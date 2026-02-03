@@ -9,9 +9,10 @@ Upload ALL of these images from the `references/` folder:
 - warrior_back.png
 - warrior_left.png
 - warrior_right.png
-- warrior_walk1.png
-- warrior_walk2.png
-- warrior_walk3.png
+- warrior_walk1.png (side walk - left foot forward)
+- warrior_walk2.png (side walk - mid-stride)
+
+**NOTE**: warrior_walk3.png is MISSING - that's the first thing to generate!
 
 ## Step 3: Send This Context Message First
 
@@ -33,6 +34,7 @@ Please confirm you understand, then I'll give you the first pose to create.
 Copy prompts from `GEMINI_MASTER_INSTRUCTIONS.md` for each sprite needed.
 
 ### Priority Order:
+0. **WS3 (FIRST!)** - Side walk frame 3 (missing from source)
 1. W01, W02, W03 (Front walking)
 2. W04, W05, W06 (Back walking)
 3. A07, A08, A09 (Left attack)

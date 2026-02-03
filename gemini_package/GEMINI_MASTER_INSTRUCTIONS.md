@@ -15,9 +15,10 @@ In the `references/` folder:
 - `warrior_back.png` - Back-facing idle pose
 - `warrior_left.png` - Left profile idle pose
 - `warrior_right.png` - Right profile idle pose
-- `warrior_walk1.png` - Walking frame 1 (left profile)
-- `warrior_walk2.png` - Walking frame 2 (left profile)
-- `warrior_walk3.png` - Walking frame 3 (left profile)
+- `warrior_walk1.png` - Walking frame 1 (left profile) - left foot forward
+- `warrior_walk2.png` - Walking frame 2 (left profile) - mid-stride
+
+**NOTE**: We only have 2 walk frames. Walk frame 3 needs to be GENERATED (see WS3 below).
 
 ---
 
@@ -68,6 +69,41 @@ In this game, the camera can view the character from any angle:
 ---
 
 # SPRITE PROMPTS
+
+## PRIORITY 0: MISSING SIDE WALK FRAME (Generate First!)
+
+We have walk frames 1 and 2 for side view, but frame 3 is MISSING from source files.
+
+### WS3: Left Side Walk Frame 3 (CRITICAL - DO THIS FIRST)
+```
+Using the attached reference images as your style guide, create a new sprite of this exact same soldier character.
+
+CONTEXT: I have warrior_walk1.png (left foot forward) and warrior_walk2.png (mid-stride). I need the THIRD frame to complete the walk cycle.
+
+POSE: Walking left profile view - completing the stride
+- RIGHT leg now stepping forward, knee bent (opposite of frame 1)
+- LEFT leg back, pushing off
+- LEFT arm swinging forward
+- RIGHT arm swinging back
+- This completes the 3-frame cycle: frame 1 (left foot forward) → frame 2 (passing) → frame 3 (right foot forward)
+
+CRITICAL: Study warrior_walk1.png and warrior_walk2.png carefully. Frame 3 should:
+- Match the same art style exactly
+- Be the mirror-opposite of frame 1's leg positions
+- Show natural walking motion progression
+- Character still facing LEFT (same direction as walk1 and walk2)
+
+REQUIREMENTS:
+- Match the armor style, colors, and proportions EXACTLY from the walk references
+- Transparent PNG background
+- Same art style and level of detail as walk1 and walk2
+- Full body visible including feet and sword
+- Lighting from upper-left
+```
+
+After generating WS3, save as `warrior_walk3.png`, then flip horizontally and save as `warrior_walk3_r.png`.
+
+---
 
 ## PHASE 1: WALKING ANIMATIONS (Front & Back)
 

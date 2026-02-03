@@ -9,12 +9,12 @@
 | warrior_back.png | Back | Idle | ✅ Complete |
 | warrior_left.png | Left | Idle | ✅ Complete |
 | warrior_right.png | Right | Idle | ✅ Complete |
-| warrior_walk1.png | Left | Walk Frame 1 | ✅ Complete |
-| warrior_walk2.png | Left | Walk Frame 2 | ✅ Complete |
-| warrior_walk3.png | Left | Walk Frame 3 | ✅ Complete |
-| warrior_walk1_r.png | Right | Walk Frame 1 | ✅ Complete |
-| warrior_walk2_r.png | Right | Walk Frame 2 | ✅ Complete |
-| warrior_walk3_r.png | Right | Walk Frame 3 | ✅ Complete |
+| warrior_walk1.png | Left | Walk Frame 1 | ✅ Complete (left foot forward) |
+| warrior_walk2.png | Left | Walk Frame 2 | ✅ Complete (mid-stride) |
+| warrior_walk3.png | Left | Walk Frame 3 | ❌ MISSING - needs generation |
+| warrior_walk1_r.png | Right | Walk Frame 1 | ✅ Complete (flipped) |
+| warrior_walk2_r.png | Right | Walk Frame 2 | ✅ Complete (flipped) |
+| warrior_walk3_r.png | Right | Walk Frame 3 | ❌ MISSING - flip after generating walk3 |
 
 ### What's Missing
 
