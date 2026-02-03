@@ -1,0 +1,30 @@
+{
+  "metadata_version": 1,
+  "app_name": "Inner Sanctum",
+  "app_author": "VMU Pro Dev",
+  "app_version": "1.0.0",
+  "app_entry_point": "app.lua",
+  "app_mode": 1,
+  "app_environment": "lua",
+  "icon_transparency": false,
+  "resources": [
+    "app.lua",
+    "sprites/warrior_front.png",
+    "sprites/warrior_back.png",
+    "sprites/warrior_left.png",
+    "sprites/warrior_right.png",
+    "sprites/warrior_walk1.png",
+    "sprites/warrior_walk2.png",
+    "sprites/warrior_walk3.png",
+    "sprites/warrior_walk1_r.png",
+    "sprites/warrior_walk2_r.png",
+    "sprites/warrior_walk3_r.png",
+    "sprites/knight_front.png",
+    "sprites/knight_back.png",
+    "sprites/knight_left.png",
+    "sprites/knight_right.png",
+    "sprites/potion.png",
+    "sprites/title.png",
+    "sounds/sword_swoosh.wav"
+  ]
+}
