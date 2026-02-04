@@ -103,7 +103,7 @@ local LEVELS = {
     },
     [2] = {
         name = "Inner Sanctum - L2",
-        playerStart = {x = 13.5, y = 13.5, dir = 32},
+        playerStart = {x = 2.5, y = 2.5, dir = 0},
         assetBase = "sprites/level2/",
         map = {
             {1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1},
@@ -139,10 +139,6 @@ local LEVELS = {
             {x=4.5, y=8.5, t=5, dir=0, tx=4.5, ty=8.5, anim=0, speed=0.025, hp=120, alive=true, startX=4.5, startY=8.5},
             {x=8.5, y=10.5, t=5, dir=16, tx=8.5, ty=10.5, anim=0, speed=0.025, hp=120, alive=true, startX=8.5, startY=10.5},
             {x=11.5, y=13.5, t=5, dir=32, tx=11.5, ty=13.5, anim=0, speed=0.025, hp=120, alive=true, startX=11.5, startY=13.5},
-            -- Knights (heavier guards)
-            {x=6.5, y=6.5, t=6, dir=16, tx=6.5, ty=6.5, anim=0, speed=0.02, hp=140, alive=true, startX=6.5, startY=6.5},
-            {x=9.5, y=6.5, t=6, dir=48, tx=9.5, ty=6.5, anim=0, speed=0.02, hp=140, alive=true, startX=9.5, startY=6.5},
-            {x=12.5, y=9.5, t=6, dir=32, tx=12.5, ty=9.5, anim=0, speed=0.02, hp=140, alive=true, startX=12.5, startY=9.5},
             -- Health vials
             {x=5.5, y=2.5, t=7, collected=false},
             {x=10.5, y=2.5, t=7, collected=false},
@@ -150,7 +146,7 @@ local LEVELS = {
             {x=8.5, y=9.5, t=7, collected=false},
             {x=12.5, y=13.5, t=7, collected=false}
         },
-        assets = {warrior = true, knight = true, potion = true}
+        assets = {warrior = true, knight = false, potion = true}
     }
 }
 
@@ -218,20 +214,22 @@ local gameOverSelection = 1  -- 1 = Restart, 2 = Menu, 3 = Quit
 local winSelection = 1  -- 1 = Menu
 local winCooldown = 0   -- Delay before accepting win screen input
 local levelBannerTimer = 0
-local levelBannerMax = 90
+local levelBannerMax = 150
 local winBannerTimer = 0
 local winBannerMax = 75
 
 -- Debug controls (set to true for sprite testing)
 local DEBUG_DISABLE_ENEMY_AGGRO = true  -- Enemies never chase/attack
 local DEBUG_WALK_IN_PLACE = true       -- Enemies animate walk without moving
-local DEBUG_FLIP_WALK_SIDES = false    -- Use left-walk sprites and flip for right side
-local DEBUG_FORCE_GLOBAL_WALK = true   -- Drive walk frames from global frameCount
-local DEBUG_FORCE_WALK_FRAMES = 2      -- Force 2-frame cycle while walk3 is under review
-local DEBUG_FORCE_SIDE_VIEW = true     -- Always show side view (left/right) for testing
-local DEBUG_FORCE_VIEW = 3             -- Set to 1 (right) or 3 (left) to lock view
-local DEBUG_SHOW_WALK_INFO = true      -- On-screen walk frame debug
-local DEBUG_WALK_OFFSET = true         -- Apply visible offset per frame for debugging
+local DEBUG_FLIP_WALK_SIDES = false     -- Use left-walk sprites and flip for right side
+local DEBUG_FORCE_GLOBAL_WALK = false   -- Drive walk frames from global frameCount
+local DEBUG_FORCE_WALK_FRAMES = nil     -- Force 2-frame cycle while walk3 is under review
+local DEBUG_FORCE_SIDE_VIEW = false     -- Always show side view (left/right) for testing
+local DEBUG_FORCE_VIEW = nil            -- Set to 1 (right) or 3 (left) to lock view
+local DEBUG_SHOW_WALK_INFO = false      -- On-screen walk frame debug
+local DEBUG_WALK_OFFSET = false         -- Apply visible offset per frame for debugging
+local DEBUG_CYCLE_VIEW = true           -- Cycle through front/left/back/right for testing
+local DEBUG_CYCLE_VIEW_FRAMES = 45      -- Frames per view (about 1.5s at 30fps)
 
 -- Enemy health system
 local ENEMY_MAX_HP = 100
@@ -261,6 +259,12 @@ local warriorRight = nil
 local warriorWalk1 = nil
 local warriorWalk2 = nil
 local warriorWalk3 = nil
+local warriorWalk1Front = nil
+local warriorWalk2Front = nil
+local warriorWalk3Front = nil
+local warriorWalk1Back = nil
+local warriorWalk2Back = nil
+local warriorWalk3Back = nil
 -- Load warrior walking animation sprites (right-facing, flipped)
 local warriorWalk1R = nil
 local warriorWalk2R = nil
@@ -343,6 +347,12 @@ local function unloadLevelSprites()
     freeSpriteRef(warriorWalk1); warriorWalk1 = nil
     freeSpriteRef(warriorWalk2); warriorWalk2 = nil
     freeSpriteRef(warriorWalk3); warriorWalk3 = nil
+    freeSpriteRef(warriorWalk1Front); warriorWalk1Front = nil
+    freeSpriteRef(warriorWalk2Front); warriorWalk2Front = nil
+    freeSpriteRef(warriorWalk3Front); warriorWalk3Front = nil
+    freeSpriteRef(warriorWalk1Back); warriorWalk1Back = nil
+    freeSpriteRef(warriorWalk2Back); warriorWalk2Back = nil
+    freeSpriteRef(warriorWalk3Back); warriorWalk3Back = nil
     freeSpriteRef(warriorWalk1R); warriorWalk1R = nil
     freeSpriteRef(warriorWalk2R); warriorWalk2R = nil
     freeSpriteRef(warriorWalk3R); warriorWalk3R = nil
@@ -371,6 +381,18 @@ local function loadLevelSprites(levelId)
         warriorRight = vmupro.sprite.new(base .. "warrior_right")
         warriorWalk1 = vmupro.sprite.new(base .. "warrior_walk1")
         warriorWalk2 = vmupro.sprite.new(base .. "warrior_walk2")
+        local okWalkFront1, spriteWalkFront1 = pcall(vmupro.sprite.new, base .. "warrior_walk1_front")
+        if okWalkFront1 then warriorWalk1Front = spriteWalkFront1 end
+        local okWalkFront2, spriteWalkFront2 = pcall(vmupro.sprite.new, base .. "warrior_walk2_front")
+        if okWalkFront2 then warriorWalk2Front = spriteWalkFront2 end
+        local okWalkFront3, spriteWalkFront3 = pcall(vmupro.sprite.new, base .. "warrior_walk3_front")
+        if okWalkFront3 then warriorWalk3Front = spriteWalkFront3 end
+        local okWalkBack1, spriteWalkBack1 = pcall(vmupro.sprite.new, base .. "warrior_walk1_back")
+        if okWalkBack1 then warriorWalk1Back = spriteWalkBack1 end
+        local okWalkBack2, spriteWalkBack2 = pcall(vmupro.sprite.new, base .. "warrior_walk2_back")
+        if okWalkBack2 then warriorWalk2Back = spriteWalkBack2 end
+        local okWalkBack3, spriteWalkBack3 = pcall(vmupro.sprite.new, base .. "warrior_walk3_back")
+        if okWalkBack3 then warriorWalk3Back = spriteWalkBack3 end
         -- Optional: walk3 frames (guard against missing assets)
         local okWalk3, spriteWalk3 = pcall(vmupro.sprite.new, base .. "warrior_walk3")
         if okWalk3 then warriorWalk3 = spriteWalk3 end
@@ -535,6 +557,9 @@ local function updateSoldiers()
             local dx = px - s.x
             local dy = py - s.y
             local distToPlayer = math.sqrt(dx * dx + dy * dy)
+            if distToPlayer < 0.001 then
+                distToPlayer = 0.001
+            end
 
             if DEBUG_DISABLE_ENEMY_AGGRO then
                 distToPlayer = 999  -- Force patrol state
@@ -1169,7 +1194,9 @@ local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData
         -- Determine view: 0=front, 1=right, 2=back, 3=left
         local view = 0
         if viewAngle then
-            if DEBUG_FORCE_VIEW then
+            if DEBUG_CYCLE_VIEW then
+                view = math.floor(frameCount / DEBUG_CYCLE_VIEW_FRAMES) % 4
+            elseif DEBUG_FORCE_VIEW then
                 view = DEBUG_FORCE_VIEW
             elseif DEBUG_FORCE_SIDE_VIEW then
                 view = (viewAngle >= 0) and 3 or 1
@@ -1197,10 +1224,84 @@ local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData
 
         if view == 0 then
             -- Front view - use front sprite (no walking animation for front yet)
-            sprite = warriorFront
+            if DEBUG_CYCLE_VIEW then
+                local frameCount = DEBUG_FORCE_WALK_FRAMES or ((warriorWalk3Front and 3) or 2)
+                local walkFrame = math.floor(animTick / 7) % frameCount
+                debugWalkFrame = walkFrame
+                if walkFrame == 0 and warriorWalk1Front then
+                    sprite = warriorWalk1Front
+                    debugSpriteLabel = "F1"
+                elseif walkFrame == 1 and warriorWalk2Front then
+                    sprite = warriorWalk2Front
+                    debugSpriteLabel = "F2"
+                elseif walkFrame == 2 and warriorWalk3Front then
+                    sprite = warriorWalk3Front
+                    debugSpriteLabel = "F3"
+                else
+                    sprite = warriorFront
+                    debugSpriteLabel = "F0"
+                end
+            elseif isMoving then
+                local frameCount = DEBUG_FORCE_WALK_FRAMES or ((warriorWalk3 and 3) or 2)
+                local walkFrame = math.floor(animTick / 7) % frameCount
+                debugWalkFrame = walkFrame
+                if walkFrame == 0 and warriorWalk1 then
+                    sprite = warriorWalk1
+                    debugSpriteLabel = "F1"
+                elseif walkFrame == 1 and warriorWalk2 then
+                    sprite = warriorWalk2
+                    debugSpriteLabel = "F2"
+                elseif walkFrame == 2 and warriorWalk3 then
+                    sprite = warriorWalk3
+                    debugSpriteLabel = "F3"
+                else
+                    sprite = warriorFront  -- Fallback
+                    debugSpriteLabel = "F0"
+                end
+            else
+                sprite = warriorFront
+                debugSpriteLabel = "F0"
+            end
         elseif view == 2 then
             -- Back view
-            sprite = warriorBack
+            if DEBUG_CYCLE_VIEW then
+                local frameCount = DEBUG_FORCE_WALK_FRAMES or ((warriorWalk3Back and 3) or 2)
+                local walkFrame = math.floor(animTick / 7) % frameCount
+                debugWalkFrame = walkFrame
+                if walkFrame == 0 and warriorWalk1Back then
+                    sprite = warriorWalk1Back
+                    debugSpriteLabel = "B1"
+                elseif walkFrame == 1 and warriorWalk2Back then
+                    sprite = warriorWalk2Back
+                    debugSpriteLabel = "B2"
+                elseif walkFrame == 2 and warriorWalk3Back then
+                    sprite = warriorWalk3Back
+                    debugSpriteLabel = "B3"
+                else
+                    sprite = warriorBack
+                    debugSpriteLabel = "B0"
+                end
+            elseif isMoving then
+                local frameCount = DEBUG_FORCE_WALK_FRAMES or ((warriorWalk3 and 3) or 2)
+                local walkFrame = math.floor(animTick / 7) % frameCount
+                debugWalkFrame = walkFrame
+                if walkFrame == 0 and warriorWalk1 then
+                    sprite = warriorWalk1
+                    debugSpriteLabel = "B1"
+                elseif walkFrame == 1 and warriorWalk2 then
+                    sprite = warriorWalk2
+                    debugSpriteLabel = "B2"
+                elseif walkFrame == 2 and warriorWalk3 then
+                    sprite = warriorWalk3
+                    debugSpriteLabel = "B3"
+                else
+                    sprite = warriorBack  -- Fallback
+                    debugSpriteLabel = "B0"
+                end
+            else
+                sprite = warriorBack
+                debugSpriteLabel = "B0"
+            end
         elseif view == 3 then
             -- Left side view - show LEFT-facing sprites
             if isMoving then
@@ -1982,17 +2083,14 @@ function AppMain()
 
         if levelBannerTimer > 0 then
             local bannerText = "LEVEL " .. tostring(currentLevel)
-            if LEVELS[currentLevel] and LEVELS[currentLevel].name then
-                bannerText = LEVELS[currentLevel].name
+            local textColor = COLOR_WHITE
+            if levelBannerTimer < 50 then
+                textColor = COLOR_DARK_GRAY
+            elseif levelBannerTimer < 100 then
+                textColor = COLOR_LIGHT_GRAY
             end
-            local bx1 = 30
-            local by1 = 90
-            local bx2 = 210
-            local by2 = 130
-            vmupro.graphics.drawFillRect(bx1, by1, bx2, by2, COLOR_BLACK)
-            vmupro.graphics.drawFillRect(bx1 + 3, by1 + 3, bx2 - 3, by2 - 3, COLOR_DARK_GRAY)
             vmupro.text.setFont(vmupro.text.FONT_SMALL)
-            vmupro.graphics.drawText(bannerText, bx1 + 10, by1 + 18, COLOR_WHITE, COLOR_DARK_GRAY)
+            vmupro.graphics.drawText(bannerText, 170, 5, textColor, COLOR_BLACK)
         end
 
             -- Draw game over screen if player died
