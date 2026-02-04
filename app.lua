@@ -73,11 +73,11 @@ local BASE_SPRITES = {
     {x=1.5, y=5.5, t=1}, {x=14.5, y=5.5, t=1},
     {x=1.5, y=8.5, t=1}, {x=1.5, y=11.5, t=1},
     {x=14.5, y=8.5, t=1}, {x=14.5, y=11.5, t=1},
-    {x=2.5, y=3.5, t=3}, {x=3.5, y=2.5, t=2}, {x=5.5, y=4.5, t=2},
-    {x=10.5, y=2.5, t=4}, {x=12.5, y=3.5, t=3}, {x=13.5, y=4.5, t=2},
-    {x=2.5, y=13.5, t=2}, {x=3.5, y=14.5, t=4}, {x=5.5, y=13.5, t=3},
-    {x=13.5, y=13.5, t=2}, {x=13.5, y=14.5, t=4},
-    {x=8.5, y=8.5, t=2}, {x=8.5, y=10.5, t=2},
+    {x=1.3, y=3.5, t=3}, {x=1.3, y=2.5, t=2}, {x=5.7, y=4.5, t=2},
+    {x=10.5, y=1.3, t=4}, {x=14.3, y=3.5, t=3}, {x=10.3, y=4.7, t=2},
+    {x=1.3, y=13.5, t=2}, {x=3.5, y=14.3, t=4}, {x=5.7, y=12.3, t=3},
+    {x=14.3, y=13.5, t=2}, {x=13.5, y=14.3, t=4},
+    {x=1.3, y=9.5, t=2}, {x=14.3, y=9.5, t=2},
     -- Warriors (red armor) - with movement data: tx,ty=target, anim=animation frame, hp=health
     {x=3.5, y=3.5, t=5, dir=32, tx=3.5, ty=3.5, anim=0, speed=0.02, hp=100, alive=true, startX=3.5, startY=3.5},
     {x=11.5, y=4.5, t=5, dir=48, tx=11.5, ty=4.5, anim=0, speed=0.02, hp=100, alive=true, startX=11.5, startY=4.5},
@@ -128,11 +128,11 @@ local LEVELS = {
             {x=1.5, y=5.5, t=1}, {x=14.5, y=5.5, t=1},
             {x=1.5, y=8.5, t=1}, {x=1.5, y=11.5, t=1},
             {x=14.5, y=8.5, t=1}, {x=14.5, y=11.5, t=1},
-            {x=2.5, y=3.5, t=3}, {x=3.5, y=2.5, t=2}, {x=5.5, y=4.5, t=2},
-            {x=10.5, y=2.5, t=4}, {x=12.5, y=3.5, t=3}, {x=13.5, y=4.5, t=2},
-            {x=2.5, y=13.5, t=2}, {x=3.5, y=14.5, t=4}, {x=5.5, y=13.5, t=3},
-            {x=13.5, y=13.5, t=2}, {x=13.5, y=14.5, t=4},
-            {x=8.5, y=8.5, t=2}, {x=8.5, y=10.5, t=2},
+            {x=1.3, y=3.5, t=3}, {x=1.3, y=2.5, t=2}, {x=5.7, y=4.5, t=2},
+            {x=10.5, y=1.3, t=4}, {x=14.3, y=3.5, t=3}, {x=10.3, y=4.7, t=2},
+            {x=1.3, y=13.5, t=2}, {x=3.5, y=14.3, t=4}, {x=5.7, y=12.3, t=3},
+            {x=14.3, y=13.5, t=2}, {x=13.5, y=14.3, t=4},
+            {x=1.3, y=9.5, t=2}, {x=14.3, y=9.5, t=2},
             -- Warriors (red armor)
             {x=3.5, y=3.5, t=5, dir=32, tx=3.5, ty=3.5, anim=0, speed=0.025, hp=120, alive=true, startX=3.5, startY=3.5},
             {x=11.5, y=4.5, t=5, dir=48, tx=11.5, ty=4.5, anim=0, speed=0.025, hp=120, alive=true, startX=11.5, startY=4.5},
@@ -173,6 +173,7 @@ local HORIZON = 100  -- Eye level (lower value = looking more downward)
 
 -- Game state
 local isAttacking = 0      -- Attack animation frames remaining
+local attackTotalFrames = 0 -- Total frames for current attack animation
 local isBlocking = false   -- Currently blocking
 local showMenu = false     -- Menu visible
 local menuSelection = 1    -- Current menu selection
@@ -191,7 +192,7 @@ local audioInitialized = false
 local swipeEffects = {}  -- {x, y, angle, frame, maxFrames}
 
 -- Attack constants
-local DETECTION_RANGE = 6    -- How far soldier can see player
+local DETECTION_RANGE = 4    -- How far soldier can see player
 local ATTACK_RANGE = 1.0     -- Distance to attack (about 1 body length)
 local ATTACK_COOLDOWN = 15   -- Frames between attacks (2 per second at 30fps)
 local CHASE_SPEED_MULT = 3   -- Speed multiplier when chasing (sprint)
@@ -202,6 +203,11 @@ local MAX_HEALTH = 100
 local DAMAGE_PER_HIT = 10
 local potionSprite = nil
 local titleSprite = nil
+local wallStone = nil
+local wallBrick = nil
+local wallMoss = nil
+local wallMetal = nil
+local wallWood = nil
 local STATE_TITLE = 0
 local STATE_PLAYING = 1
 local STATE_GAME_OVER = 2
@@ -219,8 +225,8 @@ local winBannerTimer = 0
 local winBannerMax = 75
 
 -- Debug controls (set to true for sprite testing)
-local DEBUG_DISABLE_ENEMY_AGGRO = true  -- Enemies never chase/attack
-local DEBUG_WALK_IN_PLACE = true       -- Enemies animate walk without moving
+local DEBUG_DISABLE_ENEMY_AGGRO = false  -- Enemies never chase/attack
+local DEBUG_WALK_IN_PLACE = false       -- Enemies animate walk without moving
 local DEBUG_FLIP_WALK_SIDES = false     -- Use left-walk sprites and flip for right side
 local DEBUG_FORCE_GLOBAL_WALK = false   -- Drive walk frames from global frameCount
 local DEBUG_FORCE_WALK_FRAMES = nil     -- Force 2-frame cycle while walk3 is under review
@@ -228,7 +234,7 @@ local DEBUG_FORCE_SIDE_VIEW = false     -- Always show side view (left/right) fo
 local DEBUG_FORCE_VIEW = nil            -- Set to 1 (right) or 3 (left) to lock view
 local DEBUG_SHOW_WALK_INFO = false      -- On-screen walk frame debug
 local DEBUG_WALK_OFFSET = false         -- Apply visible offset per frame for debugging
-local DEBUG_CYCLE_VIEW = true           -- Cycle through front/left/back/right for testing
+local DEBUG_CYCLE_VIEW = false          -- Cycle through front/left/back/right for testing
 local DEBUG_CYCLE_VIEW_FRAMES = 45      -- Frames per view (about 1.5s at 30fps)
 
 -- Enemy health system
@@ -269,6 +275,12 @@ local warriorWalk3Back = nil
 local warriorWalk1R = nil
 local warriorWalk2R = nil
 local warriorWalk3R = nil
+local warriorDeath = {}
+local swordAttack = {}
+local warriorAttackFront = {}
+local warriorAttackBack = {}
+local warriorAttackLeft = {}
+local warriorAttackRight = {}
 
 -- Load knight sprites for 4 directions
 local knightFront = nil
@@ -356,11 +368,40 @@ local function unloadLevelSprites()
     freeSpriteRef(warriorWalk1R); warriorWalk1R = nil
     freeSpriteRef(warriorWalk2R); warriorWalk2R = nil
     freeSpriteRef(warriorWalk3R); warriorWalk3R = nil
+    for i = 1, #warriorDeath do
+        freeSpriteRef(warriorDeath[i])
+    end
+    warriorDeath = {}
+    for i = 1, #swordAttack do
+        freeSpriteRef(swordAttack[i])
+    end
+    swordAttack = {}
+    for i = 1, #warriorAttackFront do
+        freeSpriteRef(warriorAttackFront[i])
+    end
+    for i = 1, #warriorAttackBack do
+        freeSpriteRef(warriorAttackBack[i])
+    end
+    for i = 1, #warriorAttackLeft do
+        freeSpriteRef(warriorAttackLeft[i])
+    end
+    for i = 1, #warriorAttackRight do
+        freeSpriteRef(warriorAttackRight[i])
+    end
+    warriorAttackFront = {}
+    warriorAttackBack = {}
+    warriorAttackLeft = {}
+    warriorAttackRight = {}
     freeSpriteRef(knightFront); knightFront = nil
     freeSpriteRef(knightBack); knightBack = nil
     freeSpriteRef(knightLeft); knightLeft = nil
     freeSpriteRef(knightRight); knightRight = nil
     freeSpriteRef(potionSprite); potionSprite = nil
+    freeSpriteRef(wallStone); wallStone = nil
+    freeSpriteRef(wallBrick); wallBrick = nil
+    freeSpriteRef(wallMoss); wallMoss = nil
+    freeSpriteRef(wallMetal); wallMetal = nil
+    freeSpriteRef(wallWood); wallWood = nil
 end
 
 local function loadMenuSprites()
@@ -400,6 +441,37 @@ local function loadLevelSprites(levelId)
         warriorWalk2R = vmupro.sprite.new(base .. "warrior_walk2_r")
         local okWalk3R, spriteWalk3R = pcall(vmupro.sprite.new, base .. "warrior_walk3_r")
         if okWalk3R then warriorWalk3R = spriteWalk3R end
+
+        warriorDeath = {}
+        for i = 1, 7 do
+            local okDeath, spriteDeath = pcall(vmupro.sprite.new, base .. "warrior_death" .. tostring(i))
+            if okDeath then
+                warriorDeath[i] = spriteDeath
+            end
+        end
+
+        swordAttack = {}
+        for i = 1, 9 do
+            local okAttack, spriteAttack = pcall(vmupro.sprite.new, base .. "sword_attack" .. tostring(i))
+            if okAttack then
+                swordAttack[i] = spriteAttack
+            end
+        end
+
+        warriorAttackFront = {}
+        warriorAttackBack = {}
+        warriorAttackLeft = {}
+        warriorAttackRight = {}
+        for i = 1, 2 do
+            local okFront, sprFront = pcall(vmupro.sprite.new, base .. "warrior_attack_front" .. tostring(i))
+            if okFront then warriorAttackFront[i] = sprFront end
+            local okBack, sprBack = pcall(vmupro.sprite.new, base .. "warrior_attack_back" .. tostring(i))
+            if okBack then warriorAttackBack[i] = sprBack end
+            local okLeft, sprLeft = pcall(vmupro.sprite.new, base .. "warrior_attack_left" .. tostring(i))
+            if okLeft then warriorAttackLeft[i] = sprLeft end
+            local okRight, sprRight = pcall(vmupro.sprite.new, base .. "warrior_attack_right" .. tostring(i))
+            if okRight then warriorAttackRight[i] = sprRight end
+        end
     end
 
     if assets.knight then
@@ -412,6 +484,11 @@ local function loadLevelSprites(levelId)
     if assets.potion then
         potionSprite = vmupro.sprite.new(base .. "potion")
     end
+    wallStone = vmupro.sprite.new("sprites/wall_textures/stone")
+    wallBrick = vmupro.sprite.new("sprites/wall_textures/brick")
+    wallMoss = vmupro.sprite.new("sprites/wall_textures/moss")
+    wallMetal = vmupro.sprite.new("sprites/wall_textures/metal")
+    wallWood = vmupro.sprite.new("sprites/wall_textures/wood")
 end
 
 local function freeSynthRef(synth)
@@ -597,15 +674,11 @@ local function updateSoldiers()
                 -- Attack if cooldown is ready
                 if s.attackCooldown <= 0 then
                     s.attackCooldown = ATTACK_COOLDOWN
+                    s.attackAnim = 6
+                    s.attackFrame = 1
 
-                    -- Create swipe effect at player's screen position
-                    table.insert(swipeEffects, {
-                        x = 120,  -- Center of screen
-                        y = 120,
-                        angle = (frameCount * 0.7) % 6.28,  -- Varying angle based on frame
-                        frame = 0,
-                        maxFrames = 6  -- Fast swipe animation
-                    })
+                    s.attackAnim = 6
+                    s.attackFrame = 1
 
                     -- Play sword swoosh sound
                     if swordSwooshSynth and soundEnabled then
@@ -677,6 +750,15 @@ local function updateSoldiers()
                     s.anim = ((s.anim or 0) + 1) % 20
                 end
             end
+
+            if s.attackAnim and s.attackAnim > 0 then
+                s.attackAnim = s.attackAnim - 1
+                if s.attackAnim == 3 then
+                    s.attackFrame = 2
+                elseif s.attackAnim <= 0 then
+                    s.attackAnim = 0
+                end
+            end
             ::continue::
         end
     end
@@ -692,6 +774,28 @@ local function updateSwipeEffects()
             table.remove(swipeEffects, i)
         else
             i = i + 1
+        end
+    end
+end
+
+local function updateDeathAnimations()
+    for i = 1, #sprites do
+        local s = sprites[i]
+        if s.t == 5 and s.dying then
+            if #warriorDeath == 0 then
+                s.dying = false
+                s.dead = true
+                goto continue_death
+            end
+            s.deathTick = (s.deathTick or 0) + 1
+            if s.deathTick % 1 == 0 then
+                s.deathFrame = (s.deathFrame or 1) + 2
+                if s.deathFrame > #warriorDeath then
+                    s.dying = false
+                    s.dead = true
+                end
+            end
+            ::continue_death::
         end
     end
 end
@@ -798,6 +902,10 @@ end
 local function killSoldier(soldier)
     soldier.alive = false
     soldier.hp = 0
+    soldier.dying = true
+    soldier.dead = false
+    soldier.deathFrame = 1
+    soldier.deathTick = 0
     soldiersKilled = soldiersKilled + 1
 
     -- Create blood effect
@@ -824,7 +932,7 @@ end
 
 -- Check for health vial pickups
 local function checkHealthPickups()
-    local pickupRange = 0.5  -- Distance to pick up vial
+    local pickupRange = 0.8  -- Distance to pick up vial
     for i = 1, #sprites do
         local s = sprites[i]
         if s.t == 7 and not s.collected then
@@ -1017,11 +1125,18 @@ end
 local function collidesWithSprite(nx, ny)
     for i = 1, #sprites do
         local s = sprites[i]
+        if s.t == 5 and (s.dying or s.dead) then
+            goto continue_collide
+        end
+        if s.t == 7 then
+            goto continue_collide
+        end
         local dx, dy = nx - s.x, ny - s.y
         local dist = math.sqrt(dx * dx + dy * dy)
         if dist < 0.4 then  -- Collision radius
             return true
         end
+        ::continue_collide::
     end
     return false
 end
@@ -1041,6 +1156,29 @@ local function getWallColor(wtype, side)
         if side == 1 then return COLOR_BRICK_D else return COLOR_BRICK_L end
     else
         if side == 1 then return COLOR_STONE_D else return COLOR_STONE_L end
+    end
+end
+
+local function drawWallTexture(wtype, side, sx, y1, y2)
+    local sprite = nil
+    if wtype == 1 or wtype == 6 then
+        sprite = wallStone
+    elseif wtype == 2 then
+        sprite = wallBrick
+    elseif wtype == 3 then
+        sprite = wallMoss
+    elseif wtype == 4 then
+        sprite = wallMetal
+    elseif wtype == 5 then
+        sprite = wallWood
+    end
+
+    if sprite and sprite.width and sprite.height then
+        local wallH = y2 - y1
+        if wallH <= 0 then return end
+        local scaleX = 4 / sprite.width
+        local scaleY = wallH / sprite.height
+        vmupro.sprite.drawScaled(sprite, sx, y1, scaleX, scaleY, vmupro.sprite.kImageUnflipped)
     end
 end
 
@@ -1190,6 +1328,22 @@ local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData
         vmupro.graphics.drawFillRect(screenX - 1, cy1, screenX + 1, cy1 + 2, COLOR_BLACK)
 
     elseif stype == 5 then
+        if spriteData and spriteData.dying and #warriorDeath > 0 then
+            local frameIndex = spriteData.deathFrame or 1
+            local sprite = warriorDeath[math.min(frameIndex, #warriorDeath)]
+            if sprite and sprite.height then
+                local desiredHeight = size
+                local scale = desiredHeight / sprite.height
+                local scaledWidth = sprite.width * scale
+                local scaledHeight = sprite.height * scale
+                local drawX = screenX - math.floor(scaledWidth / 2)
+                local groundY = HORIZON + size
+                if groundY > 240 then groundY = 240 end
+                local drawY = groundY - math.floor(scaledHeight)
+                vmupro.sprite.drawScaled(sprite, drawX, drawY, scale, scale, vmupro.sprite.kImageUnflipped)
+            end
+            return
+        end
         -- Warrior Guard using real sprites
         -- Determine view: 0=front, 1=right, 2=back, 3=left
         local view = 0
@@ -1206,6 +1360,34 @@ local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData
                 elseif viewAngle >= 24 or viewAngle <= -24 then view = 2
                 else view = 1 end
             end
+        end
+
+        -- Attack animation (2-frame) overrides walk/idle
+        if spriteData and spriteData.attackAnim and spriteData.attackAnim > 0 then
+            local frameIndex = (spriteData.attackFrame or 1)
+            local sprite = nil
+            if view == 0 then
+                sprite = warriorAttackFront[frameIndex]
+            elseif view == 2 then
+                sprite = warriorAttackBack[frameIndex]
+            elseif view == 3 then
+                sprite = warriorAttackLeft[frameIndex]
+            else
+                sprite = warriorAttackRight[frameIndex]
+            end
+
+            if sprite and sprite.height then
+                local desiredHeight = size
+                local scale = desiredHeight / sprite.height
+                local scaledWidth = sprite.width * scale
+                local scaledHeight = sprite.height * scale
+                local drawX = screenX - math.floor(scaledWidth / 2)
+                local groundY = HORIZON + size
+                if groundY > 240 then groundY = 240 end
+                local drawY = groundY - math.floor(scaledHeight)
+                vmupro.sprite.drawScaled(sprite, drawX, drawY, scale, scale, vmupro.sprite.kImageUnflipped)
+            end
+            return
         end
 
         -- Select appropriate sprite based on view and animation state
@@ -1242,17 +1424,17 @@ local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData
                     debugSpriteLabel = "F0"
                 end
             elseif isMoving then
-                local frameCount = DEBUG_FORCE_WALK_FRAMES or ((warriorWalk3 and 3) or 2)
+                local frameCount = DEBUG_FORCE_WALK_FRAMES or ((warriorWalk3Front and 3) or 2)
                 local walkFrame = math.floor(animTick / 7) % frameCount
                 debugWalkFrame = walkFrame
-                if walkFrame == 0 and warriorWalk1 then
-                    sprite = warriorWalk1
+                if walkFrame == 0 and warriorWalk1Front then
+                    sprite = warriorWalk1Front
                     debugSpriteLabel = "F1"
-                elseif walkFrame == 1 and warriorWalk2 then
-                    sprite = warriorWalk2
+                elseif walkFrame == 1 and warriorWalk2Front then
+                    sprite = warriorWalk2Front
                     debugSpriteLabel = "F2"
-                elseif walkFrame == 2 and warriorWalk3 then
-                    sprite = warriorWalk3
+                elseif walkFrame == 2 and warriorWalk3Front then
+                    sprite = warriorWalk3Front
                     debugSpriteLabel = "F3"
                 else
                     sprite = warriorFront  -- Fallback
@@ -1282,17 +1464,17 @@ local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData
                     debugSpriteLabel = "B0"
                 end
             elseif isMoving then
-                local frameCount = DEBUG_FORCE_WALK_FRAMES or ((warriorWalk3 and 3) or 2)
+                local frameCount = DEBUG_FORCE_WALK_FRAMES or ((warriorWalk3Back and 3) or 2)
                 local walkFrame = math.floor(animTick / 7) % frameCount
                 debugWalkFrame = walkFrame
-                if walkFrame == 0 and warriorWalk1 then
-                    sprite = warriorWalk1
+                if walkFrame == 0 and warriorWalk1Back then
+                    sprite = warriorWalk1Back
                     debugSpriteLabel = "B1"
-                elseif walkFrame == 1 and warriorWalk2 then
-                    sprite = warriorWalk2
+                elseif walkFrame == 1 and warriorWalk2Back then
+                    sprite = warriorWalk2Back
                     debugSpriteLabel = "B2"
-                elseif walkFrame == 2 and warriorWalk3 then
-                    sprite = warriorWalk3
+                elseif walkFrame == 2 and warriorWalk3Back then
+                    sprite = warriorWalk3Back
                     debugSpriteLabel = "B3"
                 else
                     sprite = warriorBack  -- Fallback
@@ -1494,11 +1676,11 @@ function AppMain()
             -- Update soldier positions and animations
             updateSoldiers()
 
-            -- Update swipe effects
-            updateSwipeEffects()
-
             -- Update blood effects
             updateBloodEffects()
+
+            -- Update death animations
+            updateDeathAnimations()
 
             -- Check for health pickups
             checkHealthPickups()
@@ -1674,8 +1856,13 @@ function AppMain()
 
             if modeHeld then
                 -- MODE + UP: Attack
-                if vmupro.input.pressed(vmupro.input.UP) then
-                    isAttacking = 10  -- Attack animation for 10 frames
+                if vmupro.input.pressed(vmupro.input.UP) and isAttacking == 0 then
+                    local attackFrames = #swordAttack
+                    attackTotalFrames = 9
+                    if attackFrames == 0 then
+                        attackTotalFrames = 10
+                    end
+                    isAttacking = attackTotalFrames
 
                     -- Check for enemies in attack range and damage them
                     for i = 1, #sprites do
@@ -1809,128 +1996,8 @@ function AppMain()
 
             -- Draw base wall color
             vmupro.graphics.drawFillRect(sx, y1, sx + 4, y2, baseColor)
-
-            -- Add texture patterns based on wall type
-            local wallH = y2 - y1
-            if wallH > 8 then
-                -- Texture coordinate in pixels (0-31 range for a 32-pixel texture)
-                local texX = math.floor(texCoord * 32) % 32
-
-                if wtype == 1 or wtype == 6 then
-                    -- Stone wall: block pattern with mortar lines
-                    local mortarColor = side == 0 and 0x2104 or 0x4208  -- Dark gray mortar
-                    local blockH = math.floor(wallH / 4)
-                    if blockH > 4 then
-                        for row = 0, 3 do
-                            local mortarY = y1 + row * blockH
-                            if mortarY > y1 and mortarY < y2 - 1 then
-                                vmupro.graphics.drawLine(sx, mortarY, sx + 3, mortarY, mortarColor)
-                            end
-                            -- Vertical mortar (offset every other row)
-                            local offset = (row % 2 == 0) and 0 or 16
-                            if (texX + offset) % 16 < 2 then
-                                local vStart = y1 + row * blockH
-                                local vEnd = y1 + (row + 1) * blockH
-                                if vEnd > y2 then vEnd = y2 end
-                                vmupro.graphics.drawLine(sx + 1, vStart, sx + 1, vEnd, mortarColor)
-                            end
-                        end
-                    end
-
-                elseif wtype == 2 then
-                    -- Brick wall: horizontal mortar lines
-                    local mortarColor = 0x2104  -- Dark mortar
-                    local brickH = math.floor(wallH / 6)
-                    if brickH > 3 then
-                        for row = 1, 5 do
-                            local mortarY = y1 + row * brickH
-                            if mortarY > y1 + 2 and mortarY < y2 - 2 then
-                                vmupro.graphics.drawLine(sx, mortarY, sx + 3, mortarY, mortarColor)
-                            end
-                        end
-                        -- Vertical mortar (staggered)
-                        for row = 0, 5 do
-                            local offset = (row % 2 == 0) and 0 or 16
-                            if (texX + offset) % 16 < 2 then
-                                local vStart = y1 + row * brickH + 1
-                                local vEnd = y1 + (row + 1) * brickH - 1
-                                if vStart < y1 then vStart = y1 end
-                                if vEnd > y2 then vEnd = y2 end
-                                if vEnd > vStart then
-                                    vmupro.graphics.drawLine(sx + 1, vStart, sx + 1, vEnd, mortarColor)
-                                end
-                            end
-                        end
-                    end
-
-                elseif wtype == 3 then
-                    -- Mossy wall: patches of different green
-                    local patchSeed = texX * 7 + x * 13
-                    if patchSeed % 5 == 0 then
-                        local patchY = y1 + math.floor(wallH * 0.3)
-                        local patchH = math.floor(wallH * 0.2)
-                        vmupro.graphics.drawFillRect(sx, patchY, sx + 3, patchY + patchH, 0x6666)
-                    end
-                    if patchSeed % 7 == 0 then
-                        local patchY = y1 + math.floor(wallH * 0.6)
-                        local patchH = math.floor(wallH * 0.15)
-                        vmupro.graphics.drawFillRect(sx + 1, patchY, sx + 4, patchY + patchH, 0x2222)
-                    end
-                    -- Add some vine-like lines
-                    if texX % 8 < 2 then
-                        vmupro.graphics.drawLine(sx + 2, y1 + 4, sx + 2, y1 + math.floor(wallH * 0.4), 0x4324)
-                    end
-
-                elseif wtype == 4 then
-                    -- Metal door: horizontal bands and rivets
-                    local bandColor = side == 0 and 0x0842 or 0x18C6
-                    local rivetColor = 0xCE7B
-                    local bandH = math.floor(wallH / 5)
-                    if bandH > 4 then
-                        for row = 1, 4 do
-                            local bandY = y1 + row * bandH
-                            if bandY > y1 + 2 and bandY < y2 - 2 then
-                                vmupro.graphics.drawLine(sx, bandY, sx + 3, bandY, bandColor)
-                                vmupro.graphics.drawLine(sx, bandY + 1, sx + 3, bandY + 1, bandColor)
-                            end
-                        end
-                        -- Rivets
-                        if texX % 8 < 3 then
-                            for row = 0, 4 do
-                                local rivetY = y1 + row * bandH + math.floor(bandH / 2)
-                                if rivetY > y1 + 4 and rivetY < y2 - 4 then
-                                    vmupro.graphics.drawFillRect(sx + 1, rivetY - 1, sx + 3, rivetY + 1, rivetColor)
-                                end
-                            end
-                        end
-                    end
-
-                elseif wtype == 5 then
-                    -- Wood door: vertical grain lines
-                    local grainColor = side == 0 and 0x0020 or 0x2841
-                    if texX % 6 < 2 then
-                        vmupro.graphics.drawLine(sx + 1, y1 + 2, sx + 1, y2 - 2, grainColor)
-                    end
-                    if texX % 8 == 4 then
-                        vmupro.graphics.drawLine(sx + 2, y1 + 4, sx + 2, y2 - 4, grainColor)
-                    end
-                    -- Horizontal planks
-                    local plankH = math.floor(wallH / 4)
-                    if plankH > 6 then
-                        for row = 1, 3 do
-                            local plankY = y1 + row * plankH
-                            if plankY > y1 + 2 and plankY < y2 - 2 then
-                                vmupro.graphics.drawLine(sx, plankY, sx + 3, plankY, 0x0020)
-                            end
-                        end
-                    end
-                    -- Door handle
-                    if texX > 20 and texX < 28 then
-                        local handleY = y1 + math.floor(wallH * 0.5)
-                        vmupro.graphics.drawFillRect(sx, handleY - 3, sx + 3, handleY + 3, 0xE0FF)
-                    end
-                end
-            end
+            -- Overlay bitmap wall texture
+            drawWallTexture(wtype, side, sx, y1, y2)
         end
 
         local spriteOrder = {}
@@ -1950,7 +2017,7 @@ function AppMain()
         for i = 1, #spriteOrder do
             local s = sprites[spriteOrder[i].idx]
             -- Skip dead soldiers
-            if s.t == 5 and s.alive == false then
+            if s.t == 5 and s.alive == false and not s.dying then
                 goto continue_sprite
             end
             local sdx, sdy = s.x - px, s.y - py
@@ -1995,16 +2062,30 @@ function AppMain()
 
         -- Draw attack sword swing
         if isAttacking > 0 then
-            local swingAngle = (10 - isAttacking) * 9  -- 0 to 90 degrees
-            local swordLen = 80
-            local swordX = 180 + math.floor(math.sin(swingAngle * 0.0174) * 40)
-            local swordY = 180 - math.floor(math.cos(swingAngle * 0.0174) * 60)
-            -- Sword blade
-            vmupro.graphics.drawFillRect(swordX - 4, swordY - swordLen, swordX + 4, swordY, COLOR_LIGHT_GRAY)
-            vmupro.graphics.drawFillRect(swordX - 2, swordY - swordLen - 10, swordX + 2, swordY - swordLen, COLOR_LIGHT_GRAY)
-            -- Sword hilt
-            vmupro.graphics.drawFillRect(swordX - 12, swordY - 4, swordX + 12, swordY + 4, COLOR_BROWN)
-            vmupro.graphics.drawFillRect(swordX - 6, swordY, swordX + 6, swordY + 20, COLOR_DARK_BROWN)
+            if #swordAttack > 0 then
+                local total = (attackTotalFrames > 0) and attackTotalFrames or (#swordAttack * 2)
+                local frameHold = math.max(1, math.floor(total / #swordAttack))
+                local frameIndex = math.floor((total - isAttacking) / frameHold) + 1
+                if frameIndex < 1 then frameIndex = 1 end
+                if frameIndex > #swordAttack then frameIndex = #swordAttack end
+                local sprite = swordAttack[frameIndex]
+                if sprite then
+                    local drawX = 140
+                    local drawY = 240 - sprite.height + 30
+                    vmupro.sprite.draw(sprite, drawX, drawY, vmupro.sprite.kImageUnflipped)
+                end
+            else
+                local swingAngle = (10 - isAttacking) * 9  -- 0 to 90 degrees
+                local swordLen = 80
+                local swordX = 180 + math.floor(math.sin(swingAngle * 0.0174) * 40)
+                local swordY = 180 - math.floor(math.cos(swingAngle * 0.0174) * 60)
+                -- Sword blade
+                vmupro.graphics.drawFillRect(swordX - 4, swordY - swordLen, swordX + 4, swordY, COLOR_LIGHT_GRAY)
+                vmupro.graphics.drawFillRect(swordX - 2, swordY - swordLen - 10, swordX + 2, swordY - swordLen, COLOR_LIGHT_GRAY)
+                -- Sword hilt
+                vmupro.graphics.drawFillRect(swordX - 12, swordY - 4, swordX + 12, swordY + 4, COLOR_BROWN)
+                vmupro.graphics.drawFillRect(swordX - 6, swordY, swordX + 6, swordY + 20, COLOR_DARK_BROWN)
+            end
         end
 
         -- Draw block shield
@@ -2070,9 +2151,6 @@ function AppMain()
                 end
             end
         end
-
-        -- Draw enemy sword swipe effects
-        drawSwipeEffects()
 
         -- Draw health UI (potion with liquid)
         drawHealthUI()
