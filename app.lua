@@ -150,6 +150,17 @@ local gameOverSelection = 1  -- 1 = Restart, 2 = Menu, 3 = Quit
 local winSelection = 1  -- 1 = Menu
 local winCooldown = 0   -- Delay before accepting win screen input
 
+-- Debug controls (set to true for sprite testing)
+local DEBUG_DISABLE_ENEMY_AGGRO = true  -- Enemies never chase/attack
+local DEBUG_WALK_IN_PLACE = true       -- Enemies animate walk without moving
+local DEBUG_FLIP_WALK_SIDES = false    -- Use left-walk sprites and flip for right side
+local DEBUG_FORCE_GLOBAL_WALK = true   -- Drive walk frames from global frameCount
+local DEBUG_FORCE_WALK_FRAMES = 2      -- Force 2-frame cycle while walk3 is under review
+local DEBUG_FORCE_SIDE_VIEW = true     -- Always show side view (left/right) for testing
+local DEBUG_FORCE_VIEW = 3             -- Set to 1 (right) or 3 (left) to lock view
+local DEBUG_SHOW_WALK_INFO = true      -- On-screen walk frame debug
+local DEBUG_WALK_OFFSET = true         -- Apply visible offset per frame for debugging
+
 -- Enemy health system
 local ENEMY_MAX_HP = 100
 local PLAYER_DAMAGE = 20
@@ -174,6 +185,7 @@ local warriorLeft = nil
 local warriorRight = nil
 
 -- Load warrior walking animation sprites (left-facing)
+-- Note: walk3 is missing and needs AI generation - using 2-frame cycle for now
 local warriorWalk1 = nil
 local warriorWalk2 = nil
 local warriorWalk3 = nil
@@ -195,10 +207,13 @@ local function loadSprites()
     warriorRight = vmupro.sprite.new("sprites/warrior_right")
     warriorWalk1 = vmupro.sprite.new("sprites/warrior_walk1")
     warriorWalk2 = vmupro.sprite.new("sprites/warrior_walk2")
-    warriorWalk3 = vmupro.sprite.new("sprites/warrior_walk3")
+    -- Optional: walk3 frames (guard against missing assets)
+    local okWalk3, spriteWalk3 = pcall(vmupro.sprite.new, "sprites/warrior_walk3")
+    if okWalk3 then warriorWalk3 = spriteWalk3 end
     warriorWalk1R = vmupro.sprite.new("sprites/warrior_walk1_r")
     warriorWalk2R = vmupro.sprite.new("sprites/warrior_walk2_r")
-    warriorWalk3R = vmupro.sprite.new("sprites/warrior_walk3_r")
+    local okWalk3R, spriteWalk3R = pcall(vmupro.sprite.new, "sprites/warrior_walk3_r")
+    if okWalk3R then warriorWalk3R = spriteWalk3R end
     knightFront = vmupro.sprite.new("sprites/knight_front")
     knightBack = vmupro.sprite.new("sprites/knight_back")
     knightLeft = vmupro.sprite.new("sprites/knight_left")
@@ -250,6 +265,25 @@ local function updateSoldiers()
             local dx = px - s.x
             local dy = py - s.y
             local distToPlayer = math.sqrt(dx * dx + dy * dy)
+
+            if DEBUG_DISABLE_ENEMY_AGGRO then
+                distToPlayer = 999  -- Force patrol state
+                s.attackCooldown = 0
+                -- Face the player for consistent side-view testing
+                local angleToPlayer = safeAtan2(dy, dx)
+                s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
+            end
+
+            if DEBUG_WALK_IN_PLACE then
+                s.state = "patrol"
+                if s.patrolAxis == "x" then
+                    s.dir = (s.patrolDir > 0) and 0 or 32
+                else
+                    s.dir = (s.patrolDir > 0) and 16 or 48
+                end
+                s.anim = ((s.anim or 0) + 1) % 20
+                goto continue
+            end
 
             -- Decrease attack cooldown
             if s.attackCooldown > 0 then
@@ -341,8 +375,10 @@ local function updateSoldiers()
                 if math.abs(distFromStart) > patrolDist or not isWalkable(newX, newY) then
                     s.patrolDir = -s.patrolDir
                 else
-                    s.x = newX
-                    s.y = newY
+                    if not DEBUG_WALK_IN_PLACE then
+                        s.x = newX
+                        s.y = newY
+                    end
                     s.anim = ((s.anim or 0) + 1) % 20
                 end
             end
@@ -878,16 +914,31 @@ local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData
         -- Determine view: 0=front, 1=right, 2=back, 3=left
         local view = 0
         if viewAngle then
-            if viewAngle >= -8 and viewAngle <= 8 then view = 0
-            elseif viewAngle > 8 and viewAngle < 24 then view = 3
-            elseif viewAngle >= 24 or viewAngle <= -24 then view = 2
-            else view = 1 end
+            if DEBUG_FORCE_VIEW then
+                view = DEBUG_FORCE_VIEW
+            elseif DEBUG_FORCE_SIDE_VIEW then
+                view = (viewAngle >= 0) and 3 or 1
+            else
+                if viewAngle >= -8 and viewAngle <= 8 then view = 0
+                elseif viewAngle > 8 and viewAngle < 24 then view = 3
+                elseif viewAngle >= 24 or viewAngle <= -24 then view = 2
+                else view = 1 end
+            end
         end
 
         -- Select appropriate sprite based on view and animation state
         local sprite = warriorFront
         local flipFlag = vmupro.sprite.kImageUnflipped
         local isMoving = animFrame ~= nil  -- Has animation = is patrolling
+        if DEBUG_WALK_IN_PLACE then
+            isMoving = true
+        end
+        local animTick = animFrame
+        if DEBUG_FORCE_GLOBAL_WALK then
+            animTick = frameCount
+        end
+        local debugWalkFrame = nil
+        local debugSpriteLabel = "?"
 
         if view == 0 then
             -- Front view - use front sprite (no walking animation for front yet)
@@ -896,36 +947,50 @@ local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData
             -- Back view
             sprite = warriorBack
         elseif view == 3 then
-            -- Left side view - character faces RIGHT, use right-facing walk sprites
+            -- Left side view - show LEFT-facing sprites
             if isMoving then
-                local walkFrame = math.floor(animFrame / 7) % 3
-                if walkFrame == 0 and warriorWalk1R then
-                    sprite = warriorWalk1R
-                elseif walkFrame == 1 and warriorWalk2R then
-                    sprite = warriorWalk2R
-                elseif warriorWalk3R then
-                    sprite = warriorWalk3R
+                local frameCount = DEBUG_FORCE_WALK_FRAMES or ((warriorWalk3 and 3) or 2)
+                local walkFrame = math.floor(animTick / 7) % frameCount
+                debugWalkFrame = walkFrame
+                if walkFrame == 0 and warriorWalk1 then
+                    sprite = warriorWalk1
+                    debugSpriteLabel = "L1"
+                elseif walkFrame == 1 and warriorWalk2 then
+                    sprite = warriorWalk2
+                    debugSpriteLabel = "L2"
+                elseif walkFrame == 2 and warriorWalk3 then
+                    sprite = warriorWalk3
+                    debugSpriteLabel = "L3"
                 else
                     sprite = warriorLeft  -- Fallback
+                    debugSpriteLabel = "L0"
                 end
             else
                 sprite = warriorLeft
+                debugSpriteLabel = "L0"
             end
         else
-            -- Right side view (view == 1) - character faces LEFT, use left-facing walk sprites
+            -- Right side view (view == 1) - show RIGHT-facing sprites
             if isMoving then
-                local walkFrame = math.floor(animFrame / 7) % 3
-                if walkFrame == 0 and warriorWalk1 then
-                    sprite = warriorWalk1
-                elseif walkFrame == 1 and warriorWalk2 then
-                    sprite = warriorWalk2
-                elseif warriorWalk3 then
-                    sprite = warriorWalk3
+                local frameCount = DEBUG_FORCE_WALK_FRAMES or ((warriorWalk3R and 3) or 2)
+                local walkFrame = math.floor(animTick / 7) % frameCount
+                debugWalkFrame = walkFrame
+                if walkFrame == 0 and warriorWalk1R then
+                    sprite = warriorWalk1R
+                    debugSpriteLabel = "R1"
+                elseif walkFrame == 1 and warriorWalk2R then
+                    sprite = warriorWalk2R
+                    debugSpriteLabel = "R2"
+                elseif walkFrame == 2 and warriorWalk3R then
+                    sprite = warriorWalk3R
+                    debugSpriteLabel = "R3"
                 else
                     sprite = warriorRight  -- Fallback
+                    debugSpriteLabel = "R0"
                 end
             else
                 sprite = warriorRight
+                debugSpriteLabel = "R0"
             end
         end
 
@@ -946,7 +1011,20 @@ local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData
             if groundY > 240 then groundY = 240 end
             local drawY = groundY - math.floor(scaledHeight)
 
+            if DEBUG_WALK_OFFSET and debugWalkFrame ~= nil then
+                if debugWalkFrame == 1 then
+                    drawX = drawX + 6
+                    drawY = drawY + 3
+                end
+            end
+
             vmupro.sprite.drawScaled(sprite, drawX, drawY, scale, scale, flipFlag)
+
+            if DEBUG_SHOW_WALK_INFO then
+                local info = "V:" .. tostring(view) .. " WF:" .. tostring(debugWalkFrame or -1) .. " S:" .. debugSpriteLabel
+                vmupro.text.setFont(vmupro.text.FONT_SMALL)
+                vmupro.graphics.drawText(info, 5, 220, COLOR_WHITE, COLOR_BLACK)
+            end
 
             -- Draw health bar above soldier if alive and has hp data
             if spriteData and spriteData.hp and spriteData.alive then
