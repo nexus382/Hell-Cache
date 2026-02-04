@@ -47,8 +47,8 @@ local COLOR_METAL_D = 0x0842
 local COLOR_WOOD_L = 0x4051
 local COLOR_WOOD_D = 0x2028
 
--- Map
-local map = {
+-- Base level data (used to build per-level instances)
+local BASE_MAP = {
     {1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1},
     {1,0,0,0,6,0,1,0,0,0,6,0,0,0,0,1},
     {2,0,0,0,0,0,1,0,0,0,0,0,0,0,0,2},
@@ -68,7 +68,7 @@ local map = {
 }
 
 -- Sprites: t=1 torch, t=2 barrel, t=3 table, t=4 chest, t=5 warrior, t=6 knight, t=7 health vial
-local sprites = {
+local BASE_SPRITES = {
     {x=1.5, y=1.5, t=1}, {x=6.5, y=1.5, t=1}, {x=8.5, y=1.5, t=1}, {x=14.5, y=1.5, t=1},
     {x=1.5, y=5.5, t=1}, {x=14.5, y=5.5, t=1},
     {x=1.5, y=8.5, t=1}, {x=1.5, y=11.5, t=1},
@@ -91,6 +91,74 @@ local sprites = {
     {x=8.5, y=9.5, t=7, collected=false},   -- Central area
     {x=12.5, y=13.5, t=7, collected=false}, -- Bottom-right area
 }
+
+local LEVELS = {
+    [1] = {
+        name = "Inner Sanctum - L1",
+        playerStart = {x = 2.5, y = 2.5, dir = 0},
+        assetBase = "sprites/level1/",
+        map = BASE_MAP,
+        sprites = BASE_SPRITES,
+        assets = {warrior = true, knight = false, potion = true}
+    },
+    [2] = {
+        name = "Inner Sanctum - L2",
+        playerStart = {x = 13.5, y = 13.5, dir = 32},
+        assetBase = "sprites/level2/",
+        map = {
+            {1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1},
+            {1,0,0,0,6,0,1,0,0,0,6,0,0,0,0,1},
+            {2,0,0,0,0,0,1,0,0,0,0,0,0,6,0,2},
+            {1,0,0,0,0,0,3,0,0,0,0,0,0,6,0,1},
+            {1,6,0,0,0,0,0,0,0,0,0,0,0,0,6,1},
+            {1,0,0,0,0,0,3,0,0,0,0,0,0,0,0,1},
+            {1,2,2,0,2,2,1,0,1,5,0,5,1,0,1,1},
+            {1,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1},
+            {3,0,0,6,0,0,0,1,4,1,0,0,0,6,0,3},
+            {1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,1},
+            {1,0,0,0,0,0,0,1,5,1,0,0,0,0,0,1},
+            {3,0,0,6,0,0,0,0,0,0,0,0,0,6,0,3},
+            {1,2,2,0,2,2,5,0,0,0,0,0,2,0,2,1},
+            {1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1},
+            {1,0,6,0,6,0,1,0,0,0,0,0,0,6,0,1},
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+        },
+        sprites = {
+            {x=1.5, y=1.5, t=1}, {x=6.5, y=1.5, t=1}, {x=8.5, y=1.5, t=1}, {x=14.5, y=1.5, t=1},
+            {x=1.5, y=5.5, t=1}, {x=14.5, y=5.5, t=1},
+            {x=1.5, y=8.5, t=1}, {x=1.5, y=11.5, t=1},
+            {x=14.5, y=8.5, t=1}, {x=14.5, y=11.5, t=1},
+            {x=2.5, y=3.5, t=3}, {x=3.5, y=2.5, t=2}, {x=5.5, y=4.5, t=2},
+            {x=10.5, y=2.5, t=4}, {x=12.5, y=3.5, t=3}, {x=13.5, y=4.5, t=2},
+            {x=2.5, y=13.5, t=2}, {x=3.5, y=14.5, t=4}, {x=5.5, y=13.5, t=3},
+            {x=13.5, y=13.5, t=2}, {x=13.5, y=14.5, t=4},
+            {x=8.5, y=8.5, t=2}, {x=8.5, y=10.5, t=2},
+            -- Warriors (red armor)
+            {x=3.5, y=3.5, t=5, dir=32, tx=3.5, ty=3.5, anim=0, speed=0.025, hp=120, alive=true, startX=3.5, startY=3.5},
+            {x=11.5, y=4.5, t=5, dir=48, tx=11.5, ty=4.5, anim=0, speed=0.025, hp=120, alive=true, startX=11.5, startY=4.5},
+            {x=4.5, y=8.5, t=5, dir=0, tx=4.5, ty=8.5, anim=0, speed=0.025, hp=120, alive=true, startX=4.5, startY=8.5},
+            {x=8.5, y=10.5, t=5, dir=16, tx=8.5, ty=10.5, anim=0, speed=0.025, hp=120, alive=true, startX=8.5, startY=10.5},
+            {x=11.5, y=13.5, t=5, dir=32, tx=11.5, ty=13.5, anim=0, speed=0.025, hp=120, alive=true, startX=11.5, startY=13.5},
+            -- Knights (heavier guards)
+            {x=6.5, y=6.5, t=6, dir=16, tx=6.5, ty=6.5, anim=0, speed=0.02, hp=140, alive=true, startX=6.5, startY=6.5},
+            {x=9.5, y=6.5, t=6, dir=48, tx=9.5, ty=6.5, anim=0, speed=0.02, hp=140, alive=true, startX=9.5, startY=6.5},
+            {x=12.5, y=9.5, t=6, dir=32, tx=12.5, ty=9.5, anim=0, speed=0.02, hp=140, alive=true, startX=12.5, startY=9.5},
+            -- Health vials
+            {x=5.5, y=2.5, t=7, collected=false},
+            {x=10.5, y=2.5, t=7, collected=false},
+            {x=2.5, y=8.5, t=7, collected=false},
+            {x=8.5, y=9.5, t=7, collected=false},
+            {x=12.5, y=13.5, t=7, collected=false}
+        },
+        assets = {warrior = true, knight = true, potion = true}
+    }
+}
+
+local currentLevel = 1
+local selectedLevel = 1
+local MAX_LEVEL = #LEVELS
+local map = nil
+local sprites = nil
 
 local sinTable = {}
 local cosTable = {}
@@ -149,6 +217,10 @@ local titleOptionsSelection = 1
 local gameOverSelection = 1  -- 1 = Restart, 2 = Menu, 3 = Quit
 local winSelection = 1  -- 1 = Menu
 local winCooldown = 0   -- Delay before accepting win screen input
+local levelBannerTimer = 0
+local levelBannerMax = 90
+local winBannerTimer = 0
+local winBannerMax = 75
 
 -- Debug controls (set to true for sprite testing)
 local DEBUG_DISABLE_ENEMY_AGGRO = true  -- Enemies never chase/attack
@@ -200,26 +272,224 @@ local knightBack = nil
 local knightLeft = nil
 local knightRight = nil
 
-local function loadSprites()
-    warriorFront = vmupro.sprite.new("sprites/warrior_front")
-    warriorBack = vmupro.sprite.new("sprites/warrior_back")
-    warriorLeft = vmupro.sprite.new("sprites/warrior_left")
-    warriorRight = vmupro.sprite.new("sprites/warrior_right")
-    warriorWalk1 = vmupro.sprite.new("sprites/warrior_walk1")
-    warriorWalk2 = vmupro.sprite.new("sprites/warrior_walk2")
-    -- Optional: walk3 frames (guard against missing assets)
-    local okWalk3, spriteWalk3 = pcall(vmupro.sprite.new, "sprites/warrior_walk3")
-    if okWalk3 then warriorWalk3 = spriteWalk3 end
-    warriorWalk1R = vmupro.sprite.new("sprites/warrior_walk1_r")
-    warriorWalk2R = vmupro.sprite.new("sprites/warrior_walk2_r")
-    local okWalk3R, spriteWalk3R = pcall(vmupro.sprite.new, "sprites/warrior_walk3_r")
-    if okWalk3R then warriorWalk3R = spriteWalk3R end
-    knightFront = vmupro.sprite.new("sprites/knight_front")
-    knightBack = vmupro.sprite.new("sprites/knight_back")
-    knightLeft = vmupro.sprite.new("sprites/knight_left")
-    knightRight = vmupro.sprite.new("sprites/knight_right")
-    potionSprite = vmupro.sprite.new("sprites/potion")
-    titleSprite = vmupro.sprite.new("sprites/title")
+local function deepCopy(value)
+    if type(value) ~= "table" then
+        return value
+    end
+    local out = {}
+    local len = #value
+    if len > 0 then
+        for i = 1, len do
+            out[i] = deepCopy(value[i])
+        end
+        for k, v in pairs(value) do
+            if type(k) ~= "number" then
+                out[k] = deepCopy(v)
+            end
+        end
+    else
+        for k, v in pairs(value) do
+            out[k] = deepCopy(v)
+        end
+    end
+    return out
+end
+
+local function countEnemies(spriteList)
+    local count = 0
+    for i = 1, #spriteList do
+        local s = spriteList[i]
+        if s.t == 5 or s.t == 6 then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+local function loadLevel(levelId)
+    local level = LEVELS[levelId]
+    if not level then return end
+    currentLevel = levelId
+    map = deepCopy(level.map)
+    sprites = deepCopy(level.sprites)
+    totalSoldiers = countEnemies(sprites)
+    px = level.playerStart.x
+    py = level.playerStart.y
+    pdir = level.playerStart.dir
+end
+
+local function unloadLevelData()
+    map = nil
+    sprites = nil
+    totalSoldiers = 0
+end
+
+local function freeSpriteRef(sprite)
+    if sprite then
+        vmupro.sprite.free(sprite)
+    end
+end
+
+local function unloadMenuSprites()
+    freeSpriteRef(titleSprite)
+    titleSprite = nil
+end
+
+local function unloadLevelSprites()
+    freeSpriteRef(warriorFront); warriorFront = nil
+    freeSpriteRef(warriorBack); warriorBack = nil
+    freeSpriteRef(warriorLeft); warriorLeft = nil
+    freeSpriteRef(warriorRight); warriorRight = nil
+    freeSpriteRef(warriorWalk1); warriorWalk1 = nil
+    freeSpriteRef(warriorWalk2); warriorWalk2 = nil
+    freeSpriteRef(warriorWalk3); warriorWalk3 = nil
+    freeSpriteRef(warriorWalk1R); warriorWalk1R = nil
+    freeSpriteRef(warriorWalk2R); warriorWalk2R = nil
+    freeSpriteRef(warriorWalk3R); warriorWalk3R = nil
+    freeSpriteRef(knightFront); knightFront = nil
+    freeSpriteRef(knightBack); knightBack = nil
+    freeSpriteRef(knightLeft); knightLeft = nil
+    freeSpriteRef(knightRight); knightRight = nil
+    freeSpriteRef(potionSprite); potionSprite = nil
+end
+
+local function loadMenuSprites()
+    if not titleSprite then
+        titleSprite = vmupro.sprite.new("sprites/title")
+    end
+end
+
+local function loadLevelSprites(levelId)
+    local level = LEVELS[levelId]
+    local assets = level and level.assets or {}
+    local base = (level and level.assetBase) or "sprites/"
+
+    if assets.warrior then
+        warriorFront = vmupro.sprite.new(base .. "warrior_front")
+        warriorBack = vmupro.sprite.new(base .. "warrior_back")
+        warriorLeft = vmupro.sprite.new(base .. "warrior_left")
+        warriorRight = vmupro.sprite.new(base .. "warrior_right")
+        warriorWalk1 = vmupro.sprite.new(base .. "warrior_walk1")
+        warriorWalk2 = vmupro.sprite.new(base .. "warrior_walk2")
+        -- Optional: walk3 frames (guard against missing assets)
+        local okWalk3, spriteWalk3 = pcall(vmupro.sprite.new, base .. "warrior_walk3")
+        if okWalk3 then warriorWalk3 = spriteWalk3 end
+        warriorWalk1R = vmupro.sprite.new(base .. "warrior_walk1_r")
+        warriorWalk2R = vmupro.sprite.new(base .. "warrior_walk2_r")
+        local okWalk3R, spriteWalk3R = pcall(vmupro.sprite.new, base .. "warrior_walk3_r")
+        if okWalk3R then warriorWalk3R = spriteWalk3R end
+    end
+
+    if assets.knight then
+        knightFront = vmupro.sprite.new(base .. "knight_front")
+        knightBack = vmupro.sprite.new(base .. "knight_back")
+        knightLeft = vmupro.sprite.new(base .. "knight_left")
+        knightRight = vmupro.sprite.new(base .. "knight_right")
+    end
+
+    if assets.potion then
+        potionSprite = vmupro.sprite.new(base .. "potion")
+    end
+end
+
+local function freeSynthRef(synth)
+    if synth then
+        vmupro.sound.synth.free(synth)
+    end
+end
+
+local function unloadLevelAudio()
+    if not audioInitialized then return end
+    freeSynthRef(swordSwooshSynth); swordSwooshSynth = nil
+    freeSynthRef(groanSynth); groanSynth = nil
+    freeSynthRef(squishSynth); squishSynth = nil
+    freeSynthRef(gulpSynth); gulpSynth = nil
+    vmupro.audio.exitListenMode()
+    audioInitialized = false
+end
+
+local function loadLevelAudio()
+    if audioInitialized then return end
+    vmupro.audio.startListenMode()
+
+    -- Create sword swoosh synth (noise-based for swoosh effect)
+    swordSwooshSynth = vmupro.sound.synth.new(vmupro.sound.kWaveNoise)
+    if swordSwooshSynth then
+        vmupro.sound.synth.setAttack(swordSwooshSynth, 0.01)
+        vmupro.sound.synth.setDecay(swordSwooshSynth, 0.1)
+        vmupro.sound.synth.setSustain(swordSwooshSynth, 0.2)
+        vmupro.sound.synth.setRelease(swordSwooshSynth, 0.1)
+        vmupro.sound.synth.setVolume(swordSwooshSynth, 0.5, 0.5)
+    end
+
+    -- Create groan synth (low frequency for death groan)
+    groanSynth = vmupro.sound.synth.new(vmupro.sound.kWaveSawtooth)
+    if groanSynth then
+        vmupro.sound.synth.setAttack(groanSynth, 0.05)
+        vmupro.sound.synth.setDecay(groanSynth, 0.3)
+        vmupro.sound.synth.setSustain(groanSynth, 0.1)
+        vmupro.sound.synth.setRelease(groanSynth, 0.2)
+        vmupro.sound.synth.setVolume(groanSynth, 0.6, 0.6)
+    end
+
+    -- Create squish synth (noise burst for impact)
+    squishSynth = vmupro.sound.synth.new(vmupro.sound.kWaveNoise)
+    if squishSynth then
+        vmupro.sound.synth.setAttack(squishSynth, 0.01)
+        vmupro.sound.synth.setDecay(squishSynth, 0.15)
+        vmupro.sound.synth.setSustain(squishSynth, 0.0)
+        vmupro.sound.synth.setRelease(squishSynth, 0.1)
+        vmupro.sound.synth.setVolume(squishSynth, 0.7, 0.7)
+    end
+
+    -- Create gulp synth (for health pickup)
+    gulpSynth = vmupro.sound.synth.new(vmupro.sound.kWaveSine)
+    if gulpSynth then
+        vmupro.sound.synth.setAttack(gulpSynth, 0.02)
+        vmupro.sound.synth.setDecay(gulpSynth, 0.1)
+        vmupro.sound.synth.setSustain(gulpSynth, 0.3)
+        vmupro.sound.synth.setRelease(gulpSynth, 0.15)
+        vmupro.sound.synth.setVolume(gulpSynth, 0.6, 0.6)
+    end
+
+    audioInitialized = true
+end
+
+local function enterTitle()
+    showMenu = false
+    gameState = STATE_TITLE
+    titleSelection = 1
+    titleInOptions = false
+    unloadLevelAudio()
+    unloadLevelSprites()
+    unloadLevelData()
+    loadMenuSprites()
+    collectgarbage()
+end
+
+local function initializeLevelState(levelId)
+    loadLevel(levelId)
+    playerHealth = MAX_HEALTH
+    soldiersKilled = 0
+    isAttacking = 0
+    isBlocking = false
+    showMenu = false
+    swipeEffects = {}
+    bloodEffects = {}
+    levelBannerTimer = levelBannerMax
+end
+
+local function startLevel(levelId)
+    unloadMenuSprites()
+    loadLevelSprites(levelId)
+    loadLevelAudio()
+    initializeLevelState(levelId)
+    gameState = STATE_PLAYING
+end
+
+local function restartLevel()
+    initializeLevelState(currentLevel)
+    gameState = STATE_PLAYING
 end
 
 -- Check if a position is walkable (no wall)
@@ -523,6 +793,7 @@ local function killSoldier(soldier)
         gameState = STATE_WIN
         winSelection = 1
         winCooldown = 30  -- Half second delay before accepting input
+        winBannerTimer = winBannerMax
     end
 end
 
@@ -564,6 +835,13 @@ local function drawWinScreen()
     -- Subtitle
     vmupro.graphics.drawText("The King is safe!", 70, 110, COLOR_WHITE, COLOR_DARK_GRAY)
 
+    if winBannerTimer > 0 then
+        local pulse = (frameCount % 20) < 10
+        local bannerColor = pulse and COLOR_MAROON or COLOR_DARK_MAROON
+        vmupro.graphics.drawFillRect(55, 115, 185, 130, bannerColor)
+        vmupro.graphics.drawText("LEVEL COMPLETE", 68, 118, COLOR_WHITE, bannerColor)
+    end
+
     -- Menu option
     local y = 130
     local bgColor = COLOR_DARK_GRAY
@@ -573,7 +851,11 @@ local function drawWinScreen()
         bgColor = COLOR_MAROON
         textColor = COLOR_WHITE
     end
-    vmupro.graphics.drawText("MAIN MENU", 90, y + 3, textColor, bgColor)
+    local winText = "MAIN MENU"
+    if currentLevel < MAX_LEVEL then
+        winText = "NEXT LEVEL"
+    end
+    vmupro.graphics.drawText(winText, 90, y + 3, textColor, bgColor)
 end
 
 -- Draw health UI (potion with red liquid)
@@ -642,9 +924,10 @@ local function drawTitleScreen()
         vmupro.graphics.drawFillRect(70, 148, 170, 168, COLOR_MAROON)
         vmupro.graphics.drawText("OPTIONS", 95, 152, COLOR_WHITE, COLOR_MAROON)
 
+        local levelText = "LEVEL: " .. tostring(selectedLevel)
         local soundText = "SOUND: " .. (soundEnabled and "ON" or "OFF")
         local healthText = "HEALTH%: " .. (showHealthPercent and "ON" or "OFF")
-        local optItems = {soundText, healthText, "BACK"}
+        local optItems = {levelText, soundText, healthText, "BACK"}
         for i, item in ipairs(optItems) do
             local y = 172 + (i - 1) * 18
             local bgColor = COLOR_DARK_GRAY
@@ -702,35 +985,7 @@ end
 
 -- Reset game state for restart
 local function resetGame()
-    playerHealth = MAX_HEALTH
-    gameState = STATE_PLAYING
-    px = 2.5
-    py = 2.5
-    pdir = 0
-
-    -- Reset kill counter
-    soldiersKilled = 0
-
-    -- Reset all soldiers to patrol state with full health
-    for i = 1, #sprites do
-        local s = sprites[i]
-        if s.t == 5 then
-            s.state = nil  -- Will be re-initialized
-            s.attackCooldown = 0
-            s.hp = ENEMY_MAX_HP
-            s.alive = true
-            -- Reset to starting positions
-            s.x = s.startX or s.x
-            s.y = s.startY or s.y
-        elseif s.t == 7 then
-            -- Reset health vials
-            s.collected = false
-        end
-    end
-
-    -- Clear effects
-    swipeEffects = {}
-    bloodEffects = {}
+    restartLevel()
 end
 
 -- Collision detection for sprites
@@ -1113,52 +1368,7 @@ local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData
 end
 
 function AppMain()
-    loadSprites()
-
-    -- Initialize audio
-    vmupro.audio.startListenMode()
-
-    -- Create sword swoosh synth (noise-based for swoosh effect)
-    swordSwooshSynth = vmupro.sound.synth.new(vmupro.sound.kWaveNoise)
-    if swordSwooshSynth then
-        vmupro.sound.synth.setAttack(swordSwooshSynth, 0.01)
-        vmupro.sound.synth.setDecay(swordSwooshSynth, 0.1)
-        vmupro.sound.synth.setSustain(swordSwooshSynth, 0.2)
-        vmupro.sound.synth.setRelease(swordSwooshSynth, 0.1)
-        vmupro.sound.synth.setVolume(swordSwooshSynth, 0.5, 0.5)
-    end
-
-    -- Create groan synth (low frequency for death groan)
-    groanSynth = vmupro.sound.synth.new(vmupro.sound.kWaveSawtooth)
-    if groanSynth then
-        vmupro.sound.synth.setAttack(groanSynth, 0.05)
-        vmupro.sound.synth.setDecay(groanSynth, 0.3)
-        vmupro.sound.synth.setSustain(groanSynth, 0.1)
-        vmupro.sound.synth.setRelease(groanSynth, 0.2)
-        vmupro.sound.synth.setVolume(groanSynth, 0.6, 0.6)
-    end
-
-    -- Create squish synth (noise burst for impact)
-    squishSynth = vmupro.sound.synth.new(vmupro.sound.kWaveNoise)
-    if squishSynth then
-        vmupro.sound.synth.setAttack(squishSynth, 0.01)
-        vmupro.sound.synth.setDecay(squishSynth, 0.15)
-        vmupro.sound.synth.setSustain(squishSynth, 0.0)
-        vmupro.sound.synth.setRelease(squishSynth, 0.1)
-        vmupro.sound.synth.setVolume(squishSynth, 0.7, 0.7)
-    end
-
-    -- Create gulp synth (for health pickup)
-    gulpSynth = vmupro.sound.synth.new(vmupro.sound.kWaveSine)
-    if gulpSynth then
-        vmupro.sound.synth.setAttack(gulpSynth, 0.02)
-        vmupro.sound.synth.setDecay(gulpSynth, 0.1)
-        vmupro.sound.synth.setSustain(gulpSynth, 0.3)
-        vmupro.sound.synth.setRelease(gulpSynth, 0.15)
-        vmupro.sound.synth.setVolume(gulpSynth, 0.6, 0.6)
-    end
-
-    audioInitialized = true
+    enterTitle()
 
     while app_running do
         vmupro.input.read()
@@ -1172,6 +1382,9 @@ function AppMain()
 
         -- Only run game logic when playing (not on title screen)
         if gameState == STATE_PLAYING then
+            if levelBannerTimer > 0 then
+                levelBannerTimer = levelBannerTimer - 1
+            end
             -- Decrement attack animation
             if isAttacking > 0 then
                 isAttacking = isAttacking - 1
@@ -1196,18 +1409,21 @@ function AppMain()
                 -- Title options submenu
                 if vmupro.input.pressed(vmupro.input.UP) then
                     titleOptionsSelection = titleOptionsSelection - 1
-                    if titleOptionsSelection < 1 then titleOptionsSelection = 3 end
+                    if titleOptionsSelection < 1 then titleOptionsSelection = 4 end
                 end
                 if vmupro.input.pressed(vmupro.input.DOWN) then
                     titleOptionsSelection = titleOptionsSelection + 1
-                    if titleOptionsSelection > 3 then titleOptionsSelection = 1 end
+                    if titleOptionsSelection > 4 then titleOptionsSelection = 1 end
                 end
                 if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
                     if titleOptionsSelection == 1 then
-                        soundEnabled = not soundEnabled
+                        selectedLevel = selectedLevel + 1
+                        if selectedLevel > MAX_LEVEL then selectedLevel = 1 end
                     elseif titleOptionsSelection == 2 then
-                        showHealthPercent = not showHealthPercent
+                        soundEnabled = not soundEnabled
                     elseif titleOptionsSelection == 3 then
+                        showHealthPercent = not showHealthPercent
+                    elseif titleOptionsSelection == 4 then
                         titleInOptions = false  -- Back
                     end
                 end
@@ -1227,7 +1443,7 @@ function AppMain()
                 if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
                     if titleSelection == 1 then
                         -- Start game
-                        resetGame()
+                        startLevel(selectedLevel)
                     elseif titleSelection == 2 then
                         -- Options
                         titleInOptions = true
@@ -1248,26 +1464,31 @@ function AppMain()
                 gameOverSelection = gameOverSelection + 1
                 if gameOverSelection > 3 then gameOverSelection = 1 end
             end
-            if vmupro.input.pressed(vmupro.input.A) or vmupro.input.pressed(vmupro.input.MODE) then
-                if gameOverSelection == 1 then
-                    resetGame()  -- Restart
-                elseif gameOverSelection == 2 then
-                    -- Return to title menu
-                    gameState = STATE_TITLE
-                    titleSelection = 1
-                    gameOverSelection = 1
-                else
-                    app_running = false  -- Quit
+                if vmupro.input.pressed(vmupro.input.A) or vmupro.input.pressed(vmupro.input.MODE) then
+                    if gameOverSelection == 1 then
+                        restartLevel()  -- Restart
+                    elseif gameOverSelection == 2 then
+                        -- Return to title menu
+                        enterTitle()
+                        gameOverSelection = 1
+                    else
+                        app_running = false  -- Quit
+                    end
                 end
-            end
         -- Win screen handling
         elseif gameState == STATE_WIN then
+            if winBannerTimer > 0 then
+                winBannerTimer = winBannerTimer - 1
+            end
             if winCooldown > 0 then
                 winCooldown = winCooldown - 1
             elseif vmupro.input.pressed(vmupro.input.A) then
-                -- Return to title menu (only A button, not MODE which is used for attack)
-                gameState = STATE_TITLE
-                titleSelection = 1
+                -- Advance to next level if available, otherwise return to title menu
+                if currentLevel < MAX_LEVEL then
+                    startLevel(currentLevel + 1)
+                else
+                    enterTitle()
+                end
             end
         -- Menu handling
         elseif showMenu then
@@ -1317,8 +1538,7 @@ function AppMain()
                     elseif menuSelection == 4 then
                         -- Return to title menu
                         showMenu = false
-                        gameState = STATE_TITLE
-                        titleSelection = 1
+                        enterTitle()
                     elseif menuSelection == 5 then
                         app_running = false  -- Quit
                     end
@@ -1756,6 +1976,25 @@ function AppMain()
         -- Draw health UI (potion with liquid)
         drawHealthUI()
 
+        -- Draw current level indicator
+        vmupro.text.setFont(vmupro.text.FONT_SMALL)
+        vmupro.graphics.drawText("L" .. tostring(currentLevel), 6, 228, COLOR_WHITE, COLOR_BLACK)
+
+        if levelBannerTimer > 0 then
+            local bannerText = "LEVEL " .. tostring(currentLevel)
+            if LEVELS[currentLevel] and LEVELS[currentLevel].name then
+                bannerText = LEVELS[currentLevel].name
+            end
+            local bx1 = 30
+            local by1 = 90
+            local bx2 = 210
+            local by2 = 130
+            vmupro.graphics.drawFillRect(bx1, by1, bx2, by2, COLOR_BLACK)
+            vmupro.graphics.drawFillRect(bx1 + 3, by1 + 3, bx2 - 3, by2 - 3, COLOR_DARK_GRAY)
+            vmupro.text.setFont(vmupro.text.FONT_SMALL)
+            vmupro.graphics.drawText(bannerText, bx1 + 10, by1 + 18, COLOR_WHITE, COLOR_DARK_GRAY)
+        end
+
             -- Draw game over screen if player died
             if gameState == STATE_GAME_OVER then
                 drawGameOver()
@@ -1771,20 +2010,10 @@ function AppMain()
         vmupro.system.delayMs(33)
     end
 
-    -- Cleanup audio
-    if swordSwooshSynth then
-        vmupro.sound.synth.free(swordSwooshSynth)
-    end
-    if groanSynth then
-        vmupro.sound.synth.free(groanSynth)
-    end
-    if squishSynth then
-        vmupro.sound.synth.free(squishSynth)
-    end
-    if gulpSynth then
-        vmupro.sound.synth.free(gulpSynth)
-    end
-    vmupro.audio.exitListenMode()
+    -- Cleanup assets
+    unloadLevelAudio()
+    unloadLevelSprites()
+    unloadMenuSprites()
 
     return 0
 end
