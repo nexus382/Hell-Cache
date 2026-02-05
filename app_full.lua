@@ -899,6 +899,13 @@ local function loadTitleMusic()
         audioSystemActive = true
     end
     titleSample = vmupro.sound.sample.new("sounds/intro_45sec")
+    if vmupro.system and vmupro.system.log then
+        if titleSample then
+            vmupro.system.log(vmupro.system.LOG_INFO, "AUDIO", "Title sample loaded")
+        else
+            vmupro.system.log(vmupro.system.LOG_ERROR, "AUDIO", "Title sample load failed")
+        end
+    end
     if titleSample then
         vmupro.sound.sample.setVolume(titleSample, TITLE_MUSIC_VOLUME, TITLE_MUSIC_VOLUME)
     end
@@ -926,6 +933,9 @@ local function startTitleMusic()
     if titleSample then
         vmupro.sound.sample.setVolume(titleSample, TITLE_MUSIC_VOLUME, TITLE_MUSIC_VOLUME)
         vmupro.sound.sample.play(titleSample, 0)
+        if vmupro.system and vmupro.system.log then
+            vmupro.system.log(vmupro.system.LOG_INFO, "AUDIO", "Title sample play")
+        end
         titleMusicState = "playing"
         titleMusicTimer = 0
         titleFadeTimer = 0
@@ -2356,7 +2366,7 @@ function AppMain()
 
 
         -- Update audio
-        if audioInitialized then
+        if audioSystemActive then
             vmupro.sound.update()
         end
         if vmupro.system and vmupro.system.log then
