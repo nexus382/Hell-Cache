@@ -37,6 +37,9 @@ end
 - Knight sprites normalized to ~579px height
 - Ground positioning: `drawY = groundY - scaledHeight` (feet on ground, not eye-level)
 - Walking animation: Check `animFrame ~= nil` (not `animFrame > 0` since 0 is valid)
+- Enemy attack animation uses 2 frames per direction (front/back/left/right)
+- Enemy death animation uses 7 frames (row-based)
+- Player sword attack uses 9 frames; lock input until animation finishes
 
 ### Audio Setup
 ```lua
@@ -55,6 +58,7 @@ vmupro.sound.synth.setVolume(synth, 0.5, 0.5)
 
 ### Implemented
 - [x] 3D raycaster rendering with textured walls
+- [x] Optional quad-based wall rendering (full 128x128 textures)
 - [x] Player movement and collision detection
 - [x] Soldier enemies with patrol/chase/attack AI (3x sprint speed when chasing)
 - [x] Soldier health system (100 HP, health bars above heads)
@@ -62,7 +66,7 @@ vmupro.sound.synth.setVolume(synth, 0.5, 0.5)
 - [x] Player health system with Diablo 2-style potion UI
 - [x] Health vials pickup (5 per level, restore to 100%)
 - [x] Death effects (blood particles, groan + squish sounds)
-- [x] Sword swipe particle effects and swoosh sound
+- [x] Sword swing sprites and swoosh sound
 - [x] Title screen with Start/Options/Exit
 - [x] Pause menu with Resume/Options/Restart/Menu/Quit
 - [x] Options: Sound On/Off, Health% On/Off
@@ -71,15 +75,15 @@ vmupro.sound.synth.setVolume(synth, 0.5, 0.5)
 - [x] Game over screen with Restart/Menu/Quit
 
 ### Known Issues
-- One soldier may appear invisible (likely a walking sprite not loading)
-- Knights removed (sprites not ready)
+- Loading screen disabled in PR branch while tracking a crash on Start
+- Wall textures are still being tuned (see Lessons Learned)
 
 ### TODO
-- Fix invisible soldier issue
+- Re-enable loading screen once crash is resolved
 - Add more enemy types
 - Add wave system
 - Add king NPC to protect
-- Create knight sprites properly
+- Create knight sprites properly (if re-enabled)
 
 ## File Structure
 
@@ -132,3 +136,12 @@ COLOR_MAROON = 0x0060
 7. **Define all colors** - undefined COLOR_* variables crash the game
 8. **Input conflicts** - MODE button used for attack can conflict with menu; use cooldowns
 9. **Test accessibility** - ensure all map areas are reachable by player
+10. **Sprite slot limit is 64** - loading too many sprites at once crashes
+11. **Column-slice wall textures are too heavy** - full 128x128 textures are safer
+12. **Quad walls are a fast fallback** - draw full texture quads when slices look distorted
+
+## Troubleshooting
+
+- **Crash on Start**: Check for missing sprites and sprite slot exhaustion in logs.
+- **Walls look like thin strips**: Use quad wall rendering or full 128x128 textures (no column slices).
+- **Missing sprites**: Ensure `metadata.json` includes all texture PNGs and per-level sprites.
