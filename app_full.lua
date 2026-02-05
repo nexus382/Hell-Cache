@@ -2202,6 +2202,8 @@ function AppMain()
     end
     if vmupro.system and vmupro.system.log then
         vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "A AppMain enter")
+        vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "drawTitleScreen local=" .. tostring(drawTitleScreen))
+        vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "drawTitleScreen global=" .. tostring(_G and _G.drawTitleScreen))
     else
         print("[BOOT] A AppMain enter")
     end
