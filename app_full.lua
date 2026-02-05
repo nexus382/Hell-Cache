@@ -12,6 +12,250 @@ local function logBoot(level, message)
     end
 end
 
+local function renderGameFrame()
+    -- Game rendering
+    vmupro.graphics.clear(COLOR_CEILING)
+    vmupro.graphics.drawFillRect(0, HORIZON, 240, 240, COLOR_FLOOR)
+
+    if WALL_TEXTURE_MODE == "lazy_quads" then
+        renderWallQuads()
+    else
+        local fovRad = renderCfg.fovSteps * (renderCfg.twoPi / 64)
+        local playerAngle = (pdir % 64) * (renderCfg.twoPi / 64)
+        local baseAngle = playerAngle - (fovRad / 2)
+        for x = 0, renderCfg.rayCols - 1 do
+            local rayAngle = baseAngle + (x * fovRad / renderCfg.rayCols)
+            local rayDx = math.cos(rayAngle)
+            local rayDy = math.sin(rayAngle)
+            local dist, wtype, side, texCoord = castRay(rayDx, rayDy)
+            local angleDiff = rayAngle - playerAngle
+            local fixedDist = dist * math.cos(angleDiff)
+            if fixedDist < 0.1 then fixedDist = 0.1 end
+            local h = math.floor(200 / fixedDist)
+            if h > 240 then h = 240 end
+            local y1 = HORIZON - math.floor(h / 2)
+            local y2 = HORIZON + math.floor(h / 2)
+            if y1 < 0 then y1 = 0 end
+            if y2 > 240 then y2 = 240 end
+
+            local baseColor = getWallColor(wtype, side)
+            local sx = x * renderCfg.colW
+
+            -- Draw base wall color
+            vmupro.graphics.drawFillRect(sx, y1, sx + renderCfg.colW, y2, baseColor)
+            local skipTex = renderCfg.skipOddTex and ((x % 2) == 1)
+            if WALL_TEXTURE_MODE == "proper" and not DEBUG_DISABLE_WALL_TEXTURE and not skipTex then
+                local useTex = texCoord or 0
+                if useTex < 0 then useTex = 0 end
+                if useTex > 0.999 then useTex = 0.999 end
+                -- Flip texture coordinate based on ray direction and hit side
+                if side == 0 and rayDx > 0 then
+                    useTex = 1.0 - useTex
+                elseif side == 1 and rayDy < 0 then
+                    useTex = 1.0 - useTex
+                end
+                local drew = drawWallTextureColumn(wtype, side, useTex, sx, y1, y2, renderCfg.colW)
+                if not drew then
+                    -- Fallback to legacy overlay if no sheet is available
+                    drawWallTexture(wtype, side, sx, y1, y2)
+                end
+            elseif WALL_TEXTURE_MODE == "flat" then
+                -- Flat color only
+            else
+                if not DEBUG_DISABLE_WALL_TEXTURE then
+                    -- Legacy (lazy) texture overlay
+                    drawWallTexture(wtype, side, sx, y1, y2)
+                end
+            end
+        end
+    end
+
+    if not DEBUG_SKIP_SPRITES then
+        local spriteOrder = {}
+        for i = 1, #sprites do
+            local s = sprites[i]
+            local sdx, sdy = s.x - px, s.y - py
+            spriteOrder[i] = {idx = i, dist = sdx * sdx + sdy * sdy}
+        end
+        for i = 1, #spriteOrder - 1 do
+            for j = 1, #spriteOrder - i do
+                if spriteOrder[j].dist < spriteOrder[j + 1].dist then
+                    spriteOrder[j], spriteOrder[j + 1] = spriteOrder[j + 1], spriteOrder[j]
+                end
+            end
+        end
+
+        for i = 1, #spriteOrder do
+            local s = sprites[spriteOrder[i].idx]
+            -- Skip dead soldiers
+            if s.t == 5 and s.alive == false and not s.dying then
+                goto continue_sprite
+            end
+            local sdx, sdy = s.x - px, s.y - py
+            local sdist = math.sqrt(sdx * sdx + sdy * sdy)
+            if sdist > 0.3 and sdist < 12 and isVisible(s.x, s.y) then
+                local sAngle = 0
+                if sdx ~= 0 then
+                    sAngle = math.atan(sdy / sdx)
+                    if sdx < 0 then sAngle = sAngle + 3.14159 end
+                else
+                    sAngle = sdy > 0 and 1.5708 or -1.5708
+                end
+                local sDir = math.floor(sAngle * 64 / 6.28318) % 64
+                local viewDiff = (sDir - pdir) % 64
+                if viewDiff > 32 then viewDiff = viewDiff - 64 end
+                if viewDiff >= -6 and viewDiff <= 6 then
+                    -- Calculate view angle for guards (angle from guard's POV)
+                    local guardViewAngle = nil
+                    if (s.t == 5 or s.t == 6) and s.dir then
+                        -- Angle player is approaching from relative to guard's facing
+                        local approachDir = (sDir + 32) % 64  -- Opposite of sDir
+                        guardViewAngle = (approachDir - s.dir) % 64
+                        if guardViewAngle > 32 then guardViewAngle = guardViewAngle - 64 end
+                    end
+                    drawSprite(120 + viewDiff * 20, sdist, s.t, guardViewAngle, s.anim, s)
+                end
+            end
+            ::continue_sprite::
+        end
+    end
+
+    for my = 0, 15 do
+        for mx = 0, 15 do
+            if map[my + 1][mx + 1] > 0 then
+                vmupro.graphics.drawFillRect(5 + mx * 4, 5 + my * 4, 8 + mx * 4, 8 + my * 4, COLOR_STONE_D)
+            end
+        end
+    end
+    local ppx = 5 + math.floor(px * 4)
+    local ppy = 5 + math.floor(py * 4)
+    vmupro.graphics.drawFillRect(ppx - 1, ppy - 1, ppx + 1, ppy + 1, COLOR_RED)
+    vmupro.graphics.drawLine(ppx, ppy, ppx + math.floor(cosTable[pdir % 64] * 4), ppy + math.floor(sinTable[pdir % 64] * 4), COLOR_YELLOW)
+
+    -- Draw attack sword swing
+    if isAttacking > 0 then
+        if #swordAttack > 0 then
+            local total = (attackTotalFrames > 0) and attackTotalFrames or (#swordAttack * 2)
+            local frameHold = math.max(1, math.floor(total / #swordAttack))
+            local frameIndex = math.floor((total - isAttacking) / frameHold) + 1
+            if frameIndex < 1 then frameIndex = 1 end
+            if frameIndex > #swordAttack then frameIndex = #swordAttack end
+            local sprite = swordAttack[frameIndex]
+            if sprite then
+                local drawX = 140
+                local drawY = 240 - sprite.height + 30
+                vmupro.sprite.draw(sprite, drawX, drawY, vmupro.sprite.kImageUnflipped)
+            end
+        else
+            local swingAngle = (10 - isAttacking) * 9  -- 0 to 90 degrees
+            local swordLen = 80
+            local swordX = 180 + math.floor(math.sin(swingAngle * 0.0174) * 40)
+            local swordY = 180 - math.floor(math.cos(swingAngle * 0.0174) * 60)
+            -- Sword blade
+            vmupro.graphics.drawFillRect(swordX - 4, swordY - swordLen, swordX + 4, swordY, COLOR_LIGHT_GRAY)
+            vmupro.graphics.drawFillRect(swordX - 2, swordY - swordLen - 10, swordX + 2, swordY - swordLen, COLOR_LIGHT_GRAY)
+            -- Sword hilt
+            vmupro.graphics.drawFillRect(swordX - 12, swordY - 4, swordX + 12, swordY + 4, COLOR_BROWN)
+            vmupro.graphics.drawFillRect(swordX - 6, swordY, swordX + 6, swordY + 20, COLOR_DARK_BROWN)
+        end
+    end
+
+    -- Draw block shield
+    if isBlocking then
+        -- Shield in center of screen
+        vmupro.graphics.drawFillRect(80, 140, 160, 230, COLOR_BROWN)
+        vmupro.graphics.drawFillRect(85, 145, 155, 225, COLOR_DARK_BROWN)
+        -- Shield boss (center)
+        vmupro.graphics.drawFillRect(110, 175, 130, 195, COLOR_GRAY)
+        vmupro.graphics.drawFillRect(115, 180, 125, 190, COLOR_LIGHT_GRAY)
+        -- Shield rim
+        vmupro.graphics.drawFillRect(80, 140, 160, 145, COLOR_GRAY)
+        vmupro.graphics.drawFillRect(80, 225, 160, 230, COLOR_GRAY)
+        vmupro.graphics.drawFillRect(80, 140, 85, 230, COLOR_GRAY)
+        vmupro.graphics.drawFillRect(155, 140, 160, 230, COLOR_GRAY)
+    end
+
+    -- Draw menu
+    if showMenu then
+        if inOptionsMenu then
+            -- Options submenu
+            vmupro.graphics.drawFillRect(50, 60, 190, 180, COLOR_BLACK)
+            vmupro.graphics.drawFillRect(55, 65, 185, 175, COLOR_DARK_GRAY)
+            -- Title bar
+            vmupro.graphics.drawFillRect(60, 70, 180, 92, COLOR_MAROON)
+            vmupro.text.setFont(vmupro.text.FONT_SMALL)
+            vmupro.graphics.drawText("OPTIONS", 80, 75, COLOR_WHITE, COLOR_MAROON)
+            -- Options items
+            local soundText = "SOUND: " .. (soundEnabled and "ON" or "OFF")
+            local healthText = "HEALTH%: " .. (showHealthPercent and "ON" or "OFF")
+            local optItems = {soundText, healthText, "BACK"}
+            for i, item in ipairs(optItems) do
+                local y = 95 + (i - 1) * 18
+                local bgColor = COLOR_DARK_GRAY
+                local textColor = COLOR_GRAY
+                if i == optionsSelection then
+                    vmupro.graphics.drawFillRect(60, y, 180, y + 18, COLOR_MAROON)
+                    bgColor = COLOR_MAROON
+                    textColor = COLOR_WHITE
+                end
+                vmupro.text.setFont(vmupro.text.FONT_SMALL)
+                vmupro.graphics.drawText(item, 66, y + 2, textColor, bgColor)
+            end
+        else
+            -- Main pause menu
+            vmupro.graphics.drawFillRect(50, 60, 190, 225, COLOR_BLACK)
+            vmupro.graphics.drawFillRect(55, 65, 185, 220, COLOR_DARK_GRAY)
+            -- Title bar
+            vmupro.graphics.drawFillRect(60, 70, 180, 92, COLOR_MAROON)
+            vmupro.text.setFont(vmupro.text.FONT_SMALL)
+            vmupro.graphics.drawText("PAUSED", 88, 75, COLOR_WHITE, COLOR_MAROON)
+            -- Menu items
+            local items = {"RESUME", "OPTIONS", "RESTART", "MENU", "QUIT"}
+            for i, item in ipairs(items) do
+                local y = 95 + (i - 1) * 20
+                local bgColor = COLOR_DARK_GRAY
+                local textColor = COLOR_GRAY
+                if i == menuSelection then
+                    vmupro.graphics.drawFillRect(60, y, 180, y + 18, COLOR_MAROON)
+                    bgColor = COLOR_MAROON
+                    textColor = COLOR_WHITE
+                end
+                vmupro.text.setFont(vmupro.text.FONT_SMALL)
+                vmupro.graphics.drawText(item, 80, y + 2, textColor, bgColor)
+            end
+        end
+    end
+
+    -- Draw health UI (potion with liquid)
+    drawHealthUI()
+
+    -- Draw current level indicator
+    vmupro.text.setFont(vmupro.text.FONT_SMALL)
+    vmupro.graphics.drawText("L" .. tostring(currentLevel), 6, 228, COLOR_WHITE, COLOR_BLACK)
+
+    if levelBannerTimer > 0 then
+        local bannerText = "LEVEL " .. tostring(currentLevel)
+        local textColor = COLOR_WHITE
+        if levelBannerTimer < 50 then
+            textColor = COLOR_DARK_GRAY
+        elseif levelBannerTimer < 100 then
+            textColor = COLOR_LIGHT_GRAY
+        end
+        vmupro.text.setFont(vmupro.text.FONT_SMALL)
+        vmupro.graphics.drawText(bannerText, 170, 5, textColor, COLOR_BLACK)
+    end
+
+    -- Draw game over screen if player died
+    if gameState == STATE_GAME_OVER then
+        drawGameOver()
+    end
+
+    -- Draw win screen if player won
+    if gameState == STATE_WIN then
+        drawWinScreen()
+    end
+end
+
 local function logPerf(message)
     if not enableBootLogs then return end
     if vmupro and vmupro.system and vmupro.system.log then
@@ -360,6 +604,13 @@ local USE_WALL_QUADS = true
 local DEBUG_DISABLE_WALL_TEXTURE = false
 local DEBUG_SKIP_SPRITES = false
 local WALL_TEXTURE_MODE = "proper" -- proper | lazy_quads | flat
+local renderCfg = {
+    rayCols = 80,
+    colW = 3,
+    fovSteps = 11,
+    twoPi = 6.28318,
+    skipOddTex = true,
+}
 local DEBUG_WALL_QUADS_LOG = false
 local wallQuadLogCount = 0
 local function wallQuadLog(msg)
@@ -2963,254 +3214,9 @@ function AppMain()
                 titleNeedsRedraw = false
             end
         else
-            local okRender, errRender = pcall(function()
-                -- Game rendering
-                vmupro.graphics.clear(COLOR_CEILING)
-                vmupro.graphics.drawFillRect(0, HORIZON, 240, 240, COLOR_FLOOR)
-
-                if WALL_TEXTURE_MODE == "lazy_quads" then
-                    renderWallQuads()
-                else
-                    local rayCols = 120
-                    local colW = 2
-                    local fovSteps = 11
-                    local twoPi = 6.28318
-                    local fovRad = fovSteps * (twoPi / 64)
-                    local playerAngle = (pdir % 64) * (twoPi / 64)
-                    local baseAngle = playerAngle - (fovRad / 2)
-                    for x = 0, rayCols - 1 do
-                        local rayAngle = baseAngle + (x * fovRad / rayCols)
-                        local rayDx = math.cos(rayAngle)
-                        local rayDy = math.sin(rayAngle)
-                        local dist, wtype, side, texCoord = castRay(rayDx, rayDy)
-                        local angleDiff = rayAngle - playerAngle
-                        local fixedDist = dist * math.cos(angleDiff)
-                        if fixedDist < 0.1 then fixedDist = 0.1 end
-                        local h = math.floor(200 / fixedDist)
-                        if h > 240 then h = 240 end
-                        local y1 = HORIZON - math.floor(h / 2)
-                        local y2 = HORIZON + math.floor(h / 2)
-                        if y1 < 0 then y1 = 0 end
-                        if y2 > 240 then y2 = 240 end
-
-                        local baseColor = getWallColor(wtype, side)
-                        local sx = x * colW
-
-                        -- Draw base wall color
-                        vmupro.graphics.drawFillRect(sx, y1, sx + colW, y2, baseColor)
-                        if WALL_TEXTURE_MODE == "proper" and not DEBUG_DISABLE_WALL_TEXTURE then
-                            local useTex = texCoord or 0
-                            if useTex < 0 then useTex = 0 end
-                            if useTex > 0.999 then useTex = 0.999 end
-                            -- Flip texture coordinate based on ray direction and hit side
-                            if side == 0 and rayDx > 0 then
-                                useTex = 1.0 - useTex
-                            elseif side == 1 and rayDy < 0 then
-                                useTex = 1.0 - useTex
-                            end
-                            local drew = drawWallTextureColumn(wtype, side, useTex, sx, y1, y2, colW)
-                            if not drew then
-                                -- Fallback to legacy overlay if no sheet is available
-                                drawWallTexture(wtype, side, sx, y1, y2)
-                            end
-                        elseif WALL_TEXTURE_MODE == "flat" then
-                            -- Flat color only
-                        else
-                            if not DEBUG_DISABLE_WALL_TEXTURE then
-                                -- Legacy (lazy) texture overlay
-                                drawWallTexture(wtype, side, sx, y1, y2)
-                            end
-                        end
-                    end
-                end
-
-                if not DEBUG_SKIP_SPRITES then
-                    local spriteOrder = {}
-                    for i = 1, #sprites do
-                        local s = sprites[i]
-                        local sdx, sdy = s.x - px, s.y - py
-                        spriteOrder[i] = {idx = i, dist = sdx * sdx + sdy * sdy}
-                    end
-                    for i = 1, #spriteOrder - 1 do
-                        for j = 1, #spriteOrder - i do
-                            if spriteOrder[j].dist < spriteOrder[j + 1].dist then
-                                spriteOrder[j], spriteOrder[j + 1] = spriteOrder[j + 1], spriteOrder[j]
-                            end
-                        end
-                    end
-
-                    for i = 1, #spriteOrder do
-                        local s = sprites[spriteOrder[i].idx]
-                        -- Skip dead soldiers
-                        if s.t == 5 and s.alive == false and not s.dying then
-                            goto continue_sprite
-                        end
-                        local sdx, sdy = s.x - px, s.y - py
-                        local sdist = math.sqrt(sdx * sdx + sdy * sdy)
-                        if sdist > 0.3 and sdist < 12 and isVisible(s.x, s.y) then
-                            local sAngle = 0
-                            if sdx ~= 0 then
-                                sAngle = math.atan(sdy / sdx)
-                                if sdx < 0 then sAngle = sAngle + 3.14159 end
-                            else
-                                sAngle = sdy > 0 and 1.5708 or -1.5708
-                            end
-                            local sDir = math.floor(sAngle * 64 / 6.28318) % 64
-                            local viewDiff = (sDir - pdir) % 64
-                            if viewDiff > 32 then viewDiff = viewDiff - 64 end
-                            if viewDiff >= -6 and viewDiff <= 6 then
-                                -- Calculate view angle for guards (angle from guard's POV)
-                                local guardViewAngle = nil
-                                if (s.t == 5 or s.t == 6) and s.dir then
-                                    -- Angle player is approaching from relative to guard's facing
-                                    local approachDir = (sDir + 32) % 64  -- Opposite of sDir
-                                    guardViewAngle = (approachDir - s.dir) % 64
-                                    if guardViewAngle > 32 then guardViewAngle = guardViewAngle - 64 end
-                                end
-                                drawSprite(120 + viewDiff * 20, sdist, s.t, guardViewAngle, s.anim, s)
-                            end
-                        end
-                        ::continue_sprite::
-                    end
-                end
-
-                for my = 0, 15 do
-                    for mx = 0, 15 do
-                        if map[my + 1][mx + 1] > 0 then
-                            vmupro.graphics.drawFillRect(5 + mx * 4, 5 + my * 4, 8 + mx * 4, 8 + my * 4, COLOR_STONE_D)
-                        end
-                    end
-                end
-                local ppx = 5 + math.floor(px * 4)
-                local ppy = 5 + math.floor(py * 4)
-                vmupro.graphics.drawFillRect(ppx - 1, ppy - 1, ppx + 1, ppy + 1, COLOR_RED)
-                vmupro.graphics.drawLine(ppx, ppy, ppx + math.floor(cosTable[pdir % 64] * 4), ppy + math.floor(sinTable[pdir % 64] * 4), COLOR_YELLOW)
-
-                -- Draw attack sword swing
-                if isAttacking > 0 then
-                    if #swordAttack > 0 then
-                        local total = (attackTotalFrames > 0) and attackTotalFrames or (#swordAttack * 2)
-                        local frameHold = math.max(1, math.floor(total / #swordAttack))
-                        local frameIndex = math.floor((total - isAttacking) / frameHold) + 1
-                        if frameIndex < 1 then frameIndex = 1 end
-                        if frameIndex > #swordAttack then frameIndex = #swordAttack end
-                        local sprite = swordAttack[frameIndex]
-                        if sprite then
-                            local drawX = 140
-                            local drawY = 240 - sprite.height + 30
-                            vmupro.sprite.draw(sprite, drawX, drawY, vmupro.sprite.kImageUnflipped)
-                        end
-                    else
-                        local swingAngle = (10 - isAttacking) * 9  -- 0 to 90 degrees
-                        local swordLen = 80
-                        local swordX = 180 + math.floor(math.sin(swingAngle * 0.0174) * 40)
-                        local swordY = 180 - math.floor(math.cos(swingAngle * 0.0174) * 60)
-                        -- Sword blade
-                        vmupro.graphics.drawFillRect(swordX - 4, swordY - swordLen, swordX + 4, swordY, COLOR_LIGHT_GRAY)
-                        vmupro.graphics.drawFillRect(swordX - 2, swordY - swordLen - 10, swordX + 2, swordY - swordLen, COLOR_LIGHT_GRAY)
-                        -- Sword hilt
-                        vmupro.graphics.drawFillRect(swordX - 12, swordY - 4, swordX + 12, swordY + 4, COLOR_BROWN)
-                        vmupro.graphics.drawFillRect(swordX - 6, swordY, swordX + 6, swordY + 20, COLOR_DARK_BROWN)
-                    end
-                end
-
-                -- Draw block shield
-                if isBlocking then
-                    -- Shield in center of screen
-                    vmupro.graphics.drawFillRect(80, 140, 160, 230, COLOR_BROWN)
-                    vmupro.graphics.drawFillRect(85, 145, 155, 225, COLOR_DARK_BROWN)
-                    -- Shield boss (center)
-                    vmupro.graphics.drawFillRect(110, 175, 130, 195, COLOR_GRAY)
-                    vmupro.graphics.drawFillRect(115, 180, 125, 190, COLOR_LIGHT_GRAY)
-                    -- Shield rim
-                    vmupro.graphics.drawFillRect(80, 140, 160, 145, COLOR_GRAY)
-                    vmupro.graphics.drawFillRect(80, 225, 160, 230, COLOR_GRAY)
-                    vmupro.graphics.drawFillRect(80, 140, 85, 230, COLOR_GRAY)
-                    vmupro.graphics.drawFillRect(155, 140, 160, 230, COLOR_GRAY)
-                end
-
-                -- Draw menu
-                if showMenu then
-                    if inOptionsMenu then
-                        -- Options submenu
-                        vmupro.graphics.drawFillRect(50, 60, 190, 180, COLOR_BLACK)
-                        vmupro.graphics.drawFillRect(55, 65, 185, 175, COLOR_DARK_GRAY)
-                        -- Title bar
-                        vmupro.graphics.drawFillRect(60, 70, 180, 92, COLOR_MAROON)
-                        vmupro.text.setFont(vmupro.text.FONT_SMALL)
-                        vmupro.graphics.drawText("OPTIONS", 80, 75, COLOR_WHITE, COLOR_MAROON)
-                        -- Options items
-                        local soundText = "SOUND: " .. (soundEnabled and "ON" or "OFF")
-                        local healthText = "HEALTH%: " .. (showHealthPercent and "ON" or "OFF")
-                        local optItems = {soundText, healthText, "BACK"}
-                        for i, item in ipairs(optItems) do
-                            local y = 95 + (i - 1) * 18
-                            local bgColor = COLOR_DARK_GRAY
-                            local textColor = COLOR_GRAY
-                            if i == optionsSelection then
-                                vmupro.graphics.drawFillRect(60, y, 180, y + 18, COLOR_MAROON)
-                                bgColor = COLOR_MAROON
-                                textColor = COLOR_WHITE
-                            end
-                            vmupro.text.setFont(vmupro.text.FONT_SMALL)
-                            vmupro.graphics.drawText(item, 66, y + 2, textColor, bgColor)
-                        end
-                    else
-                        -- Main pause menu
-                        vmupro.graphics.drawFillRect(50, 60, 190, 225, COLOR_BLACK)
-                        vmupro.graphics.drawFillRect(55, 65, 185, 220, COLOR_DARK_GRAY)
-                        -- Title bar
-                        vmupro.graphics.drawFillRect(60, 70, 180, 92, COLOR_MAROON)
-                        vmupro.text.setFont(vmupro.text.FONT_SMALL)
-                        vmupro.graphics.drawText("PAUSED", 88, 75, COLOR_WHITE, COLOR_MAROON)
-                        -- Menu items
-                        local items = {"RESUME", "OPTIONS", "RESTART", "MENU", "QUIT"}
-                        for i, item in ipairs(items) do
-                            local y = 95 + (i - 1) * 20
-                            local bgColor = COLOR_DARK_GRAY
-                            local textColor = COLOR_GRAY
-                            if i == menuSelection then
-                                vmupro.graphics.drawFillRect(60, y, 180, y + 18, COLOR_MAROON)
-                                bgColor = COLOR_MAROON
-                                textColor = COLOR_WHITE
-                            end
-                            vmupro.text.setFont(vmupro.text.FONT_SMALL)
-                            vmupro.graphics.drawText(item, 80, y + 2, textColor, bgColor)
-                        end
-                    end
-                end
-
-                -- Draw health UI (potion with liquid)
-                drawHealthUI()
-
-                -- Draw current level indicator
-                vmupro.text.setFont(vmupro.text.FONT_SMALL)
-                vmupro.graphics.drawText("L" .. tostring(currentLevel), 6, 228, COLOR_WHITE, COLOR_BLACK)
-
-                if levelBannerTimer > 0 then
-                    local bannerText = "LEVEL " .. tostring(currentLevel)
-                    local textColor = COLOR_WHITE
-                    if levelBannerTimer < 50 then
-                        textColor = COLOR_DARK_GRAY
-                    elseif levelBannerTimer < 100 then
-                        textColor = COLOR_LIGHT_GRAY
-                    end
-                    vmupro.text.setFont(vmupro.text.FONT_SMALL)
-                    vmupro.graphics.drawText(bannerText, 170, 5, textColor, COLOR_BLACK)
-                end
-
-                -- Draw game over screen if player died
-                if gameState == STATE_GAME_OVER then
-                    drawGameOver()
-                end
-
-                -- Draw win screen if player won
-                if gameState == STATE_WIN then
-                    drawWinScreen()
-                end
-            end)
+            local okRender, errRender = pcall(renderGameFrame)
             if not okRender then
-                logBoot(vmupro.system.LOG_ERROR, "render error: " .. tostring(errRender))
+                logBoot(vmupro.system.LOG_ERROR, 'render error: ' .. tostring(errRender))
                 app_running = false
             end
         end  -- End of game rendering (else branch of title screen check)
