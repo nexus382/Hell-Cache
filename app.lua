@@ -8,6 +8,8 @@ import "api/sprites"
 import "api/audio"
 import "api/text"
 
+print("[BOOT] app.lua loaded")
+
 -- Safety Check Functions
 local function safeLog(level, message)
     if vmupro.system.log then
