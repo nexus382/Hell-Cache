@@ -2573,7 +2573,15 @@ function AppMain()
             if vmupro.system and vmupro.system.log then
                 vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "B3 before drawTitleScreen")
             end
-            drawTitleScreen()
+            local okTitleDraw, errTitleDraw = pcall(function()
+                drawTitleScreen()
+            end)
+            if not okTitleDraw then
+                if vmupro.system and vmupro.system.log then
+                    vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "drawTitleScreen error: " .. tostring(errTitleDraw))
+                end
+                app_running = false
+            end
         else
             -- Game rendering
             vmupro.graphics.clear(COLOR_CEILING)
