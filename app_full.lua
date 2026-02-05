@@ -1377,7 +1377,7 @@ local function drawHealthUI()
 end
 
 -- Draw title screen
-function drawTitleScreen()
+local function drawTitleScreen()
     if vmupro.system and vmupro.system.log then
         vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "C drawTitleScreen")
     else
@@ -1441,6 +1441,11 @@ function drawTitleScreen()
             vmupro.graphics.drawText(item, 85, y + 3, textColor, bgColor)
         end
     end
+end
+
+_G.drawTitleScreen = drawTitleScreen
+if vmupro.system and vmupro.system.log then
+    vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "drawTitleScreen defined")
 end
 
 -- Draw game over screen
@@ -2574,7 +2579,11 @@ function AppMain()
                 vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "B3 before drawTitleScreen")
             end
             local okTitleDraw, errTitleDraw = pcall(function()
-                drawTitleScreen()
+                if _G.drawTitleScreen then
+                    _G.drawTitleScreen()
+                else
+                    error("drawTitleScreen missing in _G")
+                end
             end)
             if not okTitleDraw then
                 if vmupro.system and vmupro.system.log then
