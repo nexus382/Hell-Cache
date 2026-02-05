@@ -6,6 +6,7 @@ import "api/display"
 import "api/input"
 import "api/sprites"
 import "api/audio"
+import "api/text"
 
 -- Safety Check Functions
 local function safeLog(level, message)
@@ -530,6 +531,11 @@ local function loadMenuSprites()
     end
 end
 
+-- Texture metadata and loaders (forward-declared for use in loadLevelSprites)
+local textureMetadata = {}
+local loadTextureWithValidation
+local logTextureMemoryUsage
+
 local function loadLevelSprites(levelId)
     local level = LEVELS[levelId]
     local assets = level and level.assets or {}
@@ -635,17 +641,14 @@ local function loadLevelSprites(levelId)
     logTextureMemoryUsage()
 end
 
--- Texture metadata structure
-local textureMetadata = {}
-
 -- Load texture with dimension validation and error handling
-local function loadTextureWithValidation(path, textureName)
+loadTextureWithValidation = function(path, textureName)
     local success, sprite = pcall(function()
         return vmupro.sprite.new(path)
     end)
 
     if not success then
-        vmupro.log.error("TextureLoader", string.format(
+        safeLog("ERROR", string.format(
             "Failed to load texture '%s' from path: %s. Error: %s",
             textureName, path, tostring(sprite)
         ))
@@ -653,7 +656,7 @@ local function loadTextureWithValidation(path, textureName)
     end
 
     if not sprite then
-        vmupro.log.error("TextureLoader", string.format(
+        safeLog("ERROR", string.format(
             "Texture '%s' returned nil from path: %s",
             textureName, path
         ))
@@ -661,11 +664,11 @@ local function loadTextureWithValidation(path, textureName)
     end
 
     -- Get texture dimensions
-    local width = sprite:getWidth()
-    local height = sprite:getHeight()
+    local width = sprite.width
+    local height = sprite.height
 
     if not width or not height or width <= 0 or height <= 0 then
-        vmupro.log.error("TextureLoader", string.format(
+        safeLog("ERROR", string.format(
             "Texture '%s' has invalid dimensions: %dx%d (path: %s)",
             textureName, width or 0, height or 0, path
         ))
@@ -691,7 +694,7 @@ local function loadTextureWithValidation(path, textureName)
     }
 
     -- Log successful load with dimensions
-    vmupro.log.info("TextureLoader", string.format(
+    safeLog("INFO", string.format(
         "Loaded texture '%s': %dx%d (%d pixels) from %s",
         textureName, width, height, width * height, path
     ))
@@ -699,12 +702,12 @@ local function loadTextureWithValidation(path, textureName)
     return sprite
 end
 
--- Validate texture dimensions meet minimum requirements
-local function validateTextureDimensions(textureName, minWidth, minHeight)
+-- Validate texture dimensions meet minimum requirements (metadata-driven)
+local function validateTextureMinimumDimensions(textureName, minWidth, minHeight)
     local metadata = textureMetadata[textureName]
 
     if not metadata then
-        vmupro.log.warning("TextureValidator", string.format(
+        safeLog("WARN", string.format(
             "Cannot validate texture '%s': no metadata found",
             textureName
         ))
@@ -712,14 +715,14 @@ local function validateTextureDimensions(textureName, minWidth, minHeight)
     end
 
     if metadata.width < minWidth or metadata.height < minHeight then
-        vmupro.log.error("TextureValidator", string.format(
+        safeLog("ERROR", string.format(
             "Texture '%s' (%dx%d) does not meet minimum size requirements (%dx%d)",
             textureName, metadata.width, metadata.height, minWidth, minHeight
         ))
         return false
     end
 
-    vmupro.log.info("TextureValidator", string.format(
+    safeLog("INFO", string.format(
         "Texture '%s' dimension validation passed: %dx%d >= %dx%d",
         textureName, metadata.width, metadata.height, minWidth, minHeight
     ))
@@ -728,7 +731,7 @@ local function validateTextureDimensions(textureName, minWidth, minHeight)
 end
 
 -- Log total texture memory usage
-local function logTextureMemoryUsage()
+logTextureMemoryUsage = function()
     local totalPixels = 0
     local textureCount = 0
 
@@ -743,7 +746,7 @@ local function logTextureMemoryUsage()
     local estimatedBytes = totalPixels * 2
     local estimatedKB = estimatedBytes / 1024
 
-    vmupro.log.info("TextureLoader", string.format(
+    safeLog("INFO", string.format(
         "Texture memory summary: %d textures, %d total pixels, ~%.2f KB",
         textureCount, totalPixels, estimatedKB
     ))
