@@ -11,7 +11,15 @@ import "api/text"
 -- Safety Check Functions
 local function safeLog(level, message)
     if vmupro.system.log then
-        vmupro.system.log(level, "[SAFETY] " .. message)
+        local lvl = vmupro.system.LOG_INFO
+        if level == "ERROR" then
+            lvl = vmupro.system.LOG_ERROR
+        elseif level == "WARN" then
+            lvl = vmupro.system.LOG_WARN
+        elseif level == "DEBUG" then
+            lvl = vmupro.system.LOG_DEBUG
+        end
+        vmupro.system.log(lvl, "SAFETY", message)
     else
         print("[SAFETY " .. level .. "] " .. message)
     end
@@ -1342,6 +1350,11 @@ end
 
 -- Draw title screen
 local function drawTitleScreen()
+    if vmupro.system and vmupro.system.log then
+        vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "C drawTitleScreen")
+    else
+        print("[BOOT] C drawTitleScreen")
+    end
     -- Draw title background image
     if titleSprite then
         vmupro.sprite.draw(titleSprite, 0, 0, vmupro.sprite.kImageUnflipped)
@@ -1355,6 +1368,11 @@ local function drawTitleScreen()
 
     if titleInOptions then
         -- Options submenu
+        if vmupro.system and vmupro.system.log then
+            vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "D title options text")
+        else
+            print("[BOOT] D title options text")
+        end
         vmupro.text.setFont(vmupro.text.FONT_SMALL)
         vmupro.graphics.drawFillRect(70, 148, 170, 168, COLOR_MAROON)
         vmupro.graphics.drawText("OPTIONS", 95, 152, COLOR_WHITE, COLOR_MAROON)
@@ -1376,6 +1394,11 @@ local function drawTitleScreen()
         end
     else
         -- Main title menu
+        if vmupro.system and vmupro.system.log then
+            vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "D title main text")
+        else
+            print("[BOOT] D title main text")
+        end
         vmupro.text.setFont(vmupro.text.FONT_SMALL)
         local items = {"START GAME", "OPTIONS", "EXIT"}
         for i, item in ipairs(items) do
@@ -2144,7 +2167,20 @@ local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData
 end
 
 function AppMain()
+    if vmupro.system and vmupro.system.setLogLevel then
+        vmupro.system.setLogLevel(vmupro.system.LOG_DEBUG)
+    end
+    if vmupro.system and vmupro.system.log then
+        vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "A AppMain enter")
+    else
+        print("[BOOT] A AppMain enter")
+    end
     enterTitle()
+    if vmupro.system and vmupro.system.log then
+        vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "B enterTitle done")
+    else
+        print("[BOOT] B enterTitle done")
+    end
 
     while app_running do
         vmupro.input.read()

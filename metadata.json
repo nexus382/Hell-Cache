@@ -96,7 +96,6 @@
     "sprites/wall_textures/brick.png",
     "sprites/wall_textures/moss.png",
     "sprites/wall_textures/metal.png",
-    "sprites/wall_textures/wood.png",
-    "sounds/sword_swoosh.wav"
+    "sprites/wall_textures/wood.png"
   ]
 }
