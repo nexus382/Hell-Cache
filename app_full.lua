@@ -1166,10 +1166,6 @@ local function drawSwipeEffects()
             vmupro.graphics.drawLine(math.floor(x1), math.floor(y1),
                                      math.floor(x2), math.floor(y2), color)
         end
-          end
-        end
-    end
-    end
 end
 
 -- Create blood burst effect at world position
