@@ -633,13 +633,13 @@ local function restartLevel()
 end
 
 local function beginLoadLevel(levelId)
-    pendingLevelStart = levelId
-    loadingTimer = loadingMax
-    gameState = STATE_LOADING
+    pendingLevelStart = nil
+    loadingTimer = 0
     loadingLogCount = 0
-    loadingLog("LOAD beginLoadLevel " .. tostring(levelId))
+    loadingLog("LOAD beginLoadLevel (loading disabled) " .. tostring(levelId))
     wallQuadLogCount = 0
-    wallQuadLog("WQ beginLoadLevel " .. tostring(levelId))
+    wallQuadLog("WQ beginLoadLevel (loading disabled) " .. tostring(levelId))
+    startLevel(levelId)
 end
 
 -- Check if a position is walkable (no wall)
