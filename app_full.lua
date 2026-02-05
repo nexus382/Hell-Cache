@@ -2265,67 +2265,68 @@ function AppMain()
             end
         end
 
-        -- Title screen handling
-        if gameState == STATE_TITLE then
-            if titleInOptions then
-                -- Title options submenu
-                if vmupro.input.pressed(vmupro.input.UP) then
-                    titleOptionsSelection = titleOptionsSelection - 1
-                    if titleOptionsSelection < 1 then titleOptionsSelection = 4 end
-                end
-                if vmupro.input.pressed(vmupro.input.DOWN) then
-                    titleOptionsSelection = titleOptionsSelection + 1
-                    if titleOptionsSelection > 4 then titleOptionsSelection = 1 end
-                end
-                if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
-                    if titleOptionsSelection == 1 then
-                        selectedLevel = selectedLevel + 1
-                        if selectedLevel > MAX_LEVEL then selectedLevel = 1 end
-                    elseif titleOptionsSelection == 2 then
-                        soundEnabled = not soundEnabled
-                    elseif titleOptionsSelection == 3 then
-                        showHealthPercent = not showHealthPercent
-                    elseif titleOptionsSelection == 4 then
-                        titleInOptions = false  -- Back
+        local okTitle, errTitle = pcall(function()
+            -- Title screen handling
+            if gameState == STATE_TITLE then
+                if titleInOptions then
+                    -- Title options submenu
+                    if vmupro.input.pressed(vmupro.input.UP) then
+                        titleOptionsSelection = titleOptionsSelection - 1
+                        if titleOptionsSelection < 1 then titleOptionsSelection = 4 end
+                    end
+                    if vmupro.input.pressed(vmupro.input.DOWN) then
+                        titleOptionsSelection = titleOptionsSelection + 1
+                        if titleOptionsSelection > 4 then titleOptionsSelection = 1 end
+                    end
+                    if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
+                        if titleOptionsSelection == 1 then
+                            selectedLevel = selectedLevel + 1
+                            if selectedLevel > MAX_LEVEL then selectedLevel = 1 end
+                        elseif titleOptionsSelection == 2 then
+                            soundEnabled = not soundEnabled
+                        elseif titleOptionsSelection == 3 then
+                            showHealthPercent = not showHealthPercent
+                        elseif titleOptionsSelection == 4 then
+                            titleInOptions = false  -- Back
+                        end
+                    end
+                    if vmupro.input.pressed(vmupro.input.B) or vmupro.input.pressed(vmupro.input.POWER) then
+                        titleInOptions = false
+                    end
+                else
+                    -- Title main menu
+                    if vmupro.input.pressed(vmupro.input.UP) then
+                        titleSelection = titleSelection - 1
+                        if titleSelection < 1 then titleSelection = 3 end
+                    end
+                    if vmupro.input.pressed(vmupro.input.DOWN) then
+                        titleSelection = titleSelection + 1
+                        if titleSelection > 3 then titleSelection = 1 end
+                    end
+                    if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
+                        if titleSelection == 1 then
+                            -- Start game
+                            beginLoadLevel(selectedLevel)
+                        elseif titleSelection == 2 then
+                            -- Options
+                            titleInOptions = true
+                            titleOptionsSelection = 1
+                        elseif titleSelection == 3 then
+                            -- Exit
+                            app_running = false
+                        end
                     end
                 end
-                if vmupro.input.pressed(vmupro.input.B) or vmupro.input.pressed(vmupro.input.POWER) then
-                    titleInOptions = false
-                end
-            else
-                -- Title main menu
+            -- Game over handling
+            elseif gameState == STATE_GAME_OVER then
                 if vmupro.input.pressed(vmupro.input.UP) then
-                    titleSelection = titleSelection - 1
-                    if titleSelection < 1 then titleSelection = 3 end
+                    gameOverSelection = gameOverSelection - 1
+                    if gameOverSelection < 1 then gameOverSelection = 3 end
                 end
                 if vmupro.input.pressed(vmupro.input.DOWN) then
-                    titleSelection = titleSelection + 1
-                    if titleSelection > 3 then titleSelection = 1 end
+                    gameOverSelection = gameOverSelection + 1
+                    if gameOverSelection > 3 then gameOverSelection = 1 end
                 end
-                if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
-                    if titleSelection == 1 then
-                        -- Start game
-                        beginLoadLevel(selectedLevel)
-                    elseif titleSelection == 2 then
-                        -- Options
-                        titleInOptions = true
-                        titleOptionsSelection = 1
-                    elseif titleSelection == 3 then
-                        -- Exit
-                        app_running = false
-                    end
-                end
-            end
-        -- Game over handling
-        elseif gameState == STATE_GAME_OVER then
-            if vmupro.input.pressed(vmupro.input.UP) then
-                gameOverSelection = gameOverSelection - 1
-                if gameOverSelection < 1 then gameOverSelection = 3 end
-            end
-            if vmupro.input.pressed(vmupro.input.DOWN) then
-                gameOverSelection = gameOverSelection + 1
-                if gameOverSelection > 3 then gameOverSelection = 1 end
-            end
                 if vmupro.input.pressed(vmupro.input.A) or vmupro.input.pressed(vmupro.input.MODE) then
                     if gameOverSelection == 1 then
                         beginLoadLevel(currentLevel)  -- Restart
@@ -2337,80 +2338,80 @@ function AppMain()
                         app_running = false  -- Quit
                     end
                 end
-        -- Win screen handling
-        elseif gameState == STATE_WIN then
-            if winBannerTimer > 0 then
-                winBannerTimer = winBannerTimer - 1
-            end
-            if winCooldown > 0 then
-                winCooldown = winCooldown - 1
-            elseif vmupro.input.pressed(vmupro.input.A) then
-                -- Advance to next level if available, otherwise return to title menu
-                if currentLevel < MAX_LEVEL then
-                    beginLoadLevel(currentLevel + 1)
-                else
-                    enterTitle()
+            -- Win screen handling
+            elseif gameState == STATE_WIN then
+                if winBannerTimer > 0 then
+                    winBannerTimer = winBannerTimer - 1
                 end
-            end
-        -- Menu handling
-        elseif showMenu then
-            if inOptionsMenu then
-                -- Options submenu
-                if vmupro.input.pressed(vmupro.input.UP) then
-                    optionsSelection = optionsSelection - 1
-                    if optionsSelection < 1 then optionsSelection = 3 end
+                if winCooldown > 0 then
+                    winCooldown = winCooldown - 1
+                elseif vmupro.input.pressed(vmupro.input.A) then
+                    -- Advance to next level if available, otherwise return to title menu
+                    if currentLevel < MAX_LEVEL then
+                        beginLoadLevel(currentLevel + 1)
+                    else
+                        enterTitle()
+                    end
                 end
-                if vmupro.input.pressed(vmupro.input.DOWN) then
-                    optionsSelection = optionsSelection + 1
-                    if optionsSelection > 3 then optionsSelection = 1 end
-                end
-                if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
-                    if optionsSelection == 1 then
-                        soundEnabled = not soundEnabled  -- Toggle sound
-                    elseif optionsSelection == 2 then
-                        showHealthPercent = not showHealthPercent  -- Toggle health %
-                    elseif optionsSelection == 3 then
+            -- Menu handling
+            elseif showMenu then
+                if inOptionsMenu then
+                    -- Options submenu
+                    if vmupro.input.pressed(vmupro.input.UP) then
+                        optionsSelection = optionsSelection - 1
+                        if optionsSelection < 1 then optionsSelection = 3 end
+                    end
+                    if vmupro.input.pressed(vmupro.input.DOWN) then
+                        optionsSelection = optionsSelection + 1
+                        if optionsSelection > 3 then optionsSelection = 1 end
+                    end
+                    if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
+                        if optionsSelection == 1 then
+                            soundEnabled = not soundEnabled  -- Toggle sound
+                        elseif optionsSelection == 2 then
+                            showHealthPercent = not showHealthPercent  -- Toggle health %
+                        elseif optionsSelection == 3 then
+                            inOptionsMenu = false  -- Back to main menu
+                        end
+                    end
+                    if vmupro.input.pressed(vmupro.input.POWER) or vmupro.input.pressed(vmupro.input.B) then
                         inOptionsMenu = false  -- Back to main menu
                     end
-                end
-                if vmupro.input.pressed(vmupro.input.POWER) or vmupro.input.pressed(vmupro.input.B) then
-                    inOptionsMenu = false  -- Back to main menu
-                end
-            else
-                -- Main pause menu
-                if vmupro.input.pressed(vmupro.input.UP) then
-                    menuSelection = menuSelection - 1
-                    if menuSelection < 1 then menuSelection = 5 end
-                end
-                if vmupro.input.pressed(vmupro.input.DOWN) then
-                    menuSelection = menuSelection + 1
-                    if menuSelection > 5 then menuSelection = 1 end
-                end
-                if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
-                    if menuSelection == 1 then
-                        showMenu = false  -- Resume
-                    elseif menuSelection == 2 then
-                        inOptionsMenu = true  -- Enter options
-                        optionsSelection = 1
-                    elseif menuSelection == 3 then
-                        -- Reset position and health
-                        px, py, pdir = 2.5, 2.5, 0
-                        playerHealth = MAX_HEALTH
-                        showMenu = false
-                    elseif menuSelection == 4 then
-                        -- Return to title menu
-                        showMenu = false
-                        enterTitle()
-                    elseif menuSelection == 5 then
-                        app_running = false  -- Quit
+                else
+                    -- Main pause menu
+                    if vmupro.input.pressed(vmupro.input.UP) then
+                        menuSelection = menuSelection - 1
+                        if menuSelection < 1 then menuSelection = 5 end
+                    end
+                    if vmupro.input.pressed(vmupro.input.DOWN) then
+                        menuSelection = menuSelection + 1
+                        if menuSelection > 5 then menuSelection = 1 end
+                    end
+                    if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
+                        if menuSelection == 1 then
+                            showMenu = false  -- Resume
+                        elseif menuSelection == 2 then
+                            inOptionsMenu = true  -- Enter options
+                            optionsSelection = 1
+                        elseif menuSelection == 3 then
+                            -- Reset position and health
+                            px, py, pdir = 2.5, 2.5, 0
+                            playerHealth = MAX_HEALTH
+                            showMenu = false
+                        elseif menuSelection == 4 then
+                            -- Return to title menu
+                            showMenu = false
+                            enterTitle()
+                        elseif menuSelection == 5 then
+                            app_running = false  -- Quit
+                        end
+                    end
+                    if vmupro.input.pressed(vmupro.input.POWER) then
+                        showMenu = false  -- Close menu
                     end
                 end
-                if vmupro.input.pressed(vmupro.input.POWER) then
-                    showMenu = false  -- Close menu
-                end
-            end
-        else
-            -- Normal gameplay controls
+            else
+                -- Normal gameplay controls
 
             -- LEFT/RIGHT: Turn (held for continuous turning)
             if vmupro.input.held(vmupro.input.LEFT) then
@@ -2544,6 +2545,13 @@ function AppMain()
                 showMenu = true
                 menuSelection = 1
             end
+            end
+        end)
+        if not okTitle then
+            if vmupro.system and vmupro.system.log then
+                vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "title/menu error: " .. tostring(errTitle))
+            end
+            app_running = false
         end
 
         -- Render based on game state
