@@ -1493,21 +1493,20 @@ local function collidesWithSprite(nx, ny)
         for i = 1, #sprites do
             if checkArrayBounds(sprites, i, "collidesWithSprite") then
                 local s = sprites[i]
-        if s.t == 5 and (s.dying or s.dead) then
-            goto continue_collide
-        end
-        if s.t == 7 then
-            goto continue_collide
-        end
-        local dx, dy = nx - s.x, ny - s.y
-        local dist = math.sqrt(dx * dx + dy * dy)
-        if dist < 0.4 then  -- Collision radius
-            return true
-        end
-        ::continue_collide::
+                if s.t == 5 and (s.dying or s.dead) then
+                    goto continue_collide
+                end
+                if s.t == 7 then
+                    goto continue_collide
+                end
+                local dx, dy = nx - s.x, ny - s.y
+                local dist = math.sqrt(dx * dx + dy * dy)
+                if dist < 0.4 then  -- Collision radius
+                    return true
+                end
+                ::continue_collide::
             end
         end
-    end
     end
     return false
 end
