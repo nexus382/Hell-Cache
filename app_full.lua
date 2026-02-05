@@ -29,6 +29,13 @@ if vmupro and vmupro.system and vmupro.system.log then
     vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "after imports")
 end
 
+-- Fallback stub; replaced by drawTitleScreenImpl when defined
+function drawTitleScreen()
+    if vmupro and vmupro.system and vmupro.system.log then
+        vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "drawTitleScreen stub")
+    end
+end
+
 -- Safety Check Functions
 local function safeLog(level, message)
     if vmupro.system.log then
@@ -1376,10 +1383,8 @@ local function drawHealthUI()
     end
 end
 
-local drawTitleScreen
-
 -- Draw title screen
-drawTitleScreen = function()
+local function drawTitleScreenImpl()
     if vmupro.system and vmupro.system.log then
         vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "C drawTitleScreen")
     else
@@ -1443,6 +1448,11 @@ drawTitleScreen = function()
             vmupro.graphics.drawText(item, 85, y + 3, textColor, bgColor)
         end
     end
+end
+
+drawTitleScreen = drawTitleScreenImpl
+if vmupro.system and vmupro.system.log then
+    vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "drawTitleScreen bound to impl")
 end
 
 -- Draw game over screen
