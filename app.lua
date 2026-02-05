@@ -12,6 +12,10 @@ if vmupro and vmupro.system and vmupro.system.log then
     vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "app.lua loaded")
 end
 
+if vmupro and vmupro.system and vmupro.system.log then
+    vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "after imports")
+end
+
 -- Safety Check Functions
 local function safeLog(level, message)
     if vmupro.system.log then
@@ -136,6 +140,10 @@ local COLOR_METAL_D = 0x0842
 local COLOR_WOOD_L = 0x4051
 local COLOR_WOOD_D = 0x2028
 
+if vmupro and vmupro.system and vmupro.system.log then
+    vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "after color constants")
+end
+
 -- Base level data (used to build per-level instances)
 local BASE_MAP = {
     {1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1},
@@ -180,6 +188,10 @@ local BASE_SPRITES = {
     {x=8.5, y=9.5, t=7, collected=false},   -- Central area
     {x=12.5, y=13.5, t=7, collected=false}, -- Bottom-right area
 }
+
+if vmupro and vmupro.system and vmupro.system.log then
+    vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "after base sprites")
+end
 
 local LEVELS = {
     [1] = {
@@ -238,6 +250,10 @@ local LEVELS = {
         assets = {warrior = true, knight = false, potion = true}
     }
 }
+
+if vmupro and vmupro.system and vmupro.system.log then
+    vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "after levels")
+end
 
 local currentLevel = 1
 local selectedLevel = 1
