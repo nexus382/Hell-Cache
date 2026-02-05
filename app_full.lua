@@ -1172,6 +1172,7 @@ local function drawSwipeEffects()
             vmupro.graphics.drawLine(math.floor(x1), math.floor(y1),
                                      math.floor(x2), math.floor(y2), color)
         end
+    end
 end
 
 -- Create blood burst effect at world position
@@ -2216,6 +2217,12 @@ function AppMain()
         vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "drawTitleScreen global=" .. tostring(_G and _G.drawTitleScreen))
     else
         print("[BOOT] A AppMain enter")
+    end
+    if drawTitleScreenImpl then
+        drawTitleScreen = drawTitleScreenImpl
+        if vmupro.system and vmupro.system.log then
+            vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "drawTitleScreen rebound in AppMain")
+        end
     end
     enterTitle()
     if vmupro.system and vmupro.system.log then
