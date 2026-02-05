@@ -2209,9 +2209,19 @@ function AppMain()
     else
         print("[BOOT] B enterTitle done")
     end
+    local bootLoopLogged = false
 
     while app_running do
+        if not bootLoopLogged then
+            bootLoopLogged = true
+            if vmupro.system and vmupro.system.log then
+                vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "B1 loop start")
+            end
+        end
         vmupro.input.read()
+        if bootLoopLogged and vmupro.system and vmupro.system.log then
+            vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "B2 after input.read")
+        end
         frameCount = frameCount + 1
 
 
@@ -2552,6 +2562,9 @@ function AppMain()
             vmupro.text.setFont(vmupro.text.FONT_SMALL)
             vmupro.graphics.drawText("LOADING", 95, 90, COLOR_WHITE, COLOR_BLACK)
         elseif gameState == STATE_TITLE then
+            if vmupro.system and vmupro.system.log then
+                vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "B3 before drawTitleScreen")
+            end
             drawTitleScreen()
         else
             -- Game rendering
