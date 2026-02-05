@@ -1377,7 +1377,7 @@ local function drawHealthUI()
 end
 
 -- Draw title screen
-local function drawTitleScreen()
+function drawTitleScreen()
     if vmupro.system and vmupro.system.log then
         vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "C drawTitleScreen")
     else
