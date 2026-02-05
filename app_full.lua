@@ -2270,7 +2270,13 @@ function AppMain()
             end
         end
 
+        if vmupro.system and vmupro.system.log then
+            vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "B2.5 before title/menu pcall")
+        end
         local okTitle, errTitle = pcall(function()
+            if vmupro.system and vmupro.system.log then
+                vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "B2.6 inside title/menu pcall")
+            end
             -- Title screen handling
             if gameState == STATE_TITLE then
                 if titleInOptions then
@@ -2552,6 +2558,9 @@ function AppMain()
             end
             end
         end)
+        if vmupro.system and vmupro.system.log then
+            vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "B2.7 after title/menu pcall ok=" .. tostring(okTitle))
+        end
         if not okTitle then
             if vmupro.system and vmupro.system.log then
                 vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "title/menu error: " .. tostring(errTitle))
