@@ -9,6 +9,7 @@
   "icon_transparency": false,
   "resources": [
     "app.lua",
+    "app_full.lua",
     "sprites/level1/warrior_front.png",
     "sprites/level1/warrior_back.png",
     "sprites/level1/warrior_left.png",
