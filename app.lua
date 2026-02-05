@@ -8,7 +8,9 @@ import "api/sprites"
 import "api/audio"
 import "api/text"
 
-print("[BOOT] app.lua loaded")
+if vmupro and vmupro.system and vmupro.system.log then
+    vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "app.lua loaded")
+end
 
 -- Safety Check Functions
 local function safeLog(level, message)
