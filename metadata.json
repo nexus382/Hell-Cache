@@ -10,6 +10,7 @@
   "resources": [
     "app.lua",
     "app_full.lua",
+    "api/text.lua",
     "sprites/level1/warrior_front.png",
     "sprites/level1/warrior_back.png",
     "sprites/level1/warrior_left.png",
