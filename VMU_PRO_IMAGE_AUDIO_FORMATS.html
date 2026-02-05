@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VMU Pro SDK: Image & Audio Format Documentation</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --border-color: #30363d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-color: #58a6ff;
+            --success-color: #3fb950;
+            --warning-color: #d29922;
+            --danger-color: #f85149;
+            --code-bg: #0d1117;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 0;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: var(--text-secondary);
+        }
+
+        nav {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            border: 1px solid var(--border-color);
+        }
+
+        nav h2 {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        nav ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 10px;
+        }
+
+        nav a {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 8px 12px;
+            display: block;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        nav a:hover {
+            background: var(--bg-tertiary);
+            color: var(--accent-color);
+        }
+
+        section {
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        h2 {
+            color: var(--accent-color);
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h3 {
+            color: var(--text-primary);
+            font-size: 1.5em;
+            margin: 30px 0 15px 0;
+        }
+
+        h4 {
+            color: var(--text-primary);
+            font-size: 1.2em;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        .warning-box {
+            background: rgba(248, 81, 73, 0.1);
+            border-left: 4px solid var(--danger-color);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box strong {
+            color: var(--danger-color);
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .info-box {
+            background: rgba(88, 166, 255, 0.1);
+            border-left: 4px solid var(--accent-color);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .info-box strong {
+            color: var(--accent-color);
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .success-box {
+            background: rgba(63, 185, 80, 0.1);
+            border-left: 4px solid var(--success-color);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success-box strong {
+            color: var(--success-color);
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background: var(--bg-secondary);
+            color: var(--accent-color);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: var(--bg-secondary);
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .code-block .comment {
+            color: var(--text-secondary);
+        }
+
+        .code-block .keyword {
+            color: #ff7b72;
+        }
+
+        .code-block .function {
+            color: #d2a8ff;
+        }
+
+        .code-block .string {
+            color: #a5d6ff;
+        }
+
+        .code-block .number {
+            color: #79c0ff;
+        }
+
+        .comparison-table {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-card {
+            background: var(--bg-tertiary);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .comparison-card h4 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+
+        .comparison-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .comparison-card li {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comparison-card li:last-child {
+            border-bottom: none;
+        }
+
+        .comparison-card li:before {
+            content: "• ";
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .spec-item {
+            background: var(--bg-tertiary);
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .spec-item .label {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .spec-item .value {
+            color: var(--accent-color);
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        ul.feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul.feature-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        ul.feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .api-signature {
+            background: var(--bg-tertiary);
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid var(--accent-color);
+            margin: 15px 0;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+        }
+
+        .return-type {
+            color: var(--success-color);
+        }
+
+        .param {
+            color: #79c0ff;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 2px solid var(--border-color);
+            margin-top: 40px;
+            color: var(--text-secondary);
+        }
+
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+
+            section {
+                page-break-inside: avoid;
+            }
+        }
+
+        .emoji {
+            font-style: normal;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>VMU Pro SDK</h1>
+            <p class="subtitle">Complete Image & Audio Format Documentation</p>
+        </header>
+
+        <nav>
+            <h2>📑 Table of Contents</h2>
+            <ul>
+                <li><a href="#overview">Overview & System Specs</a></li>
+                <li><a href="#image-formats">Image Formats</a></li>
+                <li><a href="#rgb565">RGB565 Color Format</a></li>
+                <li><a href="#sprite-system">Sprite System</a></li>
+                <li><a href="#audio-formats">Audio Formats & Warnings</a></li>
+                <li><a href="#audio-synthesis">Audio Synthesis</a></li>
+                <li><a href="#real-image-examples">Real Image Code Examples</a></li>
+                <li><a href="#real-audio-examples">Real Audio Code Examples</a></li>
+                <li><a href="#memory">Memory & File Size Limitations</a></li>
+                <li><a href="#best-practices">Best Practices</a></li>
+            </ul>
+        </nav>
+
+        <section id="overview">
+            <h2>🎯 Overview & System Specifications</h2>
+
+            <div class="spec-grid">
+                <div class="spec-item">
+                    <div class="label">Display Resolution</div>
+                    <div class="value">240×240 pixels</div>
+                </div>
+                <div class="spec-item">
+                    <div class="label">Color Format</div>
+                    <div class="value">RGB565 (16-bit)</div>
+                </div>
+                <div class="spec-item">
+                    <div class="label">Frame Buffer</div>
+                    <div class="value">Double-buffered</div>
+                </div>
+                <div class="spec-item">
+                    <div class="label">Target FPS</div>
+                    <div class="value">60 FPS</div>
+                </div>
+                <div class="spec-item">
+                    <div class="label">Icon Size</div>
+                    <div class="value">76×76 pixels</div>
+                </div>
+                <div class="spec-item">
+                    <div class="label">Icon Format</div>
+                    <div class="value">BMP only</div>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ CRITICAL WARNING: Sample-Based Audio</strong>
+                <p>Using sample-based audio formats (WAV, MP3, etc.) will CRASH the VMU Pro device. Only use synth-based audio generation. See the <a href="#audio-formats" style="color: var(--accent-color);">Audio Formats</a> section for details.</p>
+            </div>
+
+            <h3>Key Constraints</h3>
+            <ul class="feature-list">
+                <li>Limited memory with fragmentation issues</li>
+                <li>Sprite files must be embedded in vmupack packages</li>
+                <li>Sample audio playback causes system crashes</li>
+                <li>Memory monitoring is essential for stability</li>
+                <li>Proper cleanup of sprites and audio is mandatory</li>
+            </ul>
+        </section>
+
+        <section id="image-formats">
+            <h2>🖼️ Image Formats</h2>
+
+            <h3>Supported Formats</h3>
+            <div class="comparison-table">
+                <div class="comparison-card">
+                    <h4>BMP (16-bit RGB565)</h4>
+                    <ul>
+                        <li>16-bit color depth</li>
+                        <li>Memory efficient</li>
+                        <li>Color key transparency</li>
+                        <li>Required for icons (76×76)</li>
+                        <li>Smaller file sizes</li>
+                        <li>Faster loading</li>
+                    </ul>
+                </div>
+                <div class="comparison-card">
+                    <h4>PNG (RGBA8888)</h4>
+                    <ul>
+                        <li>32-bit color depth</li>
+                        <li>Full per-pixel alpha channel</li>
+                        <li>Smooth transparency effects</li>
+                        <li>Larger file sizes</li>
+                        <li>Higher memory usage</li>
+                        <li>Better visual quality</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Format Comparison Table</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>BMP RGB565</th>
+                        <th>PNG RGBA8888</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Color Depth</strong></td>
+                        <td>16-bit (65,536 colors)</td>
+                        <td>32-bit (16.7 million colors + alpha)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Transparency</strong></td>
+                        <td>Color key (binary)</td>
+                        <td>Per-pixel alpha (256 levels)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Memory Usage</strong></td>
+                        <td>Low (2 bytes per pixel)</td>
+                        <td>High (4 bytes per pixel)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>File Size</strong></td>
+                        <td>Smaller</td>
+                        <td>Larger</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Icon Support</strong></td>
+                        <td>✓ Required</td>
+                        <td>✗ Not supported</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Loading Speed</strong></td>
+                        <td>Faster</td>
+                        <td>Slower</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Loading Sprites</h3>
+            <div class="info-box">
+                <strong>💡 Auto-Detection</strong>
+                <p>The sprite system automatically detects the format (BMP or PNG) when loading. No special handling is required in your code.</p>
+            </div>
+
+            <div class="code-block">
+                <pre><span class="comment">-- Load a sprite - format auto-detected</span>
+<span class="keyword">local</span> sprite = vmupro.sprite.<span class="function">new</span>(<span class="string">"assets/player.png"</span>)
+
+<span class="comment">-- Load another sprite</span>
+<span class="keyword">local</span> background = vmupro.sprite.<span class="function">new</span>(<span class="string">"assets/background.bmp"</span>)</pre>
+            </div>
+
+            <h3>Effect Compatibility</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Effect</th>
+                        <th>BMP Support</th>
+                        <th>PNG Support</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>draw()</code></td>
+                        <td>✓ Full</td>
+                        <td>✓ Full</td>
+                        <td>Basic drawing</td>
+                    </tr>
+                    <tr>
+                        <td><code>drawScaled()</code></td>
+                        <td>✓ Full</td>
+                        <td>✓ Full</td>
+                        <td>Scaling with transparency</td>
+                    </tr>
+                    <tr>
+                        <td><code>drawTinted()</code></td>
+                        <td>✓ Full</td>
+                        <td>✓ Full</td>
+                        <td>Color tinting</td>
+                    </tr>
+                    <tr>
+                        <td><code>drawBlended()</code></td>
+                        <td>✓ Partial</td>
+                        <td>✓ Full</td>
+                        <td>PNG alpha looks better</td>
+                    </tr>
+                    <tr>
+                        <td><code>drawMosaic()</code></td>
+                        <td>✓ Full</td>
+                        <td>✓ Full</td>
+                        <td>Pixelation effect</td>
+                    </tr>
+                    <tr>
+                        <td><code>drawBlurred()</code></td>
+                        <td>✓ Full</td>
+                        <td>✓ Full</td>
+                        <td>Blur effect</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Flip Constants</strong></td>
+                        <td>✓ All</td>
+                        <td>✓ All</td>
+                        <td>X, Y, XY flipping</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Icon Requirements</h3>
+            <div class="warning-box">
+                <strong>⚠️ Icon Format Specification</strong>
+                <ul>
+                    <li><strong>Size:</strong> Exactly 76×76 pixels</li>
+                    <li><strong>Format:</strong> BMP only (RGB565)</li>
+                    <li><strong>Color Depth:</strong> 16-bit</li>
+                    <li>PNG format is NOT supported for icons</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="rgb565">
+            <h2>🎨 RGB565 Color Format</h2>
+
+            <h3>Format Specification</h3>
+            <p>RGB565 is a 16-bit color format that divides bits between color channels:</p>
+
+            <div class="spec-grid">
+                <div class="spec-item">
+                    <div class="label">Red Channel</div>
+                    <div class="value">5 bits (32 levels)</div>
+                </div>
+                <div class="spec-item">
+                    <div class="label">Green Channel</div>
+                    <div class="value">6 bits (64 levels)</div>
+                </div>
+                <div class="spec-item">
+                    <div class="label">Blue Channel</div>
+                    <div class="value">5 bits (32 levels)</div>
+                </div>
+                <div class="spec-item">
+                    <div class="label">Total Colors</div>
+                    <div class="value">65,536</div>
+                </div>
+            </div>
+
+            <h3>Binary Layout</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- Little-endian format (16 bits total)</span>
+<span class="comment">-- Byte order: Low byte first, High byte second</span>
+
+<span class="comment">-- Bit layout:</span>
+<span class="comment">-- [BBBB BGGG] [GGGRRRRR]</span>
+<span class="comment">--  Blue: 5 bits (0-31)</span>
+<span class="comment">--  Green: 6 bits (0-63)</span>
+<span class="comment">--  Red: 5 bits (0-31)</span></pre>
+            </div>
+
+            <h3>Color Conversion Functions</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- Convert RGB (0-255) to RGB565</span>
+<span class="keyword">function</span> <span class="function">rgbTo565</span>(r, g, b)
+    r = <span class="function">math.floor</span>(r / <span class="number">255</span> * <span class="number">31</span>)
+    g = <span class="function">math.floor</span>(g / <span class="number">255</span> * <span class="number">63</span>)
+    b = <span class="function">math.floor</span>(b / <span class="number">255</span> * <span class="number">31</span>)
+    <span class="keyword">return</span> (b << <span class="number">11</span>) | (g << <span class="number">5</span>) | r
+<span class="keyword">end</span>
+
+<span class="comment">-- Convert RGB565 to RGB (0-255)</span>
+<span class="keyword">function</span> <span class="function">rgb565ToRgb</span>(color565)
+    <span class="keyword">local</span> r = (color565 & <span class="number">0x001F</span>) * <span class="number">255</span> / <span class="number">31</span>
+    <span class="keyword">local</span> g = ((color565 >> <span class="number">5</span>) & <span class="number">0x003F</span>) * <span class="number">255</span> / <span class="number">63</span>
+    <span class="keyword">local</span> b = ((color565 >> <span class="number">11</span>) & <span class="number">0x001F</span>) * <span class="number">255</span> / <span class="number">31</span>
+    <span class="keyword">return</span> r, g, b
+<span class="keyword">end</span></pre>
+            </div>
+
+            <h3>Predefined Color Constants</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- Basic colors (RGB565 values)</span>
+COLOR_BLACK   = <span class="number">0x0000</span>  <span class="comment">-- (0, 0, 0)</span>
+COLOR_WHITE   = <span class="number">0xFFFF</span>  <span class="comment">-- (255, 255, 255)</span>
+COLOR_RED     = <span class="number">0xF800</span>  <span class="comment">-- (255, 0, 0)</span>
+COLOR_GREEN   = <span class="number">0x07E0</span>  <span class="comment">-- (0, 255, 0)</span>
+COLOR_BLUE    = <span class="number">0x001F</span>  <span class="comment">-- (0, 0, 255)</span>
+COLOR_YELLOW  = <span class="number">0xFFE0</span>  <span class="comment">-- (255, 255, 0)</span>
+COLOR_CYAN    = <span class="number">0x07FF</span>  <span class="comment">-- (0, 255, 255)</span>
+COLOR_MAGENTA = <span class="number">0xF81F</span>  <span class="comment">-- (255, 0, 255)</span>
+
+<span class="comment">-- Extended palette</span>
+COLOR_ORANGE    = <span class="number">0xFD20</span>
+COLOR_PINK      = <span class="number">0xF81F</span>
+COLOR_PURPLE    = <span class="number">0x8010</span>
+COLOR_DARKGRAY  = <span class="number">0x4208</span>
+COLOR_LIGHTGRAY = <span class="number">0xC638</span>
+COLOR_BROWN     = <span class="number">0xA145</span></pre>
+            </div>
+
+            <h3>Real Usage Example from app.lua</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- Example from actual VMU Pro application</span>
+<span class="keyword">local</span> bgColor = <span class="function">rgbTo565</span>(<span class="number">20</span>, <span class="number">30</span>, <span class="number">50</span>)  <span class="comment">-- Dark blue background</span>
+<span class="keyword">local</span> playerColor = <span class="function">rgbTo565</span>(<span class="number">255</span>, <span class="number">100</span>, <span class="number">50</span>)  <span class="comment">-- Orange player</span>
+<span class="keyword">local</span> enemyColor = COLOR_RED  <span class="comment">-- Using predefined constant</span></pre>
+            </div>
+        </section>
+
+        <section id="sprite-system">
+            <h2>🎮 Sprite System</h2>
+
+            <h3>Complete Sprite API</h3>
+
+            <h4>Loading & Creation</h4>
+            <div class="api-signature">
+                <span class="return-type">sprite</span> vmupro.sprite.<span class="function">new</span>(<span class="param">string path</span>)
+            </div>
+            <p>Loads a sprite from a BMP or PNG file. Format is auto-detected.</p>
+
+            <div class="api-signature">
+                <span class="return-type">void</span> vmupro.sprite.<span class="function">free</span>(<span class="param">sprite sprite</span>)
+            </div>
+            <p>Releases memory used by a sprite. Call when sprite is no longer needed.</p>
+
+            <div class="api-signature">
+                <span class="return-type">void</span> vmupro.sprite.<span class="function">removeAll</span>()
+            </div>
+            <p><strong>CRITICAL:</strong> Removes all sprites from memory. Must call this during cleanup!</p>
+
+            <h4>Drawing Methods</h4>
+            <div class="api-signature">
+                <span class="return-type">void</span> sprite:<span class="function">draw</span>(<span class="param">number x, number y</span>)
+            </div>
+            <p>Draw sprite at position (x, y) with original size.</p>
+
+            <div class="api-signature">
+                <span class="return-type">void</span> sprite:<span class="function">drawScaled</span>(<span class="param">number x, number y, number scale</span>)
+            </div>
+            <p>Draw sprite scaled by factor (1.0 = original size, 2.0 = double size).</p>
+
+            <div class="api-signature">
+                <span class="return-type">void</span> sprite:<span class="function">drawTinted</span>(<span class="param">number x, number y, number r, number g, number b</span>)
+            </div>
+            <p>Draw sprite with RGB color tint (0-255 per channel).</p>
+
+            <div class="api-signature">
+                <span class="return-type">void</span> sprite:<span class="function">drawBlended</span>(<span class="param">number x, number y, number alpha</span>)
+            </div>
+            <p>Draw sprite with alpha blending (0.0 = transparent, 1.0 = opaque).</p>
+
+            <div class="api-signature">
+                <span class="return-type">void</span> sprite:<span class="function">drawMosaic</span>(<span class="param">number x, number y, number blockSize</span>)
+            </div>
+            <p>Draw sprite with mosaic/pixelation effect.</p>
+
+            <div class="api-signature">
+                <span class="return-type">void</span> sprite:<span class="function">drawBlurred</span>(<span class="param">number x, number y, number blurAmount</span>)
+            </div>
+            <p>Draw sprite with blur effect.</p>
+
+            <h4>Flip Constants</h4>
+            <div class="code-block">
+                <pre><span class="comment">-- Sprite flipping constants</span>
+vmupro.kImageUnflipped  <span class="comment">-- No flipping</span>
+vmupro.kImageFlippedX   <span class="comment">-- Flip horizontally</span>
+vmupro.kImageFlippedY   <span class="comment">-- Flip vertically</span>
+vmupro.kImageFlippedXY  <span class="comment">-- Flip both axes</span>
+
+<span class="comment">-- Usage example</span>
+sprite:draw(x, y, vmupro.kImageFlippedX)  <span class="comment">-- Draw mirrored horizontally</span></pre>
+            </div>
+
+            <h4>Collision Detection</h4>
+            <div class="api-signature">
+                <span class="return-type">boolean</span> sprite:<span class="function">collidesWith</span>(<span class="param">sprite other</span>)
+            </div>
+            <p>Check if this sprite collides with another sprite.</p>
+
+            <div class="api-signature">
+                <span class="return-type">table</span> vmupro.sprite.<span class="function">getCollisions</span>(<span class="param">sprite target, string group</span>)
+            </div>
+            <p>Get all sprites in a collision group that collide with target.</p>
+
+            <div class="api-signature">
+                <span class="return-type">void</span> sprite:<span class="function">setCollisionGroup</span>(<span class="param">string groupName</span>)
+            </div>
+            <p>Add sprite to a collision group for filtering.</p>
+
+            <h4>Animation System</h4>
+            <div class="api-signature">
+                <span class="return-type">void</span> sprite:<span class="function">playAnimation</span>(<span class="param">table frames, number frameRate</span>)
+            </div>
+            <p>Play an animation sequence. Frames is an array of sprite objects.</p>
+
+            <div class="api-signature">
+                <span class="return-type">void</span> sprite:<span class="function">stopAnimation</span>()
+            </div>
+            <p>Stop current animation and reset to first frame.</p>
+
+            <div class="api-signature">
+                <span class="return-type">void</span> vmupro.sprite.<span class="function">updateAnimations</span>(<span class="param">number deltaTime</span>)
+            </div>
+            <p><strong>CRITICAL:</strong> Must call every frame to advance animations. deltaTime in seconds.</p>
+
+            <h3>⚠️ CRITICAL: Sprite Cleanup</h3>
+            <div class="warning-box">
+                <strong>MUST CALL CLEANUP!</strong>
+                <p>You <strong>MUST</strong> call <code>vmupro.sprite.removeAll()</code> when your app exits or transitions scenes. Failing to do so causes memory leaks and eventual crashes.</p>
+
+                <div class="code-block">
+                    <pre><span class="comment">-- CRITICAL: Cleanup function</span>
+<span class="keyword">function</span> <span class="function">cleanup</span>()
+    vmupro.sprite.<span class="function">removeAll</span>()  <span class="comment">-- MUST DO THIS!</span>
+    <span class="comment">-- Also cleanup audio...</span>
+<span class="keyword">end</span></pre>
+                </div>
+            </div>
+
+            <h3>Best Practices</h3>
+            <ul class="feature-list">
+                <li>Always use <code>pcall</code> when loading sprites for error handling</li>
+                <li>Call <code>removeAll()</code> during cleanup/scene transitions</li>
+                <li>Use <code>drawScaled()</code> for distance-based scaling effects</li>
+                <li>Prefer BMP for memory efficiency when alpha isn't needed</li>
+                <li>Use PNG when smooth transparency is essential</li>
+                <li>Monitor memory usage with <code>getMemoryUsage()</code></li>
+            </ul>
+        </section>
+
+        <section id="audio-formats">
+            <h2>🔊 Audio Formats & Critical Warnings</h2>
+
+            <div class="warning-box">
+                <strong>🚨 CRASH WARNING: Sample-Based Audio</strong>
+                <p><strong>DO NOT USE SAMPLE-BASED AUDIO FORMATS (WAV, MP3, etc.)</strong></p>
+                <p>Loading or playing sample-based audio files will <strong>CRASH</strong> the VMU Pro device. This is a confirmed system limitation.</p>
+                <p><strong>Only use synth-based audio generation</strong> as documented in the Audio Synthesis section.</p>
+            </div>
+
+            <h3>Audio Lifecycle</h3>
+            <p>Proper audio system initialization and shutdown is critical:</p>
+
+            <div class="code-block">
+                <pre><span class="comment">-- 1. Initialize audio system</span>
+vmupro.sound.<span class="function">startListenMode</span>()
+
+<span class="comment">-- 2. Use audio functions (create synths, play notes, etc.)</span>
+<span class="comment">-- ... your audio code here ...</span>
+
+<span class="comment">-- 3. CRITICAL: Update audio every frame</span>
+vmupro.sound.<span class="function">update</span>()  <span class="comment">-- Call in your game loop!</span>
+
+<span class="comment">-- 4. Cleanup when done</span>
+vmupro.sound.<span class="function">exitListenMode</span>()</pre>
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ Required: Per-Frame Updates</strong>
+                <p>You <strong>MUST</strong> call <code>vmupro.sound.update()</code> every frame (typically in your main game loop). Without this, audio will not play correctly and may cause system issues.</p>
+            </div>
+
+            <h3>What Works vs. What Doesn't</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Audio Type</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Synth-based</strong></td>
+                        <td><span style="color: var(--success-color);">✓ WORKS</span></td>
+                        <td>Synthesizer waveforms, safe to use</td>
+                    </tr>
+                    <tr>
+                        <td><strong>WAV files</strong></td>
+                        <td><span style="color: var(--danger-color);">✗ CRASHES</span></td>
+                        <td>DO NOT USE - causes system crash</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MP3 files</strong></td>
+                        <td><span style="color: var(--danger-color);">✗ CRASHES</span></td>
+                        <td>DO NOT USE - causes system crash</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Other samples</strong></td>
+                        <td><span style="color: var(--danger-color);">✗ CRASHES</span></td>
+                        <td>Any sample-based format crashes</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Audio Synthesis System</h3>
+            <p>The VMU Pro SDK provides a powerful synthesizer-based audio system. See the <a href="#audio-synthesis" style="color: var(--accent-color);">Audio Synthesis</a> section for complete details on creating sound effects and music programmatically.</p>
+        </section>
+
+        <section id="audio-synthesis">
+            <h2>🎹 Audio Synthesis System</h2>
+
+            <h3>Wave Types</h3>
+            <p>The synthesizer supports four basic wave types:</p>
+
+            <div class="comparison-table">
+                <div class="comparison-card">
+                    <h4>kWaveNoise</h4>
+                    <ul>
+                        <li>White noise</li>
+                        <li>Explosions, impacts</li>
+                        <li>Wind, rain effects</li>
+                        <li>Rough textures</li>
+                    </ul>
+                </div>
+                <div class="comparison-card">
+                    <h4>kWaveSine</h4>
+                    <ul>
+                        <li>Pure tone</li>
+                        <li>Smooth, clean sound</li>
+                        <li>Pickup sounds</li>
+                        <li>Power-ups</li>
+                    </ul>
+                </div>
+                <div class="comparison-card">
+                    <h4>kWaveSawtooth</h4>
+                    <ul>
+                        <li>Sharp, brassy</li>
+                        <li>Rich harmonics</li>
+                        <li>Monster groans</li>
+                        <li>Sci-fi sounds</li>
+                    </ul>
+                </div>
+                <div class="comparison-card">
+                    <h4>kWaveSquare</h4>
+                    <ul>
+                        <li>Retro 8-bit style</li>
+                        <li>Video game sounds</li>
+                        <li>Electronic beeps</li>
+                        <li>Chiptune music</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>ADSR Envelope</h3>
+            <p>ADSR (Attack, Decay, Sustain, Release) controls how sound evolves over time:</p>
+
+            <div class="spec-grid">
+                <div class="spec-item">
+                    <div class="label">Attack</div>
+                    <div class="value">0.0-1.0s</div>
+                    <div class="label" style="margin-top: 5px;">Fade in time</div>
+                </div>
+                <div class="spec-item">
+                    <div class="label">Decay</div>
+                    <div class="value">0.0-1.0s</div>
+                    <div class="label" style="margin-top: 5px;">Fade to sustain</div>
+                </div>
+                <div class="spec-item">
+                    <div class="label">Sustain</div>
+                    <div class="value">0.0-1.0</div>
+                    <div class="label" style="margin-top: 5px;">Hold level</div>
+                </div>
+                <div class="spec-item">
+                    <div class="label">Release</div>
+                    <div class="value">0.0-1.0s</div>
+                    <div class="label" style="margin-top: 5px;">Fade out time</div>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <pre><span class="comment">-- ADSR visualization</span>
+<span class="comment">-- Volume</span>
+<span class="comment">--   ^    Attack   Decay</span>
+<span class="comment">--   |      /\      \</span>
+<span class="comment">-- 1.0|    /  \      \__________ Release</span>
+<span class="comment">--    |   /    \      \         \</span>
+<span class="comment">--    |  /      \___ Sustain \___</span>
+<span class="comment">-- 0.0|/                        \</span>
+<span class="comment">--    +---------------------------------> Time</span></pre>
+            </div>
+
+            <h3>Synthesizer API</h3>
+
+            <div class="api-signature">
+                <span class="return-type">synth</span> vmupro.sound.<span class="function">createSynth</span>(<span class="param">number waveType</span>)
+            </div>
+            <p>Creates a new synthesizer with specified wave type.</p>
+
+            <div class="api-signature">
+                <span class="return-type">void</span> vmupro.sound.<span class="function">setAttack</span>(<span class="param">synth s, number time</span>)
+            </div>
+            <p>Set attack time in seconds (0.0 to 1.0).</p>
+
+            <div class="api-signature">
+                <span class="return-type">void</span> vmupro.sound.<span class="function">setDecay</span>(<span class="param">synth s, number time</span>)
+            </div>
+            <p>Set decay time in seconds (0.0 to 1.0).</p>
+
+            <div class="api-signature">
+                <span class="return-type">void</span> vmupro.sound.<span class="function">setSustain</span>(<span class="param">synth s, number level</span>)
+            </div>
+            <p>Set sustain level (0.0 to 1.0).</p>
+
+            <div class="api-signature">
+                <span class="return-type">void</span> vmupro.sound.<span class="function">setRelease</span>(<span class="param">synth s, number time</span>)
+            </div>
+            <p>Set release time in seconds (0.0 to 1.0).</p>
+
+            <div class="api-signature">
+                <span class="return-type">void</span> vmupro.sound.<span class="function">setVolume</span>(<span class="param">synth s, number left, number right</span>)
+            </div>
+            <p>Set stereo volume (0.0 to 1.0 for each channel).</p>
+
+            <div class="api-signature">
+                <span class="return-type">void</span> vmupro.sound.<span class="function">playNote</span>(<span class="param">synth s, number frequency, number velocity, number length</span>)
+            </div>
+            <ul>
+                <li><code>frequency</code>: Pitch in Hz (e.g., 440 for A4)</li>
+                <li><code>velocity</code>: Volume/intensity (0.0 to 1.0)</li>
+                <li><code>length</code>: Duration in seconds</li>
+            </ul>
+
+            <h3>Frequency Reference Table</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Note</th>
+                        <th>Frequency (Hz)</th>
+                        <th>Use Case</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>C3</td>
+                        <td>130.81</td>
+                        <td>Bass, impacts</td>
+                    </tr>
+                    <tr>
+                        <td>C4 (Middle C)</td>
+                        <td>261.63</td>
+                        <td>Mid-range effects</td>
+                    </tr>
+                    <tr>
+                        <td>A4</td>
+                        <td>440.00</td>
+                        <td>Standard tuning pitch</td>
+                    </tr>
+                    <tr>
+                        <td>C5</td>
+                        <td>523.25</td>
+                        <td>High pickups, coins</td>
+                    </tr>
+                    <tr>
+                        <td>C6</td>
+                        <td>1046.50</td>
+                        <td>High alerts, beeps</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Basic Sound Example</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- Create a simple beep sound</span>
+<span class="keyword">local</span> beep = vmupro.sound.<span class="function">createSynth</span>(vmupro.sound.kWaveSine)
+vmupro.sound.<span class="function">setAttack</span>(beep, <span class="number">0.01</span>)
+vmupro.sound.<span class="function">setDecay</span>(beep, <span class="number">0.1</span>)
+vmupro.sound.<span class="function">setSustain</span>(beep, <span class="number">0.0</span>)
+vmupro.sound.<span class="function">setRelease</span>(beep, <span class="number">0.05</span>)
+vmupro.sound.<span class="function">setVolume</span>(beep, <span class="number">0.8</span>, <span class="number">0.8</span>)
+
+<span class="comment">-- Play the beep</span>
+vmupro.sound.<span class="function">playNote</span>(beep, <span class="number">440</span>, <span class="number">0.8</span>, <span class="number">0.2</span>)</pre>
+            </div>
+
+            <h3>Music: Creating Melodies</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- Simple melody using notes</span>
+<span class="keyword">local</span> melody = vmupro.sound.<span class="function">createSynth</span>(vmupro.sound.kWaveSquare)
+vmupro.sound.<span class="function">setAttack</span>(melody, <span class="number">0.01</span>)
+vmupro.sound.<span class="function">setDecay</span>(melody, <span class="number">0.05</span>)
+vmupro.sound.<span class="function">setSustain</span>(melody, <span class="number">0.3</span>)
+vmupro.sound.<span class="function">setRelease</span>(melody, <span class="number">0.1</span>)
+
+<span class="comment">-- Play a melody (timing in seconds)</span>
+<span class="keyword">local</span> notes = {
+    {freq = <span class="number">261.63</span>, dur = <span class="number">0.2</span>},  <span class="comment">-- C4</span>
+    {freq = <span class="number">293.66</span>, dur = <span class="number">0.2</span>},  <span class="comment">-- D4</span>
+    {freq = <span class="number">329.63</span>, dur = <span class="number">0.2</span>},  <span class="comment">-- E4</span>
+    {freq = <span class="number">349.23</span>, dur = <span class="number">0.4</span>}   <span class="comment">-- F4</span>
+}
+
+<span class="keyword">local</span> time = <span class="number">0</span>
+<span class="keyword">for</span> _, note <span class="keyword">in</span> <span class="function">ipairs</span>(notes) <span class="keyword">do</span>
+    vmupro.sound.<span class="function">playNote</span>(melody, note.freq, <span class="number">0.6</span>, note.dur)
+    time = time + note.dur
+<span class="keyword">end</span></pre>
+            </div>
+        </section>
+
+        <section id="real-image-examples">
+            <h2>📸 Real Image Code Examples</h2>
+
+            <h3>Sprite Loading with Error Handling</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- Real pattern from app.lua</span>
+<span class="keyword">local</span> playerSprite = <span class="keyword">nil</span>
+
+<span class="keyword">local</span> <span class="function">loadSprites</span>()
+    <span class="comment">-- Safe sprite loading with pcall</span>
+    <span class="keyword">local</span> success, result = <span class="function">pcall</span>(<span class="keyword">function</span>()
+        <span class="keyword">return</span> vmupro.sprite.<span class="function">new</span>(<span class="string">"assets/player.bmp"</span>)
+    <span class="keyword">end</span>)
+
+    <span class="keyword">if</span> success <span class="keyword">then</span>
+        playerSprite = result
+        <span class="function">print</span>(<span class="string">"Player sprite loaded successfully"</span>)
+    <span class="keyword">else</span>
+        <span class="function">print</span>(<span class="string">"Failed to load player sprite: "</span> .. result)
+    <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+            </div>
+
+            <h3>Animation Sequence Loading</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- Real example from app.lua: Loading animation frames</span>
+<span class="keyword">local</span> deathFrames = {}
+<span class="keyword">local</span> attackFrames = {}
+
+<span class="keyword">local</span> <span class="function">loadAnimations</span>()
+    <span class="comment">-- Load 7 death animation frames</span>
+    <span class="keyword">for</span> i = <span class="number">1</span>, <span class="number">7</span> <span class="keyword">do</span>
+        <span class="keyword">local</span> ok, frame = <span class="function">pcall</span>(vmupro.sprite.new, <span class="string">"anim/death_"</span> .. i .. <span class="string">".bmp"</span>)
+        <span class="keyword">if</span> ok <span class="keyword">then</span>
+            <span class="function">table.insert</span>(deathFrames, frame)
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">-- Load 9 attack animation frames</span>
+    <span class="keyword">for</span> i = <span class="number">1</span>, <span class="number">9</span> <span class="keyword">do</span>
+        <span class="keyword">local</span> ok, frame = <span class="function">pcall</span>(vmupro.sprite.new, <span class="string">"anim/attack_"</span> .. i .. <span class="string">".bmp"</span>)
+        <span class="keyword">if</span> ok <span class="keyword">then</span>
+            <span class="function">table.insert</span>(attackFrames, frame)
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+            </div>
+
+            <h3>Distance-Based Sprite Scaling (3D Raycaster)</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- Real example: Scale sprite based on distance for 3D effect</span>
+<span class="keyword">local</span> <span class="function">drawSprite3D</span>(sprite, x, y, distance)
+    <span class="comment">-- Calculate scale based on distance (closer = bigger)</span>
+    <span class="keyword">local</span> maxDist = <span class="number">400</span>
+    <span class="keyword">local</span> scale = <span class="function">math.max</span>(<span class="number">0.1</span>, <span class="number">1.0</span> - (distance / maxDist))
+
+    <span class="comment">-- Get sprite dimensions after scaling</span>
+    <span class="keyword">local</span> originalWidth = sprite.width
+    <span class="keyword">local</span> originalHeight = sprite.height
+    <span class="keyword">local</span> scaledWidth = originalWidth * scale
+    <span class="keyword">local</span> scaledHeight = originalHeight * scale
+
+    <span class="comment">-- Ground positioning: feet on ground</span>
+    <span class="comment">-- drawY = groundY - scaledHeight</span>
+    <span class="keyword">local</span> groundY = <span class="number">200</span>  <span class="comment">-- Ground level</span>
+    <span class="keyword">local</span> drawX = x - scaledWidth / <span class="number">2</span>  <span class="comment">-- Center horizontally</span>
+    <span class="keyword">local</span> drawY = groundY - scaledHeight  <span class="comment">-- Feet on ground!</span>
+
+    <span class="comment">-- Draw scaled sprite</span>
+    sprite:<span class="function">drawScaled</span>(drawX, drawY, scale)
+<span class="keyword">end</span></pre>
+            </div>
+
+            <div class="info-box">
+                <strong>💡 Ground Positioning Formula</strong>
+                <p>To make sprites appear to stand on the ground (not float), use:</p>
+                <code>drawY = groundY - scaledHeight</code>
+                <p>This ensures the sprite's feet align with the ground level, creating proper perspective.</p>
+            </div>
+
+            <h3>Sprite Cleanup Helper</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- Helper function to safely free sprite references</span>
+<span class="keyword">local</span> <span class="function">freeSpriteRef</span>(spriteRef)
+    <span class="keyword">if</span> spriteRef ~= <span class="keyword">nil</span> <span class="keyword">then</span>
+        vmupro.sprite.<span class="function">free</span>(spriteRef)
+        spriteRef = <span class="keyword">nil</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">-- Cleanup all animation frames</span>
+<span class="keyword">local</span> <span class="function">cleanupAnimations</span>()
+    <span class="keyword">for</span> _, frame <span class="keyword">in</span> <span class="function">ipairs</span>(deathFrames) <span class="keyword">do</span>
+        <span class="function">freeSpriteRef</span>(frame)
+    <span class="keyword">end</span>
+
+    <span class="keyword">for</span> _, frame <span class="keyword">in</span> <span class="function">ipairs</span>(attackFrames) <span class="keyword">do</span>
+        <span class="function">freeSpriteRef</span>(frame)
+    <span class="keyword">end</span>
+
+    deathFrames = {}
+    attackFrames = {}
+<span class="keyword">end</span></pre>
+            </div>
+
+            <h3>Animation Frame Cycling</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- Real example: Play animation with frame cycling</span>
+<span class="keyword">local</span> currentFrame = <span class="number">1</span>
+<span class="keyword">local</span> frameTimer = <span class="number">0</span>
+<span class="keyword">local</span> frameDelay = <span class="number">0.1</span>  <span class="comment">-- 10 frames per second</span>
+
+<span class="keyword">local</span> <span class="function">updateAnimation</span>(deltaTime)
+    frameTimer = frameTimer + deltaTime
+
+    <span class="keyword">if</span> frameTimer >= frameDelay <span class="keyword">then</span>
+        frameTimer = <span class="number">0</span>
+        currentFrame = currentFrame + <span class="number">1</span>
+
+        <span class="comment">-- Loop back to first frame</span>
+        <span class="keyword">if</span> currentFrame > #deathFrames <span class="keyword">then</span>
+            currentFrame = <span class="number">1</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="function">drawCurrentFrame</span>(x, y)
+    <span class="keyword">if</span> deathFrames[currentFrame] ~= <span class="keyword">nil</span> <span class="keyword">then</span>
+        deathFrames[currentFrame]:<span class="function">draw</span>(x, y)
+    <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+            </div>
+        </section>
+
+        <section id="real-audio-examples">
+            <h2>🎵 Real Audio Code Examples</h2>
+
+            <h3>Sword Swoosh Effect</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- Real example from app.lua</span>
+<span class="keyword">local</span> swordSound = vmupro.sound.<span class="function">createSynth</span>(vmupro.sound.kWaveNoise)
+vmupro.sound.<span class="function">setAttack</span>(swordSound, <span class="number">0.01</span>)   <span class="comment">-- Quick attack</span>
+vmupro.sound.<span class="function">setDecay</span>(swordSound, <span class="number">0.1</span>)    <span class="comment">-- Short decay</span>
+vmupro.sound.<span class="function">setSustain</span>(swordSound, <span class="number">0.2</span>)   <span class="comment">-- Some sustain</span>
+vmupro.sound.<span class="function">setRelease</span>(swordSound, <span class="number">0.05</span>)  <span class="comment">-- Quick release</span>
+vmupro.sound.<span class="function">setVolume</span>(swordSound, <span class="number">0.7</span>, <span class="number">0.7</span>)
+
+<span class="comment">-- Play sword swoosh at 400Hz</span>
+vmupro.sound.<span class="function">playNote</span>(swordSound, <span class="number">400</span>, <span class="number">0.8</span>, <span class="number">0.15</span>)</pre>
+            </div>
+
+            <h3>Death Groan Effect</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- Real example: Monster death sound</span>
+<span class="keyword">local</span> deathSound = vmupro.sound.<span class="function">createSynth</span>(vmupro.sound.kWaveSawtooth)
+vmupro.sound.<span class="function">setAttack</span>(deathSound, <span class="number">0.05</span>)   <span class="comment">-- Slower attack</span>
+vmupro.sound.<span class="function">setDecay</span>(deathSound, <span class="number">0.3</span>)    <span class="comment">-- Long decay</span>
+vmupro.sound.<span class="function">setSustain</span>(deathSound, <span class="number">0.1</span>)   <span class="comment">-- Low sustain</span>
+vmupro.sound.<span class="function">setRelease</span>(deathSound, <span class="number">0.2</span>)   <span class="comment">-- Longer release</span>
+vmupro.sound.<span class="function">setVolume</span>(deathSound, <span class="number">0.9</span>, <span class="number">0.9</span>)
+
+<span class="comment">-- Low pitch for death groan</span>
+vmupro.sound.<span class="function">playNote</span>(deathSound, <span class="number">80</span>, <span class="number">0.7</span>, <span class="number">0.6</span>)</pre>
+            </div>
+
+            <h3>Squish Effect</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- Real example: Squishing sound</span>
+<span class="keyword">local</span> squishSound = vmupro.sound.<span class="function">createSynth</span>(vmupro.sound.kWaveNoise)
+vmupro.sound.<span class="function">setAttack</span>(squishSound, <span class="number">0.01</span>)   <span class="comment">-- Instant attack</span>
+vmupro.sound.<span class="function">setDecay</span>(squishSound, <span class="number">0.15</span>)   <span class="comment">-- Short decay</span>
+vmupro.sound.<span class="function">setSustain</span>(squishSound, <span class="number">0.0</span>)   <span class="comment">-- No sustain</span>
+vmupro.sound.<span class="function">setRelease</span>(squishSound, <span class="number">0.05</span>)  <span class="comment">-- Quick release</span>
+vmupro.sound.<span class="function">setVolume</span>(squishSound, <span class="number">0.6</span>, <span class="number">0.6</span>)
+
+<span class="comment">-- Mid-range squish</span>
+vmupro.sound.<span class="function">playNote</span>(squishSound, <span class="number">200</span>, <span class="number">0.7</span>, <span class="number">0.1</span>)</pre>
+            </div>
+
+            <h3>Health Pickup Sound</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- Real example: Two-tone pickup sound</span>
+<span class="keyword">local</span> pickupSound = vmupro.sound.<span class="function">createSynth</span>(vmupro.sound.kWaveSine)
+vmupro.sound.<span class="function">setAttack</span>(pickupSound, <span class="number">0.01</span>)
+vmupro.sound.<span class="function">setDecay</span>(pickupSound, <span class="number">0.1</span>)
+vmupro.sound.<span class="function">setSustain</span>(pickupSound, <span class="number">0.3</span>)
+vmupro.sound.<span class="function">setRelease</span>(pickupSound, <span class="number">0.1</span>)
+vmupro.sound.<span class="function">setVolume</span>(pickupSound, <span class="number">0.8</span>, <span class="number">0.8</span>)
+
+<span class="comment">-- Play two notes for ascending effect</span>
+vmupro.sound.<span class="function">playNote</span>(pickupSound, <span class="number">300</span>, <span class="number">0.6</span>, <span class="number">0.1</span>)  <span class="comment">-- First note</span>
+vmupro.sound.<span class="function">playNote</span>(pickupSound, <span class="number">250</span>, <span class="number">0.6</span>, <span class="number">0.15</span>) <span class="comment">-- Second note (slightly lower)</span></pre>
+            </div>
+
+            <h3>Complete Audio System Setup</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- Real example: Complete audio initialization from app.lua</span>
+<span class="keyword">local</span> sounds = {}
+
+<span class="keyword">local</span> <span class="function">initAudio</span>()
+    <span class="comment">-- Start audio system</span>
+    vmupro.sound.<span class="function">startListenMode</span>()
+
+    <span class="comment">-- Create sound effects</span>
+    sounds.sword = <span class="function">createSwordSound</span>()
+    sounds.death = <span class="function">createDeathSound</span>()
+    sounds.squish = <span class="function">createSquishSound</span>()
+    sounds.pickup = <span class="function">createPickupSound</span>()
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="function">cleanupAudio</span>()
+    <span class="comment">-- Clean up all synths</span>
+    <span class="keyword">for</span> name, synth <span class="keyword">in</span> <span class="function">pairs</span>(sounds) <span class="keyword">do</span>
+        <span class="comment">-- Synths are cleaned up by exitListenMode</span>
+        sounds[name] = <span class="keyword">nil</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">-- Exit audio mode</span>
+    vmupro.sound.<span class="function">exitListenMode</span>()
+<span class="keyword">end</span>
+
+<span class="comment">-- In main game loop:</span>
+<span class="keyword">local</span> <span class="function">gameLoop</span>(deltaTime)
+    <span class="comment">-- CRITICAL: Update audio every frame</span>
+    vmupro.sound.<span class="function">update</span>()
+
+    <span class="comment">-- Rest of game logic...</span>
+<span class="keyword">end</span></pre>
+            </div>
+        </section>
+
+        <section id="memory">
+            <h2>💾 Memory & File Size Limitations</h2>
+
+            <h3>Memory Management Functions</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- Memory query functions</span>
+<span class="keyword">local</span> currentUsage = vmupro.<span class="function">getMemoryUsage</span>()      <span class="comment">-- Current memory used</span>
+<span class="keyword">local</span> memoryLimit = vmupro.<span class="function">getMemoryLimit</span>()        <span class="comment">-- Maximum available</span>
+<span class="keyword">local</span> largestFreeBlock = vmupro.<span class="function">getLargestFreeBlock</span>()  <span class="comment">-- Largest contiguous block</span></pre>
+            </div>
+
+            <div class="api-signature">
+                <span class="return-type">number</span> vmupro.<span class="function">getMemoryUsage</span>()
+            </div>
+            <p>Returns current memory usage in bytes.</p>
+
+            <div class="api-signature">
+                <span class="return-type">number</span> vmupro.<span class="function">getMemoryLimit</span>()
+            </div>
+            <p>Returns total available memory in bytes.</p>
+
+            <div class="api-signature">
+                <span class="return-type">number</span> vmupro.<span class="function">getLargestFreeBlock</span>()
+            </div>
+            <p>Returns size of largest free memory block. Critical for allocations!</p>
+
+            <h3>Display Specifications</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Specification</th>
+                        <th>Value</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Resolution</strong></td>
+                        <td>240×240 pixels</td>
+                        <td>Square display</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Color Format</strong></td>
+                        <td>RGB565</td>
+                        <td>16-bit color</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Frame Buffer</strong></td>
+                        <td>Double-buffered</td>
+                        <td>Prevents tearing</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Target FPS</strong></td>
+                        <td>60 FPS</td>
+                        <td>~16.67ms per frame</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Frame Budget</strong></td>
+                        <td>~16.67ms</td>
+                        <td>Total per-frame time</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Sprite Constraints</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Constraint</th>
+                        <th>Specification</th>
+                        <th>Impact</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Supported Formats</strong></td>
+                        <td>BMP, PNG only</td>
+                        <td>No JPG, GIF, etc.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>File Storage</strong></td>
+                        <td>Embedded in vmupack</td>
+                        <td>Must use packager</td>
+                    </tr>
+                    <tr>
+                        <td><strong>BMP Color Depth</strong></td>
+                        <td>16-bit RGB565</td>
+                        <td>2 bytes per pixel</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PNG Color Depth</strong></td>
+                        <td>32-bit RGBA8888</td>
+                        <td>4 bytes per pixel</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Icon Format</strong></td>
+                        <td>76×76 BMP only</td>
+                        <td>PNG not supported</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Audio Constraints</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Audio Type</th>
+                        <th>Status</th>
+                        <th>Consequence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Sample Audio</strong></td>
+                        <td><span style="color: var(--danger-color);">✗ CRASHES</span></td>
+                        <td>System crash, data loss</td>
+                    </tr>
+                    <tr>
+                        <td><strong>WAV Files</strong></td>
+                        <td><span style="color: var(--danger-color);">✗ CRASHES</span></td>
+                        <td>System crash, data loss</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MP3 Files</strong></td>
+                        <td><span style="color: var(--danger-color);">✗ CRASHES</span></td>
+                        <td>System crash, data loss</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Synth Audio</strong></td>
+                        <td><span style="color: var(--success-color);">✓ SAFE</span></td>
+                        <td>Recommended method</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Memory Fragmentation</h3>
+            <div class="warning-box">
+                <strong>⚠️ Critical Issue: Memory Fragmentation</strong>
+                <p>Memory fragmentation is a major concern on VMU Pro. Even if total free memory seems sufficient, allocations may fail if memory is fragmented into small blocks.</p>
+                <ul>
+                    <li><strong>Symptom:</strong> Allocations fail despite adequate free memory</li>
+                    <li><strong>Cause:</strong> Loading/unloading sprites creates memory holes</li>
+                    <li><strong>Solution:</strong> Load all sprites at startup, keep them resident</li>
+                    <li><strong>Monitor:</strong> Use <code>getLargestFreeBlock()</code> to check allocatable space</li>
+                </ul>
+            </div>
+
+            <div class="code-block">
+                <pre><span class="comment">-- Memory monitoring example</span>
+<span class="keyword">local</span> <span class="function">checkMemory</span>()
+    <span class="keyword">local</span> used = vmupro.<span class="function">getMemoryUsage</span>()
+    <span class="keyword">local</span> limit = vmupro.<span class="function">getMemoryLimit</span>()
+    <span class="keyword">local</span> largestBlock = vmupro.<span class="function">getLargestFreeBlock</span>()
+
+    <span class="function">print</span>(<span class="string">"Memory: "</span> .. used .. <span class="string">" / "</span> .. limit)
+    <span class="function">print</span>(<span class="string">"Largest free block: "</span> .. largestBlock)
+
+    <span class="keyword">if</span> largestBlock < <span class="number">10240</span> <span class="keyword">then</span>  <span class="comment">-- Less than 10KB</span>
+        <span class="function">print</span>(<span class="string">"WARNING: Low contiguous memory!"</span>)
+    <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+            </div>
+
+            <h3>Packager Limitations</h3>
+            <div class="info-box">
+                <strong>📦 vmupack Package System</strong>
+                <ul>
+                    <li>Sprites must be embedded in vmupack files</li>
+                    <li>Cannot load loose files from filesystem</li>
+                    <li>Package size affects load times</li>
+                    <li>Consider memory when creating packages</li>
+                </ul>
+            </div>
+
+            <h3>Best Practices for Memory Management</h3>
+            <ul class="feature-list">
+                <li>Monitor memory with <code>getMemoryUsage()</code> regularly</li>
+                <li>Check <code>getLargestFreeBlock()</code> before large allocations</li>
+                <li>Load all sprites at startup, avoid runtime loading</li>
+                <li>Always call <code>removeAll()</code> during cleanup</li>
+                <li>Prefer BMP over PNG when possible (half the memory)</li>
+                <li>Avoid frequent load/unload cycles (causes fragmentation)</li>
+                <li>Keep sound synths persistent (don't recreate)</li>
+            </ul>
+        </section>
+
+        <section id="best-practices">
+            <h2>✅ Best Practices & Common Pitfalls</h2>
+
+            <h3>Image Best Practices</h3>
+            <div class="success-box">
+                <strong>DO:</strong>
+                <ul>
+                    <li>Use BMP for memory efficiency when possible</li>
+                    <li>Use PNG only when smooth alpha is essential</li>
+                    <li>Always use <code>pcall</code> when loading sprites</li>
+                    <li>Load all sprites at startup to avoid fragmentation</li>
+                    <li>Call <code>vmupro.sprite.removeAll()</code> on cleanup</li>
+                    <li>Pre-free memory with <code>getLargestFreeBlock()</code> checks</li>
+                    <li>Use proper ground positioning for 3D effects</li>
+                    <li>Keep sprite dimensions power-of-2 when possible</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <strong>DON'T:</strong>
+                <ul>
+                    <li>Don't use PNG for icons (BMP required)</li>
+                    <li>Don't load sprites mid-game (causes fragmentation)</li>
+                    <li>Don't forget to clean up sprites</li>
+                    <li>Don't ignore memory warnings</li>
+                    <li>Don't use other image formats (JPG, GIF, etc.)</li>
+                    <li>Don't assume all loads will succeed</li>
+                </ul>
+            </div>
+
+            <h3>Audio Best Practices</h3>
+            <div class="success-box">
+                <strong>DO:</strong>
+                <ul>
+                    <li>Use synth-based audio exclusively</li>
+                    <li>Call <code>vmupro.sound.update()</code> every frame</li>
+                    <li>Create persistent synths at startup</li>
+                    <li>Use <code>startListenMode()</code> before audio</li>
+                    <li>Call <code>exitListenMode()</code> on cleanup</li>
+                    <li>Experiment with ADSR for better sounds</li>
+                    <li>Use different wave types for variety</li>
+                    <li>Set stereo volume for spatial effects</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <strong>🚨 CRITICAL: DON'T</strong>
+                <ul>
+                    <li><strong>NEVER use sample-based audio (WAV, MP3)</strong></li>
+                    <li>Don't forget per-frame updates</li>
+                    <li>Don't create synths in game loop</li>
+                    <li>Don't use extremely high frequencies (>2000 Hz)</li>
+                    <li>Don't set volume above 1.0</li>
+                    <li>Don't skip audio initialization</li>
+                </ul>
+            </div>
+
+            <h3>Common Pitfalls</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pitfall</th>
+                        <th>Symptom</th>
+                        <th>Solution</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Forgetting removeAll()</strong></td>
+                        <td>Memory leak, eventual crash</td>
+                        <td>Always call on cleanup/transition</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Not calling sound.update()</strong></td>
+                        <td>No audio playback</td>
+                        <td>Add to main game loop</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Using sample audio</strong></td>
+                        <td>Immediate system crash</td>
+                        <td>Use synth only</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Runtime sprite loading</strong></td>
+                        <td>Memory fragmentation</td>
+                        <td>Load all at startup</td>
+                    </tr>
+                    <tr>
+                        <td><strong>No pcall on load</strong></td>
+                        <td>Unhandled crashes</td>
+                        <td>Wrap loads in pcall</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ignoring largestFreeBlock</strong></td>
+                        <td>Allocation failures</td>
+                        <td>Check before big allocs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Wrong icon format</strong></td>
+                        <td>Icon not displayed</td>
+                        <td>Use 76×76 BMP</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Recommended Development Workflow</h3>
+            <div class="code-block">
+                <pre><span class="comment">-- 1. Initialization phase</span>
+<span class="keyword">function</span> <span class="function">init</span>()
+    <span class="comment">-- Start audio</span>
+    vmupro.sound.<span class="function">startListenMode</span>()
+
+    <span class="comment">-- Check memory</span>
+    <span class="keyword">local</span> memAvailable = vmupro.<span class="function">getLargestFreeBlock</span>()
+    <span class="function">print</span>(<span class="string">"Available: "</span> .. memAvailable .. <span class="string">" bytes"</span>)
+
+    <span class="comment">-- Load all sprites</span>
+    <span class="function">loadAllSprites</span>()
+
+    <span class="comment">-- Create all synths</span>
+    <span class="function">createAllSounds</span>()
+<span class="keyword">end</span>
+
+<span class="comment">-- 2. Main game loop</span>
+<span class="keyword">function</span> <span class="function">update</span>(deltaTime)
+    <span class="comment">-- CRITICAL: Update audio</span>
+    vmupro.sound.<span class="function">update</span>()
+
+    <span class="comment">-- Update animations</span>
+    vmupro.sprite.<span class="function">updateAnimations</span>(deltaTime)
+
+    <span class="comment">-- Game logic...</span>
+<span class="keyword">end</span>
+
+<span class="comment">-- 3. Cleanup phase</span>
+<span class="keyword">function</span> <span class="function">cleanup</span>()
+    <span class="comment">-- Remove all sprites</span>
+    vmupro.sprite.<span class="function">removeAll</span>()
+
+    <span class="comment">-- Exit audio mode</span>
+    vmupro.sound.<span class="function">exitListenMode</span>()
+
+    <span class="comment">-- Verify cleanup</span>
+    <span class="function">print</span>(<span class="string">"Cleanup complete"</span>)
+<span class="keyword">end</span></pre>
+            </div>
+
+            <h3>Quick Reference Checklist</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Required Call</th>
+                        <th>When</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Start Audio</strong></td>
+                        <td><code>vmupro.sound.startListenMode()</code></td>
+                        <td>Initialization</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Update Audio</strong></td>
+                        <td><code>vmupro.sound.update()</code></td>
+                        <td>Every frame</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Update Animations</strong></td>
+                        <td><code>vmupro.sprite.updateAnimations(dt)</code></td>
+                        <td>Every frame</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cleanup Sprites</strong></td>
+                        <td><code>vmupro.sprite.removeAll()</code></td>
+                        <td>Cleanup/transition</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Stop Audio</strong></td>
+                        <td><code>vmupro.sound.exitListenMode()</code></td>
+                        <td>Cleanup</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Check Memory</strong></td>
+                        <td><code>vmupro.getLargestFreeBlock()</code></td>
+                        <td>Before allocations</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <footer>
+            <p>VMU Pro SDK Image & Audio Format Documentation</p>
+            <p>Compiled from SDK research and real application examples</p>
+            <p style="margin-top: 20px; font-size: 0.9em;">
+                Remember: Sample audio crashes, use synth only | Always cleanup sprites | Monitor memory fragmentation
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

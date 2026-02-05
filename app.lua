@@ -7,6 +7,82 @@ import "api/input"
 import "api/sprites"
 import "api/audio"
 
+-- Safety Check Functions
+local function safeLog(level, message)
+    if vmupro.system.log then
+        vmupro.system.log(level, "[SAFETY] " .. message)
+    else
+        print("[SAFETY " .. level .. "] " .. message)
+    end
+end
+
+local function validateSprite(sprite, context)
+    if not sprite then
+        safeLog("ERROR", "Sprite is nil in context: " .. (context or "unknown"))
+        return false
+    end
+    if not sprite.width or not sprite.height then
+        safeLog("ERROR", "Sprite missing width/height in context: " .. (context or "unknown"))
+        return false
+    end
+    if sprite.width <= 0 or sprite.height <= 0 then
+        safeLog("ERROR", "Sprite has invalid dimensions in context: " .. (context or "unknown") ..
+               " width=" .. tostring(sprite.width) .. " height=" .. tostring(sprite.height))
+        return false
+    end
+    return true
+end
+
+local function validateTextureDimensions(sprite, context)
+    if not validateSprite(sprite, context) then
+        return false
+    end
+    if sprite.width > 2048 or sprite.height > 2048 then
+        safeLog("WARN", "Texture dimensions may be too large in context: " .. (context or "unknown") ..
+               " width=" .. tostring(sprite.width) .. " height=" .. tostring(sprite.height))
+    end
+    return true
+end
+
+local function safeDivide(value, divisor, context)
+    if divisor == 0 then
+        safeLog("ERROR", "Division by zero in context: " .. (context or "unknown") ..
+               " value=" .. tostring(value) .. " divisor=0")
+        return 0
+    end
+    return value / divisor
+end
+
+local function checkArrayBounds(array, index, context)
+    if not array then
+        safeLog("ERROR", "Array is nil in context: " .. (context or "unknown"))
+        return false
+    end
+    local length = #array
+    if index < 1 or index > length then
+        safeLog("ERROR", "Array index out of bounds in context: " .. (context or "unknown") ..
+               " index=" .. tostring(index) .. " length=" .. tostring(length))
+        return false
+    end
+    return true
+end
+
+local function safeScale(sprite, scaleX, scaleY, context)
+    if not validateSprite(sprite, context) then
+        return false
+    end
+    if type(scaleX) ~= "number" or type(scaleY) ~= "number" then
+        safeLog("ERROR", "Scale values are not numbers in context: " .. (context or "unknown") ..
+               " scaleX=" .. tostring(scaleX) .. " scaleY=" .. tostring(scaleY))
+        return false
+    end
+    if scaleX < 0 or scaleY < 0 then
+        safeLog("WARN", "Negative scale values in context: " .. (context or "unknown") ..
+               " scaleX=" .. tostring(scaleX) .. " scaleY=" .. tostring(scaleY))
+    end
+    return true
+end
+
 -- Colors (RGB565 little-endian)
 local COLOR_BLACK = 0x0000
 local COLOR_WHITE = 0xFFFF
@@ -216,6 +292,11 @@ local function wallQuadLog(msg)
     if DEBUG_WALL_QUADS_LOG and wallQuadLogCount < 30 then
         print(msg)
         wallQuadLogCount = wallQuadLogCount + 1
+    end
+end
+local function renderLog(msg)
+    if DEBUG_WALL_QUADS_LOG then
+        print("[RENDER] " .. msg)
     end
 end
 local STATE_TITLE = 0
@@ -442,6 +523,10 @@ end
 local function loadMenuSprites()
     if not titleSprite then
         titleSprite = vmupro.sprite.new("sprites/title")
+        if not validateSprite(titleSprite, "loadMenuSprites") then
+            safeLog("ERROR", "Failed to load title sprite")
+            titleSprite = nil
+        end
     end
 end
 
@@ -452,13 +537,22 @@ local function loadLevelSprites(levelId)
 
     if assets.warrior then
         warriorFront = vmupro.sprite.new(base .. "warrior_front")
+        if not validateSprite(warriorFront, "warriorFront") then warriorFront = nil end
         warriorBack = vmupro.sprite.new(base .. "warrior_back")
+        if not validateSprite(warriorBack, "warriorBack") then warriorBack = nil end
         warriorLeft = vmupro.sprite.new(base .. "warrior_left")
+        if not validateSprite(warriorLeft, "warriorLeft") then warriorLeft = nil end
         warriorRight = vmupro.sprite.new(base .. "warrior_right")
+        if not validateSprite(warriorRight, "warriorRight") then warriorRight = nil end
         warriorWalk1 = vmupro.sprite.new(base .. "warrior_walk1")
+        if not validateSprite(warriorWalk1, "warriorWalk1") then warriorWalk1 = nil end
         warriorWalk2 = vmupro.sprite.new(base .. "warrior_walk2")
+        if not validateSprite(warriorWalk2, "warriorWalk2") then warriorWalk2 = nil end
         local okWalkFront1, spriteWalkFront1 = pcall(vmupro.sprite.new, base .. "warrior_walk1_front")
-        if okWalkFront1 then warriorWalk1Front = spriteWalkFront1 end
+        if okWalkFront1 then
+            warriorWalk1Front = spriteWalkFront1
+            if not validateSprite(warriorWalk1Front, "warriorWalk1Front") then warriorWalk1Front = nil end
+        end
         local okWalkFront2, spriteWalkFront2 = pcall(vmupro.sprite.new, base .. "warrior_walk2_front")
         if okWalkFront2 then warriorWalk2Front = spriteWalkFront2 end
         local okWalkFront3, spriteWalkFront3 = pcall(vmupro.sprite.new, base .. "warrior_walk3_front")
@@ -482,6 +576,9 @@ local function loadLevelSprites(levelId)
             local okDeath, spriteDeath = pcall(vmupro.sprite.new, base .. "warrior_death" .. tostring(i))
             if okDeath then
                 warriorDeath[i] = spriteDeath
+                if not validateSprite(warriorDeath[i], "warriorDeath" .. tostring(i)) then
+                    warriorDeath[i] = nil
+                end
             end
         end
 
@@ -490,6 +587,9 @@ local function loadLevelSprites(levelId)
             local okAttack, spriteAttack = pcall(vmupro.sprite.new, base .. "sword_attack" .. tostring(i))
             if okAttack then
                 swordAttack[i] = spriteAttack
+                if not validateSprite(swordAttack[i], "swordAttack" .. tostring(i)) then
+                    swordAttack[i] = nil
+                end
             end
         end
 
@@ -511,19 +611,154 @@ local function loadLevelSprites(levelId)
 
     if assets.knight then
         knightFront = vmupro.sprite.new(base .. "knight_front")
+        if not validateSprite(knightFront, "knightFront") then knightFront = nil end
         knightBack = vmupro.sprite.new(base .. "knight_back")
+        if not validateSprite(knightBack, "knightBack") then knightBack = nil end
         knightLeft = vmupro.sprite.new(base .. "knight_left")
+        if not validateSprite(knightLeft, "knightLeft") then knightLeft = nil end
         knightRight = vmupro.sprite.new(base .. "knight_right")
+        if not validateSprite(knightRight, "knightRight") then knightRight = nil end
     end
 
     if assets.potion then
         potionSprite = vmupro.sprite.new(base .. "potion")
+        if not validateSprite(potionSprite, "potionSprite") then potionSprite = nil end
     end
-    wallStone = vmupro.sprite.new("sprites/wall_textures/stone")
-    wallBrick = vmupro.sprite.new("sprites/wall_textures/brick")
-    wallMoss = vmupro.sprite.new("sprites/wall_textures/moss")
-    wallMetal = vmupro.sprite.new("sprites/wall_textures/metal")
-    wallWood = vmupro.sprite.new("sprites/wall_textures/wood")
+    -- Load wall textures with validation
+    wallStone = loadTextureWithValidation("sprites/wall_textures/stone", "stone")
+    wallBrick = loadTextureWithValidation("sprites/wall_textures/brick", "brick")
+    wallMoss = loadTextureWithValidation("sprites/wall_textures/moss", "moss")
+    wallMetal = loadTextureWithValidation("sprites/wall_textures/metal", "metal")
+    wallWood = loadTextureWithValidation("sprites/wall_textures/wood", "wood")
+
+    -- Log total texture memory usage
+    logTextureMemoryUsage()
+end
+
+-- Texture metadata structure
+local textureMetadata = {}
+
+-- Load texture with dimension validation and error handling
+local function loadTextureWithValidation(path, textureName)
+    local success, sprite = pcall(function()
+        return vmupro.sprite.new(path)
+    end)
+
+    if not success then
+        vmupro.log.error("TextureLoader", string.format(
+            "Failed to load texture '%s' from path: %s. Error: %s",
+            textureName, path, tostring(sprite)
+        ))
+        return nil
+    end
+
+    if not sprite then
+        vmupro.log.error("TextureLoader", string.format(
+            "Texture '%s' returned nil from path: %s",
+            textureName, path
+        ))
+        return nil
+    end
+
+    -- Get texture dimensions
+    local width = sprite:getWidth()
+    local height = sprite:getHeight()
+
+    if not width or not height or width <= 0 or height <= 0 then
+        vmupro.log.error("TextureLoader", string.format(
+            "Texture '%s' has invalid dimensions: %dx%d (path: %s)",
+            textureName, width or 0, height or 0, path
+        ))
+        safeLog("ERROR", string.format(
+            "Texture '%s' failed validation: width=%s, height=%s, path=%s",
+            textureName, tostring(width), tostring(height), path
+        ))
+        return nil
+    end
+
+    -- Additional validation with safety function
+    if not validateTextureDimensions(sprite, "loadTextureWithValidation:" .. textureName) then
+        return nil
+    end
+
+    -- Store metadata
+    textureMetadata[textureName] = {
+        path = path,
+        width = width,
+        height = height,
+        pixelCount = width * height,
+        loaded = true
+    }
+
+    -- Log successful load with dimensions
+    vmupro.log.info("TextureLoader", string.format(
+        "Loaded texture '%s': %dx%d (%d pixels) from %s",
+        textureName, width, height, width * height, path
+    ))
+
+    return sprite
+end
+
+-- Validate texture dimensions meet minimum requirements
+local function validateTextureDimensions(textureName, minWidth, minHeight)
+    local metadata = textureMetadata[textureName]
+
+    if not metadata then
+        vmupro.log.warning("TextureValidator", string.format(
+            "Cannot validate texture '%s': no metadata found",
+            textureName
+        ))
+        return false
+    end
+
+    if metadata.width < minWidth or metadata.height < minHeight then
+        vmupro.log.error("TextureValidator", string.format(
+            "Texture '%s' (%dx%d) does not meet minimum size requirements (%dx%d)",
+            textureName, metadata.width, metadata.height, minWidth, minHeight
+        ))
+        return false
+    end
+
+    vmupro.log.info("TextureValidator", string.format(
+        "Texture '%s' dimension validation passed: %dx%d >= %dx%d",
+        textureName, metadata.width, metadata.height, minWidth, minHeight
+    ))
+
+    return true
+end
+
+-- Log total texture memory usage
+local function logTextureMemoryUsage()
+    local totalPixels = 0
+    local textureCount = 0
+
+    for name, metadata in pairs(textureMetadata) do
+        if metadata.loaded then
+            totalPixels = totalPixels + metadata.pixelCount
+            textureCount = textureCount + 1
+        end
+    end
+
+    -- Estimate memory (assuming 2 bytes per pixel for RGB565)
+    local estimatedBytes = totalPixels * 2
+    local estimatedKB = estimatedBytes / 1024
+
+    vmupro.log.info("TextureLoader", string.format(
+        "Texture memory summary: %d textures, %d total pixels, ~%.2f KB",
+        textureCount, totalPixels, estimatedKB
+    ))
+
+    return {
+        textureCount = textureCount,
+        totalPixels = totalPixels,
+        estimatedBytes = estimatedBytes,
+        estimatedKB = estimatedKB
+    }
+end
+
+-- Get texture metadata
+local function getTextureMetadata(textureName)
+    return textureMetadata[textureName]
 end
 
 local function freeSynthRef(synth)
@@ -663,8 +898,10 @@ end
 
 -- Soldier AI: patrol, chase, and attack
 local function updateSoldiers()
-    for i = 1, #sprites do
-        local s = sprites[i]
+    if checkArrayBounds(sprites, 1, "updateSoldiers") then
+        for i = 1, #sprites do
+            if checkArrayBounds(sprites, i, "updateSoldiers") then
+                local s = sprites[i]
         if s.t == 5 and s.speed then  -- Warriors with movement data
             -- Skip dead soldiers
             if s.alive == false then
@@ -811,7 +1048,9 @@ local function updateSoldiers()
                 end
             end
             ::continue::
+            end
         end
+    end
     end
 end
 
@@ -830,8 +1069,10 @@ local function updateSwipeEffects()
 end
 
 local function updateDeathAnimations()
-    for i = 1, #sprites do
-        local s = sprites[i]
+    if checkArrayBounds(sprites, 1, "updateDeathAnimations") then
+        for i = 1, #sprites do
+            if checkArrayBounds(sprites, i, "updateDeathAnimations") then
+                local s = sprites[i]
         if s.t == 5 and s.dying then
             if #warriorDeath == 0 then
                 s.dying = false
@@ -881,6 +1122,9 @@ local function drawSwipeEffects()
             vmupro.graphics.drawLine(math.floor(x1), math.floor(y1),
                                      math.floor(x2), math.floor(y2), color)
         end
+          end
+        end
+    end
     end
 end
 
@@ -984,8 +1228,10 @@ end
 -- Check for health vial pickups
 local function checkHealthPickups()
     local pickupRange = 0.8  -- Distance to pick up vial
-    for i = 1, #sprites do
-        local s = sprites[i]
+    if checkArrayBounds(sprites, 1, "checkHealthPickups") then
+        for i = 1, #sprites do
+            if checkArrayBounds(sprites, i, "checkHealthPickups") then
+                local s = sprites[i]
         if s.t == 7 and not s.collected then
             local dx = s.x - px
             local dy = s.y - py
@@ -1001,7 +1247,9 @@ local function checkHealthPickups()
                     vmupro.sound.synth.playNote(gulpSynth, 250, 0.6, 0.15)
                 end
             end
+          end
         end
+    end
     end
 end
 
@@ -1174,8 +1422,10 @@ end
 
 -- Collision detection for sprites
 local function collidesWithSprite(nx, ny)
-    for i = 1, #sprites do
-        local s = sprites[i]
+    if checkArrayBounds(sprites, 1, "collidesWithSprite") then
+        for i = 1, #sprites do
+            if checkArrayBounds(sprites, i, "collidesWithSprite") then
+                local s = sprites[i]
         if s.t == 5 and (s.dying or s.dead) then
             goto continue_collide
         end
@@ -1188,6 +1438,9 @@ local function collidesWithSprite(nx, ny)
             return true
         end
         ::continue_collide::
+            end
+        end
+    end
     end
     return false
 end
@@ -1224,20 +1477,108 @@ local function drawWallTexture(wtype, side, sx, y1, y2)
         sprite = wallWood
     end
 
-    if sprite and sprite.width and sprite.height then
-        local wallH = y2 - y1
-        if wallH <= 0 then return end
-        local scaleX = 4 / sprite.width
-        local tileH = sprite.height
-        local fullTiles = math.floor(wallH / tileH)
-        local remainder = wallH - fullTiles * tileH
-        local drawY = y1
-        for i = 1, fullTiles do
-            vmupro.sprite.drawScaled(sprite, sx, drawY, scaleX, 1.0, vmupro.sprite.kImageUnflipped)
-            drawY = drawY + tileH
+    -- Safety check: sprite must exist
+    if not sprite then
+        renderLog("drawWallTexture: No sprite for wtype=" .. tostring(wtype))
+        return
+    end
+
+    -- Safety check: sprite dimensions must be valid
+    if not sprite.width or not sprite.height then
+        renderLog("drawWallTexture: Invalid sprite dimensions for wtype=" .. tostring(wtype))
+        return
+    end
+
+    local texW, texH = sprite.width, sprite.height
+    renderLog("drawWallTexture: wtype=" .. tostring(wtype) .. " texW=" .. tostring(texW) .. " texH=" .. tostring(texH))
+
+    -- Safety check: wall height must be positive
+    local wallH = y2 - y1
+    if wallH <= 0 then
+        renderLog("drawWallTexture: Invalid wall height (y1=" .. tostring(y1) .. " y2=" .. tostring(y2) .. ")")
+        return
+    end
+
+    -- Detect texture size and compute appropriate scale
+    local scaleX = 1.0
+    local validTexture = false
+
+    -- Supported texture sizes with their scale factors
+    if texW == 128 and texH == 256 then
+        -- Vertical texture (128x256) - standard wall
+        scaleX = 4 / texW  -- Scale to 4 pixels wide
+        validTexture = true
+        renderLog("drawWallTexture: 128x256 texture detected, scaleX=" .. tostring(scaleX))
+    elseif texW == 256 and texH == 128 then
+        -- Horizontal texture (256x128) - wide wall
+        scaleX = 4 / texW  -- Scale to 4 pixels wide
+        validTexture = true
+        renderLog("drawWallTexture: 256x128 texture detected, scaleX=" .. tostring(scaleX))
+    elseif texW == 128 and texH == 128 then
+        -- Square texture (128x128)
+        scaleX = 4 / texW  -- Scale to 4 pixels wide
+        validTexture = true
+        renderLog("drawWallTexture: 128x128 texture detected, scaleX=" .. tostring(scaleX))
+    else
+        -- Unknown texture size - log error
+        renderLog("drawWallTexture: ERROR - Unsupported texture size " .. tostring(texW) .. "x" .. tostring(texH))
+        return
+    end
+
+    -- Safety check: validate scaleX value
+    if scaleX <= 0 or scaleX ~= scaleX or scaleX == math.huge or scaleX == -math.huge then
+        renderLog("drawWallTexture: ERROR - Invalid scaleX value: " .. tostring(scaleX))
+        return
+    end
+
+    -- Tile vertically
+    local tileH = texH
+    local fullTiles = math.floor(wallH / tileH)
+    local remainder = wallH - (fullTiles * tileH)
+
+    renderLog("drawWallTexture: wallH=" .. tostring(wallH) .. " tileH=" .. tostring(tileH) .. " fullTiles=" .. tostring(fullTiles) .. " remainder=" .. tostring(remainder))
+
+    -- Safety check: ensure fullTiles is reasonable
+    if fullTiles < 0 or fullTiles > 1000 then
+        renderLog("drawWallTexture: ERROR - Invalid fullTiles count: " .. tostring(fullTiles))
+        return
+    end
+
+    local drawY = y1
+    for i = 1, fullTiles do
+        -- Safety check: verify drawY is within screen bounds
+        if drawY < 0 or drawY > 240 then
+            renderLog("drawWallTexture: WARNING - drawY out of bounds: " .. tostring(drawY))
         end
-        if remainder > 0 then
-            local scaleY = remainder / tileH
+
+        -- Safety check: verify coordinates are valid
+        if sx < 0 or sx > 400 then
+            renderLog("drawWallTexture: WARNING - sx out of bounds: " .. tostring(sx))
+        end
+
+        if safeScale(sprite, scaleX, 1.0, "drawWallTexture") then
+            vmupro.sprite.drawScaled(sprite, sx, drawY, scaleX, 1.0, vmupro.sprite.kImageUnflipped)
+        end
+        drawY = drawY + tileH
+    end
+
+    if remainder > 0 then
+        local scaleY = remainder / tileH
+
+        -- Safety check: validate scaleY value
+        if scaleY <= 0 or scaleY > 1.0 or scaleY ~= scaleY or scaleY == math.huge or scaleY == -math.huge then
+            renderLog("drawWallTexture: ERROR - Invalid scaleY value: " .. tostring(scaleY))
+            return
+        end
+
+        renderLog("drawWallTexture: Drawing remainder tile with scaleY=" .. tostring(scaleY))
+
+        -- Safety check: verify drawY is within screen bounds
+        if drawY < 0 or drawY > 240 then
+            renderLog("drawWallTexture: WARNING - drawY out of bounds for remainder: " .. tostring(drawY))
+        end
+
+        if safeScale(sprite, scaleX, scaleY, "drawWallTexture_remainder") then
             vmupro.sprite.drawScaled(sprite, sx, drawY, scaleX, scaleY, vmupro.sprite.kImageUnflipped)
         end
     end
@@ -1313,9 +1654,11 @@ local function renderWallQuads()
                     wallQuadLog("WQ missing sprite for type " .. tostring(wtile.t))
                 end
                 if sprite and sprite.height then
-                    local scale = h / sprite.height
+                    local scale = safeDivide(h, sprite.height, "renderWallQuad")
                     local drawX = screenX - math.floor((sprite.width * scale) / 2)
-                    vmupro.sprite.drawScaled(sprite, drawX, y1, scale, scale, vmupro.sprite.kImageUnflipped)
+                    if safeScale(sprite, scale, scale, "renderWallQuad") then
+                        vmupro.sprite.drawScaled(sprite, drawX, y1, scale, scale, vmupro.sprite.kImageUnflipped)
+                    end
                 end
             end
         end
@@ -1478,14 +1821,16 @@ local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData
             local sprite = warriorDeath[math.min(frameIndex, #warriorDeath)]
             if sprite and sprite.height then
                 local desiredHeight = size
-                local scale = desiredHeight / sprite.height
+                local scale = safeDivide(desiredHeight, sprite.height, "renderWarriorDeath")
                 local scaledWidth = sprite.width * scale
                 local scaledHeight = sprite.height * scale
                 local drawX = screenX - math.floor(scaledWidth / 2)
                 local groundY = HORIZON + size
                 if groundY > 240 then groundY = 240 end
                 local drawY = groundY - math.floor(scaledHeight)
-                vmupro.sprite.drawScaled(sprite, drawX, drawY, scale, scale, vmupro.sprite.kImageUnflipped)
+                if safeScale(sprite, scale, scale, "renderWarriorDeath") then
+                    vmupro.sprite.drawScaled(sprite, drawX, drawY, scale, scale, vmupro.sprite.kImageUnflipped)
+                end
             end
             return
         end
@@ -1523,7 +1868,7 @@ local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData
 
             if sprite and sprite.height then
                 local desiredHeight = size
-                local scale = desiredHeight / sprite.height
+                local scale = safeDivide(desiredHeight, sprite.height, "renderScale")
                 local scaledWidth = sprite.width * scale
                 local scaledHeight = sprite.height * scale
                 local drawX = screenX - math.floor(scaledWidth / 2)
@@ -1681,7 +2026,7 @@ local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData
         if sprite and sprite.height then
             -- Calculate scale to fit desired height on screen
             local desiredHeight = size  -- size is based on distance
-            local scale = desiredHeight / sprite.height
+            local scale = safeDivide(desiredHeight, sprite.height, "renderScale")
 
             -- Calculate draw position (centered horizontally)
             local scaledWidth = sprite.width * scale
@@ -1755,7 +2100,7 @@ local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData
         if sprite and sprite.height then
             -- Calculate scale to fit desired height on screen
             local desiredHeight = size  -- size is based on distance
-            local scale = desiredHeight / sprite.height
+            local scale = safeDivide(desiredHeight, sprite.height, "renderScale")
 
             -- Calculate draw position (centered horizontally)
             local scaledWidth = sprite.width * scale

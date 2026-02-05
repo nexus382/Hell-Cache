@@ -1,0 +1,9 @@
+{
+    "Lua.workspace.library": [
+        "g:\\vmupro-game-extras\\documentation\\sdk\\api"
+    ],
+    "Lua.diagnostics.globals": [
+        "vmupro",
+        "AppMain"
+    ]
+}
