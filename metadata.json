@@ -94,11 +94,17 @@
     "sprites/level2/sword_attack9.png",
     "sprites/level2/potion.png",
     "sprites/title.png",
-    "sounds/intro_45sec.wav",
+    "sounds/inner_sanctum_44k1_adpcm_stereo.wav",
+    "sounds/intro_source_44k1_adpcm_stereo.wav",
     "sprites/wall_textures/stone.png",
+    "sprites/wall_textures/stone-table-1-128.png",
     "sprites/wall_textures/brick.png",
+    "sprites/wall_textures/brick-table-1-128.png",
     "sprites/wall_textures/moss.png",
+    "sprites/wall_textures/moss-table-1-128.png",
     "sprites/wall_textures/metal.png",
-    "sprites/wall_textures/wood.png"
+    "sprites/wall_textures/metal-table-1-128.png",
+    "sprites/wall_textures/wood.png",
+    "sprites/wall_textures/wood-table-1-128.png"
   ]
 }
