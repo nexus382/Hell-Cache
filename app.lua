@@ -155,6 +155,7 @@ local selectedLevel = 1
 local MAX_LEVEL = #LEVELS
 local map = nil
 local sprites = nil
+local wallTiles = nil
 
 local sinTable = {}
 local cosTable = {}
@@ -208,10 +209,20 @@ local wallBrick = nil
 local wallMoss = nil
 local wallMetal = nil
 local wallWood = nil
+local USE_WALL_QUADS = true
+local DEBUG_WALL_QUADS_LOG = true
+local wallQuadLogCount = 0
+local function wallQuadLog(msg)
+    if DEBUG_WALL_QUADS_LOG and wallQuadLogCount < 30 then
+        print(msg)
+        wallQuadLogCount = wallQuadLogCount + 1
+    end
+end
 local STATE_TITLE = 0
 local STATE_PLAYING = 1
 local STATE_GAME_OVER = 2
 local STATE_WIN = 3
+local STATE_LOADING = 4
 local gameState = STATE_TITLE
 local titleSelection = 1  -- 1=Start, 2=Options, 3=Exit
 local titleInOptions = false
@@ -223,6 +234,16 @@ local levelBannerTimer = 0
 local levelBannerMax = 150
 local winBannerTimer = 0
 local winBannerMax = 75
+local loadingTimer = 0
+local loadingMax = 45
+local pendingLevelStart = nil
+local loadingLogCount = 0
+local function loadingLog(msg)
+    if loadingLogCount < 20 then
+        print(msg)
+        loadingLogCount = loadingLogCount + 1
+    end
+end
 
 -- Debug controls (set to true for sprite testing)
 local DEBUG_DISABLE_ENEMY_AGGRO = false  -- Enemies never chase/attack
@@ -332,6 +353,20 @@ local function loadLevel(levelId)
     px = level.playerStart.x
     py = level.playerStart.y
     pdir = level.playerStart.dir
+    wallTiles = {}
+    for my = 0, 15 do
+        for mx = 0, 15 do
+            local wtype = map[my + 1][mx + 1]
+            if wtype and wtype > 0 then
+                wallTiles[#wallTiles + 1] = {
+                    x = mx + 0.5,
+                    y = my + 0.5,
+                    t = wtype
+                }
+            end
+        end
+    end
+    wallQuadLog("WQ loadLevel " .. tostring(levelId) .. " wallTiles=" .. tostring(#wallTiles))
 end
 
 local function unloadLevelData()
@@ -579,16 +614,32 @@ local function initializeLevelState(levelId)
 end
 
 local function startLevel(levelId)
+    loadingLog("LOAD startLevel begin " .. tostring(levelId))
     unloadMenuSprites()
+    loadingLog("LOAD after unloadMenuSprites")
     loadLevelSprites(levelId)
+    loadingLog("LOAD after loadLevelSprites")
     loadLevelAudio()
+    loadingLog("LOAD after loadLevelAudio")
     initializeLevelState(levelId)
+    loadingLog("LOAD after initializeLevelState")
     gameState = STATE_PLAYING
+    loadingLog("LOAD startLevel done")
 end
 
 local function restartLevel()
     initializeLevelState(currentLevel)
     gameState = STATE_PLAYING
+end
+
+local function beginLoadLevel(levelId)
+    pendingLevelStart = levelId
+    loadingTimer = loadingMax
+    gameState = STATE_LOADING
+    loadingLogCount = 0
+    loadingLog("LOAD beginLoadLevel " .. tostring(levelId))
+    wallQuadLogCount = 0
+    wallQuadLog("WQ beginLoadLevel " .. tostring(levelId))
 end
 
 -- Check if a position is walkable (no wall)
@@ -1177,8 +1228,98 @@ local function drawWallTexture(wtype, side, sx, y1, y2)
         local wallH = y2 - y1
         if wallH <= 0 then return end
         local scaleX = 4 / sprite.width
-        local scaleY = wallH / sprite.height
-        vmupro.sprite.drawScaled(sprite, sx, y1, scaleX, scaleY, vmupro.sprite.kImageUnflipped)
+        local tileH = sprite.height
+        local fullTiles = math.floor(wallH / tileH)
+        local remainder = wallH - fullTiles * tileH
+        local drawY = y1
+        for i = 1, fullTiles do
+            vmupro.sprite.drawScaled(sprite, sx, drawY, scaleX, 1.0, vmupro.sprite.kImageUnflipped)
+            drawY = drawY + tileH
+        end
+        if remainder > 0 then
+            local scaleY = remainder / tileH
+            vmupro.sprite.drawScaled(sprite, sx, drawY, scaleX, scaleY, vmupro.sprite.kImageUnflipped)
+        end
+    end
+end
+
+local function getWallSprite(wtype)
+    if wtype == 1 or wtype == 6 then
+        return wallStone
+    elseif wtype == 2 then
+        return wallBrick
+    elseif wtype == 3 then
+        return wallMoss
+    elseif wtype == 4 then
+        return wallMetal
+    elseif wtype == 5 then
+        return wallWood
+    end
+    return nil
+end
+
+local function renderWallQuads()
+    if not wallTiles then return end
+    wallQuadLog("WQ render start tiles=" .. tostring(#wallTiles) .. " px=" .. tostring(px) .. " py=" .. tostring(py))
+    if not wallStone or not wallStone.width then
+        wallQuadLog("WQ wallStone missing or invalid")
+    end
+    if not wallBrick or not wallBrick.width then
+        wallQuadLog("WQ wallBrick missing or invalid")
+    end
+    if not wallMoss or not wallMoss.width then
+        wallQuadLog("WQ wallMoss missing or invalid")
+    end
+    if not wallMetal or not wallMetal.width then
+        wallQuadLog("WQ wallMetal missing or invalid")
+    end
+    if not wallWood or not wallWood.width then
+        wallQuadLog("WQ wallWood missing or invalid")
+    end
+    local order = {}
+    for i = 1, #wallTiles do
+        local w = wallTiles[i]
+        local dx = w.x - px
+        local dy = w.y - py
+        local dist = math.sqrt(dx * dx + dy * dy)
+        order[i] = {idx = i, dist = dist, dx = dx, dy = dy}
+    end
+    for i = 1, #order - 1 do
+        for j = 1, #order - i do
+            if order[j].dist < order[j + 1].dist then
+                order[j], order[j + 1] = order[j + 1], order[j]
+            end
+        end
+    end
+
+    for i = 1, #order do
+        local entry = order[i]
+        if entry.dist > 0.3 and entry.dist < 12 then
+            local angle = safeAtan2(entry.dy, entry.dx)
+            local dirIdx = math.floor(angle * 64 / 6.28318) % 64
+            local viewDiff = (dirIdx - pdir) % 64
+            if viewDiff > 32 then viewDiff = viewDiff - 64 end
+            if viewDiff >= -6 and viewDiff <= 6 then
+                local screenX = 120 + viewDiff * 20
+                local h = math.floor(200 / entry.dist)
+                if h > 240 then h = 240 end
+                if h < 6 then goto continue_quad end
+                local y1 = HORIZON - math.floor(h / 2)
+                if y1 < 0 then y1 = 0 end
+
+                local wtile = wallTiles[entry.idx]
+                local sprite = getWallSprite(wtile.t)
+                if not sprite then
+                    wallQuadLog("WQ missing sprite for type " .. tostring(wtile.t))
+                end
+                if sprite and sprite.height then
+                    local scale = h / sprite.height
+                    local drawX = screenX - math.floor((sprite.width * scale) / 2)
+                    vmupro.sprite.drawScaled(sprite, drawX, y1, scale, scale, vmupro.sprite.kImageUnflipped)
+                end
+            end
+        end
+        ::continue_quad::
     end
 end
 
@@ -1198,9 +1339,13 @@ local function castRay(dirIdx)
         if wtype > 0 then
             local cellX = rx - mx
             local cellY = ry - my
-            local side = (cellX < 0.1 or cellX > 0.9) and 0 or 1
+            local edgeX = math.min(cellX, 1 - cellX)
+            local edgeY = math.min(cellY, 1 - cellY)
+            local side = (edgeX < edgeY) and 0 or 1
             -- Texture coordinate: use X or Y depending on which wall face we hit
             local texCoord = (side == 0) and cellY or cellX
+            if texCoord < 0 then texCoord = 0 end
+            if texCoord > 0.999 then texCoord = 0.999 end
             return dist, wtype, side, texCoord
         end
     end
@@ -1686,6 +1831,18 @@ function AppMain()
             checkHealthPickups()
         end
 
+        if gameState == STATE_LOADING then
+            loadingTimer = loadingTimer - 1
+            if loadingTimer <= 0 then
+                if pendingLevelStart then
+                    startLevel(pendingLevelStart)
+                    pendingLevelStart = nil
+                else
+                    gameState = STATE_TITLE
+                end
+            end
+        end
+
         -- Title screen handling
         if gameState == STATE_TITLE then
             if titleInOptions then
@@ -1726,7 +1883,7 @@ function AppMain()
                 if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
                     if titleSelection == 1 then
                         -- Start game
-                        startLevel(selectedLevel)
+                        beginLoadLevel(selectedLevel)
                     elseif titleSelection == 2 then
                         -- Options
                         titleInOptions = true
@@ -1749,7 +1906,7 @@ function AppMain()
             end
                 if vmupro.input.pressed(vmupro.input.A) or vmupro.input.pressed(vmupro.input.MODE) then
                     if gameOverSelection == 1 then
-                        restartLevel()  -- Restart
+                        beginLoadLevel(currentLevel)  -- Restart
                     elseif gameOverSelection == 2 then
                         -- Return to title menu
                         enterTitle()
@@ -1768,7 +1925,7 @@ function AppMain()
             elseif vmupro.input.pressed(vmupro.input.A) then
                 -- Advance to next level if available, otherwise return to title menu
                 if currentLevel < MAX_LEVEL then
-                    startLevel(currentLevel + 1)
+                    beginLoadLevel(currentLevel + 1)
                 else
                     enterTitle()
                 end
@@ -1968,36 +2125,54 @@ function AppMain()
         end
 
         -- Render based on game state
-        if gameState == STATE_TITLE then
+        if gameState == STATE_LOADING then
+            if loadingTimer == loadingMax then
+                loadingLog("LOAD render loading screen frame1")
+            end
+            vmupro.graphics.clear(COLOR_BLACK)
+            vmupro.graphics.drawFillRect(40, 105, 200, 135, COLOR_DARK_GRAY)
+            vmupro.graphics.drawFillRect(45, 110, 195, 130, COLOR_BLACK)
+            local progress = 1.0 - (loadingTimer / loadingMax)
+            if progress < 0 then progress = 0 end
+            if progress > 1 then progress = 1 end
+            local barW = math.floor(146 * progress)
+            vmupro.graphics.drawFillRect(48, 113, 48 + barW, 127, COLOR_MAROON)
+            vmupro.text.setFont(vmupro.text.FONT_SMALL)
+            vmupro.graphics.drawText("LOADING", 95, 90, COLOR_WHITE, COLOR_BLACK)
+        elseif gameState == STATE_TITLE then
             drawTitleScreen()
         else
             -- Game rendering
             vmupro.graphics.clear(COLOR_CEILING)
             vmupro.graphics.drawFillRect(0, HORIZON, 240, 240, COLOR_FLOOR)
 
-        for x = 0, 59 do
-            local rayDir = pdir - 5 + math.floor(x * 11 / 60)
-            local dist, wtype, side, texCoord = castRay(rayDir)
-            local angleDiff = (rayDir - pdir) % 64
-            if angleDiff > 32 then angleDiff = angleDiff - 64 end
-            local cosIdx = math.abs(angleDiff) % 64
-            if cosIdx > 16 then cosIdx = 16 end
-            local fixedDist = dist * cosTable[cosIdx]
-            if fixedDist < 0.1 then fixedDist = 0.1 end
-            local h = math.floor(200 / fixedDist)
-            if h > 240 then h = 240 end
-            local y1 = HORIZON - math.floor(h / 2)
-            local y2 = HORIZON + math.floor(h / 2)
-            if y1 < 0 then y1 = 0 end
-            if y2 > 240 then y2 = 240 end
+        if USE_WALL_QUADS then
+            renderWallQuads()
+        else
+            for x = 0, 59 do
+                local rayDir = pdir - 5 + math.floor(x * 11 / 60)
+                local dist, wtype, side, texCoord = castRay(rayDir)
+                local angleDiff = (rayDir - pdir) % 64
+                if angleDiff > 32 then angleDiff = angleDiff - 64 end
+                local cosIdx = math.abs(angleDiff) % 64
+                if cosIdx > 16 then cosIdx = 16 end
+                local fixedDist = dist * cosTable[cosIdx]
+                if fixedDist < 0.1 then fixedDist = 0.1 end
+                local h = math.floor(200 / fixedDist)
+                if h > 240 then h = 240 end
+                local y1 = HORIZON - math.floor(h / 2)
+                local y2 = HORIZON + math.floor(h / 2)
+                if y1 < 0 then y1 = 0 end
+                if y2 > 240 then y2 = 240 end
 
-            local baseColor = getWallColor(wtype, side)
-            local sx = x * 4
+                local baseColor = getWallColor(wtype, side)
+                local sx = x * 4
 
-            -- Draw base wall color
-            vmupro.graphics.drawFillRect(sx, y1, sx + 4, y2, baseColor)
-            -- Overlay bitmap wall texture
-            drawWallTexture(wtype, side, sx, y1, y2)
+                -- Draw base wall color
+                vmupro.graphics.drawFillRect(sx, y1, sx + 4, y2, baseColor)
+                -- Overlay bitmap wall texture
+                drawWallTexture(wtype, side, sx, y1, y2)
+            end
         end
 
         local spriteOrder = {}
@@ -2182,6 +2357,7 @@ function AppMain()
             end
         end  -- End of game rendering (else branch of title screen check)
 
+        ::render_only::
         vmupro.graphics.refresh()
         vmupro.system.delayMs(33)
     end
