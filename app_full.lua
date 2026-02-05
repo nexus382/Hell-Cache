@@ -2228,11 +2228,17 @@ function AppMain()
             vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "B2 after input.read")
         end
         frameCount = frameCount + 1
+        if vmupro.system and vmupro.system.log then
+            vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "B2.1 after frameCount")
+        end
 
 
         -- Update audio
         if audioInitialized then
             vmupro.sound.update()
+        end
+        if vmupro.system and vmupro.system.log then
+            vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "B2.2 after audio update")
         end
 
         -- Only run game logic when playing (not on title screen)
@@ -2257,6 +2263,9 @@ function AppMain()
             -- Check for health pickups
             checkHealthPickups()
         end
+        if vmupro.system and vmupro.system.log then
+            vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "B2.3 after playing block")
+        end
 
         if gameState == STATE_LOADING then
             loadingTimer = loadingTimer - 1
@@ -2268,6 +2277,9 @@ function AppMain()
                     gameState = STATE_TITLE
                 end
             end
+        end
+        if vmupro.system and vmupro.system.log then
+            vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "B2.4 after loading block")
         end
 
         if vmupro.system and vmupro.system.log then
