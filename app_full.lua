@@ -946,155 +946,152 @@ local function updateSoldiers()
         for i = 1, #sprites do
             if checkArrayBounds(sprites, i, "updateSoldiers") then
                 local s = sprites[i]
-        if s.t == 5 and s.speed then  -- Warriors with movement data
-            -- Skip dead soldiers
-            if s.alive == false then
-                goto continue
-            end
-
-            -- Initialize state if not set
-            if not s.state then
-                s.state = "patrol"
-                s.patrolDir = 1
-                s.patrolAxis = (i % 2 == 0) and "x" or "y"
-                s.startX = s.x
-                s.startY = s.y
-                s.attackCooldown = 0
-            end
-
-            -- Calculate distance to player
-            local dx = px - s.x
-            local dy = py - s.y
-            local distToPlayer = math.sqrt(dx * dx + dy * dy)
-            if distToPlayer < 0.001 then
-                distToPlayer = 0.001
-            end
-
-            if DEBUG_DISABLE_ENEMY_AGGRO then
-                distToPlayer = 999  -- Force patrol state
-                s.attackCooldown = 0
-                -- Face the player for consistent side-view testing
-                local angleToPlayer = safeAtan2(dy, dx)
-                s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
-            end
-
-            if DEBUG_WALK_IN_PLACE then
-                s.state = "patrol"
-                if s.patrolAxis == "x" then
-                    s.dir = (s.patrolDir > 0) and 0 or 32
-                else
-                    s.dir = (s.patrolDir > 0) and 16 or 48
-                end
-                s.anim = ((s.anim or 0) + 1) % 20
-                goto continue
-            end
-
-            -- Decrease attack cooldown
-            if s.attackCooldown > 0 then
-                s.attackCooldown = s.attackCooldown - 1
-            end
-
-            -- State machine
-            if distToPlayer < ATTACK_RANGE then
-                -- Close enough to attack
-                s.state = "attack"
-
-                -- Face the player
-                local angleToPlayer = safeAtan2(dy, dx)
-                s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
-
-                -- Attack if cooldown is ready
-                if s.attackCooldown <= 0 then
-                    s.attackCooldown = ATTACK_COOLDOWN
-                    s.attackAnim = 6
-                    s.attackFrame = 1
-
-                    s.attackAnim = 6
-                    s.attackFrame = 1
-
-                    -- Play sword swoosh sound
-                    if swordSwooshSynth and soundEnabled then
-                        vmupro.sound.synth.playNote(swordSwooshSynth, 400, 0.7, 0.15)
+                if s.t == 5 and s.speed then  -- Warriors with movement data
+                    -- Skip dead soldiers
+                    if s.alive == false then
+                        goto continue
                     end
 
-                    -- Apply damage to player
-                    playerHealth = playerHealth - DAMAGE_PER_HIT
-                    if playerHealth <= 0 then
-                        playerHealth = 0
-                        gameState = STATE_GAME_OVER
-                        gameOverSelection = 1
+                    -- Initialize state if not set
+                    if not s.state then
+                        s.state = "patrol"
+                        s.patrolDir = 1
+                        s.patrolAxis = (i % 2 == 0) and "x" or "y"
+                        s.startX = s.x
+                        s.startY = s.y
+                        s.attackCooldown = 0
                     end
-                end
 
-            elseif distToPlayer < DETECTION_RANGE then
-                -- Player detected - chase!
-                s.state = "chase"
-
-                -- Move towards player (sprint!)
-                local moveSpeed = s.speed * CHASE_SPEED_MULT
-                local moveX = (dx / distToPlayer) * moveSpeed
-                local moveY = (dy / distToPlayer) * moveSpeed
-                local newX = s.x + moveX
-                local newY = s.y + moveY
-
-                if isWalkable(newX, newY) then
-                    s.x = newX
-                    s.y = newY
-
-                    -- Update facing direction towards player
-                    local angleToPlayer = safeAtan2(dy, dx)
-                    s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
-
-                    -- Update animation frame
-                    s.anim = ((s.anim or 0) + 1) % 20
-                end
-
-            else
-                -- Patrol mode
-                s.state = "patrol"
-
-                local moveAmount = s.speed * s.patrolDir
-                local newX, newY = s.x, s.y
-
-                if s.patrolAxis == "x" then
-                    newX = s.x + moveAmount
-                    s.dir = (s.patrolDir > 0) and 0 or 32
-                else
-                    newY = s.y + moveAmount
-                    s.dir = (s.patrolDir > 0) and 16 or 48
-                end
-
-                local patrolDist = 3
-                local distFromStart
-                if s.patrolAxis == "x" then
-                    distFromStart = newX - s.startX
-                else
-                    distFromStart = newY - s.startY
-                end
-
-                if math.abs(distFromStart) > patrolDist or not isWalkable(newX, newY) then
-                    s.patrolDir = -s.patrolDir
-                else
-                    if not DEBUG_WALK_IN_PLACE then
-                        s.x = newX
-                        s.y = newY
+                    -- Calculate distance to player
+                    local dx = px - s.x
+                    local dy = py - s.y
+                    local distToPlayer = math.sqrt(dx * dx + dy * dy)
+                    if distToPlayer < 0.001 then
+                        distToPlayer = 0.001
                     end
-                    s.anim = ((s.anim or 0) + 1) % 20
-                end
-            end
 
-            if s.attackAnim and s.attackAnim > 0 then
-                s.attackAnim = s.attackAnim - 1
-                if s.attackAnim == 3 then
-                    s.attackFrame = 2
-                elseif s.attackAnim <= 0 then
-                    s.attackAnim = 0
+                    if DEBUG_DISABLE_ENEMY_AGGRO then
+                        distToPlayer = 999  -- Force patrol state
+                        s.attackCooldown = 0
+                        -- Face the player for consistent side-view testing
+                        local angleToPlayer = safeAtan2(dy, dx)
+                        s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
+                    end
+
+                    if DEBUG_WALK_IN_PLACE then
+                        s.state = "patrol"
+                        if s.patrolAxis == "x" then
+                            s.dir = (s.patrolDir > 0) and 0 or 32
+                        else
+                            s.dir = (s.patrolDir > 0) and 16 or 48
+                        end
+                        s.anim = ((s.anim or 0) + 1) % 20
+                        goto continue
+                    end
+
+                    -- Decrease attack cooldown
+                    if s.attackCooldown > 0 then
+                        s.attackCooldown = s.attackCooldown - 1
+                    end
+
+                    -- State machine
+                    if distToPlayer < ATTACK_RANGE then
+                        -- Close enough to attack
+                        s.state = "attack"
+
+                        -- Face the player
+                        local angleToPlayer = safeAtan2(dy, dx)
+                        s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
+
+                        -- Attack if cooldown is ready
+                        if s.attackCooldown <= 0 then
+                            s.attackCooldown = ATTACK_COOLDOWN
+                            s.attackAnim = 6
+                            s.attackFrame = 1
+
+                            -- Play sword swoosh sound
+                            if swordSwooshSynth and soundEnabled then
+                                vmupro.sound.synth.playNote(swordSwooshSynth, 400, 0.7, 0.15)
+                            end
+
+                            -- Apply damage to player
+                            playerHealth = playerHealth - DAMAGE_PER_HIT
+                            if playerHealth <= 0 then
+                                playerHealth = 0
+                                gameState = STATE_GAME_OVER
+                                gameOverSelection = 1
+                            end
+                        end
+
+                    elseif distToPlayer < DETECTION_RANGE then
+                        -- Player detected - chase!
+                        s.state = "chase"
+
+                        -- Move towards player (sprint!)
+                        local moveSpeed = s.speed * CHASE_SPEED_MULT
+                        local moveX = (dx / distToPlayer) * moveSpeed
+                        local moveY = (dy / distToPlayer) * moveSpeed
+                        local newX = s.x + moveX
+                        local newY = s.y + moveY
+
+                        if isWalkable(newX, newY) then
+                            s.x = newX
+                            s.y = newY
+
+                            -- Update facing direction towards player
+                            local angleToPlayer = safeAtan2(dy, dx)
+                            s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
+
+                            -- Update animation frame
+                            s.anim = ((s.anim or 0) + 1) % 20
+                        end
+
+                    else
+                        -- Patrol mode
+                        s.state = "patrol"
+
+                        local moveAmount = s.speed * s.patrolDir
+                        local newX, newY = s.x, s.y
+
+                        if s.patrolAxis == "x" then
+                            newX = s.x + moveAmount
+                            s.dir = (s.patrolDir > 0) and 0 or 32
+                        else
+                            newY = s.y + moveAmount
+                            s.dir = (s.patrolDir > 0) and 16 or 48
+                        end
+
+                        local patrolDist = 3
+                        local distFromStart
+                        if s.patrolAxis == "x" then
+                            distFromStart = newX - s.startX
+                        else
+                            distFromStart = newY - s.startY
+                        end
+
+                        if math.abs(distFromStart) > patrolDist or not isWalkable(newX, newY) then
+                            s.patrolDir = -s.patrolDir
+                        else
+                            if not DEBUG_WALK_IN_PLACE then
+                                s.x = newX
+                                s.y = newY
+                            end
+                            s.anim = ((s.anim or 0) + 1) % 20
+                        end
+                    end
+
+                    if s.attackAnim and s.attackAnim > 0 then
+                        s.attackAnim = s.attackAnim - 1
+                        if s.attackAnim == 3 then
+                            s.attackFrame = 2
+                        elseif s.attackAnim <= 0 then
+                            s.attackAnim = 0
+                        end
+                    end
+                    ::continue::
                 end
-            end
-            ::continue::
             end
         end
-    end
     end
 end
 
@@ -1117,21 +1114,23 @@ local function updateDeathAnimations()
         for i = 1, #sprites do
             if checkArrayBounds(sprites, i, "updateDeathAnimations") then
                 local s = sprites[i]
-        if s.t == 5 and s.dying then
-            if #warriorDeath == 0 then
-                s.dying = false
-                s.dead = true
-                goto continue_death
-            end
-            s.deathTick = (s.deathTick or 0) + 1
-            if s.deathTick % 1 == 0 then
-                s.deathFrame = (s.deathFrame or 1) + 2
-                if s.deathFrame > #warriorDeath then
-                    s.dying = false
-                    s.dead = true
+                if s.t == 5 and s.dying then
+                    if #warriorDeath == 0 then
+                        s.dying = false
+                        s.dead = true
+                        goto continue_death
+                    end
+                    s.deathTick = (s.deathTick or 0) + 1
+                    if s.deathTick % 1 == 0 then
+                        s.deathFrame = (s.deathFrame or 1) + 2
+                        if s.deathFrame > #warriorDeath then
+                            s.dying = false
+                            s.dead = true
+                        end
+                    end
+                    ::continue_death::
                 end
             end
-            ::continue_death::
         end
     end
 end
