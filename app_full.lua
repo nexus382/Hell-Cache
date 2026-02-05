@@ -898,7 +898,7 @@ local function loadTitleMusic()
         vmupro.audio.startListenMode()
         audioSystemActive = true
     end
-    titleSample = vmupro.sound.sample.new("sounds/Intro_45sec")
+    titleSample = vmupro.sound.sample.new("sounds/intro_45sec")
     if titleSample then
         vmupro.sound.sample.setVolume(titleSample, TITLE_MUSIC_VOLUME, TITLE_MUSIC_VOLUME)
     end
