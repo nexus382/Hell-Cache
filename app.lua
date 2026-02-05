@@ -2,15 +2,28 @@
 -- Castle dungeon with detailed sprites
 
 import "api/system"
-import "api/display"
-import "api/input"
-import "api/sprites"
-import "api/audio"
-import "api/text"
 
 if vmupro and vmupro.system and vmupro.system.log then
     vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "app.lua loaded")
 end
+
+local function tryImport(mod)
+    local ok, err = pcall(function() import(mod) end)
+    if vmupro and vmupro.system and vmupro.system.log then
+        if ok then
+            vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "import ok " .. mod)
+        else
+            vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "import FAIL " .. mod .. " err=" .. tostring(err))
+        end
+    end
+    return ok
+end
+
+tryImport("api/display")
+tryImport("api/input")
+tryImport("api/sprites")
+tryImport("api/audio")
+tryImport("api/text")
 
 if vmupro and vmupro.system and vmupro.system.log then
     vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "after imports")
