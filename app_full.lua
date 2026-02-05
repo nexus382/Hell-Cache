@@ -313,6 +313,17 @@ local showHealthPercent = true  -- Health % display on/off
 -- Sound effects
 local swordSwooshSynth = nil
 local audioInitialized = false
+local audioSystemActive = false
+local titleSample = nil
+local titleMusicState = "stopped" -- stopped|playing|fading|paused
+local titleMusicTimer = 0
+local titleFadeTimer = 0
+local titlePauseTimer = 0
+local TITLE_MUSIC_FPS = 60
+local TITLE_MUSIC_FADE_START_FRAMES = 40 * TITLE_MUSIC_FPS
+local TITLE_MUSIC_FADE_FRAMES = 5 * TITLE_MUSIC_FPS
+local TITLE_MUSIC_PAUSE_FRAMES = 2 * TITLE_MUSIC_FPS
+local TITLE_MUSIC_VOLUME = 1.0
 
 -- Enemy attack effects (list of active swipe effects)
 local swipeEffects = {}  -- {x, y, angle, frame, maxFrames}
@@ -824,13 +835,19 @@ local function unloadLevelAudio()
     freeSynthRef(groanSynth); groanSynth = nil
     freeSynthRef(squishSynth); squishSynth = nil
     freeSynthRef(gulpSynth); gulpSynth = nil
-    vmupro.audio.exitListenMode()
     audioInitialized = false
+    if audioSystemActive and not titleSample then
+        vmupro.audio.exitListenMode()
+        audioSystemActive = false
+    end
 end
 
 local function loadLevelAudio()
     if audioInitialized then return end
-    vmupro.audio.startListenMode()
+    if not audioSystemActive then
+        vmupro.audio.startListenMode()
+        audioSystemActive = true
+    end
 
     -- Create sword swoosh synth (noise-based for swoosh effect)
     swordSwooshSynth = vmupro.sound.synth.new(vmupro.sound.kWaveNoise)
@@ -875,6 +892,95 @@ local function loadLevelAudio()
     audioInitialized = true
 end
 
+local function loadTitleMusic()
+    if titleSample then return end
+    if not audioSystemActive then
+        vmupro.audio.startListenMode()
+        audioSystemActive = true
+    end
+    titleSample = vmupro.sound.sample.new("sounds/Intro_45sec")
+    if titleSample then
+        vmupro.sound.sample.setVolume(titleSample, TITLE_MUSIC_VOLUME, TITLE_MUSIC_VOLUME)
+    end
+end
+
+local function stopTitleMusic()
+    if titleSample then
+        vmupro.sound.sample.stop(titleSample)
+        vmupro.sound.sample.free(titleSample)
+        titleSample = nil
+    end
+    titleMusicState = "stopped"
+    titleMusicTimer = 0
+    titleFadeTimer = 0
+    titlePauseTimer = 0
+    if audioSystemActive and not audioInitialized then
+        vmupro.audio.exitListenMode()
+        audioSystemActive = false
+    end
+end
+
+local function startTitleMusic()
+    if not soundEnabled then return end
+    loadTitleMusic()
+    if titleSample then
+        vmupro.sound.sample.setVolume(titleSample, TITLE_MUSIC_VOLUME, TITLE_MUSIC_VOLUME)
+        vmupro.sound.sample.play(titleSample, 0)
+        titleMusicState = "playing"
+        titleMusicTimer = 0
+        titleFadeTimer = 0
+        titlePauseTimer = 0
+    end
+end
+
+local function updateTitleMusic()
+    if not soundEnabled then
+        if titleMusicState ~= "stopped" then
+            stopTitleMusic()
+        end
+        return
+    end
+    if gameState ~= STATE_TITLE then
+        if titleMusicState ~= "stopped" then
+            stopTitleMusic()
+        end
+        return
+    end
+
+    if titleMusicState == "stopped" then
+        startTitleMusic()
+        return
+    end
+
+    if titleMusicState == "playing" then
+        titleMusicTimer = titleMusicTimer + 1
+        if titleMusicTimer >= TITLE_MUSIC_FADE_START_FRAMES then
+            titleMusicState = "fading"
+            titleFadeTimer = 0
+        end
+    elseif titleMusicState == "fading" then
+        titleFadeTimer = titleFadeTimer + 1
+        local t = titleFadeTimer / TITLE_MUSIC_FADE_FRAMES
+        if t > 1 then t = 1 end
+        local v = TITLE_MUSIC_VOLUME * (1 - t)
+        if titleSample then
+            vmupro.sound.sample.setVolume(titleSample, v, v)
+        end
+        if titleFadeTimer >= TITLE_MUSIC_FADE_FRAMES then
+            if titleSample then
+                vmupro.sound.sample.stop(titleSample)
+            end
+            titleMusicState = "paused"
+            titlePauseTimer = 0
+        end
+    elseif titleMusicState == "paused" then
+        titlePauseTimer = titlePauseTimer + 1
+        if titlePauseTimer >= TITLE_MUSIC_PAUSE_FRAMES then
+            startTitleMusic()
+        end
+    end
+end
+
 local function enterTitle()
     showMenu = false
     gameState = STATE_TITLE
@@ -885,6 +991,7 @@ local function enterTitle()
     unloadLevelData()
     loadMenuSprites()
     collectgarbage()
+    startTitleMusic()
 end
 
 local function initializeLevelState(levelId)
@@ -2256,6 +2363,8 @@ function AppMain()
             vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "B2.2 after audio update")
         end
 
+        updateTitleMusic()
+
         -- Only run game logic when playing (not on title screen)
         if gameState == STATE_PLAYING then
             if levelBannerTimer > 0 then
@@ -2322,6 +2431,11 @@ function AppMain()
                             if selectedLevel > MAX_LEVEL then selectedLevel = 1 end
                         elseif titleOptionsSelection == 2 then
                             soundEnabled = not soundEnabled
+                            if soundEnabled then
+                                startTitleMusic()
+                            else
+                                stopTitleMusic()
+                            end
                         elseif titleOptionsSelection == 3 then
                             showHealthPercent = not showHealthPercent
                         elseif titleOptionsSelection == 4 then
@@ -2406,6 +2520,11 @@ function AppMain()
                     if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
                         if optionsSelection == 1 then
                             soundEnabled = not soundEnabled  -- Toggle sound
+                            if soundEnabled then
+                                startTitleMusic()
+                            else
+                                stopTitleMusic()
+                            end
                         elseif optionsSelection == 2 then
                             showHealthPercent = not showHealthPercent  -- Toggle health %
                         elseif optionsSelection == 3 then
