@@ -1129,37 +1129,67 @@ local function loadLevelAudio()
     if not gruntSample then
         gruntSample = vmupro.sound.sample.new("sounds/grunt.wav")
     end
-    if gruntSample then vmupro.sound.sample.setVolume(gruntSample, 0.7, 0.7) end
+    if gruntSample then
+        vmupro.sound.sample.setVolume(gruntSample, 0.7, 0.7)
+        if enableBootLogs then safeLog("INFO", "Loaded sample: grunt") end
+    else
+        if enableBootLogs then safeLog("WARN", "Failed to load sample: grunt") end
+    end
 
     swordHitSample = vmupro.sound.sample.new("sounds/sword_swing_connect")
     if not swordHitSample then
         swordHitSample = vmupro.sound.sample.new("sounds/sword_swing_connect.wav")
     end
-    if swordHitSample then vmupro.sound.sample.setVolume(swordHitSample, 0.7, 0.7) end
+    if swordHitSample then
+        vmupro.sound.sample.setVolume(swordHitSample, 0.7, 0.7)
+        if enableBootLogs then safeLog("INFO", "Loaded sample: sword_swing_connect") end
+    else
+        if enableBootLogs then safeLog("WARN", "Failed to load sample: sword_swing_connect") end
+    end
 
     swordMissSample = vmupro.sound.sample.new("sounds/sword_miss")
     if not swordMissSample then
         swordMissSample = vmupro.sound.sample.new("sounds/sword_miss.wav")
     end
-    if swordMissSample then vmupro.sound.sample.setVolume(swordMissSample, 0.7, 0.7) end
+    if swordMissSample then
+        vmupro.sound.sample.setVolume(swordMissSample, 0.7, 0.7)
+        if enableBootLogs then safeLog("INFO", "Loaded sample: sword_miss") end
+    else
+        if enableBootLogs then safeLog("WARN", "Failed to load sample: sword_miss") end
+    end
 
     yahSample = vmupro.sound.sample.new("sounds/yah")
     if not yahSample then
         yahSample = vmupro.sound.sample.new("sounds/yah.wav")
     end
-    if yahSample then vmupro.sound.sample.setVolume(yahSample, 0.7, 0.7) end
+    if yahSample then
+        vmupro.sound.sample.setVolume(yahSample, 0.7, 0.7)
+        if enableBootLogs then safeLog("INFO", "Loaded sample: yah") end
+    else
+        if enableBootLogs then safeLog("WARN", "Failed to load sample: yah") end
+    end
 
     winLevelSample = vmupro.sound.sample.new("sounds/win_level")
     if not winLevelSample then
         winLevelSample = vmupro.sound.sample.new("sounds/win_level.wav")
     end
-    if winLevelSample then vmupro.sound.sample.setVolume(winLevelSample, 0.7, 0.7) end
+    if winLevelSample then
+        vmupro.sound.sample.setVolume(winLevelSample, 0.7, 0.7)
+        if enableBootLogs then safeLog("INFO", "Loaded sample: win_level") end
+    else
+        if enableBootLogs then safeLog("WARN", "Failed to load sample: win_level") end
+    end
 
     argDeathSample = vmupro.sound.sample.new("sounds/arg_death1")
     if not argDeathSample then
         argDeathSample = vmupro.sound.sample.new("sounds/arg_death1.wav")
     end
-    if argDeathSample then vmupro.sound.sample.setVolume(argDeathSample, 0.7, 0.7) end
+    if argDeathSample then
+        vmupro.sound.sample.setVolume(argDeathSample, 0.7, 0.7)
+        if enableBootLogs then safeLog("INFO", "Loaded sample: arg_death1") end
+    else
+        if enableBootLogs then safeLog("WARN", "Failed to load sample: arg_death1") end
+    end
 
     -- Create groan synth (low frequency for death groan)
     groanSynth = vmupro.sound.synth.new(vmupro.sound.kWaveSawtooth)
@@ -1482,6 +1512,7 @@ local function updateSoldiers()
                             if yahSample and soundEnabled then
                                 vmupro.sound.sample.stop(yahSample)
                                 vmupro.sound.sample.play(yahSample)
+                                if enableBootLogs then safeLog("INFO", "Play sample: yah") end
                             end
 
                             -- Play sword sound sample
@@ -1506,6 +1537,7 @@ local function updateSoldiers()
                             if gruntSample and soundEnabled then
                                 vmupro.sound.sample.stop(gruntSample)
                                 vmupro.sound.sample.play(gruntSample)
+                                if enableBootLogs then safeLog("INFO", "Play sample: grunt") end
                             end
                         end
                         s.state = "chase"
@@ -1735,6 +1767,7 @@ local function killSoldier(soldier)
         if argDeathSample then
             vmupro.sound.sample.stop(argDeathSample)
             vmupro.sound.sample.play(argDeathSample)
+            if enableBootLogs then safeLog("INFO", "Play sample: arg_death1") end
         end
         if groanSynth then
             vmupro.sound.synth.playNote(groanSynth, 80, 0.8, 0.4)
@@ -1753,6 +1786,7 @@ local function killSoldier(soldier)
         if soundEnabled and winLevelSample then
             vmupro.sound.sample.stop(winLevelSample)
             vmupro.sound.sample.play(winLevelSample)
+            if enableBootLogs then safeLog("INFO", "Play sample: win_level") end
         end
     end
 end
@@ -3829,9 +3863,11 @@ function AppMain()
                         if hitSomething and swordHitSample then
                             vmupro.sound.sample.stop(swordHitSample)
                             vmupro.sound.sample.play(swordHitSample)
+                            if enableBootLogs then safeLog("INFO", "Play sample: sword_swing_connect") end
                         elseif (not hitSomething) and swordMissSample then
                             vmupro.sound.sample.stop(swordMissSample)
                             vmupro.sound.sample.play(swordMissSample)
+                            if enableBootLogs then safeLog("INFO", "Play sample: sword_miss") end
                         end
                     end
                 end
