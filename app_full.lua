@@ -222,12 +222,12 @@ local BASE_SPRITES = {
     {x=1.3, y=13.5, t=2}, {x=3.5, y=14.3, t=4}, {x=5.7, y=12.3, t=3},
     {x=14.3, y=13.5, t=2}, {x=13.5, y=14.3, t=4},
     {x=1.3, y=9.5, t=2}, {x=14.3, y=9.5, t=2},
-    -- Warriors (red armor) - with movement data: tx,ty=target, anim=animation frame, hp=health
-    {x=3.5, y=3.5, t=5, dir=32, tx=3.5, ty=3.5, anim=0, speed=0.02, hp=100, alive=true, startX=3.5, startY=3.5},
-    {x=11.5, y=4.5, t=5, dir=48, tx=11.5, ty=4.5, anim=0, speed=0.02, hp=100, alive=true, startX=11.5, startY=4.5},
-    {x=4.5, y=8.5, t=5, dir=0, tx=4.5, ty=8.5, anim=0, speed=0.02, hp=100, alive=true, startX=4.5, startY=8.5},
-    {x=8.5, y=10.5, t=5, dir=16, tx=8.5, ty=10.5, anim=0, speed=0.02, hp=100, alive=true, startX=8.5, startY=10.5},
-    {x=11.5, y=13.5, t=5, dir=32, tx=11.5, ty=13.5, anim=0, speed=0.02, hp=100, alive=true, startX=11.5, startY=13.5},
+    -- Warriors (red armor) - moved to open tiles
+    {x=4.5, y=8.5, t=5, dir=32, tx=4.5, ty=8.5, anim=0, speed=0.02, hp=100, alive=true, startX=4.5, startY=8.5},
+    {x=8.5, y=8.5, t=5, dir=48, tx=8.5, ty=8.5, anim=0, speed=0.02, hp=100, alive=true, startX=8.5, startY=8.5},
+    {x=12.5, y=8.5, t=5, dir=0, tx=12.5, ty=8.5, anim=0, speed=0.02, hp=100, alive=true, startX=12.5, startY=8.5},
+    {x=6.5, y=11.5, t=5, dir=16, tx=6.5, ty=11.5, anim=0, speed=0.02, hp=100, alive=true, startX=6.5, startY=11.5},
+    {x=10.5, y=11.5, t=5, dir=32, tx=10.5, ty=11.5, anim=0, speed=0.02, hp=100, alive=true, startX=10.5, startY=11.5},
     -- Health vials (one per room area)
     {x=5.5, y=2.5, t=7, collected=false},   -- Top-left room
     {x=10.5, y=2.5, t=7, collected=false},  -- Top-right room
@@ -279,12 +279,12 @@ local LEVELS = {
             {x=1.3, y=13.5, t=2}, {x=3.5, y=14.3, t=4}, {x=5.7, y=12.3, t=3},
             {x=14.3, y=13.5, t=2}, {x=13.5, y=14.3, t=4},
             {x=1.3, y=9.5, t=2}, {x=14.3, y=9.5, t=2},
-            -- Warriors (red armor)
-            {x=3.5, y=3.5, t=5, dir=32, tx=3.5, ty=3.5, anim=0, speed=0.025, hp=120, alive=true, startX=3.5, startY=3.5},
-            {x=11.5, y=4.5, t=5, dir=48, tx=11.5, ty=4.5, anim=0, speed=0.025, hp=120, alive=true, startX=11.5, startY=4.5},
-            {x=4.5, y=8.5, t=5, dir=0, tx=4.5, ty=8.5, anim=0, speed=0.025, hp=120, alive=true, startX=4.5, startY=8.5},
-            {x=8.5, y=10.5, t=5, dir=16, tx=8.5, ty=10.5, anim=0, speed=0.025, hp=120, alive=true, startX=8.5, startY=10.5},
-            {x=11.5, y=13.5, t=5, dir=32, tx=11.5, ty=13.5, anim=0, speed=0.025, hp=120, alive=true, startX=11.5, startY=13.5},
+            -- Warriors (red armor) - moved to open tiles
+            {x=4.5, y=8.5, t=5, dir=32, tx=4.5, ty=8.5, anim=0, speed=0.025, hp=120, alive=true, startX=4.5, startY=8.5},
+            {x=6.5, y=8.5, t=5, dir=48, tx=6.5, ty=8.5, anim=0, speed=0.025, hp=120, alive=true, startX=6.5, startY=8.5},
+            {x=11.5, y=10.5, t=5, dir=0, tx=11.5, ty=10.5, anim=0, speed=0.025, hp=120, alive=true, startX=11.5, startY=10.5},
+            {x=11.5, y=12.5, t=5, dir=16, tx=11.5, ty=12.5, anim=0, speed=0.025, hp=120, alive=true, startX=11.5, startY=12.5},
+            {x=8.5, y=13.5, t=5, dir=32, tx=8.5, ty=13.5, anim=0, speed=0.025, hp=120, alive=true, startX=8.5, startY=13.5},
             -- Health vials
             {x=5.5, y=2.5, t=7, collected=false},
             {x=10.5, y=2.5, t=7, collected=false},
@@ -388,7 +388,6 @@ showHealthPercent = true  -- Health % display on/off
 
 -- Sound effects
     swordSwooshSynth = nil
-    swordSwooshSample = nil
     gruntSample = nil
     swordHitSample = nil
     swordMissSample = nil
@@ -1062,11 +1061,6 @@ end
 local function unloadLevelAudio()
     if not audioInitialized then return end
     freeSynthRef(swordSwooshSynth); swordSwooshSynth = nil
-    if swordSwooshSample then
-        vmupro.sound.sample.stop(swordSwooshSample)
-        vmupro.sound.sample.free(swordSwooshSample)
-        swordSwooshSample = nil
-    end
     if gruntSample then
         vmupro.sound.sample.stop(gruntSample)
         vmupro.sound.sample.free(gruntSample)
@@ -1114,21 +1108,8 @@ local function loadLevelAudio()
         audioSystemActive = true
     end
 
-    -- Load sword swoosh as sample (game-complete.wav)
-    swordSwooshSample = vmupro.sound.sample.new("sounds/game-complete")
-    if not swordSwooshSample then
-        swordSwooshSample = vmupro.sound.sample.new("sounds/game-complete.wav")
-    end
-    if swordSwooshSample then
-        vmupro.sound.sample.setVolume(swordSwooshSample, 0.7, 0.7)
-    else
-        safeLog("WARN", "Failed to load sword sample sounds/game-complete")
-    end
 
     gruntSample = vmupro.sound.sample.new("sounds/grunt")
-    if not gruntSample then
-        gruntSample = vmupro.sound.sample.new("sounds/grunt.wav")
-    end
     if gruntSample then
         vmupro.sound.sample.setVolume(gruntSample, 0.7, 0.7)
         if enableBootLogs then safeLog("INFO", "Loaded sample: grunt") end
@@ -1137,9 +1118,6 @@ local function loadLevelAudio()
     end
 
     swordHitSample = vmupro.sound.sample.new("sounds/sword_swing_connect")
-    if not swordHitSample then
-        swordHitSample = vmupro.sound.sample.new("sounds/sword_swing_connect.wav")
-    end
     if swordHitSample then
         vmupro.sound.sample.setVolume(swordHitSample, 0.7, 0.7)
         if enableBootLogs then safeLog("INFO", "Loaded sample: sword_swing_connect") end
@@ -1148,9 +1126,6 @@ local function loadLevelAudio()
     end
 
     swordMissSample = vmupro.sound.sample.new("sounds/sword_miss")
-    if not swordMissSample then
-        swordMissSample = vmupro.sound.sample.new("sounds/sword_miss.wav")
-    end
     if swordMissSample then
         vmupro.sound.sample.setVolume(swordMissSample, 0.7, 0.7)
         if enableBootLogs then safeLog("INFO", "Loaded sample: sword_miss") end
@@ -1159,9 +1134,6 @@ local function loadLevelAudio()
     end
 
     yahSample = vmupro.sound.sample.new("sounds/yah")
-    if not yahSample then
-        yahSample = vmupro.sound.sample.new("sounds/yah.wav")
-    end
     if yahSample then
         vmupro.sound.sample.setVolume(yahSample, 0.7, 0.7)
         if enableBootLogs then safeLog("INFO", "Loaded sample: yah") end
@@ -1170,9 +1142,6 @@ local function loadLevelAudio()
     end
 
     winLevelSample = vmupro.sound.sample.new("sounds/win_level")
-    if not winLevelSample then
-        winLevelSample = vmupro.sound.sample.new("sounds/win_level.wav")
-    end
     if winLevelSample then
         vmupro.sound.sample.setVolume(winLevelSample, 0.7, 0.7)
         if enableBootLogs then safeLog("INFO", "Loaded sample: win_level") end
@@ -1181,9 +1150,6 @@ local function loadLevelAudio()
     end
 
     argDeathSample = vmupro.sound.sample.new("sounds/arg_death1")
-    if not argDeathSample then
-        argDeathSample = vmupro.sound.sample.new("sounds/arg_death1.wav")
-    end
     if argDeathSample then
         vmupro.sound.sample.setVolume(argDeathSample, 0.7, 0.7)
         if enableBootLogs then safeLog("INFO", "Loaded sample: arg_death1") end
@@ -1359,6 +1325,7 @@ local function enterTitle()
     unloadLevelAudio()
     unloadLevelSprites()
     unloadLevelData()
+    unloadWallTextures()
     loadMenuSprites()
     collectgarbage()
     startTitleMusic()
@@ -1515,11 +1482,6 @@ local function updateSoldiers()
                                 if enableBootLogs then safeLog("INFO", "Play sample: yah") end
                             end
 
-                            -- Play sword sound sample
-                            if swordSwooshSample and soundEnabled then
-                                vmupro.sound.sample.stop(swordSwooshSample)
-                                vmupro.sound.sample.play(swordSwooshSample)
-                            end
 
                             -- Apply damage to player
                             playerHealth = playerHealth - DAMAGE_PER_HIT
@@ -1822,32 +1784,33 @@ end
 
 -- Draw win screen
 local function drawWinScreen()
-    -- Darken background
-    vmupro.graphics.drawFillRect(40, 70, 200, 160, COLOR_BLACK)
-    vmupro.graphics.drawFillRect(45, 75, 195, 155, COLOR_DARK_GRAY)
+    -- Darken background (larger)
+    vmupro.graphics.drawFillRect(20, 40, 220, 200, COLOR_BLACK)
+    vmupro.graphics.drawFillRect(25, 45, 215, 195, COLOR_DARK_GRAY)
 
     -- Title
-    vmupro.graphics.drawFillRect(50, 80, 190, 102, COLOR_GREEN)
+    vmupro.graphics.drawFillRect(30, 55, 210, 90, COLOR_GREEN)
     vmupro.text.setFont(vmupro.text.FONT_SMALL)
-    vmupro.graphics.drawText("VICTORY!", 86, 85, COLOR_WHITE, COLOR_GREEN)
+    vmupro.graphics.drawText("VICTORY!", 76, 63, COLOR_WHITE, COLOR_GREEN)
 
     -- Subtitle
-    vmupro.graphics.drawText("The King is safe!", 70, 110, COLOR_WHITE, COLOR_DARK_GRAY)
+    vmupro.graphics.drawText("The King is safe!", 56, 100, COLOR_WHITE, COLOR_DARK_GRAY)
+    vmupro.graphics.drawText("You cleared the level!", 44, 122, COLOR_WHITE, COLOR_DARK_GRAY)
 
     if winBannerTimer > 0 then
         local pulse = (frameCount % 20) < 10
         local bannerColor = pulse and COLOR_MAROON or COLOR_DARK_MAROON
-        vmupro.graphics.drawFillRect(55, 115, 185, 136, bannerColor)
+        vmupro.graphics.drawFillRect(35, 130, 205, 154, bannerColor)
         vmupro.text.setFont(vmupro.text.FONT_SMALL)
-        vmupro.graphics.drawText("LEVEL COMPLETE", 58, 120, COLOR_WHITE, bannerColor)
+        vmupro.graphics.drawText("LEVEL COMPLETE", 46, 136, COLOR_WHITE, bannerColor)
     end
 
     -- Menu option
-    local y = 130
+    local y = 160
     local bgColor = COLOR_DARK_GRAY
     local textColor = COLOR_GRAY
     if winSelection == 1 then
-        vmupro.graphics.drawFillRect(50, y, 190, y + 18, COLOR_MAROON)
+        vmupro.graphics.drawFillRect(40, y, 200, y + 20, COLOR_MAROON)
         bgColor = COLOR_MAROON
         textColor = COLOR_WHITE
     end
@@ -1856,7 +1819,7 @@ local function drawWinScreen()
         winText = "NEXT LEVEL"
     end
     vmupro.text.setFont(vmupro.text.FONT_SMALL)
-    vmupro.graphics.drawText(winText, 80, y + 2, textColor, bgColor)
+    vmupro.graphics.drawText(winText, 74, y + 2, textColor, bgColor)
 end
 
 -- Draw health UI (potion with red liquid)
@@ -3852,23 +3815,24 @@ function AppMain()
                             if dist < PLAYER_ATTACK_RANGE then
                                 -- Hit the enemy
                                 s.hp = s.hp - PLAYER_DAMAGE
-                                hitSomething = true
+                                if not hitSomething then
+                                    hitSomething = true
+                                    if soundEnabled and swordHitSample then
+                                        vmupro.sound.sample.stop(swordHitSample)
+                                        vmupro.sound.sample.play(swordHitSample)
+                                        if enableBootLogs then safeLog("INFO", "Play sample: sword_swing_connect") end
+                                    end
+                                end
                                 if s.hp <= 0 then
                                     killSoldier(s)
                                 end
                             end
                         end
                     end
-                    if soundEnabled then
-                        if hitSomething and swordHitSample then
-                            vmupro.sound.sample.stop(swordHitSample)
-                            vmupro.sound.sample.play(swordHitSample)
-                            if enableBootLogs then safeLog("INFO", "Play sample: sword_swing_connect") end
-                        elseif (not hitSomething) and swordMissSample then
-                            vmupro.sound.sample.stop(swordMissSample)
-                            vmupro.sound.sample.play(swordMissSample)
-                            if enableBootLogs then safeLog("INFO", "Play sample: sword_miss") end
-                        end
+                    if soundEnabled and (not hitSomething) and swordMissSample then
+                        vmupro.sound.sample.stop(swordMissSample)
+                        vmupro.sound.sample.play(swordMissSample)
+                        if enableBootLogs then safeLog("INFO", "Play sample: sword_miss") end
                     end
                 end
 
