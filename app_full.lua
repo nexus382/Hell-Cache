@@ -450,7 +450,7 @@ DEBUG_WALL_QUADS_LOG = false
 wallQuadLogCount = 0
 spriteOrderCache = {}
 spriteOrderCacheFrame = -1000
-PLAYER_RADIUS = 0.35
+PLAYER_RADIUS = 0.50
 DEBUG_DISABLE_PROPS = false
 WALL_TEX_MAX_DIST = 6.0
   FOG_START = 2.5
@@ -1460,7 +1460,7 @@ end
 
 -- Check if a position is walkable (no wall)
 local function isWalkable(x, y)
-    local r = PLAYER_RADIUS or 0.25
+    local r = (PLAYER_RADIUS or 0.25) * 0.85
     local x1, x2 = x - r, x + r
     local y1, y2 = y - r, y + r
     local mx1, mx2 = math.floor(x1), math.floor(x2)
@@ -1471,6 +1471,7 @@ local function isWalkable(x, y)
         and map[my2 + 1][mx1 + 1] == 0
         and map[my2 + 1][mx2 + 1] == 0
 end
+
 
 -- Safe atan2 implementation
 local function safeAtan2(y, x)
@@ -2090,7 +2091,7 @@ local function resetGame()
 end
 
 -- Collision detection for sprites
-local function collidesWithSprite(nx, ny)
+function collidesWithSprite(nx, ny)
     if not sprites or #sprites == 0 then return false end
     if checkArrayBounds(sprites, 1, "collidesWithSprite") then
         for i = 1, #sprites do
@@ -2136,6 +2137,17 @@ local function getWallColor(wtype, side)
     else
         if side == 1 then return COLOR_STONE_D else return COLOR_STONE_L end
     end
+end
+
+-- Movement collision helper (walls + sprites)
+function canMove(x, y)
+    if not isWalkable(x, y) then
+        return false
+    end
+    if collidesWithSprite(x, y) then
+        return false
+    end
+    return true
 end
 
 local function fogBlend(color, dist)
@@ -2546,14 +2558,16 @@ local function renderWallsExperimental(minDist)
                     if distSq <= radiusSq and distSq <= maxDistSq then
                         local relX = dx * sinDir - dy * cosDir
                         local relY = dx * cosDir + dy * sinDir
+                        local projRelY = relY
+                        if projRelY < 0.5 then projRelY = 0.5 end
                         if relY > 0.05 and relY >= nearMin and relY <= maxDist and relY <= viewDist then
-                            local sx = relX / relY
+                            local sx = relX / projRelY
                             if sx >= -maxSx and sx <= maxSx then
                                 local b = math.floor(relY / bucketSpan) + 1
                                 if b < 1 then b = 1 end
                                 if b > bucketCount then b = bucketCount end
                                 local bucket = expBuckets[b]
-                                bucket[#bucket + 1] = {relY = relY, sx = sx, t = wtype}
+                                bucket[#bucket + 1] = {relY = relY, projRelY = projRelY, sx = sx, t = wtype}
                             end
                         end
                     end
@@ -2561,11 +2575,18 @@ local function renderWallsExperimental(minDist)
             end
         end
     end
+    local tilesDrawn = 0
+    local tileBudget = EXP_TILE_BUDGET or 300
     for b = bucketCount, 1, -1 do
         local bucket = expBuckets[b]
         for i = 1, #bucket do
+            if tilesDrawn >= tileBudget then
+                break
+            end
             local it = bucket[i]
-            local h = math.floor(wallScale / it.relY)
+            local projRelY = it.projRelY or it.relY
+            if projRelY < 0.5 then projRelY = 0.5 end
+            local h = math.floor(wallScale / projRelY)
             if h > VIEWPORT_H then h = VIEWPORT_H end
             if h >= 2 then
                 local y1 = HORIZON - math.floor(h / 2)
@@ -2577,9 +2598,10 @@ local function renderWallsExperimental(minDist)
                     local baseColor = getWallColor(it.t, 0)
                     local fogStart = FOG_START or (EXP_TEX_MAX_DIST or 5.0) - 1.0
                     local farWall = it.relY > (EXP_TEX_MAX_DIST or 5.0)
-                    if farWall then
+                    if farWall and it.relY >= 2.5 then
                         goto continue_exp_tile
                     end
+                    tilesDrawn = tilesDrawn + 1
                     local halfW = math.floor(h / 2)
                     local x1 = screenX - halfW
                     local x2 = screenX + halfW
@@ -2597,8 +2619,8 @@ local function renderWallsExperimental(minDist)
 
                 if needsDraw then
                     local fogOnly = (not DEBUG_DISABLE_FOG) and (it.relY > fogStart)
-                        local nearForceTex = it.relY < 1.0
-                        if DEBUG_DISABLE_WALL_TEXTURE or WALL_TEXTURE_MODE == "flat" or (fogOnly and not nearForceTex) then
+                    local nearForceTex = it.relY < 2.5
+                    if DEBUG_DISABLE_WALL_TEXTURE or WALL_TEXTURE_MODE == "flat" or (fogOnly and not nearForceTex) then
                             local fogColor = DEBUG_DISABLE_FOG and baseColor or FOG_COLOR
                             for x = x1, x2 do
                                 local prev = expDepthBuf[x]
@@ -2655,7 +2677,7 @@ local function renderWallsExperimentalHybrid()
     for x = 0, rayCols - 1 do
         local dist, wtype, side, texCoord = castRay(rayCos, raySin)
         local fixedDist = dist * (rayCos * playerCos + raySin * playerSin)
-        if fixedDist < 0.4 then fixedDist = 0.4 end
+        if fixedDist < 0.9 then fixedDist = 0.9 end
         if fixedDist <= nearLimit then
             local wallScale = VIEWPORT_H - 20
             local h = math.floor(wallScale / fixedDist)
@@ -2669,7 +2691,10 @@ local function renderWallsExperimentalHybrid()
             local fogCutoff = FOG_TEX_CUTOFF or 3.5
             local fogTextureSkip = (not DEBUG_DISABLE_FOG) and (fixedDist > fogCutoff)
             local sx = x * colW
-            local wantTex = (WALL_TEXTURE_MODE == "proper" and not DEBUG_DISABLE_WALL_TEXTURE and not farWall and not fogTextureSkip and h < (HYBRID_TEX_MAX_H or (VIEWPORT_H - 8)))
+            local nearForce = fixedDist < (TEX_NEAR_FORCE_DIST or 1.5)
+            local wantTex = (WALL_TEXTURE_MODE == "proper"
+                and not DEBUG_DISABLE_WALL_TEXTURE
+                and (nearForce or (not farWall and not fogTextureSkip and h < (HYBRID_TEX_MAX_H or (VIEWPORT_H - 8)))))
             if not wantTex then
                 if isExpRenderer() then
                     if not DEBUG_DISABLE_FOG and fixedDist > (FOG_START or 2.5) then
@@ -2930,6 +2955,25 @@ local function isVisible(tx, ty, cache)
         local mx, my = math.floor(rx), math.floor(ry)
         if mx >= 0 and mx < 16 and my >= 0 and my < 16 then
             if map[my + 1][mx + 1] > 0 then
+                if useCache then
+                    cache._visFrame = frameCount
+                    cache._visValue = false
+                end
+                return false
+            end
+            -- Thicken the ray to avoid corner peeking
+            local r = 0.1
+            local mx1, mx2 = math.floor(rx - r), math.floor(rx + r)
+            local my1, my2 = math.floor(ry - r), math.floor(ry + r)
+            if mx1 < 0 or mx2 >= 16 or my1 < 0 or my2 >= 16 then
+                if useCache then
+                    cache._visFrame = frameCount
+                    cache._visValue = false
+                end
+                return false
+            end
+            if map[my1 + 1][mx1 + 1] > 0 or map[my1 + 1][mx2 + 1] > 0
+                or map[my2 + 1][mx1 + 1] > 0 or map[my2 + 1][mx2 + 1] > 0 then
                 if useCache then
                     cache._visFrame = frameCount
                     cache._visValue = false
@@ -4222,8 +4266,8 @@ function AppMain()
             local dy = sinTable[idx] * 0.15
             -- Strafe direction (perpendicular to facing)
             local strafe_idx = (pdir + 16) % 64  -- 90 degrees right
-            local sdx = cosTable[strafe_idx] * 0.05
-            local sdy = sinTable[strafe_idx] * 0.05
+            local sdx = cosTable[strafe_idx] * 0.10
+            local sdy = sinTable[strafe_idx] * 0.10
 
             -- Check if MODE is held (modifier key)
             local modeHeld = vmupro.input.held(vmupro.input.MODE)
@@ -4279,28 +4323,22 @@ function AppMain()
                 -- UP: Move forward (held for continuous movement)
                 if vmupro.input.held(vmupro.input.UP) then
                     local nx, ny = px + dx, py + dy
-                    local mx, my = math.floor(nx), math.floor(ny)
-                    if mx >= 0 and mx < 16 and my >= 0 and my < 16 then
-                        if map[math.floor(py) + 1][mx + 1] == 0 and not collidesWithSprite(nx, py) then
-                            px = nx
-                        end
-                        if map[my + 1][math.floor(px) + 1] == 0 and not collidesWithSprite(px, ny) then
-                            py = ny
-                        end
+                    if canMove(nx, py) then
+                        px = nx
+                    end
+                    if canMove(px, ny) then
+                        py = ny
                     end
                 end
 
                 -- DOWN: Move backward (held for continuous movement)
                 if vmupro.input.held(vmupro.input.DOWN) then
                     local nx, ny = px - dx, py - dy
-                    local mx, my = math.floor(nx), math.floor(ny)
-                    if mx >= 0 and mx < 16 and my >= 0 and my < 16 then
-                        if map[math.floor(py) + 1][mx + 1] == 0 and not collidesWithSprite(nx, py) then
-                            px = nx
-                        end
-                        if map[my + 1][math.floor(px) + 1] == 0 and not collidesWithSprite(px, ny) then
-                            py = ny
-                        end
+                    if canMove(nx, py) then
+                        px = nx
+                    end
+                    if canMove(px, ny) then
+                        py = ny
                     end
                 end
 
@@ -4323,28 +4361,22 @@ function AppMain()
             -- A: Strafe left (held for continuous movement)
             if vmupro.input.held(vmupro.input.A) then
                 local nx, ny = px - sdx, py - sdy
-                local mx, my = math.floor(nx), math.floor(ny)
-                if mx >= 0 and mx < 16 and my >= 0 and my < 16 then
-                    if map[math.floor(py) + 1][mx + 1] == 0 and not collidesWithSprite(nx, py) then
-                        px = nx
-                    end
-                    if map[my + 1][math.floor(px) + 1] == 0 and not collidesWithSprite(px, ny) then
-                        py = ny
-                    end
+                if canMove(nx, py) then
+                    px = nx
+                end
+                if canMove(px, ny) then
+                    py = ny
                 end
             end
 
             -- B: Strafe right (held for continuous movement)
             if vmupro.input.held(vmupro.input.B) then
                 local nx, ny = px + sdx, py + sdy
-                local mx, my = math.floor(nx), math.floor(ny)
-                if mx >= 0 and mx < 16 and my >= 0 and my < 16 then
-                    if map[math.floor(py) + 1][mx + 1] == 0 and not collidesWithSprite(nx, py) then
-                        px = nx
-                    end
-                    if map[my + 1][math.floor(px) + 1] == 0 and not collidesWithSprite(px, ny) then
-                        py = ny
-                    end
+                if canMove(nx, py) then
+                    px = nx
+                end
+                if canMove(px, ny) then
+                    py = ny
                 end
             end
 
