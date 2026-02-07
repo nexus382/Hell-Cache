@@ -377,6 +377,8 @@ HORIZON = 120  -- Eye level within viewport
 isAttacking = 0      -- Attack animation frames remaining
 attackTotalFrames = 0 -- Total frames for current attack animation
 isBlocking = false   -- Currently blocking
+blockAnim = 0        -- Shield raise animation frame (0 = hidden)
+BLOCK_ANIM_FRAMES = 4
 showMenu = false     -- Menu visible
 menuSelection = 1    -- Current menu selection
 inOptionsMenu = false -- Currently in options submenu
@@ -588,6 +590,7 @@ local warriorWalk2R = nil
 local warriorWalk3R = nil
 local warriorDeath = {}
 local swordAttack = {}
+local shieldRaise = {}
 local warriorAttackFront = {}
 local warriorAttackBack = {}
 local warriorAttackLeft = {}
@@ -781,6 +784,10 @@ local function unloadLevelSprites()
         freeSpriteRef(swordAttack[i])
     end
     swordAttack = {}
+    for i = 1, #shieldRaise do
+        freeSpriteRef(shieldRaise[i])
+    end
+    shieldRaise = {}
     for i = 1, #warriorAttackFront do
         freeSpriteRef(warriorAttackFront[i])
     end
@@ -927,6 +934,17 @@ local function loadLevelSprites(levelId)
                 swordAttack[i] = spriteAttack
                 if not validateSprite(swordAttack[i], "swordAttack" .. tostring(i)) then
                     swordAttack[i] = nil
+                end
+            end
+        end
+
+        shieldRaise = {}
+        for i = 1, (BLOCK_ANIM_FRAMES or 8) do
+            local okShield, sprShield = pcall(vmupro.sprite.new, "sprites/shield_raise" .. tostring(i))
+            if okShield then
+                shieldRaise[i] = sprShield
+                if not validateSprite(shieldRaise[i], "shield_raise" .. tostring(i)) then
+                    shieldRaise[i] = nil
                 end
             end
         end
@@ -1418,6 +1436,7 @@ local function initializeLevelState(levelId)
     soldiersKilled = 0
     isAttacking = 0
     isBlocking = false
+    blockAnim = 0
     showMenu = false
     swipeEffects = {}
     bloodEffects = {}
@@ -3716,19 +3735,15 @@ local function renderGameFrame()
         end
     end
 
-    -- Draw block shield
-    if isBlocking then
-        -- Shield in center of screen
-        vmupro.graphics.drawFillRect(80, 140, 160, 230, COLOR_BROWN)
-        vmupro.graphics.drawFillRect(85, 145, 155, 225, COLOR_DARK_BROWN)
-        -- Shield boss (center)
-        vmupro.graphics.drawFillRect(110, 175, 130, 195, COLOR_GRAY)
-        vmupro.graphics.drawFillRect(115, 180, 125, 190, COLOR_LIGHT_GRAY)
-        -- Shield rim
-        vmupro.graphics.drawFillRect(80, 140, 160, 145, COLOR_GRAY)
-        vmupro.graphics.drawFillRect(80, 225, 160, 230, COLOR_GRAY)
-        vmupro.graphics.drawFillRect(80, 140, 85, 230, COLOR_GRAY)
-        vmupro.graphics.drawFillRect(155, 140, 160, 230, COLOR_GRAY)
+    -- Draw block shield (animated raise)
+    if blockAnim > 0 then
+        local frameIndex = blockAnim
+        if frameIndex < 1 then frameIndex = 1 end
+        if frameIndex > #shieldRaise then frameIndex = #shieldRaise end
+        local sprite = shieldRaise[frameIndex]
+        if sprite then
+            vmupro.sprite.draw(sprite, 0, 0, vmupro.sprite.kImageUnflipped)
+        end
     end
 
     -- Draw menu
@@ -4355,6 +4370,17 @@ function AppMain()
                             map[my + 1][mx + 1] = 0  -- Open the door
                         end
                     end
+                end
+            end
+
+            -- Update block animation (raise/lower)
+            if isBlocking then
+                if blockAnim < (BLOCK_ANIM_FRAMES or 8) then
+                    blockAnim = blockAnim + 1
+                end
+            else
+                if blockAnim > 0 then
+                    blockAnim = blockAnim - 1
                 end
             end
 
