@@ -3,6 +3,15 @@
 
 # Debug output
 vmupacker_debug/
+VMUPro Device Logs.log
+comport.txt
+
+# Audio test artifacts
+audio_sample_test.lua
+metadata_audio_test.json
+sounds/Inner_Sanctum.m4a
+sounds/intro_source_*.wav
+sounds/winning-a-coin*.wav
 
 # Python cache
 __pycache__/

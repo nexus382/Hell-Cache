@@ -661,11 +661,43 @@ local function loadLevel(levelId)
         if map[my + 2][mx + 1] ~= 0 then return false end
         return true
     end
+    local function tileAt(mx, my)
+        if mx < 0 or mx > 15 or my < 0 or my > 15 then
+            return 1
+        end
+        return map[my + 1][mx + 1] or 1
+    end
+    local function isDoorwayTile(mx, my)
+        local n = tileAt(mx, my - 1) > 0
+        local s = tileAt(mx, my + 1) > 0
+        local w = tileAt(mx - 1, my) > 0
+        local e = tileAt(mx + 1, my) > 0
+        return (n and s and not e and not w) or (e and w and not n and not s)
+    end
+    local function isWallAttached(mx, my)
+        if tileAt(mx, my) ~= 0 then return false end
+        local n = tileAt(mx, my - 1) > 0
+        local s = tileAt(mx, my + 1) > 0
+        local w = tileAt(mx - 1, my) > 0
+        local e = tileAt(mx + 1, my) > 0
+        if isDoorwayTile(mx, my) then return false end
+        -- Require a nearby wall, but avoid pure hallway gaps
+        if (n and s and not e and not w) or (e and w and not n and not s) then
+            return false
+        end
+        return n or s or w or e
+    end
     if sprites then
         local filteredFloor = {}
         for i = 1, #sprites do
             local s = sprites[i]
-            if s and (s.t == 2 or s.t == 3 or s.t == 4 or s.t == 7 or s.t == 8) then
+            if s and (s.t == 1 or s.t == 2 or s.t == 3 or s.t == 4) then
+                local mx = math.floor(s.x)
+                local my = math.floor(s.y)
+                if isWallAttached(mx, my) then
+                    filteredFloor[#filteredFloor + 1] = s
+                end
+            elseif s and (s.t == 7 or s.t == 8) then
                 local mx = math.floor(s.x)
                 local my = math.floor(s.y)
                 if isOpenFloor(mx, my) then
@@ -2190,6 +2222,16 @@ local function drawWallTexture(wtype, side, sx, y1, y2)
         return
     end
 
+    -- If wall is extremely tall (very close), draw a single scaled texture to avoid huge tiling
+    if wallH > (texH * 4) then
+        local scaleY = wallH / texH
+        if scaleY > 10 then scaleY = 10 end
+        if safeScale(sprite, scaleX, scaleY, "drawWallTexture_tall") then
+            vmupro.sprite.drawScaled(sprite, sx, y1, scaleX, scaleY, vmupro.sprite.kImageUnflipped)
+        end
+        return
+    end
+
     -- Tile vertically
     local tileH = texH
     local fullTiles = math.floor(wallH / tileH)
@@ -2299,14 +2341,16 @@ deltaDistXFix = deltaDistXFix or {}
 deltaDistYFix = deltaDistYFix or {}
 EXP_RAYCOLS = 24
 EXP_COLW = 10
-EXP_MAX_STEPS = 8
-EXP_MAX_DIST = 16
-EXP_RADIUS = 5
+EXP_MAX_STEPS = 20
+EXP_MAX_DIST = 80
+EXP_RADIUS = 20
 EXP_BUCKETS = 8
-EXP_TEX_MAX_DIST = 4.0
+EXP_TEX_MAX_DIST = 90.0
 EXP_VIEW_DIST = EXP_TEX_MAX_DIST
+HYBRID_BLEND = 4.0
+HYBRID_TEX_MAX_H = VIEWPORT_H
 EXP_DIST_LUT_SIZE = 256
-EXP_NEAR_DIST = EXP_NEAR_DIST or 8.0
+EXP_NEAR_DIST = EXP_NEAR_DIST or 28.0
 expRayCache = expRayCache or {}
 expRayCacheValid = expRayCacheValid or false
 expRayPrevX = expRayPrevX or 0
@@ -2502,7 +2546,7 @@ local function renderWallsExperimental(minDist)
                     if distSq <= radiusSq and distSq <= maxDistSq then
                         local relX = dx * sinDir - dy * cosDir
                         local relY = dx * cosDir + dy * sinDir
-                        if relY > 0.2 and relY >= nearMin and relY <= maxDist and relY <= viewDist then
+                        if relY > 0.05 and relY >= nearMin and relY <= maxDist and relY <= viewDist then
                             local sx = relX / relY
                             if sx >= -maxSx and sx <= maxSx then
                                 local b = math.floor(relY / bucketSpan) + 1
@@ -2551,9 +2595,10 @@ local function renderWallsExperimental(minDist)
                         end
                     end
 
-                    if needsDraw then
-                        local fogOnly = (not DEBUG_DISABLE_FOG) and (it.relY > fogStart)
-                        if DEBUG_DISABLE_WALL_TEXTURE or WALL_TEXTURE_MODE == "flat" or fogOnly then
+                if needsDraw then
+                    local fogOnly = (not DEBUG_DISABLE_FOG) and (it.relY > fogStart)
+                        local nearForceTex = it.relY < 1.0
+                        if DEBUG_DISABLE_WALL_TEXTURE or WALL_TEXTURE_MODE == "flat" or (fogOnly and not nearForceTex) then
                             local fogColor = DEBUG_DISABLE_FOG and baseColor or FOG_COLOR
                             for x = x1, x2 do
                                 local prev = expDepthBuf[x]
@@ -2572,7 +2617,8 @@ local function renderWallsExperimental(minDist)
                             local sprite = getWallSprite(it.t)
                             if sprite and sprite.height then
                                 local scale = safeDivide(h, sprite.height, "renderTilesExp")
-                                if scale == scale and scale > 0.01 and scale < 50 then
+                                if scale == scale and scale > 0.01 then
+                                    if scale > 50 then scale = 50 end
                                     local drawX = math.floor(screenX - (sprite.width * scale) / 2)
                                     if safeScale(sprite, scale, scale, "renderTilesExp") then
                                         vmupro.sprite.drawScaled(sprite, drawX, y1, scale, scale, vmupro.sprite.kImageUnflipped)
@@ -2590,7 +2636,7 @@ end
 
 local function renderWallsExperimentalHybrid()
     -- Hybrid: far tiles + near classic rays
-    local nearLimit = EXP_NEAR_DIST or 8.0
+    local nearLimit = (EXP_NEAR_DIST or 8.0) + (HYBRID_BLEND or 0)
     renderWallsExperimental(nearLimit)
 
     local fovRad = renderCfg.fovSteps * (renderCfg.twoPi / 64)
@@ -2621,7 +2667,7 @@ local function renderWallsExperimentalHybrid()
 
             local farWall = fixedDist > (WALL_TEX_MAX_DIST or 6.0)
             local fogCutoff = FOG_TEX_CUTOFF or 3.5
-            local fogTextureSkip = fixedDist > fogCutoff
+            local fogTextureSkip = (not DEBUG_DISABLE_FOG) and (fixedDist > fogCutoff)
             local sx = x * colW
             local wantTex = (WALL_TEXTURE_MODE == "proper" and not DEBUG_DISABLE_WALL_TEXTURE and not farWall and not fogTextureSkip and h < (HYBRID_TEX_MAX_H or (VIEWPORT_H - 8)))
             if not wantTex then
@@ -3409,13 +3455,23 @@ local function renderGameFrame()
 
                 -- Draw base wall color
                 vmupro.graphics.drawFillRect(sx, y1, sx + colW, y2, baseColor)
+                if fixedDist < 1.0 and not DEBUG_DISABLE_WALL_TEXTURE then
+                    drawWallTexture(wtype, side, sx, y1, y2)
+                    goto continue_ray
+                end
                 local skipTex = renderCfg.skipOddTex and ((x % 2) == 1)
                 if LOW_RES_WALLS and LOW_RES_MODE == "fast" and (x % 2) == 1 then
                     skipTex = true
                 end
+                local nearForceTex = fixedDist < 1.0
                 local farWall = fixedDist > texView
                 local fogCutoff = FOG_TEX_CUTOFF or 3.5
-                local fogTextureSkip = fixedDist > fogCutoff
+                local fogTextureSkip = (not DEBUG_DISABLE_FOG) and (fixedDist > fogCutoff)
+                if nearForceTex then
+                    farWall = false
+                    fogTextureSkip = false
+                    skipTex = false
+                end
                 if RENDERER_MODE == "exp_hybrid" and viewDist == texView then
                     skipTex = false
                 end
@@ -3458,6 +3514,9 @@ local function renderGameFrame()
             local count = 0
             for i = 1, #sprites do
                 local s = sprites[i]
+                if not s then
+                    goto continue_sprite_build
+                end
                 local skip = (DEBUG_DISABLE_ENEMIES and isEnemyType(s.t))
                     or (DEBUG_DISABLE_PROPS and isPropType(s.t))
                 if not skip then
@@ -3476,6 +3535,7 @@ local function renderGameFrame()
                         spriteOrder[count] = {idx = i, dist = distSq}
                     end
                 end
+                ::continue_sprite_build::
             end
             if count > 1 then
                 table.sort(spriteOrder, function(a, b) return a.dist > b.dist end)
@@ -3486,6 +3546,9 @@ local function renderGameFrame()
 
         for i = 1, #spriteOrderCache do
             local s = sprites[spriteOrderCache[i].idx]
+            if not s then
+                goto continue_sprite
+            end
             if DEBUG_DISABLE_ENEMIES and isEnemyType(s.t) then
                 goto continue_sprite
             end
@@ -4146,11 +4209,11 @@ function AppMain()
 
             -- LEFT/RIGHT: Turn (held for continuous turning)
             if vmupro.input.held(vmupro.input.LEFT) then
-                pdir = pdir - 4
+                pdir = pdir - 1
                 if pdir < 0 then pdir = pdir + 64 end
             end
             if vmupro.input.held(vmupro.input.RIGHT) then
-                pdir = pdir + 4
+                pdir = pdir + 1
                 if pdir >= 64 then pdir = pdir - 64 end
             end
 
@@ -4159,8 +4222,8 @@ function AppMain()
             local dy = sinTable[idx] * 0.15
             -- Strafe direction (perpendicular to facing)
             local strafe_idx = (pdir + 16) % 64  -- 90 degrees right
-            local sdx = cosTable[strafe_idx] * 0.15
-            local sdy = sinTable[strafe_idx] * 0.15
+            local sdx = cosTable[strafe_idx] * 0.05
+            local sdy = sinTable[strafe_idx] * 0.05
 
             -- Check if MODE is held (modifier key)
             local modeHeld = vmupro.input.held(vmupro.input.MODE)
