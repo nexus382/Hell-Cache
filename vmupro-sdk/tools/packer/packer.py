@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Tuple
 from PIL import Image
 from pathlib import Path
 
+
 # Rough outline for LUA apps
 # - load the LUA scripts and resources
 # - parse the json metadata (name, author, icon trans)
