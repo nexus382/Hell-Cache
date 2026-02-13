@@ -45,11 +45,14 @@ PERF_MONITOR_MIP_COLS_1 = 0
 PERF_MONITOR_MIP_COLS_2 = 0
 PERF_MONITOR_MIP_COLS_3 = 0
 PERF_MONITOR_MIP_COLS_4 = 0
+PERF_MONITOR_MOVE_BLOCKED = 0
+PERF_MONITOR_WALL_RECOVERIES = 0
+PERF_MONITOR_RAY_START_SOLID = 0
 PERF_MONITOR_LAST_BASE_RAY_LABEL = "-"
 PERF_MONITOR_LAST_EFFECTIVE_RAY_LABEL = "-"
 PERF_MONITOR_LAST_RAYCAST_MODE = "FLOAT"
 
-DEBUG_DOUBLE_BUFFER = false
+DEBUG_DOUBLE_BUFFER = true
 DOUBLE_BUFFER_ACTIVE = false
 DOUBLE_BUFFER_DELTA_USAGE_BYTES = 0
 DOUBLE_BUFFER_DELTA_LARGEST_BYTES = 0
@@ -58,6 +61,23 @@ DOUBLE_BUFFER_OFF_LARGEST_BYTES = nil
 DOUBLE_BUFFER_ON_USAGE_BYTES = nil
 DOUBLE_BUFFER_ON_LARGEST_BYTES = nil
 DOUBLE_BUFFER_PRESENT_ERROR_COUNT = 0
+DOUBLE_BUFFER_FORCED_TITLE_OFF = false
+
+local function getDoubleBufferPrefLabel()
+    return DEBUG_DOUBLE_BUFFER and "ON" or "OFF"
+end
+
+local function getDoubleBufferActiveLabel()
+    return DOUBLE_BUFFER_ACTIVE and "ON" or "OFF"
+end
+
+local function getDoubleBufferStatusLabel()
+    local suffix = ""
+    if DOUBLE_BUFFER_FORCED_TITLE_OFF then
+        suffix = " T"
+    end
+    return "P" .. getDoubleBufferPrefLabel() .. " A" .. getDoubleBufferActiveLabel() .. suffix
+end
 
 local function applyRuntimeLogLevel()
     if vmupro and vmupro.system and vmupro.system.setLogLevel then
@@ -124,6 +144,9 @@ local function perfMonitorBeginFrame()
     PERF_MONITOR_MIP_COLS_2 = 0
     PERF_MONITOR_MIP_COLS_3 = 0
     PERF_MONITOR_MIP_COLS_4 = 0
+    PERF_MONITOR_MOVE_BLOCKED = 0
+    PERF_MONITOR_WALL_RECOVERIES = 0
+    PERF_MONITOR_RAY_START_SOLID = 0
 end
 
 local function perfMonitorSetRayInfo(baseIdx, effIdx, useFixed)
@@ -170,8 +193,9 @@ local function perfMonitorEndFrame(frameUs, frameNowUs)
         PERF_MONITOR_LAST_LOG_US = nowUs
     end
     if (nowUs - PERF_MONITOR_LAST_LOG_US) >= (PERF_MONITOR_LOG_INTERVAL_US or 1000000) then
+        local dbufStatus = getDoubleBufferStatusLabel()
         logPerf(string.format(
-            "MON frame=%.2fms ray=%.2fms wall=%.2fms fog=%.2fms sec(i/a/s/l/r/p/z)=%.2f/%.2f/%.2f/%.2f/%.2f/%.2f/%.2fms rays=%s->%s mode=%s dbuf=%s dU=%dB dL=%dB cols=%d tex=%d fb=%d fogCols=%d",
+            "MON frame=%.2fms ray=%.2fms wall=%.2fms fog=%.2fms sec(i/a/s/l/r/p/z)=%.2f/%.2f/%.2f/%.2f/%.2f/%.2f/%.2fms rays=%s->%s mode=%s dbuf=%s dU=%dB dL=%dB cols=%d tex=%d fb=%d fogCols=%d mblk=%d rec=%d rsolid=%d",
             (PERF_MONITOR_EMA_FRAME_US or 0) / 1000.0,
             (PERF_MONITOR_EMA_RAYCAST_US or 0) / 1000.0,
             (PERF_MONITOR_EMA_WALL_US or 0) / 1000.0,
@@ -186,13 +210,16 @@ local function perfMonitorEndFrame(frameUs, frameNowUs)
             tostring(PERF_MONITOR_LAST_BASE_RAY_LABEL or "-"),
             tostring(PERF_MONITOR_LAST_EFFECTIVE_RAY_LABEL or "-"),
             tostring(PERF_MONITOR_LAST_RAYCAST_MODE or "FLOAT"),
-            (DEBUG_DOUBLE_BUFFER and DOUBLE_BUFFER_ACTIVE) and "ON" or "OFF",
+            dbufStatus,
             DOUBLE_BUFFER_DELTA_USAGE_BYTES or 0,
             DOUBLE_BUFFER_DELTA_LARGEST_BYTES or 0,
             PERF_MONITOR_WALL_COLS_TOTAL or 0,
             PERF_MONITOR_WALL_COLS_TEXTURED or 0,
             PERF_MONITOR_WALL_COLS_FALLBACK or 0,
-            PERF_MONITOR_FOG_COLS or 0
+            PERF_MONITOR_FOG_COLS or 0,
+            PERF_MONITOR_MOVE_BLOCKED or 0,
+            PERF_MONITOR_WALL_RECOVERIES or 0,
+            PERF_MONITOR_RAY_START_SOLID or 0
         ))
         PERF_MONITOR_LAST_LOG_US = nowUs
     end
@@ -240,12 +267,8 @@ end
 local function applyDoubleBufferMode(enable)
     local wantEnable = enable == true
     if wantEnable then
-        if DOUBLE_BUFFER_ACTIVE then
-            DEBUG_DOUBLE_BUFFER = true
-            return true
-        end
+        if DOUBLE_BUFFER_ACTIVE then return true end
         if not vmupro or not vmupro.graphics or not vmupro.graphics.startDoubleBufferRenderer then
-            DEBUG_DOUBLE_BUFFER = false
             DOUBLE_BUFFER_ACTIVE = false
             return false
         end
@@ -254,13 +277,11 @@ local function applyDoubleBufferMode(enable)
         if offStats.largest then DOUBLE_BUFFER_OFF_LARGEST_BYTES = offStats.largest end
         local okStart, errStart = pcall(vmupro.graphics.startDoubleBufferRenderer)
         if not okStart then
-            DEBUG_DOUBLE_BUFFER = false
             DOUBLE_BUFFER_ACTIVE = false
             local warnLevel = (vmupro and vmupro.system and vmupro.system.LOG_WARN) or 1
             logBoot(warnLevel, "startDoubleBufferRenderer failed: " .. tostring(errStart))
             return false
         end
-        DEBUG_DOUBLE_BUFFER = true
         DOUBLE_BUFFER_ACTIVE = true
         local onStats = readMemoryStats()
         if onStats.usage then DOUBLE_BUFFER_ON_USAGE_BYTES = onStats.usage end
@@ -276,7 +297,6 @@ local function applyDoubleBufferMode(enable)
         return true
     end
 
-    DEBUG_DOUBLE_BUFFER = false
     if DOUBLE_BUFFER_ACTIVE and vmupro and vmupro.graphics and vmupro.graphics.stopDoubleBufferRenderer then
         local okStop, errStop = pcall(vmupro.graphics.stopDoubleBufferRenderer)
         if not okStop then
@@ -299,8 +319,21 @@ local function applyDoubleBufferMode(enable)
     return true
 end
 
+local function syncDoubleBufferForState()
+    local wantActive = (DEBUG_DOUBLE_BUFFER == true)
+    if gameState == STATE_TITLE then
+        wantActive = false
+        DOUBLE_BUFFER_FORCED_TITLE_OFF = (DEBUG_DOUBLE_BUFFER == true)
+    else
+        DOUBLE_BUFFER_FORCED_TITLE_OFF = false
+    end
+    if wantActive ~= DOUBLE_BUFFER_ACTIVE then
+        applyDoubleBufferMode(wantActive)
+    end
+end
+
 local function presentFrame()
-    if DEBUG_DOUBLE_BUFFER and DOUBLE_BUFFER_ACTIVE and vmupro and vmupro.graphics and vmupro.graphics.pushDoubleBufferFrame then
+    if DOUBLE_BUFFER_ACTIVE and vmupro and vmupro.graphics and vmupro.graphics.pushDoubleBufferFrame then
         local okPush, errPush = pcall(vmupro.graphics.pushDoubleBufferFrame)
         if okPush then
             return
@@ -664,6 +697,8 @@ end
 px = 2.5
 py = 2.5
 pdir = 0
+lastSafeWallX = px
+lastSafeWallY = py
 app_running = true
 frameCount = 0
 simTickCount = 0
@@ -813,9 +848,14 @@ spriteOrderCache = {}
 spriteOrderCacheFrame = -1000
 PLAYER_RADIUS = 0.50
 -- Slightly slimmer than visual body width to reduce "invisible corner snag" feeling.
-PLAYER_COLLISION_RADIUS = 0.24
+PLAYER_COLLISION_RADIUS = 0.27
 PLAYER_MOVE_SUBSTEP = 0.08
-PLAYER_WALL_COLLISION_INSET = 0.005
+PLAYER_MOVE_SUBSTEP_STRICT = 0.04
+-- Keep full collision radius at walls; avoids micro-creep when holding forward into a wall.
+PLAYER_WALL_COLLISION_INSET = 0.0
+PLAYER_WALL_CLEARANCE_EPSILON = 0.004
+-- Prevent near-contact projection blowup when player is pressed against walls.
+PLAYER_RENDER_NEAR_CLIP_DIST = 0.6
 WALL_TEX_SEAM_OVERDRAW = true
 WALL_TEX_SEAM_PIXELS = 1
 DEBUG_DISABLE_PROPS = false
@@ -1436,6 +1476,8 @@ local function loadLevel(levelId)
     px = level.playerStart.x
     py = level.playerStart.y
     pdir = level.playerStart.dir
+    lastSafeWallX = px
+    lastSafeWallY = py
 end
 
 local function unloadLevelData()
@@ -2678,33 +2720,77 @@ drawUiText = function(text, x, y, textColor, bgColor)
     vmupro.graphics.drawText(text, x, y, fg, bg)
 end
 
--- In-game menu text path: prefer transparent background draw on newer firmware.
--- If transparent path fails, fall back to panel-matched solid background so menus stay readable.
-local MENU_TEXT_TRANSPARENT_SUPPORTED = nil
-local MENU_TEXT_TRANSPARENT_ERROR_LOGGED = false
-local function drawMenuText(text, x, y, textColor, bgColor)
+local MENU_TEXT_DRAW_IMPL = nil
+local MENU_TEXT_MODE_LABEL = "unset"
+local MENU_TEXT_MODE_LOGGED = false
+
+local function drawMenuText(text, x, y, textColor)
     local fg = textColor or COLOR_WHITE
-    if MENU_TEXT_TRANSPARENT_SUPPORTED ~= false then
-        local ok, err = pcall(vmupro.graphics.drawText, text, x, y, fg)
-        if ok then
-            MENU_TEXT_TRANSPARENT_SUPPORTED = true
-            return
-        end
-        MENU_TEXT_TRANSPARENT_SUPPORTED = false
-        if not MENU_TEXT_TRANSPARENT_ERROR_LOGGED then
-            MENU_TEXT_TRANSPARENT_ERROR_LOGGED = true
-            if enableBootLogs then
-                safeLog("ERROR", "Transparent drawText failed in drawMenuText: " .. tostring(err))
+
+    if not MENU_TEXT_DRAW_IMPL then
+        local g = vmupro.graphics
+
+        local function setMode(label, impl)
+            MENU_TEXT_MODE_LABEL = label
+            MENU_TEXT_DRAW_IMPL = impl
+            if enableBootLogs and not MENU_TEXT_MODE_LOGGED then
+                MENU_TEXT_MODE_LOGGED = true
+                safeLog("INFO", "Menu text draw mode: " .. label)
             end
+        end
+
+        -- Newer firmware may support transparent text background via nil bg.
+        do
+            local ok = pcall(g.drawText, text, x, y, fg, nil)
+            if ok then
+                setMode("bg_nil_transparent", function(t, px, py, c)
+                    g.drawText(t, px, py, c, nil)
+                end)
+            end
+        end
+
+        -- Some builds may expose transparent constants.
+        if not MENU_TEXT_DRAW_IMPL then
+            local candidates = {
+                {"TRANSPARENT", g.TRANSPARENT},
+                {"CLEAR", g.CLEAR},
+                {"BG_TRANSPARENT", g.BG_TRANSPARENT},
+                {"COLOR_TRANSPARENT", g.COLOR_TRANSPARENT},
+                {"ALPHA_TRANSPARENT", g.ALPHA_TRANSPARENT},
+            }
+            for _, entry in ipairs(candidates) do
+                local label = entry[1]
+                local value = entry[2]
+                if type(value) == "number" then
+                    local ok = pcall(g.drawText, text, x, y, fg, value)
+                    if ok then
+                        setMode("bg_" .. label, function(t, px, py, c)
+                            g.drawText(t, px, py, c, value)
+                        end)
+                        break
+                    end
+                end
+            end
+        end
+
+        -- Legacy compatibility: if 4-arg isn't supported, keep app alive with explicit bg.
+        if not MENU_TEXT_DRAW_IMPL then
+            local ok = pcall(g.drawText, text, x, y, fg)
+            if ok then
+                setMode("arg4_transparent", function(t, px, py, c)
+                    g.drawText(t, px, py, c)
+                end)
+            end
+        end
+
+        if not MENU_TEXT_DRAW_IMPL then
+            setMode("bg_black_fallback", function(t, px, py, c)
+                g.drawText(t, px, py, c, COLOR_BLACK)
+            end)
         end
     end
 
-    local bg = bgColor
-    if bg == nil then
-        -- Match menu panel tone to avoid harsh per-word bars on fallback path.
-        bg = COLOR_DARK_GRAY
-    end
-    vmupro.graphics.drawText(text, x, y, fg, bg)
+    MENU_TEXT_DRAW_IMPL(text, x, y, fg)
 end
 
 drawUiPanel = function(x1, y1, x2, y2, fillColor, borderColor)
@@ -2728,9 +2814,12 @@ local function drawPerfMonitorOverlay()
     local raysLabel = tostring(PERF_MONITOR_LAST_BASE_RAY_LABEL or "-")
     local effLabel = tostring(PERF_MONITOR_LAST_EFFECTIVE_RAY_LABEL or "-")
     local modeLabel = tostring(PERF_MONITOR_LAST_RAYCAST_MODE or "FLOAT")
-    local dbLabel = (DEBUG_DOUBLE_BUFFER and DOUBLE_BUFFER_ACTIVE) and "ON" or "OFF"
+    local dbLabel = getDoubleBufferStatusLabel()
     local deltaUsageKB = (DOUBLE_BUFFER_DELTA_USAGE_BYTES or 0) / 1024.0
     local deltaLargestKB = (DOUBLE_BUFFER_DELTA_LARGEST_BYTES or 0) / 1024.0
+    local moveBlocked = PERF_MONITOR_MOVE_BLOCKED or 0
+    local wallRecoveries = PERF_MONITOR_WALL_RECOVERIES or 0
+    local rayStartSolid = PERF_MONITOR_RAY_START_SOLID or 0
     local wallFmt = getWall1VariantConfig()
     local wallFmtLabel = tostring((wallFmt and wallFmt.label) or "?")
     local wallKeyLabel = getWallKeyModeLabel()
@@ -2744,7 +2833,7 @@ local function drawPerfMonitorOverlay()
     setFontCached(vmupro.text.FONT_TINY_6x8)
     drawUiText(string.format("PF F%.2f R%.2f W%.2f G%.2f", frameMs, rayMs, wallMs, fogMs), baseX, baseY + (rowStep * 0), COLOR_WHITE, COLOR_DARK_GRAY)
     drawUiText(string.format("PF C%d T%d FB%d FG%d", PERF_MONITOR_WALL_COLS_TOTAL or 0, PERF_MONITOR_WALL_COLS_TEXTURED or 0, PERF_MONITOR_WALL_COLS_FALLBACK or 0, PERF_MONITOR_FOG_COLS or 0), baseX, baseY + (rowStep * 1), COLOR_WHITE, COLOR_DARK_GRAY)
-    drawUiText("PF " .. raysLabel .. "->" .. effLabel .. " " .. modeLabel, baseX, baseY + (rowStep * 2), COLOR_WHITE, COLOR_DARK_GRAY)
+    drawUiText("PF " .. raysLabel .. "->" .. effLabel .. " " .. modeLabel .. string.format(" B%d R%d S%d", moveBlocked, wallRecoveries, rayStartSolid), baseX, baseY + (rowStep * 2), COLOR_WHITE, COLOR_DARK_GRAY)
     drawUiText(string.format("DB %s DU%.1fK DL%.1fK", dbLabel, deltaUsageKB, deltaLargestKB), baseX, baseY + (rowStep * 3), COLOR_WHITE, COLOR_DARK_GRAY)
     drawUiText(string.format("W1=%s K=%s P=%s", wallFmtLabel, wallKeyLabel, wallProjLabel), baseX, baseY + (rowStep * 4), COLOR_WHITE, COLOR_DARK_GRAY)
     drawUiText(string.format("MP %d/%d/%d/%d/%d", PERF_MONITOR_MIP_COLS_0 or 0, PERF_MONITOR_MIP_COLS_1 or 0, PERF_MONITOR_MIP_COLS_2 or 0, PERF_MONITOR_MIP_COLS_3 or 0, PERF_MONITOR_MIP_COLS_4 or 0), baseX, baseY + (rowStep * 5), COLOR_WHITE, COLOR_DARK_GRAY)
@@ -2824,7 +2913,7 @@ local function buildDebugMenuItems()
         local fogDitherText = "FOG DTHR: " .. tostring(FOG_DITHER_SIZE or 3)
         local fpsTargetText = "FPS TARGET: " .. string.upper(FPS_TARGET_MODE)
         local perfMonText = "PERF MON: " .. (DEBUG_PERF_MONITOR and "ON" or "OFF")
-        local dBufText = "DBUF: " .. ((DEBUG_DOUBLE_BUFFER and DOUBLE_BUFFER_ACTIVE) and "ON" or "OFF")
+        local dBufText = "DBUF: " .. getDoubleBufferStatusLabel()
         return {
             pageText,
             presetText, wallResText, raysText, drawDistText, farTexText,
@@ -2844,7 +2933,7 @@ local function buildDebugMenuItems()
     local useFixed = (USE_FIXED_RAYCAST == true) and (DEBUG_FORCE_FLOAT_RAYCAST ~= true)
     local raycastText = "RAYCAST: " .. (useFixed and "FIXED" or "FLOAT")
     local perfMonText = "PERF MON: " .. (DEBUG_PERF_MONITOR and "ON" or "OFF")
-    local dBufText = "DBUF: " .. ((DEBUG_DOUBLE_BUFFER and DOUBLE_BUFFER_ACTIVE) and "ON" or "OFF")
+    local dBufText = "DBUF: " .. getDoubleBufferStatusLabel()
     return {pageText, logsText, enemiesText, propsText, blockDbgText, fpsTargetText, audioMixText, rendererText, raycastText, perfMonText, dBufText, "BACK"}
 end
 
@@ -3188,11 +3277,7 @@ local function adjustDebugMenuSelection(sel, delta, wrap)
             DEBUG_PERF_MONITOR = (step > 0)
             return true
         elseif sel == 14 then
-            if step > 0 then
-                applyDoubleBufferMode(true)
-            else
-                applyDoubleBufferMode(false)
-            end
+            DEBUG_DOUBLE_BUFFER = (step > 0)
             return true
         end
         return false
@@ -3234,22 +3319,14 @@ local function adjustDebugMenuSelection(sel, delta, wrap)
         lockRendererMode()
         return true
     elseif sel == 9 then
-        if step > 0 then
-            USE_FIXED_RAYCAST = true
-            DEBUG_FORCE_FLOAT_RAYCAST = false
-        else
-            DEBUG_FORCE_FLOAT_RAYCAST = true
-        end
+        USE_FIXED_RAYCAST = (step > 0)
+        DEBUG_FORCE_FLOAT_RAYCAST = false
         return true
     elseif sel == 10 then
         DEBUG_PERF_MONITOR = (step > 0)
         return true
     elseif sel == 11 then
-        if step > 0 then
-            applyDoubleBufferMode(true)
-        else
-            applyDoubleBufferMode(false)
-        end
+        DEBUG_DOUBLE_BUFFER = (step > 0)
         return true
     end
 
@@ -3438,10 +3515,16 @@ local function getWallColor(wtype, side)
     end
 end
 
+local function getPlayerCollisionRadius()
+    local r = PLAYER_COLLISION_RADIUS or 0.27
+    if r < 0.1 then r = 0.1 end
+    return r
+end
+
 local function isWalkableWithRadius(x, y, radius)
     local r = radius
     if not r or r <= 0 then
-        r = (PLAYER_RADIUS or 0.25) * 0.85
+        r = getPlayerCollisionRadius()
     end
     if r < 0.05 then r = 0.05 end
 
@@ -3460,8 +3543,9 @@ local function isWalkableWithRadius(x, y, radius)
     local maxMx = math.floor(x + r)
     local minMy = math.floor(y - r)
     local maxMy = math.floor(y + r)
-    -- Keep only a tiny inset so we don't creep into walls under sustained input.
-    local collisionR = r - (PLAYER_WALL_COLLISION_INSET or 0.005)
+    local clearance = PLAYER_WALL_CLEARANCE_EPSILON or 0.004
+    if clearance < 0 then clearance = 0 end
+    local collisionR = r - (PLAYER_WALL_COLLISION_INSET or 0.005) + clearance
     if collisionR < 0.05 then collisionR = 0.05 end
     local rr = collisionR * collisionR
 
@@ -3480,7 +3564,7 @@ local function isWalkableWithRadius(x, y, radius)
                 if nearestY > tileMaxY then nearestY = tileMaxY end
                 local dx = x - nearestX
                 local dy = y - nearestY
-                if (dx * dx + dy * dy) < rr then
+                if (dx * dx + dy * dy) <= rr then
                     return false
                 end
             end
@@ -3488,6 +3572,77 @@ local function isWalkableWithRadius(x, y, radius)
     end
 
     return true
+end
+
+local function updatePlayerSafetyAnchor()
+    local radius = getPlayerCollisionRadius()
+    if isWalkableWithRadius(px, py, radius) then
+        lastSafeWallX = px
+        lastSafeWallY = py
+        return true
+    end
+    return false
+end
+
+local RECOVER_DIRS = {
+    { 1.0,  0.0}, {-1.0,  0.0}, { 0.0,  1.0}, { 0.0, -1.0},
+    { 0.7071,  0.7071}, { 0.7071, -0.7071}, {-0.7071,  0.7071}, {-0.7071, -0.7071},
+}
+
+local function recoverPlayerFromWallPenetration()
+    local radius = getPlayerCollisionRadius()
+    if isWalkableWithRadius(px, py, radius) then
+        lastSafeWallX = px
+        lastSafeWallY = py
+        return false
+    end
+
+    if lastSafeWallX and lastSafeWallY and isWalkableWithRadius(lastSafeWallX, lastSafeWallY, radius) then
+        px = lastSafeWallX
+        py = lastSafeWallY
+        PERF_MONITOR_WALL_RECOVERIES = (PERF_MONITOR_WALL_RECOVERIES or 0) + 1
+        return true
+    end
+
+    local baseX = px
+    local baseY = py
+    local step = PLAYER_MOVE_SUBSTEP or 0.08
+    if step < 0.01 then step = 0.01 end
+    if step > 0.05 then step = 0.05 end
+    local maxRadius = (PLAYER_COLLISION_RADIUS or 0.27) + 0.30
+    local r = step
+    while r <= maxRadius do
+        for i = 1, #RECOVER_DIRS do
+            local dir = RECOVER_DIRS[i]
+            local tx = baseX + dir[1] * r
+            local ty = baseY + dir[2] * r
+            if isWalkableWithRadius(tx, ty, radius) then
+                px = tx
+                py = ty
+                lastSafeWallX = tx
+                lastSafeWallY = ty
+                PERF_MONITOR_WALL_RECOVERIES = (PERF_MONITOR_WALL_RECOVERIES or 0) + 1
+                return true
+            end
+        end
+        r = r + step
+    end
+
+    local level = LEVELS and LEVELS[currentLevel]
+    if level and level.playerStart then
+        local sx = level.playerStart.x
+        local sy = level.playerStart.y
+        if isWalkableWithRadius(sx, sy, radius) then
+            px = sx
+            py = sy
+            lastSafeWallX = sx
+            lastSafeWallY = sy
+            PERF_MONITOR_WALL_RECOVERIES = (PERF_MONITOR_WALL_RECOVERIES or 0) + 1
+            return true
+        end
+    end
+
+    return false
 end
 
 -- Movement collision helper (walls + sprites)
@@ -3501,18 +3656,21 @@ function canMove(x, y, radius)
     return true
 end
 
-local function movePlayerWithSlide(deltaX, deltaY)
+local function movePlayerStrict(deltaX, deltaY)
+    recoverPlayerFromWallPenetration()
     local maxDelta = math.max(math.abs(deltaX or 0), math.abs(deltaY or 0))
     if maxDelta <= 0 then
+        updatePlayerSafetyAnchor()
         return
     end
-    local subStep = PLAYER_MOVE_SUBSTEP or 0.08
-    if subStep <= 0 then subStep = 0.08 end
+    local subStep = PLAYER_MOVE_SUBSTEP_STRICT or PLAYER_MOVE_SUBSTEP or 0.04
+    if subStep <= 0 then subStep = 0.04 end
+    if subStep > 0.04 then subStep = 0.04 end
     local subCount = math.ceil(maxDelta / subStep)
     if subCount < 1 then subCount = 1 end
     local stepX = (deltaX or 0) / subCount
     local stepY = (deltaY or 0) / subCount
-    local radius = PLAYER_COLLISION_RADIUS or 0.27
+    local radius = getPlayerCollisionRadius()
     local lastGoodX = px
     local lastGoodY = py
 
@@ -3530,24 +3688,66 @@ local function movePlayerWithSlide(deltaX, deltaY)
         return tile > 0
     end
 
-    for _ = 1, subCount do
-        local nx = px + stepX
-        if canMove(nx, py, radius) then
+    local function tryStrictStep(moveX, moveY)
+        local nx = px + moveX
+        local ny = py + moveY
+        if canMove(nx, ny, radius) then
             px = nx
-        end
-        local ny = py + stepY
-        if canMove(px, ny, radius) then
             py = ny
+            return true
         end
+
+        PERF_MONITOR_MOVE_BLOCKED = (PERF_MONITOR_MOVE_BLOCKED or 0) + 1
+
+        local moved = false
+        if moveX ~= 0 then
+            local slideX = px + moveX
+            if canMove(slideX, py, radius) then
+                px = slideX
+                moved = true
+            end
+        end
+        if moveY ~= 0 then
+            local slideY = py + moveY
+            if canMove(px, slideY, radius) then
+                py = slideY
+                moved = true
+            end
+        end
+        return moved
+    end
+
+    for _ = 1, subCount do
+        local stepMoved = tryStrictStep(stepX, stepY)
         if isInsideSolidTile(px, py) then
             -- Safety: never remain inside a wall cell; restore last valid position.
             px = lastGoodX
             py = lastGoodY
             break
         end
-        lastGoodX = px
-        lastGoodY = py
+        if not isWalkableWithRadius(px, py, radius) then
+            if not recoverPlayerFromWallPenetration() then
+                px = lastGoodX
+                py = lastGoodY
+                break
+            end
+        end
+        if stepMoved then
+            lastGoodX = px
+            lastGoodY = py
+        end
     end
+    updatePlayerSafetyAnchor()
+end
+
+local function movePlayerWithSlide(deltaX, deltaY)
+    movePlayerStrict(deltaX, deltaY)
+end
+
+local function getPlayerRenderNearClipDist()
+    local nearClip = PLAYER_RENDER_NEAR_CLIP_DIST or 0.6
+    if nearClip < 0.25 then nearClip = 0.25 end
+    return nearClip
 end
 
 local function getFogFactor(dist)
@@ -3850,7 +4050,7 @@ EXP_BUCKETS = 8
 EXP_TEX_MAX_DIST = EXP_TEX_MAX_DIST or DRAW_DIST_PRESETS[DRAW_DIST_INDEX]
 EXP_VIEW_DIST = EXP_VIEW_DIST or EXP_TEX_MAX_DIST
 HYBRID_TEX_MAX_H = VIEWPORT_H
-USE_FIXED_RAYCAST = true
+USE_FIXED_RAYCAST = false
 DEBUG_FORCE_FLOAT_RAYCAST = false
 EXP_DIST_LUT_SIZE = 256
 expHeightLut = expHeightLut or {}
@@ -3926,6 +4126,42 @@ local function getExpRayOffsets(rayCols)
     return offsets
 end
 
+local function getStartSolidRayFallback(pxVal, pyVal, mapX, mapY, startTile)
+    local fx = pxVal - mapX
+    local fy = pyVal - mapY
+    if fx < 0 then fx = 0 elseif fx > 0.999 then fx = 0.999 end
+    if fy < 0 then fy = 0 elseif fy > 0.999 then fy = 0.999 end
+
+    local best = fx
+    local side = 0
+    local texCoord = fy
+
+    local rightDist = 1.0 - fx
+    if rightDist < best then
+        best = rightDist
+        side = 0
+        texCoord = fy
+    end
+
+    local topDist = fy
+    if topDist < best then
+        best = topDist
+        side = 1
+        texCoord = fx
+    end
+
+    local bottomDist = 1.0 - fy
+    if bottomDist < best then
+        side = 1
+        texCoord = fx
+    end
+
+    if texCoord < 0.001 then texCoord = 0.001 end
+    if texCoord > 0.998 then texCoord = 0.998 end
+    PERF_MONITOR_RAY_START_SOLID = (PERF_MONITOR_RAY_START_SOLID or 0) + 1
+    return getPlayerRenderNearClipDist(), startTile, side, texCoord, true
+end
+
 local function expCastRayFixed(rayDir, maxDist)
     ensureExpTables()
     local posXFix = math.floor(px * EXP_FIX_TILE)
@@ -3942,7 +4178,7 @@ local function expCastRayFixed(rayDir, maxDist)
     if mapX >= 0 and mapX < 16 and mapY >= 0 and mapY < 16 then
         local startTile = map and map[mapY + 1] and map[mapY + 1][mapX + 1] or 0
         if startTile and startTile > 0 then
-            return 0.4, startTile, 0, 0.0, true
+            return getStartSolidRayFallback(px, py, mapX, mapY, startTile)
         end
     end
 
@@ -4167,7 +4403,8 @@ local function renderWallsExperimentalHybrid()
             PERF_MONITOR_SAMPLE_RAYCAST_US = (PERF_MONITOR_SAMPLE_RAYCAST_US or 0) + (castT1 - castT0)
         end
         local fixedDist = dist * (castCos * playerCos + castSin * playerSin)
-        if fixedDist < 0.4 then fixedDist = 0.4 end
+        local nearClipDist = getPlayerRenderNearClipDist()
+        if fixedDist < nearClipDist then fixedDist = nearClipDist end
         if not rayHit then
             fixedDist = fogView
             if fixedDist < texView then fixedDist = texView end
@@ -4368,7 +4605,7 @@ function castRay(dx, dy, maxDist)
     if mapX >= 0 and mapX < 16 and mapY >= 0 and mapY < 16 then
         local startTile = map and map[mapY + 1] and map[mapY + 1][mapX + 1] or 0
         if startTile and startTile > 0 then
-            return 0.4, startTile, 0, 0.0, true
+            return getStartSolidRayFallback(px, py, mapX, mapY, startTile)
         end
     end
 
@@ -5073,6 +5310,7 @@ local function drawRoofBackdrop()
 end
 
 local function renderGameFrame()
+    recoverPlayerFromWallPenetration()
     -- Keep world rendering live while menu is open for real-time tuning.
     local freezeMenuView = false
     if not freezeMenuView then
@@ -5274,7 +5512,7 @@ local function renderGameFrame()
             drawUiPanel(50, 40, 190, 60, COLOR_MAROON, COLOR_WHITE)
             setFontCached(vmupro.text.FONT_SMALL)
             if inGameDebugMenu then
-                drawMenuText("DEBUG", 92, 44, COLOR_WHITE, COLOR_DARK_GRAY)
+                drawMenuText("DEBUG", 92, 44, COLOR_WHITE)
                 local items = buildDebugMenuItems()
                 local visibleCount = 10
                 local sel = titleDebugSelection
@@ -5291,7 +5529,6 @@ local function renderGameFrame()
                 for i = startIndex, endIndex do
                     local item = items[i]
                     local y = 74 + drawRow * 16
-                    local bgColor = COLOR_DARK_GRAY
                     local textColor = COLOR_LIGHT_GRAY
                     local label = "  " .. item
                     if i == sel then
@@ -5299,13 +5536,13 @@ local function renderGameFrame()
                         label = "> " .. item
                     end
                     setFontCached(vmupro.text.FONT_TINY_6x8)
-                    drawMenuText(label, 54, y + 2, textColor, bgColor)
+                    drawMenuText(label, 54, y + 2, textColor)
                     drawRow = drawRow + 1
                 end
                 setFontCached(vmupro.text.FONT_TINY_6x8)
-                drawMenuText("L/R ADJUST", 54, 222, COLOR_WHITE, COLOR_DARK_GRAY)
+                drawMenuText("L/R ADJUST", 54, 222, COLOR_WHITE)
             else
-                drawMenuText("OPTIONS", 86, 44, COLOR_WHITE, COLOR_DARK_GRAY)
+                drawMenuText("OPTIONS", 86, 44, COLOR_WHITE)
                 -- Options items
                 local soundText = "SOUND: " .. (soundEnabled and "ON" or "OFF")
                 local healthText = "HEALTH%: " .. (showHealthPercent and "ON" or "OFF")
@@ -5320,7 +5557,6 @@ local function renderGameFrame()
                 local optItems = {soundText, healthText, enemiesText, propsText, texturesText, fpsText, resText, minimapText, renderText, debugText, "BACK"}
                 for i, item in ipairs(optItems) do
                     local y = 70 + (i - 1) * 15
-                    local bgColor = COLOR_DARK_GRAY
                     local textColor = COLOR_LIGHT_GRAY
                     local label = "  " .. item
                     if i == optionsSelection then
@@ -5328,7 +5564,7 @@ local function renderGameFrame()
                         label = "> " .. item
                     end
                     setFontCached(vmupro.text.FONT_SMALL)
-                    drawMenuText(label, 54, y + 1, textColor, bgColor)
+                    drawMenuText(label, 54, y + 1, textColor)
                 end
             end
         else
@@ -5338,12 +5574,11 @@ local function renderGameFrame()
             -- Title bar
             drawUiPanel(60, 70, 180, 92, COLOR_MAROON, COLOR_WHITE)
             setFontCached(vmupro.text.FONT_SMALL)
-            drawMenuText("PAUSED", 88, 75, COLOR_WHITE, COLOR_DARK_GRAY)
+            drawMenuText("PAUSED", 88, 75, COLOR_WHITE)
             -- Menu items
             local items = {"RESUME", "OPTIONS", "RESTART", "MENU", "QUIT"}
             for i, item in ipairs(items) do
                 local y = 95 + (i - 1) * 20
-                local bgColor = COLOR_DARK_GRAY
                 local textColor = COLOR_LIGHT_GRAY
                 local label = "  " .. item
                 if i == menuSelection then
@@ -5351,7 +5586,7 @@ local function renderGameFrame()
                     label = "> " .. item
                 end
                 setFontCached(vmupro.text.FONT_SMALL)
-                drawMenuText(label, 78, y + 2, textColor, bgColor)
+                drawMenuText(label, 78, y + 2, textColor)
             end
         end
     end
@@ -5511,7 +5746,7 @@ function AppMain()
     end
     enterTitle()
     logBoot(vmupro.system.LOG_ERROR, "B enterTitle done")
-    applyDoubleBufferMode(DEBUG_DOUBLE_BUFFER)
+    syncDoubleBufferForState()
     local bootLoopLogged = false
     local bootLogEvery = 300
     local fpsWindowStartUs = (vmupro.system and vmupro.system.getTimeUs and vmupro.system.getTimeUs()) or 0
@@ -5942,6 +6177,8 @@ function AppMain()
                         elseif menuSelection == 3 then
                             -- Reset position and health
                             px, py, pdir = 2.5, 2.5, 0
+                            lastSafeWallX = px
+                            lastSafeWallY = py
                             playerHealth = MAX_HEALTH
                             showMenu = false
                         elseif menuSelection == 4 then
@@ -6082,6 +6319,8 @@ function AppMain()
                             movePlayerWithSlide(sdx, sdy)
                         end
 
+                        recoverPlayerFromWallPenetration()
+
                         if simStep == 1 and pressedPower then
                             showMenu = true
                             menuSelection = 1
@@ -6104,6 +6343,9 @@ function AppMain()
             logBoot(vmupro.system.LOG_ERROR, "title/menu error: " .. tostring(errTitle))
             quitApp("title/menu error: " .. tostring(errTitle))
         end
+
+        -- Keep DBUF policy state-aware so title rendering never flips between stale buffers.
+        syncDoubleBufferForState()
 
         -- Render based on game state
         local renderSectionStartUs = perfSectionClock and perfSectionClock()
