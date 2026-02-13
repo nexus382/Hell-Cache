@@ -855,7 +855,11 @@ PLAYER_MOVE_SUBSTEP_STRICT = 0.04
 PLAYER_WALL_COLLISION_INSET = 0.0
 PLAYER_WALL_CLEARANCE_EPSILON = 0.004
 -- Prevent near-contact projection blowup when player is pressed against walls.
-PLAYER_RENDER_NEAR_CLIP_DIST = 0.6
+PLAYER_RENDER_NEAR_CLIP_DIST = 0.38
+PLAYER_WALL_CONTACT_FRAMES = 0
+PLAYER_WALL_CONTACT_HOLD_FRAMES = 4
+WALL_NEAR_STABILITY_DIST = 1.85
+WALL_SEAM_DISABLE_NEAR_DIST = 1.35
 WALL_TEX_SEAM_OVERDRAW = true
 WALL_TEX_SEAM_PIXELS = 1
 DEBUG_DISABLE_PROPS = false
@@ -2713,84 +2717,16 @@ local drawRectOutline
 drawUiText = function(text, x, y, textColor, bgColor)
     local fg = textColor or COLOR_WHITE
     local bg = bgColor
-    -- Keep solid text backgrounds, but avoid pure black boxes around menu text.
+    -- Keep solid text backgrounds for non-menu UI labels.
     if bg == nil or bg == COLOR_BLACK then
         bg = UI_TEXT_SOLID_BG or COLOR_DARK_GRAY
     end
     vmupro.graphics.drawText(text, x, y, fg, bg)
 end
 
-local MENU_TEXT_DRAW_IMPL = nil
-local MENU_TEXT_MODE_LABEL = "unset"
-local MENU_TEXT_MODE_LOGGED = false
-
 local function drawMenuText(text, x, y, textColor)
     local fg = textColor or COLOR_WHITE
-
-    if not MENU_TEXT_DRAW_IMPL then
-        local g = vmupro.graphics
-
-        local function setMode(label, impl)
-            MENU_TEXT_MODE_LABEL = label
-            MENU_TEXT_DRAW_IMPL = impl
-            if enableBootLogs and not MENU_TEXT_MODE_LOGGED then
-                MENU_TEXT_MODE_LOGGED = true
-                safeLog("INFO", "Menu text draw mode: " .. label)
-            end
-        end
-
-        -- Newer firmware may support transparent text background via nil bg.
-        do
-            local ok = pcall(g.drawText, text, x, y, fg, nil)
-            if ok then
-                setMode("bg_nil_transparent", function(t, px, py, c)
-                    g.drawText(t, px, py, c, nil)
-                end)
-            end
-        end
-
-        -- Some builds may expose transparent constants.
-        if not MENU_TEXT_DRAW_IMPL then
-            local candidates = {
-                {"TRANSPARENT", g.TRANSPARENT},
-                {"CLEAR", g.CLEAR},
-                {"BG_TRANSPARENT", g.BG_TRANSPARENT},
-                {"COLOR_TRANSPARENT", g.COLOR_TRANSPARENT},
-                {"ALPHA_TRANSPARENT", g.ALPHA_TRANSPARENT},
-            }
-            for _, entry in ipairs(candidates) do
-                local label = entry[1]
-                local value = entry[2]
-                if type(value) == "number" then
-                    local ok = pcall(g.drawText, text, x, y, fg, value)
-                    if ok then
-                        setMode("bg_" .. label, function(t, px, py, c)
-                            g.drawText(t, px, py, c, value)
-                        end)
-                        break
-                    end
-                end
-            end
-        end
-
-        -- Legacy compatibility: if 4-arg isn't supported, keep app alive with explicit bg.
-        if not MENU_TEXT_DRAW_IMPL then
-            local ok = pcall(g.drawText, text, x, y, fg)
-            if ok then
-                setMode("arg4_transparent", function(t, px, py, c)
-                    g.drawText(t, px, py, c)
-                end)
-            end
-        end
-
-        if not MENU_TEXT_DRAW_IMPL then
-            setMode("bg_black_fallback", function(t, px, py, c)
-                g.drawText(t, px, py, c, COLOR_BLACK)
-            end)
-        end
-    end
-
-    MENU_TEXT_DRAW_IMPL(text, x, y, fg)
+    vmupro.graphics.drawTextTransparent(text, x, y, fg)
 end
 
 drawUiPanel = function(x1, y1, x2, y2, fillColor, borderColor)
@@ -2831,14 +2767,14 @@ local function drawPerfMonitorOverlay()
     local rowStep = 16
     drawUiPanel(2, 100, 238, 236, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
     setFontCached(vmupro.text.FONT_TINY_6x8)
-    drawUiText(string.format("PF F%.2f R%.2f W%.2f G%.2f", frameMs, rayMs, wallMs, fogMs), baseX, baseY + (rowStep * 0), COLOR_WHITE, COLOR_DARK_GRAY)
-    drawUiText(string.format("PF C%d T%d FB%d FG%d", PERF_MONITOR_WALL_COLS_TOTAL or 0, PERF_MONITOR_WALL_COLS_TEXTURED or 0, PERF_MONITOR_WALL_COLS_FALLBACK or 0, PERF_MONITOR_FOG_COLS or 0), baseX, baseY + (rowStep * 1), COLOR_WHITE, COLOR_DARK_GRAY)
-    drawUiText("PF " .. raysLabel .. "->" .. effLabel .. " " .. modeLabel .. string.format(" B%d R%d S%d", moveBlocked, wallRecoveries, rayStartSolid), baseX, baseY + (rowStep * 2), COLOR_WHITE, COLOR_DARK_GRAY)
-    drawUiText(string.format("DB %s DU%.1fK DL%.1fK", dbLabel, deltaUsageKB, deltaLargestKB), baseX, baseY + (rowStep * 3), COLOR_WHITE, COLOR_DARK_GRAY)
-    drawUiText(string.format("W1=%s K=%s P=%s", wallFmtLabel, wallKeyLabel, wallProjLabel), baseX, baseY + (rowStep * 4), COLOR_WHITE, COLOR_DARK_GRAY)
-    drawUiText(string.format("MP %d/%d/%d/%d/%d", PERF_MONITOR_MIP_COLS_0 or 0, PERF_MONITOR_MIP_COLS_1 or 0, PERF_MONITOR_MIP_COLS_2 or 0, PERF_MONITOR_MIP_COLS_3 or 0, PERF_MONITOR_MIP_COLS_4 or 0), baseX, baseY + (rowStep * 5), COLOR_WHITE, COLOR_DARK_GRAY)
-    drawUiText(string.format("SC I%.2f A%.2f S%.2f L%.2f", inputMs, audioMs, simMs, logicMs), baseX, baseY + (rowStep * 6), COLOR_WHITE, COLOR_DARK_GRAY)
-    drawUiText(string.format("SC R%.2f P%.2f Z%.2f", renderMs, presentMs, sleepMs), baseX, baseY + (rowStep * 7), COLOR_WHITE, COLOR_DARK_GRAY)
+    drawMenuText(string.format("PF F%.2f R%.2f W%.2f G%.2f", frameMs, rayMs, wallMs, fogMs), baseX, baseY + (rowStep * 0), COLOR_WHITE)
+    drawMenuText(string.format("PF C%d T%d FB%d FG%d", PERF_MONITOR_WALL_COLS_TOTAL or 0, PERF_MONITOR_WALL_COLS_TEXTURED or 0, PERF_MONITOR_WALL_COLS_FALLBACK or 0, PERF_MONITOR_FOG_COLS or 0), baseX, baseY + (rowStep * 1), COLOR_WHITE)
+    drawMenuText("PF " .. raysLabel .. "->" .. effLabel .. " " .. modeLabel .. string.format(" B%d R%d S%d", moveBlocked, wallRecoveries, rayStartSolid), baseX, baseY + (rowStep * 2), COLOR_WHITE)
+    drawMenuText(string.format("DB %s DU%.1fK DL%.1fK", dbLabel, deltaUsageKB, deltaLargestKB), baseX, baseY + (rowStep * 3), COLOR_WHITE)
+    drawMenuText(string.format("W1=%s K=%s P=%s", wallFmtLabel, wallKeyLabel, wallProjLabel), baseX, baseY + (rowStep * 4), COLOR_WHITE)
+    drawMenuText(string.format("MP %d/%d/%d/%d/%d", PERF_MONITOR_MIP_COLS_0 or 0, PERF_MONITOR_MIP_COLS_1 or 0, PERF_MONITOR_MIP_COLS_2 or 0, PERF_MONITOR_MIP_COLS_3 or 0, PERF_MONITOR_MIP_COLS_4 or 0), baseX, baseY + (rowStep * 5), COLOR_WHITE)
+    drawMenuText(string.format("SC I%.2f A%.2f S%.2f L%.2f", inputMs, audioMs, simMs, logicMs), baseX, baseY + (rowStep * 6), COLOR_WHITE)
+    drawMenuText(string.format("SC R%.2f P%.2f Z%.2f", renderMs, presentMs, sleepMs), baseX, baseY + (rowStep * 7), COLOR_WHITE)
 end
 
 local function buildDebugMenuItems()
@@ -3361,7 +3297,7 @@ local function drawTitleScreenImpl()
         drawUiPanel(20, 50, 220, 239, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
         drawUiPanel(30, 60, 210, 82, COLOR_MAROON, COLOR_WHITE)
         setFontCached(vmupro.text.FONT_TINY_6x8)
-        drawUiText(titleInDebug and "DEBUG" or "OPTIONS", 92, 65, COLOR_WHITE, COLOR_MAROON)
+        drawMenuText(titleInDebug and "DEBUG" or "OPTIONS", 92, 65, COLOR_WHITE)
 
         local items = {}
         if titleInDebug then
@@ -3396,25 +3332,19 @@ local function drawTitleScreenImpl()
             local startY = titleInDebug and 74 or 90
             local stepY = titleInDebug and 16 or 18
             local y = startY + drawRow * stepY
-            local bgColor = COLOR_DARK_GRAY
             local textColor = COLOR_GRAY
             if i == sel then
                 local boxH = titleInDebug and 12 or 18
                 drawUiPanel(32, y, 208, y + boxH, COLOR_MAROON, COLOR_WHITE)
-                bgColor = COLOR_MAROON
                 textColor = COLOR_WHITE
             end
-            if titleInDebug then
-                setFontCached(vmupro.text.FONT_TINY_6x8)
-            else
-                setFontCached(vmupro.text.FONT_TINY_6x8)
-            end
-            drawUiText(item, x, y + 2, textColor, bgColor)
+            setFontCached(vmupro.text.FONT_TINY_6x8)
+            drawMenuText(item, x, y + 2, textColor)
             drawRow = drawRow + 1
         end
         if titleInDebug then
             setFontCached(vmupro.text.FONT_TINY_6x8)
-            drawUiText("L/R ADJUST", 34, 226, COLOR_WHITE, COLOR_DARK_GRAY)
+            drawMenuText("L/R ADJUST", 34, 226, COLOR_WHITE)
         end
     else
         -- Main title menu
@@ -3425,15 +3355,13 @@ local function drawTitleScreenImpl()
         local items = {"START GAME", "OPTIONS", "EXIT"}
         for i, item in ipairs(items) do
             local y = 153 + (i - 1) * 18
-            local bgColor = COLOR_DARK_GRAY
             local textColor = COLOR_GRAY
             if i == titleSelection then
                 drawUiPanel(70, y, 170, y + 18, COLOR_MAROON, COLOR_WHITE)
-                bgColor = COLOR_MAROON
                 textColor = COLOR_WHITE
             end
             setFontCached(vmupro.text.FONT_SMALL)
-            drawUiText(item, 78, y + 2, textColor, bgColor)
+            drawMenuText(item, 78, y + 2, textColor)
         end
     end
 end
@@ -3449,21 +3377,19 @@ local function drawGameOver()
     -- Title
     drawUiPanel(50, 80, 190, 102, COLOR_MAROON, COLOR_WHITE)
     setFontCached(vmupro.text.FONT_SMALL)
-    drawUiText("GAME OVER", 76, 85, COLOR_WHITE, COLOR_MAROON)
+    drawMenuText("GAME OVER", 76, 85, COLOR_WHITE)
 
     -- Menu items
     local items = {"RESTART", "MENU", "QUIT"}
     for i, item in ipairs(items) do
         local y = 110 + (i - 1) * 18
-        local bgColor = COLOR_DARK_GRAY
         local textColor = COLOR_GRAY
         if i == gameOverSelection then
             drawUiPanel(50, y, 190, y + 18, COLOR_MAROON, COLOR_WHITE)
-            bgColor = COLOR_MAROON
             textColor = COLOR_WHITE
         end
         setFontCached(vmupro.text.FONT_SMALL)
-        drawUiText(item, 86, y + 2, textColor, bgColor)
+        drawMenuText(item, 86, y + 2, textColor)
     end
 end
 
@@ -3673,6 +3599,8 @@ local function movePlayerStrict(deltaX, deltaY)
     local radius = getPlayerCollisionRadius()
     local lastGoodX = px
     local lastGoodY = py
+    local holdWallContact = PLAYER_WALL_CONTACT_HOLD_FRAMES or 4
+    if holdWallContact < 1 then holdWallContact = 1 end
 
     local function isInsideSolidTile(x, y)
         local mx = math.floor(x)
@@ -3714,6 +3642,11 @@ local function movePlayerStrict(deltaX, deltaY)
                 moved = true
             end
         end
+        if not moved then
+            if (PLAYER_WALL_CONTACT_FRAMES or 0) < holdWallContact then
+                PLAYER_WALL_CONTACT_FRAMES = holdWallContact
+            end
+        end
         return moved
     end
 
@@ -3735,6 +3668,9 @@ local function movePlayerStrict(deltaX, deltaY)
         if stepMoved then
             lastGoodX = px
             lastGoodY = py
+        else
+            -- Nothing moved for this substep; avoid re-testing the same blocked step repeatedly.
+            break
         end
     end
     updatePlayerSafetyAnchor()
@@ -3745,8 +3681,8 @@ local function movePlayerWithSlide(deltaX, deltaY)
 end
 
 local function getPlayerRenderNearClipDist()
-    local nearClip = PLAYER_RENDER_NEAR_CLIP_DIST or 0.6
-    if nearClip < 0.25 then nearClip = 0.25 end
+    local nearClip = PLAYER_RENDER_NEAR_CLIP_DIST or 0.38
+    if nearClip < 0.20 then nearClip = 0.20 end
     return nearClip
 end
 
@@ -3836,6 +3772,10 @@ local function drawFogOverlayArea(x1, y1, x2, y2, fogAlpha)
     local ditherSize = FOG_DITHER_SIZE or 3
     if ditherSize < 1 then ditherSize = 1 end
     if ditherSize > 6 then ditherSize = 6 end
+    -- Tie hatch pitch directly to the menu setting:
+    -- lower = finer quality, higher = larger/cheaper hatch.
+    local hatchPitch = (ditherSize * 2) - 1
+    if hatchPitch < 1 then hatchPitch = 1 end
 
     if fogAlpha >= 1.0 then
         -- Full fog path must stay cheap: single fill call.
@@ -3843,35 +3783,37 @@ local function drawFogOverlayArea(x1, y1, x2, y2, fogAlpha)
         return
     end
 
-    -- Fast translucent fog: quantized bands with sparse dual-diagonal hatch.
-    -- Cross-hatch is only added at higher fog coverage to keep cost low.
-    local levels = 14
+    -- Lightweight cross-hatch fog:
+    -- 1) sparse band fill
+    -- 2) slash hatch
+    -- 3) backslash hatch at higher density
+    local levels = 12
     local coverage = math.floor((fogAlpha * levels) + 0.5)
     if coverage < 1 then return end
     if coverage > levels then coverage = levels end
-    local bandH = ditherSize
-    if bandH < 1 then bandH = 1 end
-    local accentStepA = (ditherSize * 2) + 4
-    local accentStepB = accentStepA + ditherSize + 2
+    local bandH = hatchPitch
+    local accentStepA = (hatchPitch * 2) + 3
+    local accentStepB = accentStepA + hatchPitch + 2
+    local xCell = math.floor(x1 / hatchPitch)
     local threshold = coverage / levels
     for y = y1, y2, bandH do
         local yb = y + bandH - 1
         if yb > y2 then yb = y2 end
-        local rowIdx = math.floor((y - y1) / bandH)
-        local bandMix = ((rowIdx * 5 + x1) % levels) / levels
+        local rowIdx = math.floor(y / bandH)
+        local bandMix = ((rowIdx * 3 + xCell) % levels) / levels
         if bandMix < threshold then
             vmupro.graphics.drawFillRect(x1, y, x2, yb, fogPrimary)
-            if coverage >= 4 then
-                local startA = x1 + ((rowIdx * (ditherSize + 1) + ditherSize) % accentStepA)
-                for x = startA, x2, accentStepA do
-                    vmupro.graphics.drawFillRect(x, y, x, yb, fogAccent)
+            if coverage >= 3 then
+                local startA = x1 + ((rowIdx * hatchPitch + x1) % accentStepA)
+                if startA <= x2 then
+                    vmupro.graphics.drawFillRect(startA, y, startA, yb, fogAccent)
                 end
             end
             if coverage >= 7 then
-                local rowPhase = (rowIdx * (ditherSize + 2)) % accentStepB
+                local rowPhase = (rowIdx * (hatchPitch + 1) + x1) % accentStepB
                 local startB = x1 + ((accentStepB - rowPhase) % accentStepB)
-                for x = startB, x2, accentStepB do
-                    vmupro.graphics.drawFillRect(x, y, x, yb, fogAccentCross)
+                if startB <= x2 then
+                    vmupro.graphics.drawFillRect(startB, y, startB, yb, fogAccentCross)
                 end
             end
         end
@@ -3975,7 +3917,12 @@ local function drawWallTextureColumn(wtype, side, texCoord, sx, y1, y2, colW, di
     end
 
     local texDrawWidth = drawWidth
-    if WALL_TEX_SEAM_OVERDRAW and drawWidth <= 4 then
+    local seamNearDist = WALL_SEAM_DISABLE_NEAR_DIST or 1.35
+    local allowSeamOverdraw = WALL_TEX_SEAM_OVERDRAW
+    if distToWall and distToWall <= seamNearDist then
+        allowSeamOverdraw = false
+    end
+    if allowSeamOverdraw and drawWidth <= 4 then
         local seamPx = WALL_TEX_SEAM_PIXELS or 1
         if seamPx < 0 then seamPx = 0 end
         if seamPx > 2 then seamPx = 2 end
@@ -4321,7 +4268,12 @@ local function renderWallsExperimentalHybrid()
         raySin = math.sin(baseAngle)
     end
     perfMonitorSetRayInfo(basePresetIdx, effectivePresetIdx, useFixedRaycast)
-    local stableProjection = (WALL_PROJECTION_MODE == "stable")
+    local wallContactActive = (PLAYER_WALL_CONTACT_FRAMES or 0) > 0
+    if wallContactActive then
+        PLAYER_WALL_CONTACT_FRAMES = (PLAYER_WALL_CONTACT_FRAMES or 0) - 1
+    end
+    local stableProjection = (WALL_PROJECTION_MODE == "stable") or wallContactActive
+    local nearStabilityDist = WALL_NEAR_STABILITY_DIST or 1.85
 
     -- Ray-LOD derives from preset steps and keeps mip tiers independent where possible.
     local lodStride1, lodStride2, lodStride3, lodStride4 = 1, 2, 3, 4
@@ -4411,7 +4363,10 @@ local function renderWallsExperimentalHybrid()
             if fixedDist > hybridViewDist then fixedDist = hybridViewDist end
         end
 
-        local nearForce = rayHit and (fixedDist < (MIP_NEAR_FORCE_DIST or 1.35))
+        local nearForce = rayHit and (
+            fixedDist < (MIP_NEAR_FORCE_DIST or 1.35)
+            or (wallContactActive and fixedDist < nearStabilityDist)
+        )
         if WALL_MIPMAP_ENABLED and MIP_LOD_ENABLED and not nearForce then
             if fixedDist >= mip4Thresh then
                 mipLevel = 4
@@ -6318,8 +6273,6 @@ function AppMain()
                         if heldB then
                             movePlayerWithSlide(sdx, sdy)
                         end
-
-                        recoverPlayerFromWallPenetration()
 
                         if simStep == 1 and pressedPower then
                             showMenu = true
