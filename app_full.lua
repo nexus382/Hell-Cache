@@ -3,8 +3,8 @@
 
 import "api/system"
 
-enableBootLogs = true
-enablePerfLogs = true
+enableBootLogs = false
+enablePerfLogs = false
 showFpsOverlay = true
 lastFps = 0
 
@@ -19,9 +19,23 @@ PERF_MONITOR_EMA_FRAME_US = 0
 PERF_MONITOR_EMA_RAYCAST_US = 0
 PERF_MONITOR_EMA_WALL_US = 0
 PERF_MONITOR_EMA_FOG_US = 0
+PERF_MONITOR_EMA_INPUT_US = 0
+PERF_MONITOR_EMA_AUDIO_US = 0
+PERF_MONITOR_EMA_SIM_US = 0
+PERF_MONITOR_EMA_LOGIC_US = 0
+PERF_MONITOR_EMA_RENDER_US = 0
+PERF_MONITOR_EMA_PRESENT_US = 0
+PERF_MONITOR_EMA_SLEEP_US = 0
 PERF_MONITOR_SAMPLE_RAYCAST_US = 0
 PERF_MONITOR_SAMPLE_WALL_US = 0
 PERF_MONITOR_SAMPLE_FOG_US = 0
+PERF_MONITOR_SAMPLE_INPUT_US = 0
+PERF_MONITOR_SAMPLE_AUDIO_US = 0
+PERF_MONITOR_SAMPLE_SIM_US = 0
+PERF_MONITOR_SAMPLE_LOGIC_US = 0
+PERF_MONITOR_SAMPLE_RENDER_US = 0
+PERF_MONITOR_SAMPLE_PRESENT_US = 0
+PERF_MONITOR_SAMPLE_SLEEP_US = 0
 PERF_MONITOR_WALL_COLS_TOTAL = 0
 PERF_MONITOR_WALL_COLS_TEXTURED = 0
 PERF_MONITOR_WALL_COLS_FALLBACK = 0
@@ -94,6 +108,13 @@ local function perfMonitorBeginFrame()
     PERF_MONITOR_SAMPLE_RAYCAST_US = 0
     PERF_MONITOR_SAMPLE_WALL_US = 0
     PERF_MONITOR_SAMPLE_FOG_US = 0
+    PERF_MONITOR_SAMPLE_INPUT_US = 0
+    PERF_MONITOR_SAMPLE_AUDIO_US = 0
+    PERF_MONITOR_SAMPLE_SIM_US = 0
+    PERF_MONITOR_SAMPLE_LOGIC_US = 0
+    PERF_MONITOR_SAMPLE_RENDER_US = 0
+    PERF_MONITOR_SAMPLE_PRESENT_US = 0
+    PERF_MONITOR_SAMPLE_SLEEP_US = 0
     PERF_MONITOR_WALL_COLS_TOTAL = 0
     PERF_MONITOR_WALL_COLS_TEXTURED = 0
     PERF_MONITOR_WALL_COLS_FALLBACK = 0
@@ -132,6 +153,13 @@ local function perfMonitorEndFrame(frameUs, frameNowUs)
         PERF_MONITOR_EMA_RAYCAST_US = perfEma(PERF_MONITOR_EMA_RAYCAST_US, PERF_MONITOR_SAMPLE_RAYCAST_US)
         PERF_MONITOR_EMA_WALL_US = perfEma(PERF_MONITOR_EMA_WALL_US, PERF_MONITOR_SAMPLE_WALL_US)
         PERF_MONITOR_EMA_FOG_US = perfEma(PERF_MONITOR_EMA_FOG_US, PERF_MONITOR_SAMPLE_FOG_US)
+        PERF_MONITOR_EMA_INPUT_US = perfEma(PERF_MONITOR_EMA_INPUT_US, PERF_MONITOR_SAMPLE_INPUT_US)
+        PERF_MONITOR_EMA_AUDIO_US = perfEma(PERF_MONITOR_EMA_AUDIO_US, PERF_MONITOR_SAMPLE_AUDIO_US)
+        PERF_MONITOR_EMA_SIM_US = perfEma(PERF_MONITOR_EMA_SIM_US, PERF_MONITOR_SAMPLE_SIM_US)
+        PERF_MONITOR_EMA_LOGIC_US = perfEma(PERF_MONITOR_EMA_LOGIC_US, PERF_MONITOR_SAMPLE_LOGIC_US)
+        PERF_MONITOR_EMA_RENDER_US = perfEma(PERF_MONITOR_EMA_RENDER_US, PERF_MONITOR_SAMPLE_RENDER_US)
+        PERF_MONITOR_EMA_PRESENT_US = perfEma(PERF_MONITOR_EMA_PRESENT_US, PERF_MONITOR_SAMPLE_PRESENT_US)
+        PERF_MONITOR_EMA_SLEEP_US = perfEma(PERF_MONITOR_EMA_SLEEP_US, PERF_MONITOR_SAMPLE_SLEEP_US)
     end
 
     local nowUs = frameNowUs or perfNowUs()
@@ -143,15 +171,21 @@ local function perfMonitorEndFrame(frameUs, frameNowUs)
     end
     if (nowUs - PERF_MONITOR_LAST_LOG_US) >= (PERF_MONITOR_LOG_INTERVAL_US or 1000000) then
         logPerf(string.format(
-            "MON frame=%.2fms ray=%.2fms wall=%.2fms fog=%.2fms rays=%s->%s mode=%s auto=%s dbuf=%s dU=%dB dL=%dB cols=%d tex=%d fb=%d fogCols=%d",
+            "MON frame=%.2fms ray=%.2fms wall=%.2fms fog=%.2fms sec(i/a/s/l/r/p/z)=%.2f/%.2f/%.2f/%.2f/%.2f/%.2f/%.2fms rays=%s->%s mode=%s dbuf=%s dU=%dB dL=%dB cols=%d tex=%d fb=%d fogCols=%d",
             (PERF_MONITOR_EMA_FRAME_US or 0) / 1000.0,
             (PERF_MONITOR_EMA_RAYCAST_US or 0) / 1000.0,
             (PERF_MONITOR_EMA_WALL_US or 0) / 1000.0,
             (PERF_MONITOR_EMA_FOG_US or 0) / 1000.0,
+            (PERF_MONITOR_EMA_INPUT_US or 0) / 1000.0,
+            (PERF_MONITOR_EMA_AUDIO_US or 0) / 1000.0,
+            (PERF_MONITOR_EMA_SIM_US or 0) / 1000.0,
+            (PERF_MONITOR_EMA_LOGIC_US or 0) / 1000.0,
+            (PERF_MONITOR_EMA_RENDER_US or 0) / 1000.0,
+            (PERF_MONITOR_EMA_PRESENT_US or 0) / 1000.0,
+            (PERF_MONITOR_EMA_SLEEP_US or 0) / 1000.0,
             tostring(PERF_MONITOR_LAST_BASE_RAY_LABEL or "-"),
             tostring(PERF_MONITOR_LAST_EFFECTIVE_RAY_LABEL or "-"),
             tostring(PERF_MONITOR_LAST_RAYCAST_MODE or "FLOAT"),
-            ADAPTIVE_RAY_BUDGET_ENABLED and "ON" or "OFF",
             (DEBUG_DOUBLE_BUFFER and DOUBLE_BUFFER_ACTIVE) and "ON" or "OFF",
             DOUBLE_BUFFER_DELTA_USAGE_BYTES or 0,
             DOUBLE_BUFFER_DELTA_LARGEST_BYTES or 0,
@@ -406,8 +440,6 @@ COLOR_WHITE = 0xFFFF
 COLOR_RED = 0x00F8
 COLOR_YELLOW = 0xE0FF
 COLOR_ORANGE = 0x20FC
-COLOR_SKIN = 0xB6BD
-COLOR_SKIN_DARK = 0x9294
 COLOR_BROWN = 0x4051
 COLOR_DARK_BROWN = 0x2028
 COLOR_LIGHT_BROWN = 0x6079
@@ -420,9 +452,7 @@ COLOR_LIGHT_BLUE = 0x1F42
 COLOR_GREEN = 0xE007
 COLOR_MAROON = 0x0060
 COLOR_DARK_MAROON = 0x0040
-COLOR_LIGHT_MAROON = 0x0861
 COLOR_SILVER = 0xF7BD
-COLOR_DARK_SILVER = 0xCE7B
 
 -- Dungeon colors
 COLOR_FLOOR = 0x6931
@@ -622,7 +652,6 @@ function getLevelLabel(levelId)
 end
 map = nil
 sprites = nil
-wallTiles = nil
 
 sinTable = {}
 cosTable = {}
@@ -675,7 +704,6 @@ gameBgmSample = nil
 showHealthPercent = true  -- Health % display on/off
 
 -- Sound effects
-    swordSwooshSynth = nil
     gruntSample = nil
     swordHitSample = nil
     swordMissSample = nil
@@ -695,9 +723,6 @@ TITLE_MUSIC_VOLUME = 1.0
 TITLE_VOICE_VOLUME = 1.0
 TITLE_MUSIC_REPEAT_COUNT = 99
 TITLE_VOICE_REPEAT_COUNT = 0
--- Enemy attack effects (list of active swipe effects)
-swipeEffects = {}  -- {x, y, angle, frame, maxFrames}
-
 -- Attack constants
 DETECTION_RANGE = 4    -- How far soldier can see player
 ATTACK_RANGE = 1.0     -- Distance to attack (about 1 body length)
@@ -725,9 +750,8 @@ wallSheetMetal = nil
 wallSheetWood = nil
 wallSheetWindow = nil
 wallTextureLoadAttempted = false
-USE_WALL_QUADS = true
 DEBUG_DISABLE_WALL_TEXTURE = false
-DEBUG_DISABLE_ROOF_TEXTURE = false
+DEBUG_DISABLE_ROOF_TEXTURE = true
 DEBUG_SKIP_SPRITES = false
 WALL_TEXTURE_MODE = "proper" -- locked to proper (single renderer pipeline)
 WALL_MIPMAP_ENABLED = true
@@ -762,14 +786,14 @@ RAY_PRESETS = {
     {label = "120x2", rays = 120, colW = 2},
     {label = "240x1", rays = 240, colW = 1},
 }
-RAY_PRESET_INDEX = 12
+RAY_PRESET_INDEX = 10
 DRAW_DIST_PRESETS = {3, 4, 5, 6, 8, 10, 12, 14, 16, 20, 24}
 DRAW_DIST_INDEX = 7
 MIPMAP_DIST_PRESETS = {1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24}
-MIPMAP1_DIST_INDEX = 5
-MIPMAP2_DIST_INDEX = 6
+MIPMAP1_DIST_INDEX = 6
+MIPMAP2_DIST_INDEX = 8
 MIPMAP3_DIST_INDEX = 11
-MIPMAP4_DIST_INDEX = 13
+MIPMAP4_DIST_INDEX = 12
 EXP_TEX_MAX_DIST = DRAW_DIST_PRESETS[DRAW_DIST_INDEX]
 EXP_VIEW_DIST = EXP_TEX_MAX_DIST
 WALL_MIPMAP_DIST1 = MIPMAP_DIST_PRESETS[MIPMAP1_DIST_INDEX]
@@ -791,10 +815,10 @@ PLAYER_RADIUS = 0.50
 -- Slightly slimmer than visual body width to reduce "invisible corner snag" feeling.
 PLAYER_COLLISION_RADIUS = 0.24
 PLAYER_MOVE_SUBSTEP = 0.08
+PLAYER_WALL_COLLISION_INSET = 0.005
 WALL_TEX_SEAM_OVERDRAW = true
 WALL_TEX_SEAM_PIXELS = 1
 DEBUG_DISABLE_PROPS = false
-WALL_TEX_MAX_DIST = 10.0
 FOG_DISTANCE_PRESETS = {
     2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5,
     7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5,
@@ -807,19 +831,19 @@ FOG_END_PRESETS = FOG_DISTANCE_PRESETS
 FOG_CUTOFF_PRESETS = FOG_DISTANCE_PRESETS
 FOG_COLOR_PRESETS = {COLOR_DARK_GRAY, COLOR_GRAY, COLOR_LIGHT_GRAY, COLOR_WHITE, COLOR_BLACK, COLOR_MAROON}
 FOG_COLOR_LABELS = {"DARK", "GRAY", "LGRAY", "WHITE", "BLACK", "MAROON"}
-FOG_START_INDEX = 13
-FOG_END_INDEX = 16
-FOG_CUTOFF_INDEX = 16
-FOG_COLOR_INDEX = 1
+FOG_START_INDEX = 16
+FOG_END_INDEX = 23
+FOG_CUTOFF_INDEX = 17
+FOG_COLOR_INDEX = 5
 FOG_START = FOG_START_PRESETS[FOG_START_INDEX]
 FOG_END = FOG_END_PRESETS[FOG_END_INDEX]
 FOG_TEX_CUTOFF = FOG_CUTOFF_PRESETS[FOG_CUTOFF_INDEX]
 FOG_COLOR = FOG_COLOR_PRESETS[FOG_COLOR_INDEX]
 FOG_DITHER_SIZE_PRESETS = {1, 2, 3, 4, 5, 6}
-FOG_DITHER_SIZE_INDEX = 3
+FOG_DITHER_SIZE_INDEX = 1
 FOG_DITHER_SIZE = FOG_DITHER_SIZE_PRESETS[FOG_DITHER_SIZE_INDEX]
 FAR_TEX_OFF_PRESETS = {3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 20, 24, 999}
-FAR_TEX_OFF_INDEX = #FAR_TEX_OFF_PRESETS
+FAR_TEX_OFF_INDEX = 8
 FAR_TEX_OFF_DIST = FAR_TEX_OFF_PRESETS[FAR_TEX_OFF_INDEX]
 MIP_LOD_ENABLED = true
 WALL_PROJECTION_MODE = "adaptive" -- adaptive | stable
@@ -827,16 +851,7 @@ DEBUG_DISABLE_FOG = false
 DEBUG_DISABLE_EFFECTS = true
 LOW_RES_WALLS = true
 LOW_RES_MODE = "quality"
-ADAPTIVE_RAY_BUDGET_ENABLED = false
-ADAPTIVE_RAY_RUNTIME_INDEX = nil
-ADAPTIVE_RAY_EMA_US = 0
-ADAPTIVE_RAY_ALPHA = 0.2
-ADAPTIVE_RAY_COOLDOWN = 0
-ADAPTIVE_RAY_COOLDOWN_FRAMES = 18
-ADAPTIVE_RAY_DOWN_HYST_US = 2200
-ADAPTIVE_RAY_UP_HYST_US = 2600
-ADAPTIVE_RAY_UNCAPPED_TARGET_US = 16667
-SHOW_MINIMAP = true
+SHOW_MINIMAP = false
 RENDERER_MODE = "exp_hybrid" -- locked single renderer
 DEBUG_DISABLE_ENEMIES = false
 textureDebugFrame = -1
@@ -845,17 +860,6 @@ local function wallQuadLog(msg)
     if enableBootLogs and DEBUG_WALL_QUADS_LOG and wallQuadLogCount < 30 then
         print(msg)
         wallQuadLogCount = wallQuadLogCount + 1
-    end
-end
-local function renderLog(msg)
-    if enableBootLogs and DEBUG_WALL_QUADS_LOG then
-        print("[RENDER] " .. msg)
-    end
-end
-
-local function textureLog(msg)
-    if DEBUG_TEXTURE_LOG and enableBootLogs then
-        safeLog("INFO", "[TEX] " .. msg)
     end
 end
 
@@ -887,6 +891,7 @@ titleOptionsSelection = 1
 titleDebugSelection = 1
 DEBUG_PAGE_CORE = 1
 DEBUG_PAGE_VIDEO = 2
+DEBUG_PAGE_PERF = 3
 titleDebugPage = DEBUG_PAGE_CORE
 titleNeedsRedraw = true
 FPS_TARGET_MODE = "uncapped" -- uncapped | 60 | 45 | 30 | 24 (render pacing only)
@@ -896,6 +901,10 @@ AUDIO_UPDATE_TARGET_HZ = AUDIO_MIX_HZ_PRESETS[AUDIO_MIX_HZ_INDEX]
 AUDIO_UPDATE_STEP_US = math.floor(1000000 / AUDIO_UPDATE_TARGET_HZ)
 AUDIO_UPDATE_MAX_STEPS = 3
 AUDIO_UPDATE_MAX_BACKLOG_STEPS = 3
+
+PERF_QUALITY_PRESETS = {"QUALITY", "BALANCED", "PERFORMANCE"}
+PERF_QUALITY_INDEX = 0
+UI_TEXT_SOLID_BG = COLOR_DARK_GRAY
 
 local function setAudioMixHz(hz)
     local target = hz or 60
@@ -918,6 +927,31 @@ local function quitApp(reason)
     app_running = false
 end
 
+local function getDebugPageName(pageId)
+    if pageId == DEBUG_PAGE_VIDEO then
+        return "VIDEO"
+    elseif pageId == DEBUG_PAGE_PERF then
+        return "PERF/Q"
+    end
+    return "DEBUG"
+end
+
+local function stepDebugPage(delta)
+    local pages = {DEBUG_PAGE_CORE, DEBUG_PAGE_VIDEO, DEBUG_PAGE_PERF}
+    local current = 1
+    for i = 1, #pages do
+        if pages[i] == titleDebugPage then
+            current = i
+            break
+        end
+    end
+    local nextIdx = current + (delta or 1)
+    if nextIdx < 1 then nextIdx = #pages end
+    if nextIdx > #pages then nextIdx = 1 end
+    titleDebugPage = pages[nextIdx]
+    titleDebugSelection = 1
+end
+
 local function lockRendererMode()
     -- Single supported renderer path: EXP-H with proper column textures.
     if RENDERER_MODE ~= "exp_hybrid" then
@@ -934,6 +968,22 @@ local function nearestPresetIndex(list, target)
     local bestDelta = math.abs((list[1] or target) - target)
     for i = 2, #list do
         local delta = math.abs((list[i] or target) - target)
+        if delta < bestDelta then
+            bestDelta = delta
+            bestIdx = i
+        end
+    end
+    return bestIdx
+end
+
+local function nearestRayPresetIndex(targetRays)
+    if not RAY_PRESETS or #RAY_PRESETS == 0 then
+        return 1
+    end
+    local bestIdx = 1
+    local bestDelta = math.abs((RAY_PRESETS[1].rays or targetRays) - targetRays)
+    for i = 2, #RAY_PRESETS do
+        local delta = math.abs((RAY_PRESETS[i].rays or targetRays) - targetRays)
         if delta < bestDelta then
             bestDelta = delta
             bestIdx = i
@@ -990,17 +1040,6 @@ local function normalizeFogRange()
     refreshExpViewDistance()
 end
 
-local function syncFogToDrawDistance()
-    local viewDist = EXP_TEX_MAX_DIST or 8.0
-    local startTarget = viewDist - 2.0
-    local endTarget = viewDist + 1.0
-    FOG_START_INDEX = nearestPresetIndex(FOG_START_PRESETS, startTarget)
-    FOG_END_INDEX = nearestPresetIndex(FOG_END_PRESETS, endTarget)
-    normalizeFogRange()
-    FOG_CUTOFF_INDEX = nearestPresetIndex(FOG_CUTOFF_PRESETS, FOG_END)
-    FOG_TEX_CUTOFF = FOG_CUTOFF_PRESETS[FOG_CUTOFF_INDEX]
-end
-
 local function normalizeMipmapRanges()
     if not MIPMAP_DIST_PRESETS or #MIPMAP_DIST_PRESETS == 0 then return end
     local n = #MIPMAP_DIST_PRESETS
@@ -1048,6 +1087,54 @@ local function normalizeFarTextureCutoff()
     FAR_TEX_OFF_DIST = FAR_TEX_OFF_PRESETS[FAR_TEX_OFF_INDEX]
 end
 
+local function markPerfQualityCustom()
+    PERF_QUALITY_INDEX = 0
+end
+
+local function applyPerfQualityPreset(newIndex)
+    if not PERF_QUALITY_PRESETS or #PERF_QUALITY_PRESETS == 0 then
+        return
+    end
+    PERF_QUALITY_INDEX = clampInt(newIndex or PERF_QUALITY_INDEX or 1, 1, #PERF_QUALITY_PRESETS)
+    local preset = PERF_QUALITY_PRESETS[PERF_QUALITY_INDEX]
+
+    if preset == "QUALITY" then
+        LOW_RES_MODE = "quality"
+        RAY_PRESET_INDEX = nearestRayPresetIndex(120)
+        DRAW_DIST_INDEX = nearestPresetIndex(DRAW_DIST_PRESETS, 16)
+        FAR_TEX_OFF_INDEX = nearestPresetIndex(FAR_TEX_OFF_PRESETS, 999)
+        WALL_MIPMAP_ENABLED = true
+        MIP_LOD_ENABLED = true
+        FOG_DITHER_SIZE_INDEX = nearestPresetIndex(FOG_DITHER_SIZE_PRESETS, 2)
+    elseif preset == "PERFORMANCE" then
+        LOW_RES_MODE = "fast"
+        RAY_PRESET_INDEX = nearestRayPresetIndex(48)
+        DRAW_DIST_INDEX = nearestPresetIndex(DRAW_DIST_PRESETS, 8)
+        FAR_TEX_OFF_INDEX = nearestPresetIndex(FAR_TEX_OFF_PRESETS, 10)
+        WALL_MIPMAP_ENABLED = true
+        MIP_LOD_ENABLED = true
+        FOG_DITHER_SIZE_INDEX = nearestPresetIndex(FOG_DITHER_SIZE_PRESETS, 4)
+    else
+        -- BALANCED default
+        LOW_RES_MODE = "quality"
+        RAY_PRESET_INDEX = nearestRayPresetIndex(80)
+        DRAW_DIST_INDEX = nearestPresetIndex(DRAW_DIST_PRESETS, 12)
+        FAR_TEX_OFF_INDEX = nearestPresetIndex(FAR_TEX_OFF_PRESETS, 10)
+        WALL_MIPMAP_ENABLED = true
+        MIP_LOD_ENABLED = true
+        FOG_DITHER_SIZE_INDEX = nearestPresetIndex(FOG_DITHER_SIZE_PRESETS, 1)
+    end
+
+    EXP_TEX_MAX_DIST = DRAW_DIST_PRESETS[DRAW_DIST_INDEX]
+    if FOG_DITHER_SIZE_PRESETS and #FOG_DITHER_SIZE_PRESETS > 0 then
+        FOG_DITHER_SIZE_INDEX = clampInt(FOG_DITHER_SIZE_INDEX or 1, 1, #FOG_DITHER_SIZE_PRESETS)
+        FOG_DITHER_SIZE = FOG_DITHER_SIZE_PRESETS[FOG_DITHER_SIZE_INDEX]
+    end
+    normalizeFarTextureCutoff()
+    normalizeMipmapRanges()
+    refreshExpViewDistance()
+end
+
 local function getBaseEffectiveRayPresetIndex(baseIdx)
     local n = (RAY_PRESETS and #RAY_PRESETS) or 0
     if n <= 0 then return 1 end
@@ -1061,99 +1148,13 @@ local function getBaseEffectiveRayPresetIndex(baseIdx)
 end
 
 local function getEffectiveRayPresetIndex(baseIdx)
-    local baseEffective = getBaseEffectiveRayPresetIndex(baseIdx)
-    if ADAPTIVE_RAY_BUDGET_ENABLED ~= true then
-        return baseEffective
-    end
-    local n = (RAY_PRESETS and #RAY_PRESETS) or 0
-    if n <= 0 then
-        return baseEffective
-    end
-    if not ADAPTIVE_RAY_RUNTIME_INDEX then
-        ADAPTIVE_RAY_RUNTIME_INDEX = baseEffective
-    end
-    ADAPTIVE_RAY_RUNTIME_INDEX = clampInt(ADAPTIVE_RAY_RUNTIME_INDEX, 1, baseEffective)
-    return ADAPTIVE_RAY_RUNTIME_INDEX
-end
-
-local function getAdaptiveRayTargetFrameUs()
-    if FPS_TARGET_MODE == "60" then return 16667 end
-    if FPS_TARGET_MODE == "45" then return 22222 end
-    if FPS_TARGET_MODE == "30" then return 33333 end
-    if FPS_TARGET_MODE == "24" then return 41667 end
-    return ADAPTIVE_RAY_UNCAPPED_TARGET_US or 16667
-end
-
-local function updateAdaptiveRayBudget(frameUs)
-    local n = (RAY_PRESETS and #RAY_PRESETS) or 0
-    if n <= 0 then
-        ADAPTIVE_RAY_RUNTIME_INDEX = nil
-        ADAPTIVE_RAY_EMA_US = 0
-        ADAPTIVE_RAY_COOLDOWN = 0
-        return
-    end
-
-    local maxIdx = getBaseEffectiveRayPresetIndex(RAY_PRESET_INDEX or 1)
-    if ADAPTIVE_RAY_BUDGET_ENABLED ~= true then
-        ADAPTIVE_RAY_RUNTIME_INDEX = nil
-        ADAPTIVE_RAY_EMA_US = 0
-        ADAPTIVE_RAY_COOLDOWN = 0
-        return
-    end
-    if gameState ~= STATE_PLAYING then
-        return
-    end
-
-    if not ADAPTIVE_RAY_RUNTIME_INDEX then
-        ADAPTIVE_RAY_RUNTIME_INDEX = maxIdx
-    end
-    ADAPTIVE_RAY_RUNTIME_INDEX = clampInt(ADAPTIVE_RAY_RUNTIME_INDEX, 1, maxIdx)
-
-    local sample = frameUs or 0
-    if sample < 0 then sample = 0 end
-    if sample > 250000 then sample = 250000 end
-    local alpha = ADAPTIVE_RAY_ALPHA or 0.2
-    if ADAPTIVE_RAY_EMA_US <= 0 then
-        ADAPTIVE_RAY_EMA_US = sample
-    else
-        ADAPTIVE_RAY_EMA_US = ADAPTIVE_RAY_EMA_US + (sample - ADAPTIVE_RAY_EMA_US) * alpha
-    end
-
-    if ADAPTIVE_RAY_COOLDOWN > 0 then
-        ADAPTIVE_RAY_COOLDOWN = ADAPTIVE_RAY_COOLDOWN - 1
-        return
-    end
-
-    local targetUs = getAdaptiveRayTargetFrameUs()
-    local downThreshold = targetUs + (ADAPTIVE_RAY_DOWN_HYST_US or 2200)
-    local upThreshold = targetUs - (ADAPTIVE_RAY_UP_HYST_US or 2600)
-    local prevIdx = ADAPTIVE_RAY_RUNTIME_INDEX
-
-    if ADAPTIVE_RAY_EMA_US > downThreshold and ADAPTIVE_RAY_RUNTIME_INDEX > 1 then
-        ADAPTIVE_RAY_RUNTIME_INDEX = ADAPTIVE_RAY_RUNTIME_INDEX - 1
-        ADAPTIVE_RAY_COOLDOWN = ADAPTIVE_RAY_COOLDOWN_FRAMES or 18
-    elseif ADAPTIVE_RAY_EMA_US < upThreshold and ADAPTIVE_RAY_RUNTIME_INDEX < maxIdx then
-        ADAPTIVE_RAY_RUNTIME_INDEX = ADAPTIVE_RAY_RUNTIME_INDEX + 1
-        ADAPTIVE_RAY_COOLDOWN = ADAPTIVE_RAY_COOLDOWN_FRAMES or 18
-    end
-
-    if prevIdx ~= ADAPTIVE_RAY_RUNTIME_INDEX and enablePerfLogs and RAY_PRESETS then
-        local prevLabel = (RAY_PRESETS[prevIdx] and RAY_PRESETS[prevIdx].label) or tostring(prevIdx)
-        local nextLabel = (RAY_PRESETS[ADAPTIVE_RAY_RUNTIME_INDEX] and RAY_PRESETS[ADAPTIVE_RAY_RUNTIME_INDEX].label) or tostring(ADAPTIVE_RAY_RUNTIME_INDEX)
-        logPerf(string.format(
-            "AUTO_RAYS %s->%s ema=%.2fms target=%.2fms",
-            prevLabel,
-            nextLabel,
-            (ADAPTIVE_RAY_EMA_US or 0) / 1000.0,
-            targetUs / 1000.0
-        ))
-    end
+    return getBaseEffectiveRayPresetIndex(baseIdx)
 end
 
 normalizeFogRange()
-syncFogToDrawDistance()
 normalizeMipmapRanges()
 normalizeFarTextureCutoff()
+refreshExpViewDistance()
 
 local function isExpRenderer()
     return true
@@ -1180,7 +1181,6 @@ end
 -- Debug controls (set to true for sprite testing)
 DEBUG_DISABLE_ENEMY_AGGRO = false  -- Enemies never chase/attack
 DEBUG_WALK_IN_PLACE = false       -- Enemies animate walk without moving
-DEBUG_FLIP_WALK_SIDES = false     -- Use left-walk sprites and flip for right side
 DEBUG_FORCE_GLOBAL_WALK = false   -- Drive walk frames from global frameCount
 DEBUG_FORCE_WALK_FRAMES = nil     -- Force 2-frame cycle while walk3 is under review
 DEBUG_FORCE_SIDE_VIEW = false     -- Always show side view (left/right) for testing
@@ -1219,13 +1219,6 @@ local totalSoldiers = 5
 
 -- Blood particle effects
 local bloodEffects = {}  -- {x, y, particles={{dx, dy, life}...}}
-
--- Death sounds
-local groanSynth = nil
-local squishSynth = nil
-
--- Pickup sounds
-local gulpSynth = nil
 
 -- Load warrior sprites for 4 directions
 local warriorFront = nil
@@ -1443,20 +1436,6 @@ local function loadLevel(levelId)
     px = level.playerStart.x
     py = level.playerStart.y
     pdir = level.playerStart.dir
-    wallTiles = {}
-    for my = 0, 15 do
-        for mx = 0, 15 do
-            local wtype = map[my + 1][mx + 1]
-            if wtype and wtype > 0 then
-                wallTiles[#wallTiles + 1] = {
-                    x = mx + 0.5,
-                    y = my + 0.5,
-                    t = wtype
-                }
-            end
-        end
-    end
-    wallQuadLog("WQ loadLevel " .. tostring(levelId) .. " wallTiles=" .. tostring(#wallTiles))
 end
 
 local function unloadLevelData()
@@ -1878,34 +1857,6 @@ loadTextureWithValidation = function(path, textureName)
     return sprite
 end
 
--- Validate texture dimensions meet minimum requirements (metadata-driven)
-local function validateTextureMinimumDimensions(textureName, minWidth, minHeight)
-    local metadata = textureMetadata[textureName]
-
-    if not metadata then
-        safeLog("WARN", string.format(
-            "Cannot validate texture '%s': no metadata found",
-            textureName
-        ))
-        return false
-    end
-
-    if metadata.width < minWidth or metadata.height < minHeight then
-        safeLog("ERROR", string.format(
-            "Texture '%s' (%dx%d) does not meet minimum size requirements (%dx%d)",
-            textureName, metadata.width, metadata.height, minWidth, minHeight
-        ))
-        return false
-    end
-
-    safeLog("INFO", string.format(
-        "Texture '%s' dimension validation passed: %dx%d >= %dx%d",
-        textureName, metadata.width, metadata.height, minWidth, minHeight
-    ))
-
-    return true
-end
-
 -- Log total texture memory usage
 logTextureMemoryUsage = function()
     local totalPixels = 0
@@ -1935,15 +1886,8 @@ logTextureMemoryUsage = function()
     }
 end
 
-local function freeSynthRef(synth)
-    if synth then
-        vmupro.sound.synth.free(synth)
-    end
-end
-
 local function unloadLevelAudio()
     if not audioInitialized then return end
-    freeSynthRef(swordSwooshSynth); swordSwooshSynth = nil
     if gruntSample then
         vmupro.sound.sample.stop(gruntSample)
         vmupro.sound.sample.free(gruntSample)
@@ -1974,9 +1918,6 @@ local function unloadLevelAudio()
         vmupro.sound.sample.free(argDeathSample)
         argDeathSample = nil
     end
-    freeSynthRef(groanSynth); groanSynth = nil
-    freeSynthRef(squishSynth); squishSynth = nil
-    freeSynthRef(gulpSynth); gulpSynth = nil
     audioInitialized = false
     if audioSystemActive and not titleSample then
         vmupro.audio.exitListenMode()
@@ -2040,37 +1981,16 @@ local function loadLevelAudio()
         if enableBootLogs then safeLog("WARN", "Failed to load sample: arg_death1") end
     end
 
-    -- Create groan synth (low frequency for death groan)
-    groanSynth = vmupro.sound.synth.new(vmupro.sound.kWaveSawtooth)
-    if groanSynth then
-        vmupro.sound.synth.setAttack(groanSynth, 0.05)
-        vmupro.sound.synth.setDecay(groanSynth, 0.3)
-        vmupro.sound.synth.setSustain(groanSynth, 0.1)
-        vmupro.sound.synth.setRelease(groanSynth, 0.2)
-        vmupro.sound.synth.setVolume(groanSynth, 0.6, 0.6)
-    end
-
-    -- Create squish synth (noise burst for impact)
-    squishSynth = vmupro.sound.synth.new(vmupro.sound.kWaveNoise)
-    if squishSynth then
-        vmupro.sound.synth.setAttack(squishSynth, 0.01)
-        vmupro.sound.synth.setDecay(squishSynth, 0.15)
-        vmupro.sound.synth.setSustain(squishSynth, 0.0)
-        vmupro.sound.synth.setRelease(squishSynth, 0.1)
-        vmupro.sound.synth.setVolume(squishSynth, 0.7, 0.7)
-    end
-
-    -- Create gulp synth (for health pickup)
-    gulpSynth = vmupro.sound.synth.new(vmupro.sound.kWaveSine)
-    if gulpSynth then
-        vmupro.sound.synth.setAttack(gulpSynth, 0.02)
-        vmupro.sound.synth.setDecay(gulpSynth, 0.1)
-        vmupro.sound.synth.setSustain(gulpSynth, 0.3)
-        vmupro.sound.synth.setRelease(gulpSynth, 0.15)
-        vmupro.sound.synth.setVolume(gulpSynth, 0.6, 0.6)
-    end
-
     audioInitialized = true
+end
+
+local function stopGameplaySamples()
+    if gruntSample then vmupro.sound.sample.stop(gruntSample) end
+    if swordHitSample then vmupro.sound.sample.stop(swordHitSample) end
+    if swordMissSample then vmupro.sound.sample.stop(swordMissSample) end
+    if yahSample then vmupro.sound.sample.stop(yahSample) end
+    if winLevelSample then vmupro.sound.sample.stop(winLevelSample) end
+    if argDeathSample then vmupro.sound.sample.stop(argDeathSample) end
 end
 
 local function loadTitleMusic()
@@ -2260,7 +2180,6 @@ local function initializeLevelState(levelId)
     isBlocking = false
     blockAnim = 0
     showMenu = false
-    swipeEffects = {}
     bloodEffects = {}
     levelBannerTimer = levelBannerMax
 end
@@ -2280,9 +2199,6 @@ local function startLevel(levelId)
     loadLevelAudio()
     loadingLog("LOAD after loadLevelAudio")
     initializeLevelState(levelId)
-    ADAPTIVE_RAY_RUNTIME_INDEX = nil
-    ADAPTIVE_RAY_EMA_US = 0
-    ADAPTIVE_RAY_COOLDOWN = 0
     loadingLog("LOAD after initializeLevelState")
     gameState = STATE_PLAYING
     loadingLog("LOAD startLevel done")
@@ -2334,276 +2250,219 @@ local function updateSoldiers()
     if DEBUG_DISABLE_ENEMIES then
         return
     end
-    if checkArrayBounds(sprites, 1, "updateSoldiers") then
-        for i = 1, #sprites do
-            if checkArrayBounds(sprites, i, "updateSoldiers") then
-                local s = sprites[i]
-                if s.t == 5 and s.speed then  -- Warriors with movement data
-                    -- Skip dead soldiers
-                    if s.alive == false then
-                        goto continue
+    if not sprites or #sprites == 0 then
+        return
+    end
+    for i = 1, #sprites do
+        local s = sprites[i]
+        if s and s.t == 5 and s.speed then  -- Warriors with movement data
+            -- Skip dead soldiers
+            if s.alive == false then
+                goto continue
+            end
+
+            -- Initialize state if not set
+            if not s.state then
+                s.state = "patrol"
+                s.patrolDir = 1
+                s.patrolAxis = (i % 2 == 0) and "x" or "y"
+                s.startX = s.x
+                s.startY = s.y
+                s.attackCooldown = 0
+            end
+
+            -- Calculate distance to player (cheap cull first)
+            local dx = px - s.x
+            local dy = py - s.y
+            local distSq = dx * dx + dy * dy
+            if distSq > SOLDIER_ACTIVE_DIST_SQ and (simTickCount % 8) ~= 0 then
+                goto continue
+            end
+            local distToPlayer = math.sqrt(distSq)
+            if distToPlayer < 0.001 then
+                distToPlayer = 0.001
+            end
+
+            if DEBUG_DISABLE_ENEMY_AGGRO then
+                distToPlayer = 999  -- Force patrol state
+                s.attackCooldown = 0
+                -- Face the player for consistent side-view testing
+                local angleToPlayer = safeAtan2(dy, dx)
+                s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
+            end
+
+            if DEBUG_WALK_IN_PLACE then
+                s.state = "patrol"
+                if s.patrolAxis == "x" then
+                    s.dir = (s.patrolDir > 0) and 0 or 32
+                else
+                    s.dir = (s.patrolDir > 0) and 16 or 48
+                end
+                s.anim = ((s.anim or 0) + 1) % 20
+                goto continue
+            end
+
+            -- Decrease attack cooldown
+            if s.attackCooldown > 0 then
+                s.attackCooldown = s.attackCooldown - 1
+            end
+
+            -- State machine
+            if distToPlayer < ATTACK_RANGE then
+                -- Close enough to attack
+                s.state = "attack"
+
+                -- Face the player
+                local angleToPlayer = safeAtan2(dy, dx)
+                s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
+
+                -- Attack if cooldown is ready
+                if s.attackCooldown <= 0 then
+                    s.attackCooldown = ATTACK_COOLDOWN
+                    s.attackAnim = 7
+                    s.attackFrame = 1
+                    s.attackStartTick = simTickCount
+                    s.attackDidHit = false
+
+                    -- Soldier attack sound
+                    if yahSample and soundEnabled then
+                        vmupro.sound.sample.stop(yahSample)
+                        vmupro.sound.sample.play(yahSample)
+                        if enableBootLogs then safeLog("INFO", "Play sample: yah") end
                     end
 
-                    -- Initialize state if not set
-                    if not s.state then
-                        s.state = "patrol"
-                        s.patrolDir = 1
-                        s.patrolAxis = (i % 2 == 0) and "x" or "y"
-                        s.startX = s.x
-                        s.startY = s.y
-                        s.attackCooldown = 0
+
+                end
+
+            elseif distToPlayer < DETECTION_RANGE then
+                -- Player detected - chase!
+                if s.state ~= "chase" and not s.aggroed then
+                    s.aggroed = true
+                    if gruntSample and soundEnabled then
+                        vmupro.sound.sample.stop(gruntSample)
+                        vmupro.sound.sample.play(gruntSample)
+                        if enableBootLogs then safeLog("INFO", "Play sample: grunt") end
                     end
+                end
+                s.state = "chase"
 
-                    -- Calculate distance to player (cheap cull first)
-                    local dx = px - s.x
-                    local dy = py - s.y
-                    local distSq = dx * dx + dy * dy
-                    if distSq > SOLDIER_ACTIVE_DIST_SQ and (simTickCount % 8) ~= 0 then
-                        goto continue
+                -- Move towards player (sprint!)
+                local moveSpeed = s.speed * CHASE_SPEED_MULT * SOLDIER_SPEED_SCALE
+                local moveX = (dx / distToPlayer) * moveSpeed
+                local moveY = (dy / distToPlayer) * moveSpeed
+                local newX = s.x + moveX
+                local newY = s.y + moveY
+
+                if isWalkable(newX, newY) then
+                    s.x = newX
+                    s.y = newY
+
+                    -- Update facing direction towards player
+                    local angleToPlayer = safeAtan2(dy, dx)
+                    s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
+
+                    -- Update animation frame
+                    s.anim = ((s.anim or 0) + 1) % 20
+                end
+
+            else
+                -- Patrol mode
+                s.state = "patrol"
+
+                local moveAmount = s.speed * s.patrolDir * SOLDIER_SPEED_SCALE
+                local newX, newY = s.x, s.y
+
+                if s.patrolAxis == "x" then
+                    newX = s.x + moveAmount
+                    s.dir = (s.patrolDir > 0) and 0 or 32
+                else
+                    newY = s.y + moveAmount
+                    s.dir = (s.patrolDir > 0) and 16 or 48
+                end
+
+                local patrolDist = 3
+                local distFromStart
+                if s.patrolAxis == "x" then
+                    distFromStart = newX - s.startX
+                else
+                    distFromStart = newY - s.startY
+                end
+
+                if math.abs(distFromStart) > patrolDist or not isWalkable(newX, newY) then
+                    s.patrolDir = -s.patrolDir
+                else
+                    if not DEBUG_WALK_IN_PLACE then
+                        s.x = newX
+                        s.y = newY
                     end
-                    local distToPlayer = math.sqrt(distSq)
-                    if distToPlayer < 0.001 then
-                        distToPlayer = 0.001
-                    end
-
-                    if DEBUG_DISABLE_ENEMY_AGGRO then
-                        distToPlayer = 999  -- Force patrol state
-                        s.attackCooldown = 0
-                        -- Face the player for consistent side-view testing
-                        local angleToPlayer = safeAtan2(dy, dx)
-                        s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
-                    end
-
-                    if DEBUG_WALK_IN_PLACE then
-                        s.state = "patrol"
-                        if s.patrolAxis == "x" then
-                            s.dir = (s.patrolDir > 0) and 0 or 32
-                        else
-                            s.dir = (s.patrolDir > 0) and 16 or 48
-                        end
-                        s.anim = ((s.anim or 0) + 1) % 20
-                        goto continue
-                    end
-
-                    -- Decrease attack cooldown
-                    if s.attackCooldown > 0 then
-                        s.attackCooldown = s.attackCooldown - 1
-                    end
-
-                    -- State machine
-                    if distToPlayer < ATTACK_RANGE then
-                        -- Close enough to attack
-                        s.state = "attack"
-
-                        -- Face the player
-                        local angleToPlayer = safeAtan2(dy, dx)
-                        s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
-
-                        -- Attack if cooldown is ready
-                        if s.attackCooldown <= 0 then
-                            s.attackCooldown = ATTACK_COOLDOWN
-                            s.attackAnim = 7
-                            s.attackFrame = 1
-                            s.attackStartTick = simTickCount
-                            s.attackDidHit = false
-
-                            -- Soldier attack sound
-                            if yahSample and soundEnabled then
-                                vmupro.sound.sample.stop(yahSample)
-                                vmupro.sound.sample.play(yahSample)
-                                if enableBootLogs then safeLog("INFO", "Play sample: yah") end
-                            end
-
-
-                        end
-
-                    elseif distToPlayer < DETECTION_RANGE then
-                        -- Player detected - chase!
-                        if s.state ~= "chase" and not s.aggroed then
-                            s.aggroed = true
-                            if gruntSample and soundEnabled then
-                                vmupro.sound.sample.stop(gruntSample)
-                                vmupro.sound.sample.play(gruntSample)
-                                if enableBootLogs then safeLog("INFO", "Play sample: grunt") end
-                            end
-                        end
-                        s.state = "chase"
-
-                        -- Move towards player (sprint!)
-                        local moveSpeed = s.speed * CHASE_SPEED_MULT * SOLDIER_SPEED_SCALE
-                        local moveX = (dx / distToPlayer) * moveSpeed
-                        local moveY = (dy / distToPlayer) * moveSpeed
-                        local newX = s.x + moveX
-                        local newY = s.y + moveY
-
-                        if isWalkable(newX, newY) then
-                            s.x = newX
-                            s.y = newY
-
-                            -- Update facing direction towards player
-                            local angleToPlayer = safeAtan2(dy, dx)
-                            s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
-
-                            -- Update animation frame
-                            s.anim = ((s.anim or 0) + 1) % 20
-                        end
-
-                    else
-                        -- Patrol mode
-                        s.state = "patrol"
-
-                        local moveAmount = s.speed * s.patrolDir * SOLDIER_SPEED_SCALE
-                        local newX, newY = s.x, s.y
-
-                        if s.patrolAxis == "x" then
-                            newX = s.x + moveAmount
-                            s.dir = (s.patrolDir > 0) and 0 or 32
-                        else
-                            newY = s.y + moveAmount
-                            s.dir = (s.patrolDir > 0) and 16 or 48
-                        end
-
-                        local patrolDist = 3
-                        local distFromStart
-                        if s.patrolAxis == "x" then
-                            distFromStart = newX - s.startX
-                        else
-                            distFromStart = newY - s.startY
-                        end
-
-                        if math.abs(distFromStart) > patrolDist or not isWalkable(newX, newY) then
-                            s.patrolDir = -s.patrolDir
-                        else
-                            if not DEBUG_WALK_IN_PLACE then
-                                s.x = newX
-                                s.y = newY
-                            end
-                            s.anim = ((s.anim or 0) + 1) % 20
-                        end
-                    end
-
-                    if s.attackAnim and s.attackAnim > 0 then
-                        s.attackAnim = s.attackAnim - 1
-                        if s.attackAnim == 3 then
-                            s.attackFrame = 2
-                            if not s.attackDidHit and distToPlayer <= ATTACK_RANGE then
-                                local damage = DAMAGE_PER_HIT
-                                local primeBlock = false
-                                if isBlocking and blockAnim > 0 then
-                                    -- Prime block: raised at/after enemy attack start and before hit connect.
-                                    if blockStartFrame
-                                        and blockStartFrame >= (s.attackStartTick or -1000)
-                                        and blockStartFrame <= simTickCount then
-                                        primeBlock = true
-                                        damage = 0
-                                    else
-                                        damage = math.floor(DAMAGE_PER_HIT * 0.5 + 0.5)
-                                    end
-                                end
-                                if damage > 0 then
-                                    playerHealth = playerHealth - damage
-                                    if playerHealth <= 0 then
-                                        playerHealth = 0
-                                        gameState = STATE_GAME_OVER
-                                        gameOverSelection = 1
-                                    end
-                                end
-                                if isBlocking and blockAnim > 0 then
-                                    local pct = primeBlock and 1.0 or 0.5
-                                    lastBlockEvent = {
-                                        amount = DAMAGE_PER_HIT - damage,
-                                        pct = pct,
-                                        prime = primeBlock,
-                                        frame = frameCount
-                                    }
-                                end
-                                s.attackDidHit = true
-                            end
-                        elseif s.attackAnim <= 0 then
-                            s.attackAnim = 0
-                        end
-                    end
-                    ::continue::
+                    s.anim = ((s.anim or 0) + 1) % 20
                 end
             end
-        end
-    end
-end
 
--- Update swipe effects
-local function updateSwipeEffects()
-    local i = 1
-    while i <= #swipeEffects do
-        local e = swipeEffects[i]
-        e.frame = e.frame + 1
-        if e.frame >= e.maxFrames then
-            -- PERFORMANCE: swap-and-pop for O(1) removal instead of O(n)
-            local lastIdx = #swipeEffects
-            swipeEffects[i] = swipeEffects[lastIdx]
-            swipeEffects[lastIdx] = nil
-            -- Don't increment i since we swapped in a new element to check
-        else
-            i = i + 1
+            if s.attackAnim and s.attackAnim > 0 then
+                s.attackAnim = s.attackAnim - 1
+                if s.attackAnim == 3 then
+                    s.attackFrame = 2
+                    if not s.attackDidHit and distToPlayer <= ATTACK_RANGE then
+                        local damage = DAMAGE_PER_HIT
+                        local primeBlock = false
+                        if isBlocking and blockAnim > 0 then
+                            -- Prime block: raised at/after enemy attack start and before hit connect.
+                            if blockStartFrame
+                                and blockStartFrame >= (s.attackStartTick or -1000)
+                                and blockStartFrame <= simTickCount then
+                                primeBlock = true
+                                damage = 0
+                            else
+                                damage = math.floor(DAMAGE_PER_HIT * 0.5 + 0.5)
+                            end
+                        end
+                        if damage > 0 then
+                            playerHealth = playerHealth - damage
+                            if playerHealth <= 0 then
+                                playerHealth = 0
+                                gameState = STATE_GAME_OVER
+                                gameOverSelection = 1
+                            end
+                        end
+                        if isBlocking and blockAnim > 0 then
+                            local pct = primeBlock and 1.0 or 0.5
+                            lastBlockEvent = {
+                                amount = DAMAGE_PER_HIT - damage,
+                                pct = pct,
+                                prime = primeBlock,
+                                frame = frameCount
+                            }
+                        end
+                        s.attackDidHit = true
+                    end
+                elseif s.attackAnim <= 0 then
+                    s.attackAnim = 0
+                end
+            end
+            ::continue::
         end
     end
 end
 
 local function updateDeathAnimations()
     if not sprites or #sprites == 0 then return end
-    if checkArrayBounds(sprites, 1, "updateDeathAnimations") then
-        for i = 1, #sprites do
-            if checkArrayBounds(sprites, i, "updateDeathAnimations") then
-                local s = sprites[i]
-                if s.t == 5 and s.dying then
-                    if #warriorDeath == 0 then
+    for i = 1, #sprites do
+        local s = sprites[i]
+        if s and s.t == 5 and s.dying then
+            if #warriorDeath == 0 then
+                s.dying = false
+                s.dead = true
+            else
+                s.deathTick = (s.deathTick or 0) + 1
+                if s.deathTick % 2 == 0 then
+                    s.deathFrame = (s.deathFrame or 1) + 1
+                    if s.deathFrame > #warriorDeath then
                         s.dying = false
                         s.dead = true
-                        goto continue_death
                     end
-                    s.deathTick = (s.deathTick or 0) + 1
-                    if s.deathTick % 2 == 0 then
-                        s.deathFrame = (s.deathFrame or 1) + 1
-                        if s.deathFrame > #warriorDeath then
-                            s.dying = false
-                            s.dead = true
-                        end
-                    end
-                    ::continue_death::
                 end
             end
-        end
-    end
-end
-
--- Draw swipe effects
-local function drawSwipeEffects()
-    for _, e in ipairs(swipeEffects) do
-        local progress = e.frame / e.maxFrames
-        local alpha = 1.0 - progress  -- Fade out
-        local radius = 30 + progress * 50  -- Expand outward
-
-        -- Draw arc lines for sword swipe effect
-        local numLines = 5
-        local arcSpan = 1.5  -- Radians of arc
-        local startAngle = e.angle - arcSpan / 2
-
-        for j = 0, numLines - 1 do
-            local lineProgress = j / numLines
-            local lineAlpha = alpha * (1 - lineProgress * 0.5)
-            local lineRadius = radius * (0.7 + lineProgress * 0.3)
-
-            local a1 = startAngle + (arcSpan * lineProgress)
-            local a2 = a1 + arcSpan / numLines
-
-            local x1 = e.x + math.cos(a1) * lineRadius
-            local y1 = e.y + math.sin(a1) * lineRadius
-            local x2 = e.x + math.cos(a2) * lineRadius
-            local y2 = e.y + math.sin(a2) * lineRadius
-
-            -- Use white/silver color for sword swipe
-            local color = (lineAlpha > 0.5) and COLOR_WHITE or COLOR_SILVER
-            vmupro.graphics.drawLine(math.floor(x1), math.floor(y1),
-                                     math.floor(x2), math.floor(y2), color)
         end
     end
 end
@@ -2672,12 +2531,6 @@ local function killSoldier(soldier)
             vmupro.sound.sample.play(argDeathSample)
             if enableBootLogs then safeLog("INFO", "Play sample: arg_death1") end
         end
-        if groanSynth then
-            vmupro.sound.synth.playNote(groanSynth, 80, 0.8, 0.4)
-        end
-        if squishSynth then
-            vmupro.sound.synth.playNote(squishSynth, 200, 0.9, 0.2)
-        end
     end
 
     -- Check win condition
@@ -2702,11 +2555,9 @@ local function checkHealthPickups()
     local pickupRange = 0.8  -- Distance to pick up vial
     local pickupRangeSq = pickupRange * pickupRange
     if not sprites or #sprites == 0 then return end
-    if checkArrayBounds(sprites, 1, "checkHealthPickups") then
-        for i = 1, #sprites do
-            if checkArrayBounds(sprites, i, "checkHealthPickups") then
-                local s = sprites[i]
-        if s.t == 7 and not s.collected then
+    for i = 1, #sprites do
+        local s = sprites[i]
+        if s and s.t == 7 and not s.collected then
             local dx = s.x - px
             local dy = s.y - py
             local distSq = dx * dx + dy * dy
@@ -2714,40 +2565,34 @@ local function checkHealthPickups()
                 -- Collect the vial
                 s.collected = true
                 playerHealth = MAX_HEALTH
-
-                -- Play gulp sound
-                if soundEnabled and gulpSynth then
-                    vmupro.sound.synth.playNote(gulpSynth, 300, 0.8, 0.2)
-                    vmupro.sound.synth.playNote(gulpSynth, 250, 0.6, 0.15)
-                end
             end
-          end
         end
     end
-    end
 end
+
+local drawUiText
+local drawUiPanel
 
 -- Draw win screen
 local function drawWinScreen()
     -- Darken background (larger)
-    vmupro.graphics.drawFillRect(20, 40, 220, 200, COLOR_BLACK)
-    vmupro.graphics.drawFillRect(25, 45, 215, 195, COLOR_DARK_GRAY)
+    drawUiPanel(20, 40, 220, 200, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
 
     -- Title
-    vmupro.graphics.drawFillRect(30, 55, 210, 90, COLOR_GREEN)
+    drawUiPanel(30, 55, 210, 90, COLOR_GREEN, COLOR_WHITE)
     setFontCached(vmupro.text.FONT_SMALL)
-    vmupro.graphics.drawText("VICTORY!", 76, 63, COLOR_WHITE, COLOR_GREEN)
+    drawUiText("VICTORY!", 76, 63, COLOR_WHITE, COLOR_GREEN)
 
     -- Subtitle
-    vmupro.graphics.drawText("The King is safe!", 56, 100, COLOR_WHITE, COLOR_DARK_GRAY)
-    vmupro.graphics.drawText("You cleared the level!", 44, 122, COLOR_WHITE, COLOR_DARK_GRAY)
+    drawUiText("The King is safe!", 56, 100, COLOR_WHITE, COLOR_DARK_GRAY)
+    drawUiText("You cleared the level!", 44, 122, COLOR_WHITE, COLOR_DARK_GRAY)
 
     if winBannerTimer > 0 then
         local pulse = (frameCount % 20) < 10
         local bannerColor = pulse and COLOR_MAROON or COLOR_DARK_MAROON
-        vmupro.graphics.drawFillRect(35, 130, 205, 154, bannerColor)
+        drawUiPanel(35, 130, 205, 154, bannerColor, COLOR_WHITE)
         setFontCached(vmupro.text.FONT_SMALL)
-        vmupro.graphics.drawText("LEVEL COMPLETE", 46, 136, COLOR_WHITE, bannerColor)
+        drawUiText("LEVEL COMPLETE", 46, 136, COLOR_WHITE, bannerColor)
     end
 
     -- Menu option
@@ -2755,7 +2600,7 @@ local function drawWinScreen()
     local bgColor = COLOR_DARK_GRAY
     local textColor = COLOR_GRAY
     if winSelection == 1 then
-        vmupro.graphics.drawFillRect(40, y, 200, y + 20, COLOR_MAROON)
+        drawUiPanel(40, y, 200, y + 20, COLOR_MAROON, COLOR_WHITE)
         bgColor = COLOR_MAROON
         textColor = COLOR_WHITE
     end
@@ -2764,7 +2609,7 @@ local function drawWinScreen()
         winText = "NEXT LEVEL"
     end
     setFontCached(vmupro.text.FONT_SMALL)
-    vmupro.graphics.drawText(winText, 74, y + 2, textColor, bgColor)
+    drawUiText(winText, 74, y + 2, textColor, bgColor)
 end
 
 -- Draw health UI (potion with red liquid)
@@ -2810,7 +2655,7 @@ local function drawHealthUI()
     if showHealthPercent then
         setFontCached(vmupro.text.FONT_SMALL)
         local healthText = tostring(math.floor(playerHealth)) .. "%"
-        vmupro.graphics.drawText(healthText, potionX + 18, potionY + 50, COLOR_WHITE, COLOR_BLACK)
+        drawUiText(healthText, potionX + 18, potionY + 50, COLOR_WHITE, COLOR_BLACK)
     end
 end
 
@@ -2818,7 +2663,53 @@ local function drawEnemiesRemainingUI()
     local remaining = (totalSoldiers or 0) - (soldiersKilled or 0)
     if remaining < 0 then remaining = 0 end
     setFontCached(vmupro.text.FONT_SMALL)
-    vmupro.graphics.drawText("ENEMIES LEFT: " .. tostring(remaining), 104, 228, COLOR_WHITE, COLOR_BLACK)
+    drawUiText("ENEMIES LEFT: " .. tostring(remaining), 104, 228, COLOR_WHITE, COLOR_BLACK)
+end
+
+local drawRectOutline
+
+drawUiText = function(text, x, y, textColor, bgColor)
+    local fg = textColor or COLOR_WHITE
+    local bg = bgColor
+    -- Keep solid text backgrounds, but avoid pure black boxes around menu text.
+    if bg == nil or bg == COLOR_BLACK then
+        bg = UI_TEXT_SOLID_BG or COLOR_DARK_GRAY
+    end
+    vmupro.graphics.drawText(text, x, y, fg, bg)
+end
+
+-- In-game menu text path: prefer transparent background draw on newer firmware.
+-- If transparent path fails, fall back to panel-matched solid background so menus stay readable.
+local MENU_TEXT_TRANSPARENT_SUPPORTED = nil
+local MENU_TEXT_TRANSPARENT_ERROR_LOGGED = false
+local function drawMenuText(text, x, y, textColor, bgColor)
+    local fg = textColor or COLOR_WHITE
+    if MENU_TEXT_TRANSPARENT_SUPPORTED ~= false then
+        local ok, err = pcall(vmupro.graphics.drawText, text, x, y, fg)
+        if ok then
+            MENU_TEXT_TRANSPARENT_SUPPORTED = true
+            return
+        end
+        MENU_TEXT_TRANSPARENT_SUPPORTED = false
+        if not MENU_TEXT_TRANSPARENT_ERROR_LOGGED then
+            MENU_TEXT_TRANSPARENT_ERROR_LOGGED = true
+            if enableBootLogs then
+                safeLog("ERROR", "Transparent drawText failed in drawMenuText: " .. tostring(err))
+            end
+        end
+    end
+
+    local bg = bgColor
+    if bg == nil then
+        -- Match menu panel tone to avoid harsh per-word bars on fallback path.
+        bg = COLOR_DARK_GRAY
+    end
+    vmupro.graphics.drawText(text, x, y, fg, bg)
+end
+
+drawUiPanel = function(x1, y1, x2, y2, fillColor, borderColor)
+    -- Keep menu overlays lightweight: outline only, no stipple fill.
+    drawRectOutline(x1, y1, x2, y2, borderColor or COLOR_GRAY)
 end
 
 local function drawPerfMonitorOverlay()
@@ -2827,10 +2718,16 @@ local function drawPerfMonitorOverlay()
     local rayMs = (PERF_MONITOR_EMA_RAYCAST_US or 0) / 1000.0
     local wallMs = (PERF_MONITOR_EMA_WALL_US or 0) / 1000.0
     local fogMs = (PERF_MONITOR_EMA_FOG_US or 0) / 1000.0
+    local inputMs = (PERF_MONITOR_EMA_INPUT_US or 0) / 1000.0
+    local audioMs = (PERF_MONITOR_EMA_AUDIO_US or 0) / 1000.0
+    local simMs = (PERF_MONITOR_EMA_SIM_US or 0) / 1000.0
+    local logicMs = (PERF_MONITOR_EMA_LOGIC_US or 0) / 1000.0
+    local renderMs = (PERF_MONITOR_EMA_RENDER_US or 0) / 1000.0
+    local presentMs = (PERF_MONITOR_EMA_PRESENT_US or 0) / 1000.0
+    local sleepMs = (PERF_MONITOR_EMA_SLEEP_US or 0) / 1000.0
     local raysLabel = tostring(PERF_MONITOR_LAST_BASE_RAY_LABEL or "-")
     local effLabel = tostring(PERF_MONITOR_LAST_EFFECTIVE_RAY_LABEL or "-")
     local modeLabel = tostring(PERF_MONITOR_LAST_RAYCAST_MODE or "FLOAT")
-    local autoLabel = ADAPTIVE_RAY_BUDGET_ENABLED and "AUTO" or "MAN"
     local dbLabel = (DEBUG_DOUBLE_BUFFER and DOUBLE_BUFFER_ACTIVE) and "ON" or "OFF"
     local deltaUsageKB = (DOUBLE_BUFFER_DELTA_USAGE_BYTES or 0) / 1024.0
     local deltaLargestKB = (DOUBLE_BUFFER_DELTA_LARGEST_BYTES or 0) / 1024.0
@@ -2838,26 +2735,25 @@ local function drawPerfMonitorOverlay()
     local wallFmtLabel = tostring((wallFmt and wallFmt.label) or "?")
     local wallKeyLabel = getWallKeyModeLabel()
     local wallProjLabel = getWallProjectionModeLabel()
-    local textBg = COLOR_DARK_GRAY
-    if vmupro and vmupro.graphics and vmupro.graphics.kColorClear ~= nil then
-        textBg = vmupro.graphics.kColorClear
-    end
     local baseX = 6
     -- Leave extra vertical room because some firmware builds render this font taller than 8px.
     -- This avoids line-on-line overlap regardless of FONT_TINY fallback behavior.
     local baseY = 104
     local rowStep = 16
+    drawUiPanel(2, 100, 238, 236, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
     setFontCached(vmupro.text.FONT_TINY_6x8)
-    vmupro.graphics.drawText(string.format("PF F%.2f R%.2f W%.2f G%.2f", frameMs, rayMs, wallMs, fogMs), baseX, baseY + (rowStep * 0), COLOR_WHITE, textBg)
-    vmupro.graphics.drawText(string.format("PF C%d T%d FB%d FG%d", PERF_MONITOR_WALL_COLS_TOTAL or 0, PERF_MONITOR_WALL_COLS_TEXTURED or 0, PERF_MONITOR_WALL_COLS_FALLBACK or 0, PERF_MONITOR_FOG_COLS or 0), baseX, baseY + (rowStep * 1), COLOR_WHITE, textBg)
-    vmupro.graphics.drawText("PF " .. raysLabel .. "->" .. effLabel .. " " .. modeLabel .. " " .. autoLabel, baseX, baseY + (rowStep * 2), COLOR_WHITE, textBg)
-    vmupro.graphics.drawText(string.format("DB %s DU%.1fK DL%.1fK", dbLabel, deltaUsageKB, deltaLargestKB), baseX, baseY + (rowStep * 3), COLOR_WHITE, textBg)
-    vmupro.graphics.drawText(string.format("W1=%s K=%s P=%s", wallFmtLabel, wallKeyLabel, wallProjLabel), baseX, baseY + (rowStep * 4), COLOR_WHITE, textBg)
-    vmupro.graphics.drawText(string.format("MP %d/%d/%d/%d/%d", PERF_MONITOR_MIP_COLS_0 or 0, PERF_MONITOR_MIP_COLS_1 or 0, PERF_MONITOR_MIP_COLS_2 or 0, PERF_MONITOR_MIP_COLS_3 or 0, PERF_MONITOR_MIP_COLS_4 or 0), baseX, baseY + (rowStep * 5), COLOR_WHITE, textBg)
+    drawUiText(string.format("PF F%.2f R%.2f W%.2f G%.2f", frameMs, rayMs, wallMs, fogMs), baseX, baseY + (rowStep * 0), COLOR_WHITE, COLOR_DARK_GRAY)
+    drawUiText(string.format("PF C%d T%d FB%d FG%d", PERF_MONITOR_WALL_COLS_TOTAL or 0, PERF_MONITOR_WALL_COLS_TEXTURED or 0, PERF_MONITOR_WALL_COLS_FALLBACK or 0, PERF_MONITOR_FOG_COLS or 0), baseX, baseY + (rowStep * 1), COLOR_WHITE, COLOR_DARK_GRAY)
+    drawUiText("PF " .. raysLabel .. "->" .. effLabel .. " " .. modeLabel, baseX, baseY + (rowStep * 2), COLOR_WHITE, COLOR_DARK_GRAY)
+    drawUiText(string.format("DB %s DU%.1fK DL%.1fK", dbLabel, deltaUsageKB, deltaLargestKB), baseX, baseY + (rowStep * 3), COLOR_WHITE, COLOR_DARK_GRAY)
+    drawUiText(string.format("W1=%s K=%s P=%s", wallFmtLabel, wallKeyLabel, wallProjLabel), baseX, baseY + (rowStep * 4), COLOR_WHITE, COLOR_DARK_GRAY)
+    drawUiText(string.format("MP %d/%d/%d/%d/%d", PERF_MONITOR_MIP_COLS_0 or 0, PERF_MONITOR_MIP_COLS_1 or 0, PERF_MONITOR_MIP_COLS_2 or 0, PERF_MONITOR_MIP_COLS_3 or 0, PERF_MONITOR_MIP_COLS_4 or 0), baseX, baseY + (rowStep * 5), COLOR_WHITE, COLOR_DARK_GRAY)
+    drawUiText(string.format("SC I%.2f A%.2f S%.2f L%.2f", inputMs, audioMs, simMs, logicMs), baseX, baseY + (rowStep * 6), COLOR_WHITE, COLOR_DARK_GRAY)
+    drawUiText(string.format("SC R%.2f P%.2f Z%.2f", renderMs, presentMs, sleepMs), baseX, baseY + (rowStep * 7), COLOR_WHITE, COLOR_DARK_GRAY)
 end
 
 local function buildDebugMenuItems()
-    local pageName = (titleDebugPage == DEBUG_PAGE_VIDEO) and "VIDEO" or "DEBUG"
+    local pageName = getDebugPageName(titleDebugPage)
     local pageText = "PAGE: " .. pageName
 
     if titleDebugPage == DEBUG_PAGE_VIDEO then
@@ -2868,14 +2764,7 @@ local function buildDebugMenuItems()
         local rayPreset = "?"
         if RAY_PRESETS and #RAY_PRESETS > 0 then
             local baseIdx = clampInt(RAY_PRESET_INDEX or 1, 1, #RAY_PRESETS)
-            local effIdx = getEffectiveRayPresetIndex(baseIdx)
-            local baseLabel = (RAY_PRESETS[baseIdx] and RAY_PRESETS[baseIdx].label) or "?"
-            local effLabel = (RAY_PRESETS[effIdx] and RAY_PRESETS[effIdx].label) or baseLabel
-            if effIdx ~= baseIdx then
-                rayPreset = baseLabel .. "->" .. effLabel
-            else
-                rayPreset = baseLabel
-            end
+            rayPreset = (RAY_PRESETS[baseIdx] and RAY_PRESETS[baseIdx].label) or "?"
         end
         local raysText = "RAYS: " .. rayPreset
         local drawDistText = "DRAW DIST: " .. tostring(EXP_TEX_MAX_DIST or "?")
@@ -2913,6 +2802,38 @@ local function buildDebugMenuItems()
         }
     end
 
+    if titleDebugPage == DEBUG_PAGE_PERF then
+        local presetLabel = "CUSTOM"
+        if PERF_QUALITY_INDEX and PERF_QUALITY_INDEX > 0 and PERF_QUALITY_PRESETS[PERF_QUALITY_INDEX] then
+            presetLabel = PERF_QUALITY_PRESETS[PERF_QUALITY_INDEX]
+        end
+        local rayLabel = "?"
+        if RAY_PRESETS and #RAY_PRESETS > 0 then
+            local idx = clampInt(RAY_PRESET_INDEX or 1, 1, #RAY_PRESETS)
+            rayLabel = (RAY_PRESETS[idx] and RAY_PRESETS[idx].label) or tostring(idx)
+        end
+        local presetText = "P/Q PRESET: " .. presetLabel
+        local wallResText = "WALL RES: " .. ((LOW_RES_MODE == "fast") and "FAST" or "QUALITY")
+        local raysText = "RAYS: " .. rayLabel
+        local drawDistText = "DRAW DIST: " .. tostring(EXP_TEX_MAX_DIST or "?")
+        local farTexText = ((FAR_TEX_OFF_DIST or 999) >= 900) and "FAR TEX OFF: OFF" or ("FAR TEX OFF: " .. tostring(FAR_TEX_OFF_DIST or "?"))
+        local mipmapText = "MIPMAP: " .. (WALL_MIPMAP_ENABLED and "ON" or "OFF")
+        local mipLodText = "MIP LOD: " .. (MIP_LOD_ENABLED and "ON" or "OFF")
+        local fogStartText = "FOG START: " .. tostring(FOG_START or "?")
+        local fogEndText = "FOG FULL: " .. tostring(FOG_END or "?")
+        local fogDitherText = "FOG DTHR: " .. tostring(FOG_DITHER_SIZE or 3)
+        local fpsTargetText = "FPS TARGET: " .. string.upper(FPS_TARGET_MODE)
+        local perfMonText = "PERF MON: " .. (DEBUG_PERF_MONITOR and "ON" or "OFF")
+        local dBufText = "DBUF: " .. ((DEBUG_DOUBLE_BUFFER and DOUBLE_BUFFER_ACTIVE) and "ON" or "OFF")
+        return {
+            pageText,
+            presetText, wallResText, raysText, drawDistText, farTexText,
+            mipmapText, mipLodText, fogStartText, fogEndText, fogDitherText,
+            fpsTargetText, perfMonText, dBufText,
+            "BACK"
+        }
+    end
+
     local logsText = "LOGS: " .. (enableBootLogs and "ON" or "OFF")
     local enemiesText = "ENEMIES: " .. (DEBUG_DISABLE_ENEMIES and "OFF" or "ON")
     local propsText = "PROPS: " .. (DEBUG_DISABLE_PROPS and "OFF" or "ON")
@@ -2923,9 +2844,19 @@ local function buildDebugMenuItems()
     local useFixed = (USE_FIXED_RAYCAST == true) and (DEBUG_FORCE_FLOAT_RAYCAST ~= true)
     local raycastText = "RAYCAST: " .. (useFixed and "FIXED" or "FLOAT")
     local perfMonText = "PERF MON: " .. (DEBUG_PERF_MONITOR and "ON" or "OFF")
-    local autoRaysText = "AUTO RAYS: " .. (ADAPTIVE_RAY_BUDGET_ENABLED and "ON" or "OFF")
     local dBufText = "DBUF: " .. ((DEBUG_DOUBLE_BUFFER and DOUBLE_BUFFER_ACTIVE) and "ON" or "OFF")
-    return {pageText, logsText, enemiesText, propsText, blockDbgText, fpsTargetText, audioMixText, rendererText, raycastText, perfMonText, autoRaysText, dBufText, "BACK"}
+    return {pageText, logsText, enemiesText, propsText, blockDbgText, fpsTargetText, audioMixText, rendererText, raycastText, perfMonText, dBufText, "BACK"}
+end
+
+-- Keep in sync with buildDebugMenuItems() to avoid per-frame table builds in input handlers.
+local function getDebugMenuItemCount()
+    if titleDebugPage == DEBUG_PAGE_VIDEO then
+        return 24
+    end
+    if titleDebugPage == DEBUG_PAGE_PERF then
+        return 15
+    end
+    return 12
 end
 
 local function stepListIndex(idx, delta, count, wrap)
@@ -3025,16 +2956,14 @@ local function adjustDebugMenuSelection(sel, delta, wrap)
     local doWrap = (wrap == true)
 
     if sel == 1 then
-        if titleDebugPage == DEBUG_PAGE_VIDEO then
-            titleDebugPage = DEBUG_PAGE_CORE
-        else
-            titleDebugPage = DEBUG_PAGE_VIDEO
-        end
-        titleDebugSelection = 1
+        stepDebugPage(step)
         return true
     end
 
     if titleDebugPage == DEBUG_PAGE_VIDEO then
+        if sel >= 2 then
+            markPerfQualityCustom()
+        end
         if sel == 2 then
             -- TEXTURES label is inverse of DEBUG_DISABLE_WALL_TEXTURE.
             local disableTextures = (step < 0)
@@ -3059,8 +2988,6 @@ local function adjustDebugMenuSelection(sel, delta, wrap)
         elseif sel == 6 then
             if RAY_PRESETS and #RAY_PRESETS > 0 then
                 RAY_PRESET_INDEX = stepListIndex(RAY_PRESET_INDEX or 1, step, #RAY_PRESETS, doWrap)
-                ADAPTIVE_RAY_RUNTIME_INDEX = nil
-                ADAPTIVE_RAY_COOLDOWN = 0
             end
             return true
         elseif sel == 7 then
@@ -3154,8 +3081,6 @@ local function adjustDebugMenuSelection(sel, delta, wrap)
             else
                 LOW_RES_MODE = "fast"
             end
-            ADAPTIVE_RAY_RUNTIME_INDEX = nil
-            ADAPTIVE_RAY_COOLDOWN = 0
             return true
         elseif sel == 19 then
             showFpsOverlay = (step > 0)
@@ -3181,6 +3106,92 @@ local function adjustDebugMenuSelection(sel, delta, wrap)
                 WALL_PROJECTION_MODE = "adaptive"
             else
                 WALL_PROJECTION_MODE = "stable"
+            end
+            return true
+        end
+        return false
+    end
+
+    if titleDebugPage == DEBUG_PAGE_PERF then
+        if sel == 2 then
+            local count = #PERF_QUALITY_PRESETS
+            if count > 0 then
+                local idx = PERF_QUALITY_INDEX
+                if not idx or idx < 1 or idx > count then idx = 2 end
+                idx = stepListIndex(idx, step, count, doWrap)
+                applyPerfQualityPreset(idx)
+            end
+            return true
+        elseif sel == 3 then
+            markPerfQualityCustom()
+            LOW_RES_MODE = (step > 0) and "quality" or "fast"
+            return true
+        elseif sel == 4 then
+            markPerfQualityCustom()
+            if RAY_PRESETS and #RAY_PRESETS > 0 then
+                RAY_PRESET_INDEX = stepListIndex(RAY_PRESET_INDEX or 1, step, #RAY_PRESETS, doWrap)
+            end
+            return true
+        elseif sel == 5 then
+            markPerfQualityCustom()
+            if DRAW_DIST_PRESETS and #DRAW_DIST_PRESETS > 0 then
+                DRAW_DIST_INDEX = stepListIndex(DRAW_DIST_INDEX or 1, step, #DRAW_DIST_PRESETS, doWrap)
+                EXP_TEX_MAX_DIST = DRAW_DIST_PRESETS[DRAW_DIST_INDEX]
+                refreshExpViewDistance()
+            end
+            return true
+        elseif sel == 6 then
+            markPerfQualityCustom()
+            if FAR_TEX_OFF_PRESETS and #FAR_TEX_OFF_PRESETS > 0 then
+                FAR_TEX_OFF_INDEX = stepListIndex(FAR_TEX_OFF_INDEX or #FAR_TEX_OFF_PRESETS, step, #FAR_TEX_OFF_PRESETS, doWrap)
+                FAR_TEX_OFF_DIST = FAR_TEX_OFF_PRESETS[FAR_TEX_OFF_INDEX]
+            end
+            return true
+        elseif sel == 7 then
+            markPerfQualityCustom()
+            WALL_MIPMAP_ENABLED = (step > 0)
+            return true
+        elseif sel == 8 then
+            markPerfQualityCustom()
+            MIP_LOD_ENABLED = (step > 0)
+            return true
+        elseif sel == 9 then
+            markPerfQualityCustom()
+            if FOG_START_PRESETS and #FOG_START_PRESETS > 0 then
+                normalizeFogRange()
+                local maxStart = math.max(1, (FOG_END_INDEX or 2) - 1)
+                FOG_START_INDEX = clampInt((FOG_START_INDEX or 1) + step, 1, maxStart)
+                normalizeFogRange()
+            end
+            return true
+        elseif sel == 10 then
+            markPerfQualityCustom()
+            if FOG_END_PRESETS and #FOG_END_PRESETS > 0 then
+                normalizeFogRange()
+                local n = #FOG_END_PRESETS
+                local minEnd = math.min(n, (FOG_START_INDEX or 1) + 1)
+                FOG_END_INDEX = clampInt((FOG_END_INDEX or minEnd) + step, minEnd, n)
+                normalizeFogRange()
+            end
+            return true
+        elseif sel == 11 then
+            markPerfQualityCustom()
+            if FOG_DITHER_SIZE_PRESETS and #FOG_DITHER_SIZE_PRESETS > 0 then
+                FOG_DITHER_SIZE_INDEX = stepListIndex(FOG_DITHER_SIZE_INDEX or 3, step, #FOG_DITHER_SIZE_PRESETS, doWrap)
+                FOG_DITHER_SIZE = FOG_DITHER_SIZE_PRESETS[FOG_DITHER_SIZE_INDEX]
+            end
+            return true
+        elseif sel == 12 then
+            stepFpsTarget(step, doWrap)
+            return true
+        elseif sel == 13 then
+            DEBUG_PERF_MONITOR = (step > 0)
+            return true
+        elseif sel == 14 then
+            if step > 0 then
+                applyDoubleBufferMode(true)
+            else
+                applyDoubleBufferMode(false)
             end
             return true
         end
@@ -3234,12 +3245,6 @@ local function adjustDebugMenuSelection(sel, delta, wrap)
         DEBUG_PERF_MONITOR = (step > 0)
         return true
     elseif sel == 11 then
-        ADAPTIVE_RAY_BUDGET_ENABLED = (step > 0)
-        ADAPTIVE_RAY_RUNTIME_INDEX = nil
-        ADAPTIVE_RAY_EMA_US = 0
-        ADAPTIVE_RAY_COOLDOWN = 0
-        return true
-    elseif sel == 12 then
         if step > 0 then
             applyDoubleBufferMode(true)
         else
@@ -3252,44 +3257,14 @@ local function adjustDebugMenuSelection(sel, delta, wrap)
 end
 
 local function applyDebugMenuSelection(sel)
-    local items = buildDebugMenuItems()
-    return sel == #items
+    return sel == getDebugMenuItemCount()
 end
 
-local function drawDashedRect(x1, y1, x2, y2, color, step)
-    local dashStep = step or 2
-    for x = x1, x2, dashStep do
-        vmupro.graphics.drawFillRect(x, y1, x, y1, color)
-        vmupro.graphics.drawFillRect(x, y2, x, y2, color)
-    end
-    for y = y1, y2, dashStep do
-        vmupro.graphics.drawFillRect(x1, y, x1, y, color)
-        vmupro.graphics.drawFillRect(x2, y, x2, y, color)
-    end
-end
-
-local function drawRectOutline(x1, y1, x2, y2, color)
+drawRectOutline = function(x1, y1, x2, y2, color)
     vmupro.graphics.drawLine(x1, y1, x2, y1, color)
     vmupro.graphics.drawLine(x1, y2, x2, y2, color)
     vmupro.graphics.drawLine(x1, y1, x1, y2, color)
     vmupro.graphics.drawLine(x2, y1, x2, y2, color)
-end
-
-local function drawTransparentPanel(x1, y1, x2, y2, fillColor, borderColor, dotStep, borderStep)
-    -- Static sparse stipple to simulate transparency without animated scanlines.
-    local step = dotStep or 12
-    local rowIndex = 0
-    for y = y1 + 2, y2 - 2, step do
-        local xOffset = 0
-        if (rowIndex % 2) == 1 then
-            xOffset = math.floor(step / 2)
-        end
-        for x = x1 + 2 + xOffset, x2 - 2, step do
-            vmupro.graphics.drawFillRect(x, y, x, y, fillColor)
-        end
-        rowIndex = rowIndex + 1
-    end
-    drawDashedRect(x1, y1, x2, y2, borderColor or COLOR_GRAY, borderStep or 3)
 end
 
 -- Draw title screen
@@ -3306,11 +3281,10 @@ local function drawTitleScreenImpl()
         -- Options submenu
         logBoot(vmupro.system.LOG_ERROR, "D title options text")
         -- Large single-column menu box (extend to bottom)
-        vmupro.graphics.drawFillRect(20, 50, 220, 239, COLOR_BLACK)
-        vmupro.graphics.drawFillRect(25, 55, 215, 237, COLOR_DARK_GRAY)
-        vmupro.graphics.drawFillRect(30, 60, 210, 82, COLOR_MAROON)
+        drawUiPanel(20, 50, 220, 239, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
+        drawUiPanel(30, 60, 210, 82, COLOR_MAROON, COLOR_WHITE)
         setFontCached(vmupro.text.FONT_TINY_6x8)
-        vmupro.graphics.drawText(titleInDebug and "DEBUG" or "OPTIONS", 92, 65, COLOR_WHITE, COLOR_MAROON)
+        drawUiText(titleInDebug and "DEBUG" or "OPTIONS", 92, 65, COLOR_WHITE, COLOR_MAROON)
 
         local items = {}
         if titleInDebug then
@@ -3349,7 +3323,7 @@ local function drawTitleScreenImpl()
             local textColor = COLOR_GRAY
             if i == sel then
                 local boxH = titleInDebug and 12 or 18
-                vmupro.graphics.drawFillRect(32, y, 208, y + boxH, COLOR_MAROON)
+                drawUiPanel(32, y, 208, y + boxH, COLOR_MAROON, COLOR_WHITE)
                 bgColor = COLOR_MAROON
                 textColor = COLOR_WHITE
             end
@@ -3358,19 +3332,18 @@ local function drawTitleScreenImpl()
             else
                 setFontCached(vmupro.text.FONT_TINY_6x8)
             end
-            vmupro.graphics.drawText(item, x, y + 2, textColor, bgColor)
+            drawUiText(item, x, y + 2, textColor, bgColor)
             drawRow = drawRow + 1
         end
         if titleInDebug then
             setFontCached(vmupro.text.FONT_TINY_6x8)
-            vmupro.graphics.drawText("L/R ADJUST", 34, 226, COLOR_WHITE, COLOR_DARK_GRAY)
+            drawUiText("L/R ADJUST", 34, 226, COLOR_WHITE, COLOR_DARK_GRAY)
         end
     else
         -- Main title menu
         logBoot(vmupro.system.LOG_ERROR, "D title main text")
         -- Compact menu box for 3 items
-        vmupro.graphics.drawFillRect(60, 140, 180, 230, COLOR_BLACK)
-        vmupro.graphics.drawFillRect(65, 145, 175, 225, COLOR_DARK_GRAY)
+        drawUiPanel(60, 140, 180, 230, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
         setFontCached(vmupro.text.FONT_SMALL)
         local items = {"START GAME", "OPTIONS", "EXIT"}
         for i, item in ipairs(items) do
@@ -3378,12 +3351,12 @@ local function drawTitleScreenImpl()
             local bgColor = COLOR_DARK_GRAY
             local textColor = COLOR_GRAY
             if i == titleSelection then
-                vmupro.graphics.drawFillRect(70, y, 170, y + 18, COLOR_MAROON)
+                drawUiPanel(70, y, 170, y + 18, COLOR_MAROON, COLOR_WHITE)
                 bgColor = COLOR_MAROON
                 textColor = COLOR_WHITE
             end
             setFontCached(vmupro.text.FONT_SMALL)
-            vmupro.graphics.drawText(item, 78, y + 2, textColor, bgColor)
+            drawUiText(item, 78, y + 2, textColor, bgColor)
         end
     end
 end
@@ -3394,13 +3367,12 @@ logBoot(vmupro.system.LOG_ERROR, "drawTitleScreen bound to impl")
 -- Draw game over screen
 local function drawGameOver()
     -- Darken background
-    vmupro.graphics.drawFillRect(40, 70, 200, 195, COLOR_BLACK)
-    vmupro.graphics.drawFillRect(45, 75, 195, 190, COLOR_DARK_GRAY)
+    drawUiPanel(40, 70, 200, 195, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
 
     -- Title
-    vmupro.graphics.drawFillRect(50, 80, 190, 102, COLOR_MAROON)
+    drawUiPanel(50, 80, 190, 102, COLOR_MAROON, COLOR_WHITE)
     setFontCached(vmupro.text.FONT_SMALL)
-    vmupro.graphics.drawText("GAME OVER", 76, 85, COLOR_WHITE, COLOR_MAROON)
+    drawUiText("GAME OVER", 76, 85, COLOR_WHITE, COLOR_MAROON)
 
     -- Menu items
     local items = {"RESTART", "MENU", "QUIT"}
@@ -3409,12 +3381,12 @@ local function drawGameOver()
         local bgColor = COLOR_DARK_GRAY
         local textColor = COLOR_GRAY
         if i == gameOverSelection then
-            vmupro.graphics.drawFillRect(50, y, 190, y + 18, COLOR_MAROON)
+            drawUiPanel(50, y, 190, y + 18, COLOR_MAROON, COLOR_WHITE)
             bgColor = COLOR_MAROON
             textColor = COLOR_WHITE
         end
         setFontCached(vmupro.text.FONT_SMALL)
-        vmupro.graphics.drawText(item, 86, y + 2, textColor, bgColor)
+        drawUiText(item, 86, y + 2, textColor, bgColor)
     end
 end
 
@@ -3428,26 +3400,20 @@ function collidesWithSprite(nx, ny, playerRadius)
     if not sprites or #sprites == 0 then return false end
     local pr = playerRadius or PLAYER_COLLISION_RADIUS or 0.27
     if pr < 0.1 then pr = 0.1 end
-    if checkArrayBounds(sprites, 1, "collidesWithSprite") then
-        for i = 1, #sprites do
-            if checkArrayBounds(sprites, i, "collidesWithSprite") then
-                local s = sprites[i]
-                if not s or not isEnemyType(s.t) then
-                    goto continue_collide
-                end
-                if DEBUG_DISABLE_ENEMIES then
-                    goto continue_collide
-                end
-                if (s.t == 5 or s.t == 6) and (s.dying or s.dead or s.alive == false) then
-                    goto continue_collide
-                end
+    if DEBUG_DISABLE_ENEMIES then
+        return false
+    end
+    for i = 1, #sprites do
+        local s = sprites[i]
+        if s and isEnemyType(s.t) then
+            local inactiveEnemy = (s.t == 5 or s.t == 6) and (s.dying or s.dead or s.alive == false)
+            if not inactiveEnemy then
                 local dx, dy = nx - s.x, ny - s.y
                 local sr = 0.34
                 local minDist = pr + sr
                 if (dx * dx + dy * dy) < (minDist * minDist) then
                     return true
                 end
-                ::continue_collide::
             end
         end
     end
@@ -3494,8 +3460,8 @@ local function isWalkableWithRadius(x, y, radius)
     local maxMx = math.floor(x + r)
     local minMy = math.floor(y - r)
     local maxMy = math.floor(y + r)
-    -- Keep a small inset so circle-vs-tile checks are less sticky at corners.
-    local collisionR = r - 0.025
+    -- Keep only a tiny inset so we don't creep into walls under sustained input.
+    local collisionR = r - (PLAYER_WALL_COLLISION_INSET or 0.005)
     if collisionR < 0.05 then collisionR = 0.05 end
     local rr = collisionR * collisionR
 
@@ -3547,6 +3513,22 @@ local function movePlayerWithSlide(deltaX, deltaY)
     local stepX = (deltaX or 0) / subCount
     local stepY = (deltaY or 0) / subCount
     local radius = PLAYER_COLLISION_RADIUS or 0.27
+    local lastGoodX = px
+    local lastGoodY = py
+
+    local function isInsideSolidTile(x, y)
+        local mx = math.floor(x)
+        local my = math.floor(y)
+        if mx < 0 or mx >= 16 or my < 0 or my >= 16 then
+            return true
+        end
+        local row = map and map[my + 1]
+        if not row then
+            return true
+        end
+        local tile = row[mx + 1] or 1
+        return tile > 0
+    end
 
     for _ = 1, subCount do
         local nx = px + stepX
@@ -3557,6 +3539,14 @@ local function movePlayerWithSlide(deltaX, deltaY)
         if canMove(px, ny, radius) then
             py = ny
         end
+        if isInsideSolidTile(px, py) then
+            -- Safety: never remain inside a wall cell; restore last valid position.
+            px = lastGoodX
+            py = lastGoodY
+            break
+        end
+        lastGoodX = px
+        lastGoodY = py
     end
 end
 
@@ -3638,6 +3628,11 @@ local function drawFogOverlayArea(x1, y1, x2, y2, fogAlpha)
     end
     local fogPrimary = FOG_COLOR or COLOR_GRAY
     local fogAccent = getFogAccentColor(fogPrimary)
+    local fogAccentCross = getFogAccentColor(fogAccent)
+    if fogPrimary == COLOR_BLACK or fogPrimary == COLOR_DARK_GRAY then
+        -- Keep dark fog subtle: avoid bright cross-hatch lines.
+        fogAccentCross = fogAccent
+    end
     local ditherSize = FOG_DITHER_SIZE or 3
     if ditherSize < 1 then ditherSize = 1 end
     if ditherSize > 6 then ditherSize = 6 end
@@ -3648,25 +3643,35 @@ local function drawFogOverlayArea(x1, y1, x2, y2, fogAlpha)
         return
     end
 
-    -- Fast translucent fog: quantized horizontal bands + sparse accent.
-    -- This avoids the per-pixel grid cost that heavily impacts FPS.
-    local levels = 12
+    -- Fast translucent fog: quantized bands with sparse dual-diagonal hatch.
+    -- Cross-hatch is only added at higher fog coverage to keep cost low.
+    local levels = 14
     local coverage = math.floor((fogAlpha * levels) + 0.5)
     if coverage < 1 then return end
     if coverage > levels then coverage = levels end
-    local bandH = ditherSize + 1
-    local accentStep = (ditherSize * 3) + 5
+    local bandH = ditherSize
+    if bandH < 1 then bandH = 1 end
+    local accentStepA = (ditherSize * 2) + 4
+    local accentStepB = accentStepA + ditherSize + 2
     local threshold = coverage / levels
     for y = y1, y2, bandH do
         local yb = y + bandH - 1
         if yb > y2 then yb = y2 end
         local rowIdx = math.floor((y - y1) / bandH)
-        local bandMix = ((rowIdx * 3 + x1) % levels) / levels
+        local bandMix = ((rowIdx * 5 + x1) % levels) / levels
         if bandMix < threshold then
             vmupro.graphics.drawFillRect(x1, y, x2, yb, fogPrimary)
             if coverage >= 4 then
-                for x = x1 + ((rowIdx + ditherSize) % accentStep), x2, accentStep do
+                local startA = x1 + ((rowIdx * (ditherSize + 1) + ditherSize) % accentStepA)
+                for x = startA, x2, accentStepA do
                     vmupro.graphics.drawFillRect(x, y, x, yb, fogAccent)
+                end
+            end
+            if coverage >= 7 then
+                local rowPhase = (rowIdx * (ditherSize + 2)) % accentStepB
+                local startB = x1 + ((accentStepB - rowPhase) % accentStepB)
+                for x = startB, x2, accentStepB do
+                    vmupro.graphics.drawFillRect(x, y, x, yb, fogAccentCross)
                 end
             end
         end
@@ -3690,149 +3695,6 @@ local function drawFogCurtainColumn(sx, ex, dist)
     if y1 < 0 then y1 = 0 end
     if y2 > (VIEWPORT_H - 1) then y2 = VIEWPORT_H - 1 end
     vmupro.graphics.drawFillRect(sx, y1, ex, y2, FOG_COLOR or COLOR_GRAY)
-end
-
-local function drawWallTexture(wtype, side, sx, y1, y2)
-    local sprite = nil
-    if wtype == 1 then
-        sprite = wallStone
-    elseif wtype == 2 then
-        sprite = wallBrick
-    elseif wtype == 3 then
-        sprite = wallMoss
-    elseif wtype == 4 then
-        sprite = wallMetal
-    elseif wtype == 5 then
-        sprite = wallWood
-    elseif wtype == 6 then
-        sprite = wallWindow
-    end
-
-    -- Safety check: sprite must exist
-    if not sprite then
-        renderLog("drawWallTexture: No sprite for wtype=" .. tostring(wtype))
-        return
-    end
-
-    -- Safety check: sprite dimensions must be valid
-    if not sprite.width or not sprite.height then
-        renderLog("drawWallTexture: Invalid sprite dimensions for wtype=" .. tostring(wtype))
-        return
-    end
-
-    local texW, texH = sprite.width, sprite.height
-    renderLog("drawWallTexture: wtype=" .. tostring(wtype) .. " texW=" .. tostring(texW) .. " texH=" .. tostring(texH))
-
-    -- Safety check: wall height must be positive
-    local wallH = y2 - y1
-    if wallH <= 0 then
-        renderLog("drawWallTexture: Invalid wall height (y1=" .. tostring(y1) .. " y2=" .. tostring(y2) .. ")")
-        return
-    end
-
-    -- Detect texture size and compute appropriate scale
-    local scaleX = 1.0
-    local validTexture = false
-
-    -- Supported texture sizes with their scale factors
-    if texW == 128 and texH == 256 then
-        -- Vertical texture (128x256) - standard wall
-        scaleX = 4 / texW  -- Scale to 4 pixels wide
-        validTexture = true
-        renderLog("drawWallTexture: 128x256 texture detected, scaleX=" .. tostring(scaleX))
-    elseif texW == 256 and texH == 128 then
-        -- Horizontal texture (256x128) - wide wall
-        scaleX = 4 / texW  -- Scale to 4 pixels wide
-        validTexture = true
-        renderLog("drawWallTexture: 256x128 texture detected, scaleX=" .. tostring(scaleX))
-    elseif texW == 128 and texH == 128 then
-        -- Square texture (128x128)
-        scaleX = 4 / texW  -- Scale to 4 pixels wide
-        validTexture = true
-        renderLog("drawWallTexture: 128x128 texture detected, scaleX=" .. tostring(scaleX))
-    else
-        -- Unknown texture size - log error
-        renderLog("drawWallTexture: ERROR - Unsupported texture size " .. tostring(texW) .. "x" .. tostring(texH))
-        return
-    end
-
-    -- Safety check: validate scaleX value
-    if scaleX <= 0 or scaleX ~= scaleX or scaleX == math.huge or scaleX == -math.huge then
-        renderLog("drawWallTexture: ERROR - Invalid scaleX value: " .. tostring(scaleX))
-        return
-    end
-
-    -- If wall is extremely tall (very close), draw a single scaled texture to avoid huge tiling
-    if wallH > (texH * 4) then
-        local scaleY = wallH / texH
-        if scaleY > 10 then scaleY = 10 end
-        if safeScale(sprite, scaleX, scaleY, "drawWallTexture_tall") then
-            vmupro.sprite.drawScaled(sprite, sx, y1, scaleX, scaleY, vmupro.sprite.kImageUnflipped)
-        end
-        return
-    end
-
-    -- Tile vertically
-    local tileH = texH
-    local fullTiles = math.floor(wallH / tileH)
-    local remainder = wallH - (fullTiles * tileH)
-
-    renderLog("drawWallTexture: wallH=" .. tostring(wallH) .. " tileH=" .. tostring(tileH) .. " fullTiles=" .. tostring(fullTiles) .. " remainder=" .. tostring(remainder))
-
-    -- Safety check: ensure fullTiles is reasonable
-    if fullTiles < 0 or fullTiles > 1000 then
-        renderLog("drawWallTexture: ERROR - Invalid fullTiles count: " .. tostring(fullTiles))
-        return
-    end
-
-    local drawY = y1
-    for i = 1, fullTiles do
-        -- Safety check: verify drawY is within screen bounds
-        if drawY < 0 or drawY > 240 then
-            renderLog("drawWallTexture: WARNING - drawY out of bounds: " .. tostring(drawY))
-        end
-
-        -- Safety check: verify coordinates are valid
-        if sx < 0 or sx > 400 then
-            renderLog("drawWallTexture: WARNING - sx out of bounds: " .. tostring(sx))
-        end
-
-        if safeScale(sprite, scaleX, 1.0, "drawWallTexture") then
-            vmupro.sprite.drawScaled(sprite, sx, drawY, scaleX, 1.0, vmupro.sprite.kImageUnflipped)
-        end
-        drawY = drawY + tileH
-    end
-
-    if remainder > 0 then
-        local scaleY = remainder / tileH
-
-        -- Safety check: validate scaleY value
-        if scaleY <= 0 or scaleY > 1.0 or scaleY ~= scaleY or scaleY == math.huge or scaleY == -math.huge then
-            renderLog("drawWallTexture: ERROR - Invalid scaleY value: " .. tostring(scaleY))
-            return
-        end
-
-        renderLog("drawWallTexture: Drawing remainder tile with scaleY=" .. tostring(scaleY))
-
-        -- Safety check: verify drawY is within screen bounds
-        if drawY < 0 or drawY > 240 then
-            renderLog("drawWallTexture: WARNING - drawY out of bounds for remainder: " .. tostring(drawY))
-        end
-
-        if safeScale(sprite, scaleX, scaleY, "drawWallTexture_remainder") then
-            vmupro.sprite.drawScaled(sprite, sx, drawY, scaleX, scaleY, vmupro.sprite.kImageUnflipped)
-        end
-    end
-end
-
-local function getWallSpriteForType(wtype)
-    if wtype == 1 then return wallStone end
-    if wtype == 2 then return wallBrick end
-    if wtype == 3 then return wallMoss end
-    if wtype == 4 then return wallMetal end
-    if wtype == 5 then return wallWood end
-    if wtype == 6 then return wallWindow end
-    return wallStone
 end
 
 local function getWallSheetForType(wtype)
@@ -3930,6 +3792,7 @@ local function drawWallTextureColumn(wtype, side, texCoord, sx, y1, y2, colW, di
         return false
     end
     local perfSample = (DEBUG_PERF_MONITOR == true) and (PERF_MONITOR_ACTIVE_SAMPLE == true)
+    local trackCounters = (DEBUG_PERF_MONITOR == true)
     local canTime = perfSample and vmupro and vmupro.system and vmupro.system.getTimeUs
     local t0
     if canTime then
@@ -3948,7 +3811,9 @@ local function drawWallTextureColumn(wtype, side, texCoord, sx, y1, y2, colW, di
         if y2 > 239 then y2 = 239 end
         local fogAlpha = getFogQuantizedFactor(distToWall)
         if fogAlpha > 0 then
-            PERF_MONITOR_FOG_COLS = (PERF_MONITOR_FOG_COLS or 0) + drawWidth
+            if trackCounters then
+                PERF_MONITOR_FOG_COLS = (PERF_MONITOR_FOG_COLS or 0) + drawWidth
+            end
             if canTime then
                 t0 = vmupro.system.getTimeUs()
             end
@@ -3984,12 +3849,10 @@ EXP_RADIUS = 20
 EXP_BUCKETS = 8
 EXP_TEX_MAX_DIST = EXP_TEX_MAX_DIST or DRAW_DIST_PRESETS[DRAW_DIST_INDEX]
 EXP_VIEW_DIST = EXP_VIEW_DIST or EXP_TEX_MAX_DIST
-HYBRID_BLEND = 4.0
 HYBRID_TEX_MAX_H = VIEWPORT_H
 USE_FIXED_RAYCAST = true
 DEBUG_FORCE_FLOAT_RAYCAST = false
 EXP_DIST_LUT_SIZE = 256
-EXP_NEAR_DIST = EXP_NEAR_DIST or 28.0
 expHeightLut = expHeightLut or {}
 expScaleYLut = expScaleYLut or {}
 expHeightLutReady = expHeightLutReady or false
@@ -4075,6 +3938,14 @@ local function expCastRayFixed(rayDir, maxDist)
     end
     local rayMaxDistFix = math.floor(rayMaxDist * EXP_FIX_DIST)
 
+    -- Guard against rare movement penetration: stabilize rendering when inside a wall cell.
+    if mapX >= 0 and mapX < 16 and mapY >= 0 and mapY < 16 then
+        local startTile = map and map[mapY + 1] and map[mapY + 1][mapX + 1] or 0
+        if startTile and startTile > 0 then
+            return 0.4, startTile, 0, 0.0, true
+        end
+    end
+
     local dirXFix = rayDirXFix[rayDir] or 0
     local dirYFix = rayDirYFix[rayDir] or 0
     local stepX = (dirXFix < 0) and -1 or 1
@@ -4151,178 +4022,7 @@ local function expCastRayFixed(rayDir, maxDist)
     return dist, wtype, side, texCoord, true
 end
 
-local getWallSprite
-local expBuckets = {}
-local expBucketCounts = {}
 local expDepthBuf = {}
-local expEntryPool = {}
-for i = 1, (EXP_BUCKETS or 8) do
-    expBuckets[i] = {}
-    expBucketCounts[i] = 0
-end
-
-local function renderWallsExperimental(minDist)
-    if not map then return end
-    if not DEBUG_DISABLE_WALL_TEXTURE and (not wallStone or not wallBrick) and not wallTextureLoadAttempted then
-        loadWallTextures()
-    end
-    local nearMin = minDist or 0
-    local maxDist = EXP_MAX_DIST or 16
-    local viewDist = EXP_VIEW_DIST or maxDist
-    local maxDistSq = maxDist * maxDist
-    local radius = EXP_RADIUS or 8
-    local radiusSq = radius * radius
-    local dir = pdir % 64
-    local cosDir = cosTable[dir]
-    local sinDir = sinTable[dir]
-    local fovRad = renderCfg.fovSteps * (renderCfg.twoPi / 64)
-    local maxSx = math.tan(fovRad / 2)
-    local wallScale = VIEWPORT_H - 20
-    local bucketCount = EXP_BUCKETS or 8
-    for i = 1, bucketCount do
-        if not expBuckets[i] then
-            expBuckets[i] = {}
-        end
-        expBucketCounts[i] = 0
-    end
-    local nextExpEntry = 1
-    for x = 0, 239 do
-        expDepthBuf[x] = nil
-    end
-    local bucketSpan = maxDist / bucketCount
-    local minX = math.floor(px - radius)
-    local maxX = math.floor(px + radius)
-    local minY = math.floor(py - radius)
-    local maxY = math.floor(py + radius)
-    if minX < 0 then minX = 0 end
-    if minY < 0 then minY = 0 end
-    if maxX > 15 then maxX = 15 end
-    if maxY > 15 then maxY = 15 end
-    for my = minY, maxY do
-        local row = map[my + 1]
-        if row then
-            for mx = minX, maxX do
-                local wtype = row[mx + 1]
-                if wtype and wtype > 0 then
-                    local wx = mx + 0.5
-                    local wy = my + 0.5
-                    local dx = wx - px
-                    local dy = wy - py
-                    local distSq = dx * dx + dy * dy
-                    if distSq <= radiusSq and distSq <= maxDistSq then
-                        local relX = dx * sinDir - dy * cosDir
-                        local relY = dx * cosDir + dy * sinDir
-                        local projRelY = relY
-                        if projRelY < 0.5 then projRelY = 0.5 end
-                        if relY > 0.05 and relY >= nearMin and relY <= maxDist and relY <= viewDist then
-                            local sx = relX / projRelY
-                            if sx >= -maxSx and sx <= maxSx then
-                                local b = math.floor(relY / bucketSpan) + 1
-                                if b < 1 then b = 1 end
-                                if b > bucketCount then b = bucketCount end
-                                local bucket = expBuckets[b]
-                                local bucketIdx = (expBucketCounts[b] or 0) + 1
-                                expBucketCounts[b] = bucketIdx
-                                local it = expEntryPool[nextExpEntry]
-                                if not it then
-                                    it = {}
-                                    expEntryPool[nextExpEntry] = it
-                                end
-                                nextExpEntry = nextExpEntry + 1
-                                it.relY = relY
-                                it.projRelY = projRelY
-                                it.sx = sx
-                                it.t = wtype
-                                bucket[bucketIdx] = it
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-    local tilesDrawn = 0
-    local tileBudget = EXP_TILE_BUDGET or 300
-    for b = bucketCount, 1, -1 do
-        local bucket = expBuckets[b]
-        local bucketLen = expBucketCounts[b] or 0
-        for i = 1, bucketLen do
-            if tilesDrawn >= tileBudget then
-                break
-            end
-            local it = bucket[i]
-            local projRelY = it.projRelY or it.relY
-            if projRelY < 0.5 then projRelY = 0.5 end
-            local h = math.floor(wallScale / projRelY)
-            if h > VIEWPORT_H then h = VIEWPORT_H end
-            if h >= 2 then
-                local y1 = HORIZON - math.floor(h / 2)
-                local y2 = HORIZON + math.floor(h / 2)
-                if y1 < 0 then y1 = 0 end
-                if y2 > VIEWPORT_H then y2 = VIEWPORT_H end
-                local screenX = math.floor(120 + it.sx * 120)
-                if screenX == screenX and screenX >= -10000 and screenX <= 10000 then
-                    local baseColor = getWallColor(it.t, 0)
-                    local fogStart = FOG_START or (EXP_TEX_MAX_DIST or 5.0) - 1.0
-                    local farWall = it.relY > (EXP_TEX_MAX_DIST or 5.0)
-                    if farWall and it.relY >= 2.5 then
-                        goto continue_exp_tile
-                    end
-                    tilesDrawn = tilesDrawn + 1
-                    local halfW = math.floor(h / 2)
-                    local x1 = screenX - halfW
-                    local x2 = screenX + halfW
-                    if x1 < 0 then x1 = 0 end
-                    if x2 > 239 then x2 = 239 end
-
-                    local needsDraw = false
-                    for x = x1, x2 do
-                        local prev = expDepthBuf[x]
-                        if not prev or it.relY < prev then
-                            needsDraw = true
-                            break
-                        end
-                    end
-
-                if needsDraw then
-                    local fogOnly = (not DEBUG_DISABLE_FOG) and (it.relY > fogStart)
-                    local nearForceTex = it.relY < 2.5
-                    if DEBUG_DISABLE_WALL_TEXTURE or WALL_TEXTURE_MODE == "flat" or (fogOnly and not nearForceTex) then
-                            local fogColor = DEBUG_DISABLE_FOG and baseColor or FOG_COLOR
-                            for x = x1, x2 do
-                                local prev = expDepthBuf[x]
-                                if not prev or it.relY < prev then
-                                    expDepthBuf[x] = it.relY
-                                    vmupro.graphics.drawFillRect(x, y1, x, y2, fogColor)
-                                end
-                            end
-                        else
-                            for x = x1, x2 do
-                                local prev = expDepthBuf[x]
-                                if not prev or it.relY < prev then
-                                    expDepthBuf[x] = it.relY
-                                end
-                            end
-                            local sprite = getWallSprite(it.t)
-                            if sprite and sprite.height then
-                                local scale = safeDivide(h, sprite.height, "renderTilesExp")
-                                if scale == scale and scale > 0.01 then
-                                    if scale > 50 then scale = 50 end
-                                    local drawX = math.floor(screenX - (sprite.width * scale) / 2)
-                                    if safeScale(sprite, scale, scale, "renderTilesExp") then
-                                        vmupro.sprite.drawScaled(sprite, drawX, y1, scale, scale, vmupro.sprite.kImageUnflipped)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-            ::continue_exp_tile::
-        end
-    end
-end
-
 local function renderWallsExperimentalHybrid()
     -- Stability-first EXP-H: use one raycast projection model at all distances.
     -- This prevents wall seams/shape shifts when draw distance changes.
@@ -4357,6 +4057,7 @@ local function renderWallsExperimentalHybrid()
     end
     local useFixedRaycast = (USE_FIXED_RAYCAST == true) and (DEBUG_FORCE_FLOAT_RAYCAST ~= true)
     local perfSample = (DEBUG_PERF_MONITOR == true) and (PERF_MONITOR_ACTIVE_SAMPLE == true)
+    local trackCounters = (DEBUG_PERF_MONITOR == true)
     local canTime = perfSample and vmupro and vmupro.system and vmupro.system.getTimeUs
     local rayOffsets = nil
     local playerDirFix = 0
@@ -4516,17 +4217,19 @@ local function renderWallsExperimentalHybrid()
             local spanW = (ex - sx) + 1
 
             if rayHit and fixedDist <= hybridViewDist then
-                PERF_MONITOR_WALL_COLS_TOTAL = (PERF_MONITOR_WALL_COLS_TOTAL or 0) + spanW
-                if mipLevel <= 0 then
-                    PERF_MONITOR_MIP_COLS_0 = (PERF_MONITOR_MIP_COLS_0 or 0) + spanW
-                elseif mipLevel == 1 then
-                    PERF_MONITOR_MIP_COLS_1 = (PERF_MONITOR_MIP_COLS_1 or 0) + spanW
-                elseif mipLevel == 2 then
-                    PERF_MONITOR_MIP_COLS_2 = (PERF_MONITOR_MIP_COLS_2 or 0) + spanW
-                elseif mipLevel == 3 then
-                    PERF_MONITOR_MIP_COLS_3 = (PERF_MONITOR_MIP_COLS_3 or 0) + spanW
-                else
-                    PERF_MONITOR_MIP_COLS_4 = (PERF_MONITOR_MIP_COLS_4 or 0) + spanW
+                if trackCounters then
+                    PERF_MONITOR_WALL_COLS_TOTAL = (PERF_MONITOR_WALL_COLS_TOTAL or 0) + spanW
+                    if mipLevel <= 0 then
+                        PERF_MONITOR_MIP_COLS_0 = (PERF_MONITOR_MIP_COLS_0 or 0) + spanW
+                    elseif mipLevel == 1 then
+                        PERF_MONITOR_MIP_COLS_1 = (PERF_MONITOR_MIP_COLS_1 or 0) + spanW
+                    elseif mipLevel == 2 then
+                        PERF_MONITOR_MIP_COLS_2 = (PERF_MONITOR_MIP_COLS_2 or 0) + spanW
+                    elseif mipLevel == 3 then
+                        PERF_MONITOR_MIP_COLS_3 = (PERF_MONITOR_MIP_COLS_3 or 0) + spanW
+                    else
+                        PERF_MONITOR_MIP_COLS_4 = (PERF_MONITOR_MIP_COLS_4 or 0) + spanW
+                    end
                 end
                 local wallScale = VIEWPORT_H - 20
                 local h = math.floor(wallScale / fixedDist)
@@ -4536,9 +4239,12 @@ local function renderWallsExperimentalHybrid()
                 if y1 < 0 then y1 = 0 end
                 if y2 > (VIEWPORT_H - 1) then y2 = VIEWPORT_H - 1 end
 
-                local fogFactor = getFogQuantizedFactor(fixedDist)
+                local fogAlpha = 0
+                if not DEBUG_DISABLE_FOG then
+                    fogAlpha = getFogQuantizedFactor(fixedDist)
+                end
                 local fogCut = FOG_TEX_CUTOFF or FOG_END or texView
-                local farWall = (fixedDist > texView) or (fixedDist >= fogCut) or (fogFactor >= 1.0)
+                local farWall = (fixedDist > texView) or (fixedDist >= fogCut) or (fogAlpha >= 1.0)
                 local farTexOff = FAR_TEX_OFF_DIST or 999
                 local forceNoTexByDist = (farTexOff < 900) and (fixedDist >= farTexOff)
 
@@ -4555,16 +4261,15 @@ local function renderWallsExperimentalHybrid()
                         local drawT1 = vmupro.system.getTimeUs()
                         PERF_MONITOR_SAMPLE_WALL_US = (PERF_MONITOR_SAMPLE_WALL_US or 0) + (drawT1 - drawT0)
                     end
-                    if not DEBUG_DISABLE_FOG then
-                        local fogAlpha = getFogQuantizedFactor(fixedDist)
-                        if fogAlpha > 0 then
+                    if fogAlpha > 0 then
+                        if trackCounters then
                             PERF_MONITOR_FOG_COLS = (PERF_MONITOR_FOG_COLS or 0) + spanW
-                            if canTime then drawT0 = vmupro.system.getTimeUs() end
-                            drawFogOverlayArea(sx, y1, ex, y2, fogAlpha)
-                            if canTime and drawT0 then
-                                local fogT1 = vmupro.system.getTimeUs()
-                                PERF_MONITOR_SAMPLE_FOG_US = (PERF_MONITOR_SAMPLE_FOG_US or 0) + (fogT1 - drawT0)
-                            end
+                        end
+                        if canTime then drawT0 = vmupro.system.getTimeUs() end
+                        drawFogOverlayArea(sx, y1, ex, y2, fogAlpha)
+                        if canTime and drawT0 then
+                            local fogT1 = vmupro.system.getTimeUs()
+                            PERF_MONITOR_SAMPLE_FOG_US = (PERF_MONITOR_SAMPLE_FOG_US or 0) + (fogT1 - drawT0)
                         end
                     end
                 else
@@ -4581,7 +4286,9 @@ local function renderWallsExperimentalHybrid()
                     if useTex > 0.998 then useTex = 0.998 end
                     local drewTex = drawWallTextureColumn(wtype, side, useTex, sx, y1, y2, drawColW, fixedDist, mipLevel)
                     if not drewTex then
-                        PERF_MONITOR_WALL_COLS_FALLBACK = (PERF_MONITOR_WALL_COLS_FALLBACK or 0) + spanW
+                        if trackCounters then
+                            PERF_MONITOR_WALL_COLS_FALLBACK = (PERF_MONITOR_WALL_COLS_FALLBACK or 0) + spanW
+                        end
                         local baseColor = getWallColor(wtype, side)
                         local drawT0
                         if canTime then drawT0 = vmupro.system.getTimeUs() end
@@ -4590,26 +4297,29 @@ local function renderWallsExperimentalHybrid()
                             local drawT1 = vmupro.system.getTimeUs()
                             PERF_MONITOR_SAMPLE_WALL_US = (PERF_MONITOR_SAMPLE_WALL_US or 0) + (drawT1 - drawT0)
                         end
-                        if not DEBUG_DISABLE_FOG then
-                            local fogAlpha = getFogQuantizedFactor(fixedDist)
-                            if fogAlpha > 0 then
+                        if fogAlpha > 0 then
+                            if trackCounters then
                                 PERF_MONITOR_FOG_COLS = (PERF_MONITOR_FOG_COLS or 0) + spanW
-                                if canTime then drawT0 = vmupro.system.getTimeUs() end
-                                drawFogOverlayArea(sx, y1, ex, y2, fogAlpha)
-                                if canTime and drawT0 then
-                                    local fogT1 = vmupro.system.getTimeUs()
-                                    PERF_MONITOR_SAMPLE_FOG_US = (PERF_MONITOR_SAMPLE_FOG_US or 0) + (fogT1 - drawT0)
-                                end
+                            end
+                            if canTime then drawT0 = vmupro.system.getTimeUs() end
+                            drawFogOverlayArea(sx, y1, ex, y2, fogAlpha)
+                            if canTime and drawT0 then
+                                local fogT1 = vmupro.system.getTimeUs()
+                                PERF_MONITOR_SAMPLE_FOG_US = (PERF_MONITOR_SAMPLE_FOG_US or 0) + (fogT1 - drawT0)
                             end
                         end
                     else
-                        PERF_MONITOR_WALL_COLS_TEXTURED = (PERF_MONITOR_WALL_COLS_TEXTURED or 0) + spanW
+                        if trackCounters then
+                            PERF_MONITOR_WALL_COLS_TEXTURED = (PERF_MONITOR_WALL_COLS_TEXTURED or 0) + spanW
+                        end
                     end
                 end
             elseif not rayHit and not DEBUG_DISABLE_FOG then
                 -- Draw a fog curtain when no wall was traced inside draw distance.
                 -- This keeps fog coverage independent from draw-distance cutoff.
-                PERF_MONITOR_FOG_COLS = (PERF_MONITOR_FOG_COLS or 0) + spanW
+                if trackCounters then
+                    PERF_MONITOR_FOG_COLS = (PERF_MONITOR_FOG_COLS or 0) + spanW
+                end
                 local fogT0
                 if canTime then fogT0 = vmupro.system.getTimeUs() end
                 drawFogCurtainColumn(sx, ex, fogView)
@@ -4642,90 +4352,6 @@ local function renderWallsExperimentalHybrid()
     end
 end
 
-getWallSprite = function(wtype)
-    if wtype == 1 then
-        return wallStone
-    elseif wtype == 2 then
-        return wallBrick
-    elseif wtype == 3 then
-        return wallMoss
-    elseif wtype == 4 then
-        return wallMetal
-    elseif wtype == 5 then
-        return wallWood
-    elseif wtype == 6 then
-        return wallWindow
-    end
-    return nil
-end
-
-local function renderWallQuads()
-    if not wallTiles then return end
-    wallQuadLog("WQ render start tiles=" .. tostring(#wallTiles) .. " px=" .. tostring(px) .. " py=" .. tostring(py))
-    if not wallStone or not wallStone.width then
-        wallQuadLog("WQ wallStone missing or invalid")
-    end
-    if not wallBrick or not wallBrick.width then
-        wallQuadLog("WQ wallBrick missing or invalid")
-    end
-    if not wallMoss or not wallMoss.width then
-        wallQuadLog("WQ wallMoss missing or invalid")
-    end
-    if not wallMetal or not wallMetal.width then
-        wallQuadLog("WQ wallMetal missing or invalid")
-    end
-    if not wallWood or not wallWood.width then
-        wallQuadLog("WQ wallWood missing or invalid")
-    end
-    local order = {}
-    for i = 1, #wallTiles do
-        local w = wallTiles[i]
-        local dx = w.x - px
-        local dy = w.y - py
-        local dist = math.sqrt(dx * dx + dy * dy)
-        order[i] = {idx = i, dist = dist, dx = dx, dy = dy}
-    end
-    for i = 1, #order - 1 do
-        for j = 1, #order - i do
-            if order[j].dist < order[j + 1].dist then
-                order[j], order[j + 1] = order[j + 1], order[j]
-            end
-        end
-    end
-
-    for i = 1, #order do
-        local entry = order[i]
-        if entry.dist > 0.3 and entry.dist < 12 then
-            local angle = safeAtan2(entry.dy, entry.dx)
-            local dirIdx = math.floor(angle * 64 / 6.28318) % 64
-            local viewDiff = (dirIdx - pdir) % 64
-            if viewDiff > 32 then viewDiff = viewDiff - 64 end
-            if viewDiff >= -6 and viewDiff <= 6 then
-                local screenX = 120 + viewDiff * 20
-                local h = math.floor(200 / entry.dist)
-                if h > 240 then h = 240 end
-                if h < 6 then goto continue_quad end
-                local y1 = HORIZON - math.floor(h / 2)
-                if y1 < 0 then y1 = 0 end
-
-                local wtile = wallTiles[entry.idx]
-                local sprite = getWallSprite(wtile.t)
-                if not sprite then
-                    wallQuadLog("WQ missing sprite for type " .. tostring(wtile.t))
-                end
-                if sprite and sprite.height then
-                    local scale = safeDivide(h, sprite.height, "renderWallQuad")
-                    local drawX = screenX - math.floor((sprite.width * scale) / 2)
-                    if safeScale(sprite, scale, scale, "renderWallQuad") then
-                        vmupro.sprite.drawScaled(sprite, drawX, y1, scale, scale, vmupro.sprite.kImageUnflipped)
-                    end
-                end
-            end
-        end
-        ::continue_quad::
-    end
-end
-
 function castRay(dx, dy, maxDist)
     if dx == 0 and dy == 0 then
         return 16, 1, 0, 0, false
@@ -4736,6 +4362,14 @@ function castRay(dx, dy, maxDist)
     local rayMaxDist = maxDist or 16
     if rayMaxDist < 0.25 then
         rayMaxDist = 0.25
+    end
+
+    -- Guard against rare movement penetration: stabilize rendering when inside a wall cell.
+    if mapX >= 0 and mapX < 16 and mapY >= 0 and mapY < 16 then
+        local startTile = map and map[mapY + 1] and map[mapY + 1][mapX + 1] or 0
+        if startTile and startTile > 0 then
+            return 0.4, startTile, 0, 0.0, true
+        end
     end
 
     local deltaDistX = (dx == 0) and 1e9 or math.abs(1 / dx)
@@ -4817,7 +4451,8 @@ function castRay(dx, dy, maxDist)
 end
 
 local function isVisible(tx, ty, cache)
-    local useCache = cache and (not isExpRenderer())
+    local expRenderer = isExpRenderer()
+    local useCache = cache and (not expRenderer)
     if useCache then
         local lastFrame = cache._visFrame or -1000
         if frameCount - lastFrame < 14 then
@@ -4827,7 +4462,7 @@ local function isVisible(tx, ty, cache)
     local dx, dy = tx - px, ty - py
     local dist = math.sqrt(dx * dx + dy * dy)
     local maxDist = SPRITE_VIS_DIST or 6
-    if isExpRenderer() then
+    if expRenderer then
         local viewDist = EXP_VIEW_DIST or maxDist
         if viewDist < maxDist then maxDist = viewDist end
     end
@@ -4838,7 +4473,7 @@ local function isVisible(tx, ty, cache)
         end
         return false
     end
-    if isExpRenderer() then
+    if expRenderer then
         local dir = pdir % 64
         local cosDir = cosTable[dir]
         local sinDir = sinTable[dir]
@@ -4871,7 +4506,7 @@ local function isVisible(tx, ty, cache)
     end
     dx, dy = dx / dist, dy / dist
     local rx, ry, traveled = px, py, 0
-    local step = isExpRenderer() and 0.1 or 0.25
+    local step = expRenderer and 0.1 or 0.25
     while traveled < dist - step do
         rx, ry = rx + dx * step, ry + dy * step
         traveled = traveled + step
@@ -5251,7 +4886,7 @@ local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData
             if DEBUG_SHOW_WALK_INFO then
                 local info = "V:" .. tostring(view) .. " WF:" .. tostring(debugWalkFrame or -1) .. " S:" .. debugSpriteLabel
                 setFontCached(vmupro.text.FONT_TINY_6x8)
-                vmupro.graphics.drawText(info, 5, 220, COLOR_WHITE, COLOR_BLACK)
+                drawUiText(info, 5, 220, COLOR_WHITE, COLOR_BLACK)
             end
 
             -- Draw health bar above soldier if alive and has hp data
@@ -5633,13 +5268,13 @@ local function renderGameFrame()
     if showMenu then
         if inOptionsMenu then
             -- Options submenu
-            drawRectOutline(40, 30, 200, 230, COLOR_LIGHT_GRAY)
-            drawRectOutline(45, 35, 195, 225, COLOR_GRAY)
+            drawUiPanel(40, 30, 200, 230, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
+            drawUiPanel(45, 35, 195, 225, COLOR_DARK_GRAY, COLOR_GRAY)
             -- Title bar
-            drawRectOutline(50, 40, 190, 60, COLOR_WHITE)
+            drawUiPanel(50, 40, 190, 60, COLOR_MAROON, COLOR_WHITE)
             setFontCached(vmupro.text.FONT_SMALL)
             if inGameDebugMenu then
-                vmupro.graphics.drawText("DEBUG", 92, 44, COLOR_WHITE, COLOR_BLACK)
+                drawMenuText("DEBUG", 92, 44, COLOR_WHITE, COLOR_DARK_GRAY)
                 local items = buildDebugMenuItems()
                 local visibleCount = 10
                 local sel = titleDebugSelection
@@ -5656,7 +5291,7 @@ local function renderGameFrame()
                 for i = startIndex, endIndex do
                     local item = items[i]
                     local y = 74 + drawRow * 16
-                    local bgColor = COLOR_BLACK
+                    local bgColor = COLOR_DARK_GRAY
                     local textColor = COLOR_LIGHT_GRAY
                     local label = "  " .. item
                     if i == sel then
@@ -5664,13 +5299,13 @@ local function renderGameFrame()
                         label = "> " .. item
                     end
                     setFontCached(vmupro.text.FONT_TINY_6x8)
-                    vmupro.graphics.drawText(label, 54, y + 2, textColor, bgColor)
+                    drawMenuText(label, 54, y + 2, textColor, bgColor)
                     drawRow = drawRow + 1
                 end
                 setFontCached(vmupro.text.FONT_TINY_6x8)
-                vmupro.graphics.drawText("L/R ADJUST", 54, 222, COLOR_WHITE, COLOR_BLACK)
+                drawMenuText("L/R ADJUST", 54, 222, COLOR_WHITE, COLOR_DARK_GRAY)
             else
-                vmupro.graphics.drawText("OPTIONS", 86, 44, COLOR_WHITE, COLOR_BLACK)
+                drawMenuText("OPTIONS", 86, 44, COLOR_WHITE, COLOR_DARK_GRAY)
                 -- Options items
                 local soundText = "SOUND: " .. (soundEnabled and "ON" or "OFF")
                 local healthText = "HEALTH%: " .. (showHealthPercent and "ON" or "OFF")
@@ -5685,7 +5320,7 @@ local function renderGameFrame()
                 local optItems = {soundText, healthText, enemiesText, propsText, texturesText, fpsText, resText, minimapText, renderText, debugText, "BACK"}
                 for i, item in ipairs(optItems) do
                     local y = 70 + (i - 1) * 15
-                    local bgColor = COLOR_BLACK
+                    local bgColor = COLOR_DARK_GRAY
                     local textColor = COLOR_LIGHT_GRAY
                     local label = "  " .. item
                     if i == optionsSelection then
@@ -5693,22 +5328,22 @@ local function renderGameFrame()
                         label = "> " .. item
                     end
                     setFontCached(vmupro.text.FONT_SMALL)
-                    vmupro.graphics.drawText(label, 54, y + 1, textColor, bgColor)
+                    drawMenuText(label, 54, y + 1, textColor, bgColor)
                 end
             end
         else
             -- Main pause menu
-            drawRectOutline(50, 60, 190, 225, COLOR_LIGHT_GRAY)
-            drawRectOutline(55, 65, 185, 220, COLOR_GRAY)
+            drawUiPanel(50, 60, 190, 225, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
+            drawUiPanel(55, 65, 185, 220, COLOR_DARK_GRAY, COLOR_GRAY)
             -- Title bar
-            drawRectOutline(60, 70, 180, 92, COLOR_WHITE)
+            drawUiPanel(60, 70, 180, 92, COLOR_MAROON, COLOR_WHITE)
             setFontCached(vmupro.text.FONT_SMALL)
-            vmupro.graphics.drawText("PAUSED", 88, 75, COLOR_WHITE, COLOR_BLACK)
+            drawMenuText("PAUSED", 88, 75, COLOR_WHITE, COLOR_DARK_GRAY)
             -- Menu items
             local items = {"RESUME", "OPTIONS", "RESTART", "MENU", "QUIT"}
             for i, item in ipairs(items) do
                 local y = 95 + (i - 1) * 20
-                local bgColor = COLOR_BLACK
+                local bgColor = COLOR_DARK_GRAY
                 local textColor = COLOR_LIGHT_GRAY
                 local label = "  " .. item
                 if i == menuSelection then
@@ -5716,7 +5351,7 @@ local function renderGameFrame()
                     label = "> " .. item
                 end
                 setFontCached(vmupro.text.FONT_SMALL)
-                vmupro.graphics.drawText(label, 78, y + 2, textColor, bgColor)
+                drawMenuText(label, 78, y + 2, textColor, bgColor)
             end
         end
     end
@@ -5729,10 +5364,10 @@ local function renderGameFrame()
 
     -- Draw current level indicator
                 setFontCached(vmupro.text.FONT_SMALL)
-                vmupro.graphics.drawText(getLevelLabel(currentLevel), 6, 228, COLOR_WHITE, COLOR_BLACK)
+                drawUiText(getLevelLabel(currentLevel), 6, 228, COLOR_WHITE, COLOR_BLACK)
                 if showFpsOverlay and lastFps and lastFps > 0 then
                     local fpsText = string.format("FPS %.1f", lastFps)
-                    vmupro.graphics.drawText(fpsText, 6, 214, COLOR_WHITE, COLOR_BLACK)
+                    drawUiText(fpsText, 6, 214, COLOR_WHITE, COLOR_BLACK)
                 end
                 if DEBUG_PERF_MONITOR then
                     drawPerfMonitorOverlay()
@@ -5740,7 +5375,7 @@ local function renderGameFrame()
                 if DEBUG_SHOW_BLOCK and lastBlockEvent and (frameCount - lastBlockEvent.frame) < 60 then
                     local pct = math.floor((lastBlockEvent.pct or 0) * 100 + 0.5)
                     local msg = "BLOCK " .. tostring(pct) .. "% (-" .. tostring(lastBlockEvent.amount or 0) .. ")"
-                    vmupro.graphics.drawText(msg, 6, 202, COLOR_WHITE, COLOR_BLACK)
+                    drawUiText(msg, 6, 202, COLOR_WHITE, COLOR_BLACK)
                 end
 
     if levelBannerTimer > 0 then
@@ -5752,7 +5387,7 @@ local function renderGameFrame()
             textColor = COLOR_LIGHT_GRAY
         end
         setFontCached(vmupro.text.FONT_SMALL)
-        vmupro.graphics.drawText(bannerText, 170, 5, textColor, COLOR_BLACK)
+        drawUiText(bannerText, 170, 5, textColor, COLOR_BLACK)
     end
 
     -- Draw game over screen if player died
@@ -5767,7 +5402,7 @@ local function renderGameFrame()
 end
 
 local function consumeAudioSteps(elapsedUs, audioAccumulatorUs)
-    if not audioSystemActive then
+    if not audioSystemActive or not soundEnabled then
         return 0.0, 0
     end
 
@@ -5905,6 +5540,14 @@ function AppMain()
             bootLoopLogged = true
             logBoot(vmupro.system.LOG_ERROR, "B1 loop start")
         end
+        local inputSampleStartUs = nil
+        if DEBUG_PERF_MONITOR and vmupro and vmupro.system and vmupro.system.getTimeUs then
+            local sampleEvery = PERF_MONITOR_SAMPLE_EVERY or 12
+            if sampleEvery < 1 then sampleEvery = 1 end
+            if ((frameCount + 1) % sampleEvery) == 0 then
+                inputSampleStartUs = vmupro.system.getTimeUs()
+            end
+        end
         vmupro.input.read()
         lockRendererMode()
         if enableBootLogs and gameState == STATE_TITLE and bootLoopLogged and (frameCount % bootLogEvery == 0) then
@@ -5912,6 +5555,16 @@ function AppMain()
         end
         frameCount = frameCount + 1
         perfMonitorBeginFrame()
+        local perfSectionClock = nil
+        if PERF_MONITOR_ACTIVE_SAMPLE then
+            perfSectionClock = perfNowUs
+        end
+        if inputSampleStartUs and perfSectionClock then
+            local inputSampleEndUs = perfSectionClock()
+            if inputSampleEndUs and inputSampleEndUs >= inputSampleStartUs then
+                PERF_MONITOR_SAMPLE_INPUT_US = inputSampleEndUs - inputSampleStartUs
+            end
+        end
         if enableBootLogs and gameState == STATE_TITLE and (frameCount % bootLogEvery == 0) then
             logBoot(vmupro.system.LOG_ERROR, "B2.1 after frameCount")
         end
@@ -5936,17 +5589,31 @@ function AppMain()
             end
         end
 
+        local audioSectionStartUs = perfSectionClock and perfSectionClock()
         audioAccumulatorUs, audioStepsThisFrame = consumeAudioSteps(elapsedUs, audioAccumulatorUs)
+        if audioSectionStartUs and perfSectionClock then
+            local audioSectionEndUs = perfSectionClock()
+            if audioSectionEndUs and audioSectionEndUs >= audioSectionStartUs then
+                PERF_MONITOR_SAMPLE_AUDIO_US = PERF_MONITOR_SAMPLE_AUDIO_US + (audioSectionEndUs - audioSectionStartUs)
+            end
+        end
         if enableBootLogs and gameState == STATE_TITLE and (frameCount % bootLogEvery == 0) then
             logBoot(vmupro.system.LOG_ERROR, "B2.2 after audio update steps=" .. tostring(audioStepsThisFrame))
         end
 
+        local simSectionStartUs = perfSectionClock and perfSectionClock()
         if gameState == STATE_TITLE then
             updateTitleMusic()
             simAccumulatorUs = 0.0
             simStepsThisFrame = 0
         else
             simAccumulatorUs, simStepsThisFrame = consumeSimulationSteps(elapsedUs, simAccumulatorUs)
+        end
+        if simSectionStartUs and perfSectionClock then
+            local simSectionEndUs = perfSectionClock()
+            if simSectionEndUs and simSectionEndUs >= simSectionStartUs then
+                PERF_MONITOR_SAMPLE_SIM_US = PERF_MONITOR_SAMPLE_SIM_US + (simSectionEndUs - simSectionStartUs)
+            end
         end
 
         if enableBootLogs and gameState == STATE_TITLE and (frameCount % bootLogEvery == 0) then
@@ -5960,6 +5627,7 @@ function AppMain()
         if enableBootLogs and gameState == STATE_TITLE and (frameCount % bootLogEvery == 0) then
             logBoot(vmupro.system.LOG_ERROR, "B2.5 before title/menu pcall")
         end
+        local logicSectionStartUs = perfSectionClock and perfSectionClock()
         local okTitle, errTitle = pcall(function()
             if enableBootLogs and gameState == STATE_TITLE and (frameCount % bootLogEvery == 0) then
                 logBoot(vmupro.system.LOG_ERROR, "B2.6 inside title/menu pcall")
@@ -6002,15 +5670,13 @@ function AppMain()
                 local prevUseFixedRaycast = USE_FIXED_RAYCAST
                 local prevForceFloatRaycast = DEBUG_FORCE_FLOAT_RAYCAST
                 local prevPerfMonitor = DEBUG_PERF_MONITOR
-                local prevAutoRays = ADAPTIVE_RAY_BUDGET_ENABLED
                 local prevDoubleBuffer = DEBUG_DOUBLE_BUFFER
                 local prevWall1Format = WALL1_FORMAT_INDEX
                 local prevWallKey = WALL_FORCE_COLORKEY_OVERRIDE
                 local prevWallProjection = WALL_PROJECTION_MODE
                 if titleInOptions then
                     if titleInDebug then
-                        local dbgItems = buildDebugMenuItems()
-                        local dbgCount = #dbgItems
+                        local dbgCount = getDebugMenuItemCount()
                         if vmupro.input.pressed(vmupro.input.UP) then
                             titleDebugSelection = titleDebugSelection - 1
                             if titleDebugSelection < 1 then titleDebugSelection = dbgCount end
@@ -6052,6 +5718,7 @@ function AppMain()
                                 if soundEnabled then
                                     startTitleMusic()
                                 else
+                                    stopGameplaySamples()
                                     stopTitleMusic()
                                 end
                             elseif titleOptionsSelection == 3 then
@@ -6135,7 +5802,6 @@ function AppMain()
                     or prevUseFixedRaycast ~= USE_FIXED_RAYCAST
                     or prevForceFloatRaycast ~= DEBUG_FORCE_FLOAT_RAYCAST
                     or prevPerfMonitor ~= DEBUG_PERF_MONITOR
-                    or prevAutoRays ~= ADAPTIVE_RAY_BUDGET_ENABLED
                     or prevDoubleBuffer ~= DEBUG_DOUBLE_BUFFER
                     or prevWall1Format ~= WALL1_FORMAT_INDEX
                     or prevWallKey ~= WALL_FORCE_COLORKEY_OVERRIDE
@@ -6178,14 +5844,14 @@ function AppMain()
                 if inOptionsMenu then
                     -- Options submenu
                     if inGameDebugMenu then
-                        local items = buildDebugMenuItems()
+                        local dbgCount = getDebugMenuItemCount()
                         if vmupro.input.pressed(vmupro.input.UP) then
                             titleDebugSelection = titleDebugSelection - 1
-                            if titleDebugSelection < 1 then titleDebugSelection = #items end
+                            if titleDebugSelection < 1 then titleDebugSelection = dbgCount end
                         end
                         if vmupro.input.pressed(vmupro.input.DOWN) then
                             titleDebugSelection = titleDebugSelection + 1
-                            if titleDebugSelection > #items then titleDebugSelection = 1 end
+                            if titleDebugSelection > dbgCount then titleDebugSelection = 1 end
                         end
                         local gameAdjustDelta = getDebugAdjustDelta()
                         if gameAdjustDelta ~= 0 then
@@ -6213,9 +5879,8 @@ function AppMain()
                         if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
                             if optionsSelection == 1 then
                                 soundEnabled = not soundEnabled  -- Toggle sound
-                                if soundEnabled then
-                                    startTitleMusic()
-                                else
+                                if not soundEnabled then
+                                    stopGameplaySamples()
                                     stopTitleMusic()
                                 end
                             elseif optionsSelection == 2 then
@@ -6298,14 +5963,25 @@ function AppMain()
                     local moveStep = PLAYER_MOVE_SPEED_PER_SEC / SIM_TARGET_HZ
                     local strafeStep = PLAYER_STRAFE_SPEED_PER_SEC / SIM_TARGET_HZ
                     local turnPerStep = PLAYER_TURN_STEPS_PER_SEC / SIM_TARGET_HZ
+                    local heldLeft = vmupro.input.held(vmupro.input.LEFT)
+                    local heldRight = vmupro.input.held(vmupro.input.RIGHT)
+                    local heldMode = vmupro.input.held(vmupro.input.MODE)
+                    local heldUp = vmupro.input.held(vmupro.input.UP)
+                    local heldDown = vmupro.input.held(vmupro.input.DOWN)
+                    local heldA = vmupro.input.held(vmupro.input.A)
+                    local heldB = vmupro.input.held(vmupro.input.B)
+                    local pressedUp = vmupro.input.pressed(vmupro.input.UP)
+                    local pressedPower = vmupro.input.pressed(vmupro.input.POWER)
+                    local attackRange = PLAYER_ATTACK_RANGE or 0
+                    local attackRangeSq = attackRange * attackRange
                     for simStep = 1, controlSteps do
                         if showMenu then break end
 
                         local turnInput = 0
-                        if vmupro.input.held(vmupro.input.LEFT) then
+                        if heldLeft then
                             turnInput = turnInput - 1
                         end
-                        if vmupro.input.held(vmupro.input.RIGHT) then
+                        if heldRight then
                             turnInput = turnInput + 1
                         end
                         if turnInput ~= 0 then
@@ -6329,11 +6005,11 @@ function AppMain()
                         local sdx = cosTable[strafe_idx] * strafeStep
                         local sdy = sinTable[strafe_idx] * strafeStep
 
-                        local modeHeld = vmupro.input.held(vmupro.input.MODE)
+                        local modeHeld = heldMode
                         local wasBlocking = isBlocking
 
                         if modeHeld then
-                            if simStep == 1 and vmupro.input.pressed(vmupro.input.UP) and isAttacking == 0 then
+                            if simStep == 1 and pressedUp and isAttacking == 0 then
                                 local attackFrames = #swordAttack
                                 attackTotalFrames = 9
                                 if attackFrames == 0 then
@@ -6347,8 +6023,8 @@ function AppMain()
                                     if s.t == 5 and s.alive then
                                         local sdxHit = s.x - px
                                         local sdyHit = s.y - py
-                                        local dist = math.sqrt(sdxHit * sdxHit + sdyHit * sdyHit)
-                                        if dist < PLAYER_ATTACK_RANGE then
+                                        local distSq = sdxHit * sdxHit + sdyHit * sdyHit
+                                        if distSq < attackRangeSq then
                                             s.hp = s.hp - PLAYER_DAMAGE
                                             if not hitSomething then
                                                 hitSomething = true
@@ -6371,15 +6047,15 @@ function AppMain()
                                 end
                             end
 
-                            isBlocking = vmupro.input.held(vmupro.input.DOWN)
+                            isBlocking = heldDown
                         else
                             isBlocking = false
 
-                            if vmupro.input.held(vmupro.input.UP) then
+                            if heldUp then
                                 movePlayerWithSlide(dx, dy)
                             end
 
-                            if vmupro.input.held(vmupro.input.DOWN) then
+                            if heldDown then
                                 movePlayerWithSlide(-dx, -dy)
                             end
 
@@ -6398,15 +6074,15 @@ function AppMain()
                             end
                         end
 
-                        if vmupro.input.held(vmupro.input.A) then
+                        if heldA then
                             movePlayerWithSlide(-sdx, -sdy)
                         end
 
-                        if vmupro.input.held(vmupro.input.B) then
+                        if heldB then
                             movePlayerWithSlide(sdx, sdy)
                         end
 
-                        if simStep == 1 and vmupro.input.pressed(vmupro.input.POWER) then
+                        if simStep == 1 and pressedPower then
                             showMenu = true
                             menuSelection = 1
                             break
@@ -6415,6 +6091,12 @@ function AppMain()
                 end
             end
         end)
+        if logicSectionStartUs and perfSectionClock then
+            local logicSectionEndUs = perfSectionClock()
+            if logicSectionEndUs and logicSectionEndUs >= logicSectionStartUs then
+                PERF_MONITOR_SAMPLE_LOGIC_US = PERF_MONITOR_SAMPLE_LOGIC_US + (logicSectionEndUs - logicSectionStartUs)
+            end
+        end
         if (frameCount % bootLogEvery == 0) then
             logBoot(vmupro.system.LOG_ERROR, "B2.7 after title/menu pcall ok=" .. tostring(okTitle))
         end
@@ -6424,6 +6106,7 @@ function AppMain()
         end
 
         -- Render based on game state
+        local renderSectionStartUs = perfSectionClock and perfSectionClock()
         if gameState == STATE_LOADING then
             if loadingTimer == loadingMax then
                 loadingLog("LOAD render loading screen frame1")
@@ -6437,7 +6120,7 @@ function AppMain()
             local barW = math.floor(146 * progress)
             vmupro.graphics.drawFillRect(48, 113, 48 + barW, 127, COLOR_MAROON)
             setFontCached(vmupro.text.FONT_SMALL)
-            vmupro.graphics.drawText("LOADING", 95, 90, COLOR_WHITE, COLOR_BLACK)
+            drawUiText("LOADING", 95, 90, COLOR_WHITE, COLOR_BLACK)
         elseif gameState == STATE_TITLE then
             if titleNeedsRedraw then
                 logBoot(vmupro.system.LOG_ERROR, "B3 before drawTitleScreen")
@@ -6461,9 +6144,22 @@ function AppMain()
                 quitApp("render error: " .. tostring(errRender))
             end
         end  -- End of game rendering (else branch of title screen check)
+        if renderSectionStartUs and perfSectionClock then
+            local renderSectionEndUs = perfSectionClock()
+            if renderSectionEndUs and renderSectionEndUs >= renderSectionStartUs then
+                PERF_MONITOR_SAMPLE_RENDER_US = PERF_MONITOR_SAMPLE_RENDER_US + (renderSectionEndUs - renderSectionStartUs)
+            end
+        end
 
         ::render_only::
+        local presentSectionStartUs = perfSectionClock and perfSectionClock()
         presentFrame()
+        if presentSectionStartUs and perfSectionClock then
+            local presentSectionEndUs = perfSectionClock()
+            if presentSectionEndUs and presentSectionEndUs >= presentSectionStartUs then
+                PERF_MONITOR_SAMPLE_PRESENT_US = PERF_MONITOR_SAMPLE_PRESENT_US + (presentSectionEndUs - presentSectionStartUs)
+            end
+        end
         if gameState == STATE_TITLE then
             targetFrameUs = 16667
         else
@@ -6484,13 +6180,20 @@ function AppMain()
         if vmupro.system and vmupro.system.getTimeUs then
             local frameEndUs = vmupro.system.getTimeUs()
             if frameStartUs > 0 and frameEndUs > frameStartUs then
-                local elapsedUs = frameEndUs - frameStartUs
-                perfMonitorEndFrame(elapsedUs, frameEndUs)
-                updateAdaptiveRayBudget(elapsedUs)
-                local remainingUs = targetFrameUs - elapsedUs
+                local cpuElapsedUs = frameEndUs - frameStartUs
+                local remainingUs = targetFrameUs - cpuElapsedUs
                 if remainingUs > 0 and vmupro.system.delayMs then
+                    local sleepSectionStartUs = perfSectionClock and perfSectionClock()
                     vmupro.system.delayMs(math.floor(remainingUs / 1000))
+                    if sleepSectionStartUs and perfSectionClock then
+                        local sleepSectionEndUs = perfSectionClock()
+                        if sleepSectionEndUs and sleepSectionEndUs >= sleepSectionStartUs then
+                            PERF_MONITOR_SAMPLE_SLEEP_US = PERF_MONITOR_SAMPLE_SLEEP_US + (sleepSectionEndUs - sleepSectionStartUs)
+                        end
+                    end
                 end
+                local perfNowUsAfterSleep = vmupro.system.getTimeUs()
+                perfMonitorEndFrame(cpuElapsedUs, perfNowUsAfterSleep)
             end
         end
     end

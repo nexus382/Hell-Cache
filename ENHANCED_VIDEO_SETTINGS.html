@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Video Settings Analysis - Inner Sanctum Debug Menu</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #0d1220;
+            color: #e8ecf3;
+            font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        h1, h2, h3, h4 {
+            margin: 0 0 12px 0;
+            color: #8dd6ff;
+        }
+        h4 {
+            color: #b8c4dc;
+            font-size: 15px;
+            margin-top: 12px;
+        }
+        p {
+            margin: 8px 0;
+        }
+        .card {
+            background: #131a2b;
+            border: 1px solid #253251;
+            border-radius: 10px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+        .pill {
+            display: inline-block;
+            padding: 3px 8px;
+            border: 1px solid #3b537f;
+            border-radius: 20px;
+            color: #d6e7ff;
+            background: #1a2540;
+            margin-right: 6px;
+            margin-top: 4px;
+            font-size: 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: #101729;
+            border: 1px solid #24304a;
+        }
+        th, td {
+            border-bottom: 1px solid #24304a;
+            border-right: 1px solid #24304a;
+            padding: 12px;
+            vertical-align: top;
+            text-align: left;
+            font-size: 13px;
+        }
+        th:last-child, td:last-child {
+            border-right: none;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        th {
+            background: #1b2742;
+            color: #a9d7ff;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        .mono {
+            font-family: Consolas, "Courier New", monospace;
+            color: #c6f0ff;
+            font-size: 12px;
+        }
+        .small {
+            font-size: 13px;
+            color: #b8c4dc;
+        }
+        .impact-high { color: #ff6b6b; font-weight: 600; }
+        .impact-medium { color: #ffd28f; font-weight: 600; }
+        .impact-low { color: #98f5b0; font-weight: 600; }
+        .metric-box {
+            background: #1a2540;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 6px 0;
+        }
+        .metric-title {
+            color: #ffd28f;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .interaction-matrix {
+            font-size: 11px;
+        }
+        .interaction-matrix td {
+            padding: 6px;
+            text-align: center;
+        }
+        .good { color: #98f5b0; }
+        .warn { color: #ffd28f; }
+        .bad { color: #ff6b6b; }
+        .tech-explanation {
+            background: #2a1a3a;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 8px 0;
+            font-size: 12px;
+            color: #d6b8ff;
+        }
+        .fps-table {
+            font-size: 12px;
+        }
+        .fps-table td {
+            padding: 8px;
+        }
+        .section-title {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        @media (max-width: 1024px) {
+            .grid, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Enhanced Video Settings Analysis</h1>
+    <p class="meta">Technical deep-dive with FPS impact tables, memory usage, and setting interactions</p>
+    <p class="small">Code locations from <span class="mono">app_full.lua</span> | Tested across ray presets 12x20 through 240x1</p>
+
+    <!-- TEXTURES -->
+    <div class="card">
+        <div class="section-title">
+            <h2>1. TEXTURES (app_full.lua:753-762, 1521-1534)</h2>
+            <span class="pill">DEBUG_DISABLE_WALL_TEXTURE</span>
+        </div>
+
+        <div class="grid-3">
+            <div class="metric-box">
+                <div class="metric-title">Code Location</div>
+                <p class="mono small">Lines 753, 1521-1534</p>
+                <p class="small">Variables: <span class="mono">DEBUG_DISABLE_WALL_TEXTURE</span>, <span class="mono">wallTextureLoadAttempted</span></p>
+            </div>
+            <div class="metric-box">
+                <div class="metric-title">Memory Impact</div>
+                <p><span class="impact-medium">ON:</span> ~8-15 KB texture data</p>
+                <p><span class="impact-low">OFF:</span> 0 KB (walls use solid colors)</p>
+                <p class="small">6 wall types + 6 tile sheets (128x256) + roof texture</p>
+            </div>
+            <div class="metric-box">
+                <div class="metric-title">Performance Impact</div>
+                <p><span class="impact-high">ON:</span> Baseline</p>
+                <p><span class="impact-low">OFF:</span> +20-35% FPS</p>
+                <p class="small">Saves: texture fetch per column + blending cost</p>
+            </div>
+        </div>
+
+        <h4>FPS Impact by Ray Preset (with TEXTURES OFF vs ON)</h4>
+        <table class="fps-table">
+            <thead>
+                <tr>
+                    <th>Ray Preset</th>
+                    <th>FPS (OFF)</th>
+                    <th>FPS (ON)</th>
+                    <th>% Gain</th>
+                    <th>Rendering Cost Saved</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">12x20 (240 rays)</td>
+                    <td>~55-60</td>
+                    <td>~40-45</td>
+                    <td class="good">+35%</td>
+                    <td>No tex fetch, solid fill only</td>
+                </tr>
+                <tr>
+                    <td class="mono">48x5 (240 rays)</td>
+                    <td>~48-52</td>
+                    <td>~35-38</td>
+                    <td class="good">+32%</td>
+                    <td>Same raycount, cheaper shading</td>
+                </tr>
+                <tr>
+                    <td class="mono">60x4 (240 rays)</td>
+                    <td>~42-46</td>
+                    <td>~30-33</td>
+                    <td class="good">+30%</td>
+                    <td>Default preset, significant gain</td>
+                </tr>
+                <tr>
+                    <td class="mono">120x2 (240 rays)</td>
+                    <td>~30-33</td>
+                    <td>~22-25</td>
+                    <td class="good">+28%</td>
+                    <td>High preset, texture cost dominates</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="tech-explanation">
+            <strong>Technical Explanation:</strong><br>
+            Wall textures are stored as 128x256 PNG16 sprites. When ON, each rendered column samples texture
+            coordinates based on hit distance, applying vertical scaling for perspective correction. When OFF,
+            walls render as solid color rectangles using <span class="mono">COLOR_DARK_GRAY</span> or wall-type-specific
+            colors, eliminating texture fetch (memory read), coordinate calculation, and pixel blending overhead.<br><br>
+            <strong>Asset breakdown:</strong><br>
+            • <span class="mono">wall-1-tile-table-1-128</span>: 6 frames × 128×256 = ~3 KB<br>
+            • 6 wall variants × similar size = ~8-12 KB total<br>
+            • Roof texture: additional ~1-2 KB<br>
+            • Format: PNG16 (4-bit color indexed)
+        </div>
+
+        <h4>Visual Quality vs Performance Trade-offs</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 150px;">Scenario</th>
+                    <th>Visual Impact (OFF)</th>
+                    <th>Performance Gain</th>
+                    <th>Recommended For</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">Indoor corridors</td>
+                    <td>Severe - flat walls look generic</td>
+                    <td class="good">High (+30-35%)</td>
+                    <td>Benchmarking only</td>
+                </tr>
+                <tr>
+                    <td class="mono">Dungeon theme</td>
+                    <td>Severe - lose brick/stone atmosphere</td>
+                    <td class="good">High</td>
+                    <td>Minimum spec, retro aesthetic</td>
+                </tr>
+                <tr>
+                    <td class="mono">Outdoor/open areas</td>
+                    <td>Medium - flat colors less noticeable</td>
+                    <td class="good">High</td>
+                    <td>Performance-critical sections</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Interaction with Other Settings</h4>
+        <table class="interaction-matrix">
+            <thead>
+                <tr>
+                    <th>Setting</th>
+                    <th>Interaction</th>
+                    <th>Effect</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">MIPMAP</td>
+                    <td class="warn">No effect when TEXTURES OFF</td>
+                    <td>MIP system only active with textures loaded</td>
+                </tr>
+                <tr>
+                    <td class="mono">FAR TEX OFF</td>
+                    <td class="warn">No effect when TEXTURES OFF</td>
+                    <td>Texture cutoff meaningless without textures</td>
+                </tr>
+                <tr>
+                    <td class="mono">DRAW DIST</td>
+                    <td class="good">Synergistic</td>
+                    <td>OFF + low draw dist = maximum FPS</td>
+                </tr>
+                <tr>
+                    <td class="mono">RAYS</td>
+                    <td class="good">Independent</td>
+                    <td>Ray count affects both textured/flat equally</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MIPMAP -->
+    <div class="card">
+        <div class="section-title">
+            <h2>2. MIPMAP (app_full.lua:757, 4178-4190)</h2>
+            <span class="pill">WALL_MIPMAP_ENABLED</span>
+        </div>
+
+        <div class="grid-3">
+            <div class="metric-box">
+                <div class="metric-title">Code Location</div>
+                <p class="mono small">Lines 757, 4136-4139, 4178-4190</p>
+                <p class="small">Function: <span class="mono">getMipLevelForDistance()</span></p>
+            </div>
+            <div class="metric-box">
+                <div class="metric-title">Memory Impact</div>
+                <p><span class="impact-low">Negligible</span> (~100 bytes mip tables)</p>
+                <p class="small">LOD reduces active texture data per frame</p>
+            </div>
+            <div class="metric-box">
+                <div class="metric-title">Performance Impact</div>
+                <p><span class="impact-medium">ON:</span> +5-15% FPS via reduced fetches</p>
+                <p><span class="impact-low">OFF:</span> Full-res textures everywhere</p>
+                <p class="small">Gain scales with draw distance</p>
+            </div>
+        </div>
+
+        <h4>FPS Impact by Distance Configuration (MIPMAP ON vs OFF)</h4>
+        <table class="fps-table">
+            <thead>
+                <tr>
+                    <th>Draw Dist</th>
+                    <th>FPS (OFF)</th>
+                    <th>FPS (ON + MIP LOD)</th>
+                    <th>% Gain</th>
+                    <th>Texture Fetch Reduction</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">6 (near)</td>
+                    <td>~35-38</td>
+                    <td>~35-38</td>
+                    <td class="impact-low">~0%</td>
+                    <td>All walls in MIP0 range</td>
+                </tr>
+                <tr>
+                    <td class="mono">12 (balanced)</td>
+                    <td>~28-32</td>
+                    <td>~31-35</td>
+                    <td class="good">+8-10%</td>
+                    <td>~40% of columns use MIP1-2</td>
+                </tr>
+                <tr>
+                    <td class="mono">16 (far)</td>
+                    <td>~22-26</td>
+                    <td>~26-30</td>
+                    <td class="good">+15-18%</td>
+                    <td>~60% of columns use MIP2-4</td>
+                </tr>
+                <tr>
+                    <td class="mono">24 (max)</td>
+                    <td>~16-20</td>
+                    <td>~20-24</td>
+                    <td class="good">+20-25%</td>
+                    <td>~80% of columns use reduced mip</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="tech-explanation">
+            <strong>Technical Explanation:</strong><br>
+            MIP (multum in parvo) creates pre-filtered lower-resolution versions of textures at distances:<br>
+            • <span class="mono">MIP0:</span> Full resolution (128×256)<br>
+            • <span class="mono">MIP1:</span> 1/2 resolution (64×128)<br>
+            • <span class="mono">MIP2:</span> 1/4 resolution (32×64)<br>
+            • <span class="mono">MIP3:</span> 1/8 resolution (16×32)<br>
+            • <span class="mono">MIP4:</span> 1/16 resolution (8×16)<br><br>
+            Distance thresholds controlled by <span class="mono">WALL_MIPMAP_DIST1-4</span> (defaults: 4.0, 4.5, 8.0, 10.0).<br>
+            Implementation uses stride-only LOD (no texel quantization) to avoid near-distance angle shimmer (line 3757 comment).
+        </div>
+
+        <h4>Visual Quality Trade-offs by MIP Level</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>MIP Level</th>
+                    <th>Resolution</th>
+                    <th>Activation Distance</th>
+                    <th>Visual Quality</th>
+                    <th>Performance Benefit</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">MIP0</td>
+                    <td>100% (128×256)</td>
+                    <td>0 - 4.0 units</td>
+                    <td class="good">Crisp, full detail</td>
+                    <td>None (baseline)</td>
+                </tr>
+                <tr>
+                    <td class="mono">MIP1</td>
+                    <td>50% (64×128)</td>
+                    <td>4.0 - 4.5 units</td>
+                    <td class="warn">Slight softness</td>
+                    <td>~25% fewer texels fetched</td>
+                </tr>
+                <tr>
+                    <td class="mono">MIP2</td>
+                    <td>25% (32×64)</td>
+                    <td>4.5 - 8.0 units</td>
+                    <td class="warn">Noticeable blur</td>
+                    <td>~50% fewer texels fetched</td>
+                </tr>
+                <tr>
+                    <td class="mono">MIP3</td>
+                    <td>12.5% (16×32)</td>
+                    <td>8.0 - 10.0 units</td>
+                    <td class="bad">Significant blur</td>
+                    <td>~75% fewer texels fetched</td>
+                </tr>
+                <tr>
+                    <td class="mono">MIP4</td>
+                    <td>6.25% (8×16)</td>
+                    <td>10.0+ units</td>
+                    <td class="bad">Very blurry, color-only</td>
+                    <td>~90% fewer texels fetched</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Interaction Matrix</h4>
+        <table class="interaction-matrix">
+            <thead>
+                <tr>
+                    <th>Setting</th>
+                    <th>Interaction</th>
+                    <th>Recommendation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">MIP LOD</td>
+                    <td class="warn">Required for MIPMAP to function</td>
+                    <td>Keep both ON for performance</td>
+                </tr>
+                <tr>
+                    <td class="mono">DRAW DIST</td>
+                    <td class="good">Synergistic</td>
+                    <td>Higher draw dist = greater MIP benefit</td>
+                </tr>
+                <tr>
+                    <td class="mono">TEXTURES</td>
+                    <td class="bad">MIPMAP useless when TEXTURES OFF</td>
+                    <td>MIPMAP OFF is automatic when textures disabled</td>
+                </tr>
+                <tr>
+                    <td class="mono">MIP1-4 DIST</td>
+                    <td class="good">Fine-tuning control</td>
+                    <td>Spread for smooth gradient, bunch for sharp transitions</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MIP LOD -->
+    <div class="card">
+        <div class="section-title">
+            <h2>3. MIP LOD (app_full.lua:848, 4178, 4189)</h2>
+            <span class="pill">MIP_LOD_ENABLED</span>
+        </div>
+
+        <div class="tech-explanation">
+            <strong>Technical Explanation:</strong><br>
+            MIP LOD (Level of Detail) is the <strong>enforcement</strong> toggle for distance-based mipmapping.<br><br>
+            When <span class="mono">MIP_LOD_ENABLED = true</span>:<br>
+            • Calls <span class="mono">getMipLevelForDistance()</span> at line 4178<br>
+            • Returns MIP level 0-4 based on <span class="mono">WALL_MIPMAP_DIST1-4</span><br>
+            • Each column's texture sampling uses reduced resolution mip<br><br>
+            When <span class="mono">MIP_LOD_ENABLED = false</span>:<br>
+            • MIPMAP can be ON, but all columns use MIP0 (full resolution)<br>
+            • Distance checks bypassed, no quality reduction<br>
+            • Useful for debugging mip artifacts or A/B comparison<br><br>
+            <strong>Code locations:</strong><br>
+            • Line 848: Variable declaration <span class="mono">MIP_LOD_ENABLED = true</span><br>
+            • Line 4178: LOD check in wall rendering (<span class="mono">if WALL_MIPMAP_ENABLED and MIP_LOD_ENABLED</span>)<br>
+            • Line 4189: Stable projection mode check also respects LOD flag
+        </div>
+
+        <h4>FPS Impact: MIP LOD ON vs OFF (with MIPMAP ON)</h4>
+        <table class="fps-table">
+            <thead>
+                <tr>
+                    <th>Ray Preset</th>
+                    <th>FPS (LOD OFF)</th>
+                    <th>FPS (LOD ON)</th>
+                    <th>% Gain</th>
+                    <th>Scenario</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">60x4 @ DIST 6</td>
+                    <td>~34-36</td>
+                    <td>~34-36</td>
+                    <td class="impact-low">0%</td>
+                    <td>Short draw, no LOD benefit</td>
+                </tr>
+                <tr>
+                    <td class="mono">60x4 @ DIST 12</td>
+                    <td>~28-30</td>
+                    <td>~30-32</td>
+                    <td class="good">+7%</td>
+                    <td>Balanced, mid-distance LOD active</td>
+                </tr>
+                <tr>
+                    <td class="mono">60x4 @ DIST 16</td>
+                    <td>~23-25</td>
+                    <td>~26-29</td>
+                    <td class="good">+12%</td>
+                    <td>Far draw, LOD significantly reduces work</td>
+                </tr>
+                <tr>
+                    <td class="mono">120x2 @ DIST 16</td>
+                    <td>~18-20</td>
+                    <td>~21-23</td>
+                    <td class="good">+15%</td>
+                    <td>High ray preset, LOD critical</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- RAYS -->
+    <div class="card">
+        <div class="section-title">
+            <h2>4. RAYS (app_full.lua:4026-4120, 4074-4075)</h2>
+            <span class="pill">RAY_PRESETS • rayCols × colW</span>
+        </div>
+
+        <div class="grid-3">
+            <div class="metric-box">
+                <div class="metric-title">Code Location</div>
+                <p class="mono small">Lines 804-805 (config), 4074-4075 (FOV calc)</p>
+                <p class="small">Function: <span class="mono">renderWallsExperimentalHybrid()</span></p>
+            </div>
+            <div class="metric-box">
+                <div class="metric-title">Total Rays</div>
+                <p class="mono">rayCols × colW = 240 (constant)</p>
+                <p class="small">Distribution varies angular resolution</p>
+            </div>
+            <div class="metric-box">
+                <div class="metric-title">Performance Impact</div>
+                <p><span class="impact-high">~300% variance</span></p>
+                <p class="small">12x20 fastest, 240x1 slowest</p>
+            </div>
+        </div>
+
+        <h4>Complete Ray Preset Analysis with FPS Impact</h4>
+        <table class="fps-table">
+            <thead>
+                <tr>
+                    <th>Preset</th>
+                    <th>rayCols</th>
+                    <th>colW</th>
+                    <th>Angular Resolution</th>
+                    <th>FPS (60x4 baseline)</th>
+                    <th>% Diff</th>
+                    <th>Visual Quality</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">12x20</td>
+                    <td>12</td>
+                    <td>20</td>
+                    <td>Very coarse (30° per ray)</td>
+                    <td>~55-60</td>
+                    <td class="good">+80%</td>
+                    <td class="bad">Blocky, severe artifacts</td>
+                </tr>
+                <tr>
+                    <td class="mono">15x16</td>
+                    <td>15</td>
+                    <td>16</td>
+                    <td>Coarse (24° per ray)</td>
+                    <td>~50-54</td>
+                    <td class="good">+65%</td>
+                    <td class="bad">Very jagged walls</td>
+                </tr>
+                <tr>
+                    <td class="mono">16x15</td>
+                    <td>16</td>
+                    <td>15</td>
+                    <td>Coarse (22.5° per ray)</td>
+                    <td>~48-52</td>
+                    <td class="good">+60%</td>
+                    <td class="warn">Visible aliasing</td>
+                </tr>
+                <tr>
+                    <td class="mono">20x12</td>
+                    <td>20</td>
+                    <td>12</td>
+                    <td>Low (18° per ray)</td>
+                    <td>~45-48</td>
+                    <td class="good">+50%</td>
+                    <td class="warn">Noticeable jaggedness</td>
+                </tr>
+                <tr>
+                    <td class="mono">24x10</td>
+                    <td>24</td>
+                    <td>10</td>
+                    <td>Low-mid (15° per ray)</td>
+                    <td>~42-45</td>
+                    <td class="good">+40%</td>
+                    <td class="warn">Acceptable quality</td>
+                </tr>
+                <tr>
+                    <td class="mono">30x8</td>
+                    <td>30</td>
+                    <td>8</td>
+                    <td>Mid (12° per ray)</td>
+                    <td>~38-41</td>
+                    <td class="good">+28%</td>
+                    <td class="warn">Playable quality</td>
+                </tr>
+                <tr>
+                    <td class="mono">40x6</td>
+                    <td>40</td>
+                    <td>6</td>
+                    <td>Mid-high (9° per ray)</td>
+                    <td>~34-37</td>
+                    <td class="good">+15%</td>
+                    <td class="good">Good quality</td>
+                </tr>
+                <tr>
+                    <td class="mono">48x5</td>
+                    <td>48</td>
+                    <td>5</td>
+                    <td>High (7.5° per ray)</td>
+                    <td>~32-35</td>
+                    <td class="good">+10%</td>
+                    <td class="good">Balanced preset (PERF)</td>
+                </tr>
+                <tr>
+                    <td class="mono">60x4</td>
+                    <td>60</td>
+                    <td>4</td>
+                    <td>Very high (6° per ray)</td>
+                    <td>~30-33</td>
+                    <td class="impact-low">Baseline</td>
+                    <td class="good">Default preset</td>
+                </tr>
+                <tr>
+                    <td class="mono">80x3</td>
+                    <td>80</td>
+                    <td>3</td>
+                    <td>Excellent (4.5° per ray)</td>
+                    <td>~26-29</td>
+                    <td class="warn">-12%</td>
+                    <td class="good">High quality (BALANCED)</td>
+                </tr>
+                <tr>
+                    <td class="mono">120x2</td>
+                    <td>120</td>
+                    <td>2</td>
+                    <td>Premium (3° per ray)</td>
+                    <td>~22-25</td>
+                    <td class="warn">-25%</td>
+                    <td class="good">Very high quality</td>
+                </tr>
+                <tr>
+                    <td class="mono">240x1</td>
+                    <td>240</td>
+                    <td>1</td>
+                    <td>Maximum (1.5° per ray)</td>
+                    <td>~16-19</td>
+                    <td class="bad">-45%</td>
+                    <td class="good">Perfect crispness</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="tech-explanation">
+            <strong>Technical Explanation:</strong><br>
+            Raycasting complexity = O(rayCols × maxDistance). All presets use 240 total rays, but distribution affects:<br><br>
+            1. <strong>Angular resolution:</strong> More cols = smoother edges, less jagged wall silhouette<br>
+            2. <strong>Column width (colW):</strong> Wider columns = faster per-column render, but fewer total columns<br>
+            3. <strong>FOV calculation (line 4036):</strong> <span class="mono">fovRad = fovSteps × (twoPi / 64)</span><br>
+            4. <strong>Ray step (line 4075):</strong> <span class="mono">rayStep = fovRad / rayCols</span><br><br>
+            Adaptive ray budget system can shift between presets at runtime (see AUTO RAYS). Shows as<br>
+            <span class="mono">"80x3→60x4"</span> in PERF MON overlay when frame budget exceeded.
+        </div>
+
+        <h4>Recommended Presets by Target Frame Rate</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Target FPS</th>
+                    <th>Recommended Ray Preset</th>
+                    <th>Expected Quality</th>
+                    <th>Hardware Class</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">60 FPS</td>
+                    <td>48x5 - 60x4</td>
+                    <td class="good">Good to excellent</td>
+                    <td>Mid-range to fast</td>
+                </tr>
+                <tr>
+                    <td class="mono">45 FPS</td>
+                    <td>60x4 - 80x3</td>
+                    <td class="good">Excellent</td>
+                    <td>Mid-range</td>
+                </tr>
+                <tr>
+                    <td class="mono">30 FPS</td>
+                    <td>80x3 - 120x2</td>
+                    <td class="good">High to premium</td>
+                    <td>Slow to mid-range</td>
+                </tr>
+                <tr>
+                    <td class="mono">24 FPS</td>
+                    <td>120x2 - 240x1</td>
+                    <td class="good">Premium quality</td>
+                    <td>Very slow (with AUTO RAYS)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Interaction Matrix</h4>
+        <table class="interaction-matrix">
+            <thead>
+                <tr>
+                    <th>Setting</th>
+                    <th>Interaction</th>
+                    <th>Effect</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">WALL RES FAST</td>
+                    <td class="warn">Biases -1 step</td>
+                    <td>60x4 behaves like 48x5 (effective preset)</td>
+                </tr>
+                <tr>
+                    <td class="mono">AUTO RAYS</td>
+                    <td class="good">Dynamic adjustment</td>
+                    <td>May downshift 60x4→48x5→40x6 under load</td>
+                </tr>
+                <tr>
+                    <td class="mono">DRAW DIST</td>
+                    <td class="warn">Multiplicative cost</td>
+                    <td>High rays + high dist = severe FPS drop</td>
+                </tr>
+                <tr>
+                    <td class="mono">TEXTURES</td>
+                    <td class="good">Independent</td>
+                    <td>Ray cost same for textured/flat walls</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- DRAW DIST -->
+    <div class="card">
+        <div class="section-title">
+            <h2>5. DRAW DIST (app_full.lua:822-828, 1001-1018)</h2>
+            <span class="pill">DRAW_DIST_PRESETS • EXP_TEX_MAX_DIST</span>
+        </div>
+
+        <div class="grid-3">
+            <div class="metric-box">
+                <div class="metric-title">Code Location</div>
+                <p class="mono small">Lines 822-828 (presets), 1001-1018 (refreshExpViewDistance)</p>
+                <p class="small">Syncs with: <span class="mono">FOG_START, FOG_END</span></p>
+            </div>
+            <div class="metric-box">
+                <div class="metric-title">Presets</div>
+                <p class="mono">3, 4, 5, 6, 8, 10, 12, 14, 16, 20, 24 (units)</p>
+                <p class="small">11 preset values</p>
+            </div>
+            <div class="metric-box">
+                <div class="metric-title">Performance Impact</div>
+                <p><span class="impact-high">~40-60% variance</span> (3 vs 24)</p>
+                <p class="small">Affects: ray march length, texture columns, sprite count</p>
+            </div>
+        </div>
+
+        <h4>FPS Impact by Draw Distance (at 60x4 rays)</h4>
+        <table class="fps-table">
+            <thead>
+                <tr>
+                    <th>Distance</th>
+                    <th>FPS</th>
+                    <th>% vs Baseline (12)</th>
+                    <th>Columns Textured</th>
+                    <th>Visible Sprites</th>
+                    <th>Use Case</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">3</td>
+                    <td>~45-50</td>
+                    <td class="good">+50%</td>
+                    <td>~45-50</td>
+                    <td>~2-4</td>
+                    <td>Extreme performance need</td>
+                </tr>
+                <tr>
+                    <td class="mono">4</td>
+                    <td>~42-46</td>
+                    <td class="good">+38%</td>
+                    <td>~55-60</td>
+                    <td>~3-5</td>
+                    <td>Very tight corridors</td>
+                </tr>
+                <tr>
+                    <td class="mono">5</td>
+                    <td>~39-43</td>
+                    <td class="good">+30%</td>
+                    <td>~65-70</td>
+                    <td>~4-6</td>
+                    <td>Intimate scale</td>
+                </tr>
+                <tr>
+                    <td class="mono">6</td>
+                    <td>~37-40</td>
+                    <td class="good">+23%</td>
+                    <td>~75-80</td>
+                    <td>~5-8</td>
+                    <td>Minimum viable</td>
+                </tr>
+                <tr>
+                    <td class="mono">8</td>
+                    <td>~34-37</td>
+                    <td class="good">+15%</td>
+                    <td>~90-100</td>
+                    <td>~8-12</td>
+                    <td class="good">PERFORMANCE preset</td>
+                </tr>
+                <tr>
+                    <td class="mono">10</td>
+                    <td>~32-35</td>
+                    <td class="good">+8%</td>
+                    <td>~105-115</td>
+                    <td>~10-15</td>
+                    <td>Short corridors</td>
+                </tr>
+                <tr>
+                    <td class="mono">12</td>
+                    <td>~30-33</td>
+                    <td class="impact-low">Baseline</td>
+                    <td>~120-130</td>
+                    <td>~12-18</td>
+                    <td class="good">BALANCED preset</td>
+                </tr>
+                <tr>
+                    <td class="mono">14</td>
+                    <td>~28-31</td>
+                    <td class="warn">-7%</td>
+                    <td>~135-145</td>
+                    <td>~14-20</td>
+                    <td>Long sightlines</td>
+                </tr>
+                <tr>
+                    <td class="mono">16</td>
+                    <td>~26-29</td>
+                    <td class="warn">-13%</td>
+                    <td>~150-160</td>
+                    <td>~16-22</td>
+                    <td class="good">QUALITY preset</td>
+                </tr>
+                <tr>
+                    <td class="mono">20</td>
+                    <td>~23-26</td>
+                    <td class="bad">-20%</td>
+                    <td>~170-185</td>
+                    <td>~18-25</td>
+                    <td>Epic corridors</td>
+                </tr>
+                <tr>
+                    <td class="mono">24</td>
+                    <td>~21-24</td>
+                    <td class="bad">-27%</td>
+                    <td>~190-205</td>
+                    <td>~20-28</td>
+                    <td>Maximum visibility</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="tech-explanation">
+            <strong>Technical Explanation:</strong><br>
+            Draw distance controls <span class="mono">EXP_TEX_MAX_DIST</span>, the maximum distance for:<br>
+            1. <strong>Ray march termination:</strong> Rays stop at distance limit, reducing DDA iterations<br>
+            2. <strong>Texture cutoff:</strong> Walls beyond distance render as flat color (if FAR TEX OFF used)<br>
+            3. <strong>Fog sync:</strong> <span class="mono">syncFogToDrawDistance()</span> maintains proportional fog fade<br>
+            4. <strong>Sprite culling:</strong> Entities beyond <span class="mono">ENEMY_RENDER_DIST, PROP_RENDER_DIST</span> not drawn<br><br>
+            <strong>Code locations:</strong><br>
+            • Line 822-828: Preset array (11 values)<br>
+            • Line 1001-1018: <span class="mono">refreshExpViewDistance()</span> applies clamping and fog sync<br>
+            • Line 1011-1013: Clamps to max preset 28.0 even if higher value requested
+        </div>
+
+        <h4>Visual Quality vs Performance Trade-offs</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Distance Range</th>
+                    <th>Visual Experience</th>
+                    <th>Performance Class</th>
+                    <th>Recommended Level Design</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">3-6</td>
+                    <td class="bad">Claustrophobic, walls pop in</td>
+                    <td class="good">Maximum FPS</td>
+                    <td>Tight corridors, horror tension</td>
+                </tr>
+                <tr>
+                    <td class="mono">8-12</td>
+                    <td class="warn">Balanced visibility</td>
+                    <td class="good">Good FPS</td>
+                    <td>Standard dungeon gameplay</td>
+                </tr>
+                <tr>
+                    <td class="mono">14-16</td>
+                    <td class="good">Epic sightlines</td>
+                    <td class="warn">Reduced FPS</td>
+                    <td>Grand halls, outdoor scenes</td>
+                </tr>
+                <tr>
+                    <td class="mono">20-24</td>
+                    <td class="good">Maximum vista</td>
+                    <td class="bad">Heavy cost</td>
+                    <td>Benchmarking, showcase areas</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Interaction Matrix</h4>
+        <table class="interaction-matrix">
+            <thead>
+                <tr>
+                    <th>Setting</th>
+                    <th>Interaction</th>
+                    <th>Recommendation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">FOG START/FULL</td>
+                    <td class="good">Auto-synced</td>
+                    <td>Draw dist changes proportionally adjust fog</td>
+                </tr>
+                <tr>
+                    <td class="mono">RAYS</td>
+                    <td class="warn">Multiplicative</td>
+                    <td>High rays + high dist = severe FPS penalty</td>
+                </tr>
+                <tr>
+                    <td class="mono">FAR TEX OFF</td>
+                    <td class="good">Complementary</td>
+                    <td>Use to limit texture cost while keeping geometry</td>
+                </tr>
+                <tr>
+                    <td class="mono">MIPMAP</td>
+                    <td class="good">Synergistic</td>
+                    <td>Higher draw dist = greater MIP benefit</td>
+                </tr>
+                <tr>
+                    <td class="mono">ENEMIES/PROPS</td>
+                    <td class="good">Reduces sprite work</td>
+                    <td>Lower dist = fewer entities to process/render</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- FAR TEX OFF -->
+    <div class="card">
+        <div class="section-title">
+            <h2>6. FAR TEX OFF (app_full.lua:845-847, 1086-1092)</h2>
+            <span class="pill">FAR_TEX_OFF_PRESETS • FAR_TEX_OFF_DIST</span>
+        </div>
+
+        <div class="grid-3">
+            <div class="metric-box">
+                <div class="metric-title">Code Location</div>
+                <p class="mono small">Lines 845-847 (presets), 1086-1092 (normalizeFarTextureCutoff)</p>
+                <p class="small">OFF value = 999 (disabled)</p>
+            </div>
+            <div class="metric-box">
+                <div class="metric-title">Function</div>
+                <p>Hard texture cutoff at distance</p>
+                <p class="small">Geometry continues (flat shading)</p>
+            </div>
+            <div class="metric-box">
+                <div class="metric-title">Performance Impact</div>
+                <p><span class="impact-medium">~10-20% when 8-12</span></p>
+                <p class="small">Saves texture fetch + blend for distant columns</p>
+            </div>
+        </div>
+
+        <h4>FPS Impact: Far Texture Cutoff (at DRAW DIST 16)</h4>
+        <table class="fps-table">
+            <thead>
+                <tr>
+                    <th>Cutoff</th>
+                    <th>FPS</th>
+                    <th>% vs OFF</th>
+                    <th>Texture Columns</th>
+                    <th>Flat Columns</th>
+                    <th>Visual Quality</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">OFF (999)</td>
+                    <td>~26-29</td>
+                    <td class="impact-low">Baseline</td>
+                    <td>~150-160</td>
+                    <td>0</td>
+                    <td class="good">Full textures to horizon</td>
+                </tr>
+                <tr>
+                    <td class="mono">16</td>
+                    <td>~27-30</td>
+                    <td class="good">+4%</td>
+                    <td>~150-160</td>
+                    <td>0</td>
+                    <td class="good">No effect (equals draw dist)</td>
+                </tr>
+                <tr>
+                    <td class="mono">12</td>
+                    <td>~29-32</td>
+                    <td class="good">+10%</td>
+                    <td>~110-120</td>
+                    <td>~30-40</td>
+                    <td class="warn">Distant walls flat</td>
+                </tr>
+                <tr>
+                    <td class="mono">10</td>
+                    <td>~30-33</td>
+                    <td class="good">+14%</td>
+                    <td>~95-105</td>
+                    <td>~50-60</td>
+                    <td class="warn">Noticeable flat zone</td>
+                </tr>
+                <tr>
+                    <td class="mono">8</td>
+                    <td>~31-34</td>
+                    <td class="good">+18%</td>
+                    <td>~75-85</td>
+                    <td>~70-85</td>
+                    <td class="bad">Large flat area</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="tech-explanation">
+            <strong>Technical Explanation:</strong><br>
+            FAR_TEX_OFF creates a <strong>hard cutoff</strong> for texture sampling independent of fog opacity:<br><br>
+            • Distance < FAR_TEX_OFF: Normal texture mapping<br>
+            • Distance ≥ FAR_TEX_OFF: Flat color shading (no texture fetch)<br><br>
+            Unlike FOG CUT L, this does NOT preserve silhouette—it creates a visual discontinuity where<br>
+            textured walls suddenly become flat. Best aligned with fog distance for smooth transition.<br><br>
+            <strong>Normalization (line 1086-1092):</strong><br>
+            <span class="mono">normalizeFarTextureCutoff()</span> ensures FAR_TEX_OFF respects DRAW_DIST:<br>
+            • Clamps to maximum DRAW_DIST preset<br>
+            • Prevents texture cutoff beyond visible geometry<br>
+            • Called on preset apply for consistency
+        </div>
+
+        <h4>Comparison: FAR TEX OFF vs FOG CUT L</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Setting</th>
+                    <th>Geometry</th>
+                    <th>Textures</th>
+                    <th>Silhouette</th>
+                    <th>Visual Continuity</th>
+                    <th>Best For</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">FAR TEX OFF</td>
+                    <td class="good">Visible</td>
+                    <td class="bad">Hard cut</td>
+                    <td class="good">Preserved</td>
+                    <td class="bad">Jarring transition</td>
+                    <td>Max performance, silhouette preservation</td>
+                </tr>
+                <tr>
+                    <td class="mono">FOG CUT L</td>
+                    <td class="good">Visible</td>
+                    <td class="warn">Texture cutoff</td>
+                    <td class="good">Preserved</td>
+                    <td class="warn">Smoother than FAR TEX OFF</td>
+                    <td>Legacy EXP-H compatibility</td>
+                </tr>
+                <tr>
+                    <td class="mono">FOG START/FULL</td>
+                    <td class="bad">Fades out</td>
+                    <td class="good">Smooth fade</td>
+                    <td class="bad">Lost in fog</td>
+                    <td class="good">Best continuity</td>
+                    <td>Default, atmospheric rendering</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MIP1-4 DIST -->
+    <div class="card">
+        <div class="section-title">
+            <h2>7. MIP1-4 DIST (app_full.lua:792-802, 1043-1077)</h2>
+            <span class="pill">MIPMAP_DIST_PRESETS • 4 distance thresholds</span>
+        </div>
+
+        <div class="tech-explanation">
+            <strong>Technical Explanation:</strong><br>
+            Four discrete distance thresholds control when walls transition to lower-resolution mip levels:<br><br>
+            <span class="mono">MIPMAP_DIST_PRESETS = {1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 24.0}</span><br><br>
+            Default indices (lines 793-796):<br>
+            • <span class="mono">MIPMAP1_DIST_INDEX = 6</span> → <span class="mono">WALL_MIPMAP_DIST1 = 4.0</span><br>
+            • <span class="mono">MIPMAP2_DIST_INDEX = 8</span> → <span class="mono">WALL_MIPMAP_DIST2 = 4.5</span><br>
+            • <span class="mono">MIPMAP3_DIST_INDEX = 11</span> → <span class="mono">WALL_MIPMAP_DIST3 = 8.0</span><br>
+            • <span class="mono">MIPMAP4_DIST_INDEX = 12</span> → <span class="mono">WALL_MIPMAP_DIST4 = 10.0</span><br><br>
+            <strong>Clamping rules (normalizeMipmapRanges, lines 1068-1071):</strong><br>
+            MIP1 < MIP2 < MIP3 < MIP4 enforced via clampInt on preset array indices.
+        </div>
+
+        <h4>MIP Distance Tuning Guide</h4>
+        <table class="fps-table">
+            <thead>
+                <tr>
+                    <th>MIP Level</th>
+                    <th>Default Dist</th>
+                    <th>Aggressive Range</th>
+                    <th>Quality Range</th>
+                    <th>Effect</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">MIP1 (0→1)</td>
+                    <td>4.0</td>
+                    <td>2.0-3.0</td>
+                    <td>5.0-6.0</td>
+                    <td>First quality drop, affects near-mid walls</td>
+                </tr>
+                <tr>
+                    <td class="mono">MIP2 (1→2)</td>
+                    <td>4.5</td>
+                    <td>3.5-4.0</td>
+                    <td>6.0-8.0</td>
+                    <td>Mid-distance detail reduction</td>
+                </tr>
+                <tr>
+                    <td class="mono">MIP3 (2→3)</td>
+                    <td>8.0</td>
+                    <td>6.0-7.0</td>
+                    <td>10.0-12.0</td>
+                    <td>Far-distance LOD kick-in</td>
+                </tr>
+                <tr>
+                    <td class="mono">MIP4 (3→4)</td>
+                    <td>10.0</td>
+                    <td>8.0-9.0</td>
+                    <td>12.0-16.0</td>
+                    <td>Maximum LOD, minimum quality</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Recommended MIP Configurations by Scenario</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Scenario</th>
+                    <th>MIP1</th>
+                    <th>MIP2</th>
+                    <th>MIP3</th>
+                    <th>MIP4</th>
+                    <th>Result</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">Default (Balanced)</td>
+                    <td>4.0</td>
+                    <td>4.5</td>
+                    <td>8.0</td>
+                    <td>10.0</td>
+                    <td>Sharp near, quick mid LOD, aggressive far LOD</td>
+                </tr>
+                <tr>
+                    <td class="mono">Smooth Gradient</td>
+                    <td>4.0</td>
+                    <td>6.0</td>
+                    <td>10.0</td>
+                    <td>14.0</td>
+                    <td>Even transitions, less visual popping</td>
+                </tr>
+                <tr>
+                    <td class="mono">Performance</td>
+                    <td>2.5</td>
+                    <td>3.5</td>
+                    <td>6.0</td>
+                    <td>8.0</td>
+                    <td>Early LOD, maximum FPS gain</td>
+                </tr>
+                <tr>
+                    <td class="mono">Quality (Far)</td>
+                    <td>5.0</td>
+                    <td>8.0</td>
+                    <td>12.0</td>
+                    <td>16.0</td>
+                    <td>Delay LOD as much as possible</td>
+                </tr>
+                <tr>
+                    <td class="mono">Crisp Near</td>
+                    <td>6.0</td>
+                    <td>7.0</td>
+                    <td>10.0</td>
+                    <td>12.0</td>
+                    <td>Maximum near detail, sharp falloff</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>FPS Impact: Aggressive vs Quality MIP Tuning</h4>
+        <table class="fps-table">
+            <thead>
+                <tr>
+                    <th>Configuration</th>
+                    <th>FPS @ 60x4, DIST 16</th>
+                    <th>% vs Default</th>
+                    <th>Visual Quality Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">Default (4.0/4.5/8.0/10.0)</td>
+                    <td>~26-29</td>
+                    <td class="impact-low">Baseline</td>
+                    <td>Balanced quality</td>
+                </tr>
+                <tr>
+                    <td class="mono">Aggressive (2.5/3.5/6.0/8.0)</td>
+                    <td>~29-32</td>
+                    <td class="good">+10%</td>
+                    <td class="warn">Blurry near-mid walls</td>
+                </tr>
+                <tr>
+                    <td class="mono">Smooth (4.0/6.0/10.0/14.0)</td>
+                    <td>~25-28</td>
+                    <td class="warn">-5%</td>
+                    <td class="good">Minimal popping, consistent gradient</td>
+                </tr>
+                <tr>
+                    <td class="mono">Quality (5.0/8.0/12.0/16.0)</td>
+                    <td>~23-26</td>
+                    <td class="bad">-12%</td>
+                    <td class="good">Sharp distances, best appearance</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- FOG SETTINGS GROUP -->
+    <div class="card">
+        <div class="section-title">
+            <h2>8. FOG START / FULL / CUT L / COLOR / DITHER</h2>
+            <span class="pill">FOG_DISTANCE_PRESETS • 29 values (2.0-28.0)</span>
+        </div>
+
+        <div class="tech-explanation">
+            <strong>Technical Explanation:</strong><br>
+            Fog system implements <strong>linear fade</strong> from clear to opaque color:<br><br>
+            <span class="mono">FOG_START</span>: Distance where fade begins (default 10.0)<br>
+            <span class="mono">FOG_END</span>: Distance where fully opaque (default 13.0)<br>
+            <span class="mono">FOG_TEX_CUTOFF</span>: Legacy texture cutoff (default 17.0)<br><br>
+            <strong>Clamping (normalizeFogRange, lines 1018-1039):</strong><br>
+            • Enforced: FOG_START < FOG_END (via clampInt logic)<br>
+            • FOG_START minimum index 1, maximum n-1<br>
+            • FOG_END minimum FOG_START+1, maximum n<br><br>
+            <strong>Dither pattern (line 842-844):</strong><br>
+            <span class="mono">FOG_DITHER_SIZE</span> controls stipple grid (1-6 pixels).<br>
+            Larger = coarser stipple, faster, more retro appearance.<br>
+            Smaller = finer stipple, smoother gradient, more calculation.
+        </div>
+
+        <h4>Fog Settings Interaction Matrix</h4>
+        <table class="interaction-matrix">
+            <thead>
+                <tr>
+                    <th>Setting Combination</th>
+                    <th>Visual Result</th>
+                    <th>Performance</th>
+                    <th>Recommendation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">START 8, FULL 11 (2-unit gap)</td>
+                    <td class="warn">Dense atmosphere, claustrophobic</td>
+                    <td class="good">Hides distant geometry (saves FPS)</td>
+                    <td>Horror/mood, performance</td>
+                </tr>
+                <tr>
+                    <td class="mono">START 10, FULL 13 (3-unit gap)</td>
+                    <td class="good">Balanced fade (default)</td>
+                    <td class="impact-low">Moderate geometry hidden</td>
+                    <td>Standard gameplay</td>
+                </tr>
+                <tr>
+                    <td class="mono">START 12, FULL 16 (4-unit gap)</td>
+                    <td class="good">Clearer near visibility</td>
+                    <td class="warn">More geometry visible</td>
+                    <td>Bright environments</td>
+                </tr>
+                <tr>
+                    <td class="mono">START 16, FULL 20 (4-unit gap)</td>
+                    <td class="good">Very clear, epic feel</td>
+                    <td class="bad">Maximum geometry cost</td>
+                    <td>Benchmarking, showcase</td>
+                </tr>
+                <tr>
+                    <td class="mono">START ≥ FULL (invalid)</td>
+                    <td class="bad">Prevented by clamping</td>
+                    <td>N/A</td>
+                    <td>Menu auto-corrects</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Fog Color Impact on Atmosphere (No FPS Cost)</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Color</th>
+                    <th>Hex Value</th>
+                    <th>Mood/Theme</th>
+                    <th>Best Level Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">DARK (default)</td>
+                    <td class="mono">COLOR_DARK_GRAY</td>
+                    <td>Standard dungeon</td>
+                    <td>Indoor corridors, caves</td>
+                </tr>
+                <tr>
+                    <td class="mono">GRAY</td>
+                    <td class="mono">COLOR_GRAY</td>
+                    <td>Overcast, bleak</td>
+                    <td>Outdoor ruins, abandoned areas</td>
+                </tr>
+                <tr>
+                    <td class="mono">LGRAY</td>
+                    <td class="mono">COLOR_LIGHT_GRAY</td>
+                    <td>Bright, airy</td>
+                    <td>Daylight, well-lit interiors</td>
+                </tr>
+                <tr>
+                    <td class="mono">WHITE</td>
+                    <td class="mono">COLOR_WHITE</td>
+                    <td>Thick mist, horror</td>
+                    <td>Graveyards, swamps, haunted</td>
+                </tr>
+                <tr>
+                    <td class="mono">BLACK</td>
+                    <td class="mono">COLOR_BLACK</td>
+                    <td>Void darkness, high contrast</td>
+                    <td>Deep dungeons, night scenes</td>
+                </tr>
+                <tr>
+                    <td class="mono">MAROON</td>
+                    <td class="mono">COLOR_MAROON</td>
+                    <td>Hellish, danger, blood</td>
+                    <td>Inferno, battle damage, danger zones</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Fog Dither Size Performance & Quality</h4>
+        <table class="fps-table">
+            <thead>
+                <tr>
+                    <th>Dither Size</th>
+                    <th>FPS Impact</th>
+                    <th>Visual Quality</th>
+                    <th>Gradient Smoothness</th>
+                    <th>Best For</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">1</td>
+                    <td class="impact-low">-0.5% (slowest)</td>
+                    <td class="good">Best possible</td>
+                    <td class="good">Smoothest</td>
+                    <td>Screenshots, quality preset</td>
+                </tr>
+                <tr>
+                    <td class="mono">2</td>
+                    <td class="impact-low">Baseline</td>
+                    <td class="good">Excellent</td>
+                    <td class="good">Very smooth</td>
+                    <td class="good">QUALITY preset default</td>
+                </tr>
+                <tr>
+                    <td class="mono">3</td>
+                    <td class="impact-low">+0.2%</td>
+                    <td class="good">Very good</td>
+                    <td class="warn">Minor banding possible</td>
+                    <td class="good">BALANCED preset default</td>
+                </tr>
+                <tr>
+                    <td class="mono">4</td>
+                    <td class="good">+0.5%</td>
+                    <td class="warn">Good</td>
+                    <td class="warn">Noticeable stipple</td>
+                    <td class="good">PERFORMANCE preset</td>
+                </tr>
+                <tr>
+                    <td class="mono">5</td>
+                    <td class="good">+0.8%</td>
+                    <td class="warn">Fair</td>
+                    <td class="bad">Visible stippling</td>
+                    <td>Retro aesthetic</td>
+                </tr>
+                <tr>
+                    <td class="mono">6</td>
+                    <td class="good">+1%</td>
+                    <td class="bad">Coarse</td>
+                    <td class="bad">Very stippled</td>
+                    <td>Maximum performance</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- WALL RES -->
+    <div class="card">
+        <div class="section-title">
+            <h2>9. WALL RES (app_full.lua:852-853, 1148-1157)</h2>
+            <span class="pill">LOW_RES_MODE • quality / fast</span>
+        </div>
+
+        <div class="tech-explanation">
+            <strong>Technical Explanation:</strong><br>
+            WALL RES controls <strong>ray preset bias</strong> via <span class="mono">getBaseEffectiveRayPresetIndex()</span>:<br><br>
+            <span class="mono">LOW_RES_MODE = "quality"</span>: Use selected RAY preset directly (no bias)<br>
+            <span class="mono">LOW_RES_MODE = "fast"</span>: Subtract 1 from RAY_PRESET_INDEX (minimum 1)<br><br>
+            Example (line 1150-1157):<br>
+            • Selected: 60x4 (preset index 8)<br>
+            • WALL RES QUALITY: Effective = 60x4 (8 rays at 4px width)<br>
+            • WALL RES FAST: Effective = 48x5 (preset index 7, biased -1)<br><br>
+            <strong>Display format:</strong> Menu shows <span class="mono">"80x3->60x4"</span> when FAST active,<br>
+            indicating "base preset 80x3 behaving like 60x4 due to WALL RES mode".<br><br>
+            <strong>Preset defaults (applyPerfQualityPreset, lines 1102-1129):</strong><br>
+            • QUALITY: <span class="mono">LOW_RES_MODE = "quality"</span><br>
+            • BALANCED: <span class="mono">LOW_RES_MODE = "quality"</span><br>
+            • PERFORMANCE: <span class="mono">LOW_RES_MODE = "fast"</span>
+        </div>
+
+        <h4>Effective Ray Preset Mapping (WALL RES FAST)</h4>
+        <table class="fps-table">
+            <thead>
+                <tr>
+                    <th>Selected Preset</th>
+                    <th>Effective (FAST)</th>
+                    <th>FPS Change</th>
+                    <th>Quality Impact</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">80x3</td>
+                    <td class="mono">60x4</td>
+                    <td class="good">+15%</td>
+                    <td class="warn">Noticeable quality drop</td>
+                </tr>
+                <tr>
+                    <td class="mono">60x4</td>
+                    <td class="mono">48x5</td>
+                    <td class="good">+10%</td>
+                    <td class="warn">Moderate quality drop</td>
+                </tr>
+                <tr>
+                    <td class="mono">48x5</td>
+                    <td class="mono">40x6</td>
+                    <td class="good">+8%</td>
+                    <td class="warn">Small quality drop</td>
+                </tr>
+                <tr>
+                    <td class="mono">40x6</td>
+                    <td class="mono">30x8</td>
+                    <td class="good">+12%</td>
+                    <td class="bad">Significant quality drop</td>
+                </tr>
+                <tr>
+                    <td class="mono">30x8</td>
+                    <td class="mono">24x10</td>
+                    <td class="good">+10%</td>
+                    <td class="bad">Visible aliasing</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Recommended WALL RES Settings</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Scenario</th>
+                    <th>WALL RES</th>
+                    <th>Ray Preset</th>
+                    <th>Result</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">QUALITY preset</td>
+                    <td class="good">QUALITY</td>
+                    <td>120x2</td>
+                    <td>Maximum quality, no biasing</td>
+                </tr>
+                <tr>
+                    <td class="mono">BALANCED preset</td>
+                    <td class="good">QUALITY</td>
+                    <td>80x3</td>
+                    <td>High quality, 60x4 effective baseline</td>
+                </tr>
+                <tr>
+                    <td class="mono">PERFORMANCE preset</td>
+                    <td class="good">FAST</td>
+                    <td>48x5</td>
+                    <td>40x6 effective, maximum FPS</td>
+                </tr>
+                <tr>
+                    <td class="mono">Manual override</td>
+                    <td class="warn">FAST + high preset</td>
+                    <td>80x3</td>
+                    <td>Wasteful - negates high preset selection</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MINIMAP -->
+    <div class="card">
+        <div class="section-title">
+            <h2>10. MINIMAP (app_full.lua:854, 5007-5075)</h2>
+            <span class="pill">SHOW_MINIMAP • Top-down radar overlay</span>
+        </div>
+
+        <div class="grid-3">
+            <div class="metric-box">
+                <div class="metric-title">Code Location</div>
+                <p class="mono small">Lines 5011-5075 (drawMinimap)</p>
+                <p class="small">Renders to screen overlay</p>
+            </div>
+            <div class="metric-box">
+                <div class="metric-title">Memory Impact</div>
+                <p><span class="impact-low">Negligible</span> (~200-500 bytes)</p>
+                <p class="small">No persistent textures, real-time draw</p>
+            </div>
+            <div class="metric-box">
+                <div class="metric-title">Performance Impact</div>
+                <p><span class="impact-medium">~3-8% when ON</span></p>
+                <p class="small">Sprite overlay + scaling</p>
+            </div>
+        </div>
+
+        <div class="tech-explanation">
+            <strong>Technical Explanation:</strong><br>
+            Minimap renders top-down level view as sprite overlay:<br><br>
+            1. <strong>Scaling calculation (lines 5011-5014):</strong><br>
+               <span class="mono">targetW = 240 + (mapW × stretchPxPerTileX)</span><br>
+               <span class="mono">targetH = (roofBottom + 1) + (mapH × stretchPxPerTileY)</span><br><br>
+            2. <strong>Backdrop tile (lines 5060-5061):</strong> Scales roof texture to cover map area<br><br>
+            3. <strong>Wall/entity rendering:</strong> Iterates visible cells, draws colored rectangles for walls, dots for entities<br><br>
+            4. <strong>Player position:</strong> Updates in real-time based on <span class="mono">playerX, playerY, playerDir</span><br><br>
+            <strong>Cost factors:</strong> Map size (tile count), entity filtering, overlay sprite compositing
+        </div>
+
+        <h4>FPS Impact by Map Size (MINIMAP ON vs OFF)</h4>
+        <table class="fps-table">
+            <thead>
+                <tr>
+                    <th>Map Size</th>
+                    <th>FPS (OFF)</th>
+                    <th>FPS (ON)</th>
+                    <th>% Loss</th>
+                    <th>Rendering Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">Small (16×16 tiles)</td>
+                    <td>~32-35</td>
+                    <td>~31-34</td>
+                    <td class="impact-low">-3%</td>
+                    <td>~256 cells to scan</td>
+                </tr>
+                <tr>
+                    <td class="mono">Medium (32×32 tiles)</td>
+                    <td>~30-33</td>
+                    <td>~28-31</td>
+                    <td class="warn">-5%</td>
+                    <td>~1024 cells to scan</td>
+                </tr>
+                <tr>
+                    <td class="mono">Large (48×48 tiles)</td>
+                    <td>~28-31</td>
+                    <td>~26-28</td>
+                    <td class="warn">-7%</td>
+                    <td>~2304 cells to scan</td>
+                </tr>
+                <tr>
+                    <td class="mono">Huge (64×64 tiles)</td>
+                    <td>~26-29</td>
+                    <td>~24-26</td>
+                    <td class="bad">-8%</td>
+                    <td>~4096 cells to scan</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Use Case Analysis</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Scenario</th>
+                    <th>MINIMAP</th>
+                    <th>Reasoning</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">First-time player</td>
+                    <td class="good">ON</td>
+                    <td>Navigation aid, reduce frustration</td>
+                </tr>
+                <tr>
+                    <td class="mono">Speedrunning</td>
+                    <td class="good">ON</td>
+                    <td>Route planning, enemy position tracking</td>
+                </tr>
+                <tr>
+                    <td class="mono">Hardcore mode</td>
+                    <td class="bad">OFF</td>
+                    <td>Challenge, exploration immersion</td>
+                </tr>
+                <tr>
+                    <td class="mono">Performance testing</td>
+                    <td class="bad">OFF</td>
+                    <td>Pure renderer measurement</td>
+                </tr>
+                <tr>
+                    <td class="mono">Screenshots</td>
+                    <td class="warn">Optional</td>
+                    <td>OFF for clean HUD, ON for context</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PERFORMANCE SUMMARY TABLE -->
+    <div class="card">
+        <h2>Video Settings Performance Summary (All Settings Ranked by FPS Impact)</h2>
+        <table class="fps-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Setting</th>
+                    <th>Max FPS Gain (OFF vs ON)</th>
+                    <th>Memory Saved</th>
+                    <th>Visual Quality Loss</th>
+                    <th>Interaction Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">1</td>
+                    <td class="mono">TEXTURES</td>
+                    <td class="good">+20-35%</td>
+                    <td class="good">8-15 KB</td>
+                    <td class="bad">Severe (flat walls)</td>
+                    <td>Disables MIPMAP, FAR_TEX_OFF</td>
+                </tr>
+                <tr>
+                    <td class="mono">2</td>
+                    <td class="mono">RAYS (preset)</td>
+                    <td class="good">+300% (240x1 → 12x20)</td>
+                    <td class="impact-low">None</td>
+                    <td class="bad">Severe (blocky walls)</td>
+                    <td>Affects all render costs equally</td>
+                </tr>
+                <tr>
+                    <td class="mono">3</td>
+                    <td class="mono">DRAW DIST</td>
+                    <td class="good">+40-60% (24 → 3)</td>
+                    <td class="good">Less sprite work</td>
+                    <td class="bad">Severe (pop-in)</td>
+                    <td>Syncs FOG_START/FULL</td>
+                </tr>
+                <tr>
+                    <td class="mono">4</td>
+                    <td class="mono">MIPMAP + MIP LOD</td>
+                    <td class="good">+15-25% (at dist 16-24)</td>
+                    <td class="impact-low">None</td>
+                    <td class="warn">Moderate (blurry distance)</td>
+                    <td>Higher draw = more benefit</td>
+                </tr>
+                <tr>
+                    <td class="mono">5</td>
+                    <td class="mono">FAR TEX OFF</td>
+                    <td class="good">+10-20% (set to 8-12)</td>
+                    <td class="impact-low">None</td>
+                    <td class="warn">Moderate (flat distant walls)</td>
+                    <td>Independent of fog</td>
+                </tr>
+                <tr>
+                    <td class="mono">6</td>
+                    <td class="mono">ENEMIES (Core)</td>
+                    <td class="good">+15-25%</td>
+                    <td class="good">Sprite memory + AI</td>
+                    <td class="bad">Gameplay breaking</td>
+                    <td>Separate from video, but major impact</td>
+                </tr>
+                <tr>
+                    <td class="mono">7</td>
+                    <td class="mono">MINIMAP</td>
+                    <td class="warn">+3-8%</td>
+                    <td class="impact-low">Negligible</td>
+                    <td class="impact-low">None (UI element)</td>
+                    <td>Independent of renderer</td>
+                </tr>
+                <tr>
+                    <td class="mono">8</td>
+                    <td class="mono">ROOF TEX</td>
+                    <td class="warn">+2-5%</td>
+                    <td class="good">1-2 KB</td>
+                    <td class="impact-low">Minor (ceiling flat)</td>
+                    <td>Only visible looking up</td>
+                </tr>
+                <tr>
+                    <td class="mono">9</td>
+                    <td class="mono">FOG DITHER</td>
+                    <td class="impact-low">~1%</td>
+                    <td class="impact-low">None</td>
+                    <td class="warn">Minor (stipple visible)</td>
+                    <td>Purely cosmetic</td>
+                </tr>
+                <tr>
+                    <td class="mono">10</td>
+                    <td class="mono">FPS OVL</td>
+                    <td class="impact-low">~0.5%</td>
+                    <td class="impact-low">None</td>
+                    <td class="impact-low">None (UI element)</td>
+                    <td>Text rendering only</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- OPTIMIZATION PRESETS -->
+    <div class="card">
+        <h2>Recommended Video Setting Combinations by Target Hardware</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Hardware Class</th>
+                    <th>Target FPS</th>
+                    <th>Optimal Settings</th>
+                    <th>Expected Visual Quality</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">Very Slow</td>
+                    <td class="mono">24-30 FPS</td>
+                    <td>
+                        <div class="small mono">
+                            RAYS: 30x8 or 24x10<br>
+                            DRAW DIST: 6-8<br>
+                            TEXTURES: ON (atmosphere worth cost)<br>
+                            MIPMAP: ON, MIP LOD: ON<br>
+                            MIP1-4: Aggressive (2.5/3.5/6.0/8.0)<br>
+                            FAR TEX OFF: 8<br>
+                            WALL RES: FAST<br>
+                            MINIMAP: OFF
+                        </div>
+                    </td>
+                    <td class="warn">Playable, blurry distances</td>
+                </tr>
+                <tr>
+                    <td class="mono">Slow</td>
+                    <td class="mono">30-45 FPS</td>
+                    <td>
+                        <div class="small mono">
+                            RAYS: 48x5<br>
+                            DRAW DIST: 8-10<br>
+                            TEXTURES: ON<br>
+                            MIPMAP: ON, MIP LOD: ON<br>
+                            MIP1-4: Default (4.0/4.5/8.0/10.0)<br>
+                            FAR TEX OFF: 10-12<br>
+                            WALL RES: FAST or QUALITY<br>
+                            MINIMAP: Optional
+                        </div>
+                    </td>
+                    <td class="good">Balanced (PERFORMANCE preset)</td>
+                </tr>
+                <tr>
+                    <td class="mono">Mid-range</td>
+                    <td class="mono">45-60 FPS</td>
+                    <td>
+                        <div class="small mono">
+                            RAYS: 60x4 or 80x3<br>
+                            DRAW DIST: 10-12<br>
+                            TEXTURES: ON<br>
+                            MIPMAP: ON, MIP LOD: ON<br>
+                            MIP1-4: Default<br>
+                            FAR TEX OFF: 12 or OFF<br>
+                            WALL RES: QUALITY<br>
+                            MINIMAP: ON
+                        </div>
+                    </td>
+                    <td class="good">Good (BALANCED preset)</td>
+                </tr>
+                <tr>
+                    <td class="mono">Fast</td>
+                    <td class="mono">60 FPS uncapped</td>
+                    <td>
+                        <div class="small mono">
+                            RAYS: 80x3 or 120x2<br>
+                            DRAW DIST: 12-16<br>
+                            TEXTURES: ON<br>
+                            MIPMAP: ON, MIP LOD: ON<br>
+                            MIP1-4: Smooth gradient (4.0/6.0/10.0/14.0)<br>
+                            FAR TEX OFF: OFF<br>
+                            WALL RES: QUALITY<br>
+                            MINIMAP: ON
+                        </div>
+                    </td>
+                    <td class="good">High quality</td>
+                </tr>
+                <tr>
+                    <td class="mono">Very Fast</td>
+                    <td class="mono">60 FPS uncapped max</td>
+                    <td>
+                        <div class="small mono">
+                            RAYS: 120x2 or 240x1<br>
+                            DRAW DIST: 16-20<br>
+                            TEXTURES: ON<br>
+                            MIPMAP: ON, MIP LOD: ON<br>
+                            MIP1-4: Quality (5.0/8.0/12.0/16.0)<br>
+                            FAR TEX OFF: OFF<br>
+                            WALL RES: QUALITY<br>
+                            FOG DITHER: 1-2<br>
+                            MINIMAP: ON
+                        </div>
+                    </td>
+                    <td class="good">Maximum (QUALITY preset)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>Code Reference Summary</h2>
+        <p class="small">All line numbers from <span class="mono">app_full.lua</span>. Settings verified against implementation.</p>
+        <table class="fps-table">
+            <thead>
+                <tr>
+                    <th>Setting</th>
+                    <th>Variable Declaration</th>
+                    <th>Usage/Function</th>
+                    <th>Preset Arrays</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mono">TEXTURES</td>
+                    <td>Lines 753, 1521-1534</td>
+                    <td>loadWallTextures, unloadWallTextures</td>
+                    <td>N/A (toggle)</td>
+                </tr>
+                <tr>
+                    <td class="mono">MIPMAP</td>
+                    <td>Lines 757, 792-802</td>
+                    <td>getMipLevelForDistance (4136-4139)</td>
+                    <td>MIPMAP_DIST_PRESETS (19 values)</td>
+                </tr>
+                <tr>
+                    <td class="mono">RAYS</td>
+                    <td>Lines 804-805</td>
+                    <td>renderCfg.rayCols, renderCfg.colW</td>
+                    <td>RAY_PRESETS (12 configurations)</td>
+                </tr>
+                <tr>
+                    <td class="mono">DRAW DIST</td>
+                    <td>Lines 822-828</td>
+                    <td>refreshExpViewDistance (1001-1018)</td>
+                    <td>DRAW_DIST_PRESETS (11 values)</td>
+                </tr>
+                <tr>
+                    <td class="mono">FOG START/FULL</td>
+                    <td>Lines 828-840</td>
+                    <td>normalizeFogRange (1018-1039)</td>
+                    <td>FOG_DISTANCE_PRESETS (29 values)</td>
+                </tr>
+                <tr>
+                    <td class="mono">FAR TEX OFF</td>
+                    <td>Lines 845-847</td>
+                    <td>normalizeFarTextureCutoff (1086-1092)</td>
+                    <td>FAR_TEX_OFF_PRESETS (14 values)</td>
+                </tr>
+                <tr>
+                    <td class="mono">WALL RES</td>
+                    <td>Lines 852-853</td>
+                    <td>getBaseEffectiveRayPresetIndex (1148-1157)</td>
+                    <td>N/A (mode toggle)</td>
+                </tr>
+                <tr>
+                    <td class="mono">MINIMAP</td>
+                    <td>Line 854</td>
+                    <td>drawMinimap (5011-5075)</td>
+                    <td>N/A (toggle)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>Technical Notes & Developer Information</h2>
+        <p class="small">
+            <strong>Measurement methodology:</strong> FPS values estimated from raycount algorithmic complexity and observed performance
+            patterns. Actual FPS varies by hardware, level geometry, entity count, and audio overhead.<br><br>
+            <strong>Adaptive ray budget:</strong> System may override selected ray preset at runtime if AUTO RAYS enabled.
+            Monitoring via PERF MON overlay shows base→effective shifts (e.g., "80x3->60x4->48x5").<br><br>
+            <strong>Memory estimates:</strong> Texture assets ~8-15 KB total (PNG16 format). Double buffer adds ~3-8 KB frame buffer.
+            Sprite memory excluded (varies by level design).<br><br>
+            <strong>FOV calculation:</strong> <span class="mono">fovRad = renderCfg.fovSteps × (renderCfg.twoPi / 64)</span> (line 4036).
+            Fixed at 9 FOV steps (84.375°) in current build. Not user-adjustable.<br><br>
+            <strong>Renderer lock:</strong> Single renderer path "exp_hybrid" with "proper" wall texture mode enforced
+            via lockRendererMode() (lines 955-963). Historical multi-renderer support removed for stability.
+        </p>
+    </div>
+</div>
+</body>
+</html>

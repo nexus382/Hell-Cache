@@ -2,6 +2,7 @@
 
 A comprehensive LUA-based software development kit for creating applications on the VMU Pro platform.
 
+
 ## Overview
 
 The VMU Pro LUA SDK enables developers to create applications using LUA scripting instead of C/C++. Applications run in a LUA environment with access to graphics, input, audio, file system, and utility APIs provided by the VMU Pro firmware.
@@ -9,7 +10,8 @@ The VMU Pro LUA SDK enables developers to create applications using LUA scriptin
 ## Features
 
 - **LUA Scripting Environment**: Write applications in LUA with full API access
-- **Rich API Set**: Graphics, input, audio, file operations, and utilities
+- **Rich API Set**: Graphics, input, audio, file op
+erations, and utilities
 - **Nested Module Support**: Organize code with `require()` and folder structures
 - **Cross-Platform Tooling**: Python-based packaging and deployment tools
 - **IDE Support**: Type definitions and documentation for development
@@ -18,9 +20,12 @@ The VMU Pro LUA SDK enables developers to create applications using LUA scriptin
 
 ### Prerequisites
 
+
 - Python 3.6 or later
 - Pillow (PIL) library: `pip install Pillow`
 - VMU Pro device (for deployment)
+
+
 
 ### Creating Your First Application
 

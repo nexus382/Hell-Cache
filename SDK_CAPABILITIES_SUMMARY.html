@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VMU Pro SDK Capabilities Summary</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e4e4e7;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #1e1e2f;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .nav {
+            background: #252538;
+            padding: 15px 30px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            border-bottom: 2px solid #3a3a5c;
+        }
+
+        .nav a {
+            color: #a8b3d1;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav a:hover {
+            background: #3a3a5c;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #252538;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3a3a5c;
+            padding-bottom: 10px;
+        }
+
+        .subsection {
+            margin: 20px 0;
+            padding: 20px;
+            background: #1e1e2f;
+            border-radius: 8px;
+            border-left: 3px solid #764ba2;
+        }
+
+        .subsection h3 {
+            color: #a8b3d1;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+        }
+
+        .subsection h4 {
+            color: #9ca3af;
+            font-size: 1.2em;
+            margin: 15px 0 10px 0;
+        }
+
+        .capability-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .capability-card {
+            background: #2d2d44;
+            padding: 20px;
+            border-radius: 8px;
+            border-top: 3px solid #667eea;
+        }
+
+        .capability-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0 8px 25px;
+            position: relative;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4ade80;
+            font-weight: bold;
+        }
+
+        .constraint-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .constraint-list li {
+            padding: 8px 0 8px 25px;
+            position: relative;
+        }
+
+        .constraint-list li:before {
+            content: "✗";
+            position: absolute;
+            left: 0;
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .warning-list li:before {
+            content: "⚠";
+            color: #f59e0b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #2d2d44;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background: #3a3a5c;
+            color: #667eea;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #667eea;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #3a3a5c;
+        }
+
+        tr:hover td {
+            background: #3a3a5c;
+        }
+
+        .code-block {
+            background: #0d0d1a;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+            border: 1px solid #3a3a5c;
+        }
+
+        .code-block pre {
+            color: #a8b3d1;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .inline-code {
+            background: #3a3a5c;
+            color: #667eea;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+        }
+
+        .feasibility {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85em;
+            margin-left: 10px;
+        }
+
+        .feasibility.excellent {
+            background: #059669;
+            color: white;
+        }
+
+        .feasibility.good {
+            background: #0d9488;
+            color: white;
+        }
+
+        .feasibility.moderate {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .feasibility.limited {
+            background: #dc2626;
+            color: white;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #60a5fa;
+        }
+
+        .info-box h4 {
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            color: #dbeafe;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #fbbf24;
+        }
+
+        .warning-box h4 {
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .warning-box p {
+            color: #fef3c7;
+        }
+
+        .tip-box {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #34d399;
+        }
+
+        .tip-box h4 {
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .tip-box p {
+            color: #d1fae5;
+        }
+
+        .quick-ref {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .quick-ref-item {
+            background: #2d2d44;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 3px solid #a8b3d1;
+        }
+
+        .quick-ref-item strong {
+            color: #a8b3d1;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .quick-ref-item code {
+            color: #9ca3af;
+            font-size: 0.9em;
+        }
+
+        .metrics {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .metric {
+            flex: 1;
+            min-width: 200px;
+            background: #2d2d44;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .metric-label {
+            color: #9ca3af;
+            font-size: 0.9em;
+        }
+
+        .back-to-top {
+            text-align: center;
+            padding: 30px;
+            border-top: 2px solid #3a3a5c;
+        }
+
+        .back-to-top a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .capability-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>VMU Pro SDK Capabilities Summary</h1>
+            <p>Complete Reference for Display, Audio, Input, Text, and System Features</p>
+        </div>
+
+        <nav class="nav">
+            <a href="#display">Display & Rendering</a>
+            <a href="#audio">Audio</a>
+            <a href="#input">Input</a>
+            <a href="#text">Text & UI</a>
+            <a href="#system">System</a>
+            <a href="#fileio">File I/O</a>
+            <a href="#feasibility">Game Features</a>
+        </nav>
+
+        <div class="content">
+
+            <!-- DISPLAY & RENDERING SECTION -->
+            <div id="display" class="section">
+                <h2>1. Display & Rendering Capabilities</h2>
+
+                <div class="subsection">
+                    <h3>Hardware Specifications</h3>
+                    <div class="metrics">
+                        <div class="metric">
+                            <div class="metric-value">240×240</div>
+                            <div class="metric-label">Resolution (pixels)</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">RGB565</div>
+                            <div class="metric-label">Color Format (16-bit)</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">65,536</div>
+                            <div class="metric-label">Total Pixels</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">0-255</div>
+                            <div class="metric-label">Brightness Levels</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Core Rendering Features</h3>
+                    <div class="capability-grid">
+                        <div class="capability-card">
+                            <h4>Primitives</h4>
+                            <ul class="feature-list">
+                                <li>Lines (drawLine)</li>
+                                <li>Rectangles (drawRect, drawFillRect)</li>
+                                <li>Circles (drawCircle, drawCircleFilled)</li>
+                                <li>Ellipses (drawEllipse, drawEllipseFilled)</li>
+                                <li>Polygons (drawPolygon, drawPolygonFilled)</li>
+                                <li>Flood Fill (floodFill, floodFillTolerance)</li>
+                            </ul>
+                        </div>
+
+                        <div class="capability-card">
+                            <h4>Sprite System</h4>
+                            <ul class="feature-list">
+                                <li>BMP and PNG loading</li>
+                                <li>Per-pixel alpha blending (PNG RGBA8888)</li>
+                                <li>Color key transparency (BMP RGB565)</li>
+                                <li>Scaling (drawScaled with independent X/Y)</li>
+                                <li>Flipping (X, Y, XY)</li>
+                                <li>Color tinting (multiply)</li>
+                                <li>Color addition (brighten)</li>
+                                <li>Mosaic effects (pixelation)</li>
+                                <li>Blur effects (0-10 radius)</li>
+                                <li>Alpha blending (transparency)</li>
+                                <li>Z-index layering</li>
+                                <li>Position management</li>
+                                <li>Visibility control</li>
+                            </ul>
+                        </div>
+
+                        <div class="capability-card">
+                            <h4>Text Rendering</h4>
+                            <ul class="feature-list">
+                                <li>Built-in font rendering</li>
+                                <li>Custom foreground/background colors</li>
+                                <li>Arbitrary positioning</li>
+                                <li>Automatic character spacing</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Performance Limits & Constraints</h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Aspect</th>
+                                <th>Limit/Constraint</th>
+                                <th>Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Resolution</strong></td>
+                                <td>Fixed at 240×240 pixels</td>
+                                <td>Cannot change resolution, all content must fit</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Color Depth</strong></td>
+                                <td>16-bit RGB565 only</td>
+                                <td>Limited color palette (65,536 colors), banding possible</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Double Buffering</strong></td>
+                                <td>Supported but uses extra memory</td>
+                                <td>Back buffer = 115KB additional RAM</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sprite Memory</strong></td>
+                                <td>Stored in C memory space</td>
+                                <td>Efficient, but must free manually</td>
+                            </tr>
+                            <tr>
+                                <td><strong>No Hardware Acceleration</strong></td>
+                                <td>All rendering is software-based</td>
+                                <td>CPU-intensive, must optimize draw calls</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="warning-box">
+                        <h4>Performance Critical Constraints</h4>
+                        <ul class="constraint-list warning-list">
+                            <li>Maximum 60 FPS achievable only with optimized rendering</li>
+                            <li>Complex scenes may drop to 30-45 FPS without optimization</li>
+                            <li>Alpha blending and blur effects are expensive operations</li>
+                            <li>Overdraw (drawing same pixels multiple times) kills performance</li>
+                            <li>Sprite scaling is CPU-intensive (especially non-uniform scaling)</li>
+                            <li>Mosaic effects have moderate performance cost</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Best Practices</h3>
+
+                    <div class="tip-box">
+                        <h4>Rendering Optimization Tips</h4>
+                        <ul class="feature-list">
+                            <li>Use double buffering to eliminate flicker</li>
+                            <li>Minimize overdraw by drawing back-to-front</li>
+                            <li>Avoid per-pixel operations when possible</li>
+                            <li>Use sprite scaling sparingly (cache scaled versions if frequent)</li>
+                            <li>Limit blur radius (0-3 is subtle, 8-10 is extreme)</li>
+                            <li>Batch similar drawing operations together</li>
+                            <li>Use Z-index to minimize redundant draw calls</li>
+                            <li>Consider lower FPS targets (30-45 FPS) for complex scenes</li>
+                            <li>Profile performance with frame time monitoring</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box">
+                        <h4>Color Format Guide</h4>
+                        <p><strong>RGB565 Format:</strong> Red (5 bits) + Green (6 bits) + Blue (5 bits)</p>
+                        <div class="code-block"><pre>-- Color conversion helper
+function rgb_to_565(r, g, b)
+    local r5 = math.floor((r * 31) / 255)
+    local g6 = math.floor((g * 63) / 255)
+    local b5 = math.floor((b * 31) / 255)
+    return (r5 << 11) | (g6 << 5) | b5
+end
+
+-- Pre-defined colors available:
+vmupro.graphics.RED = 0x00F8
+vmupro.graphics.GREEN = 0xE007
+vmupro.graphics.BLUE = 0x001F
+vmupro.graphics.WHITE = 0xFFFF
+vmupro.graphics.BLACK = 0x0000</pre></div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Code Examples</h3>
+
+                    <div class="code-block"><pre>-- Double buffering setup
+vmupro.graphics.startDoubleBufferRenderer()
+
+function game_loop()
+    -- Clear back buffer
+    vmupro.graphics.clear(vmupro.graphics.BLACK)
+
+    -- Draw background
+    vmupro.sprite.draw(background, 0, 0, vmupro.sprite.kImageUnflipped)
+
+    -- Draw player with scaling
+    vmupro.sprite.drawScaled(player, x, y, 1.5, 1.5)
+
+    -- Draw enemy with tint
+    vmupro.sprite.drawTinted(enemy, ex, ey, 0xFF0000)
+
+    -- Present frame
+    vmupro.graphics.pushDoubleBufferFrame()
+
+    -- Maintain 60 FPS
+    vmupro.system.delayUs(16667)  -- ~60 FPS
+end
+
+vmupro.graphics.stopDoubleBufferRenderer()</pre></div>
+                </div>
+            </div>
+
+            <!-- AUDIO SECTION -->
+            <div id="audio" class="section">
+                <h2>2. Audio Capabilities</h2>
+
+                <div class="subsection">
+                    <h3>Audio Systems</h3>
+                    <div class="capability-grid">
+                        <div class="capability-card">
+                            <h4>Sound Sample Playback</h4>
+                            <ul class="feature-list">
+                                <li>WAV file playback (16-bit PCM)</li>
+                                <li>Automatic resampling to 44.1kHz</li>
+                                <li>Mono and stereo support</li>
+                                <li>Automatic mixing</li>
+                                <li>Repeat/loop support</li>
+                                <li>Per-sample volume control (L/R)</li>
+                                <li>Playback rate adjustment (speed/pitch)</li>
+                                <li>Finish callbacks</li>
+                                <li>IsPlaying/Stop/Free controls</li>
+                            </ul>
+                        </div>
+
+                        <div class="capability-card">
+                            <h4>Synthesizer</h4>
+                            <ul class="feature-list">
+                                <li>8 waveform types (Square, Triangle, Sine, etc.)</li>
+                                <li>ADSR envelope (Attack, Decay, Sustain, Release)</li>
+                                <li>Frequency-based notes (Hz or MIDI)</li>
+                                <li>Velocity control</li>
+                                <li>Stereo volume/panning</li>
+                                <li>PO waveform parameters</li>
+                                <li>Note length control (finite or infinite)</li>
+                                <li>Real-time parameter changes</li>
+                            </ul>
+                        </div>
+
+                        <div class="capability-card">
+                            <h4>Ring Buffer Streaming</h4>
+                            <ul class="feature-list">
+                                <li>Raw PCM streaming</li>
+                                <li>Mono and stereo modes</li>
+                                <li>Global volume application</li>
+                                <li>Buffer fill state monitoring</li>
+                                <li>44.1kHz, 16-bit output</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Performance Limits & Constraints</h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Resource</th>
+                                <th>Limit</th>
+                                <th>Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Simultaneous Synths</strong></td>
+                                <td>Maximum 16</td>
+                                <td>Hard limit, plan audio budget carefully</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sequence Voices</strong></td>
+                                <td>16 per instrument</td>
+                                <td>Max polyphony per music track</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Global Volume</strong></td>
+                                <td>0-10 range</td>
+                                <td>10 = maximum, 0 = mute</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sample Rate</strong></td>
+                                <td>Fixed at 44.1kHz</td>
+                                <td>All samples resampled to this rate</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Audio Lifecycle</strong></td>
+                                <td>Manual management required</td>
+                                <td>Must call startListenMode/exitListenMode</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Memory</strong></td>
+                                <td>Large samples need contiguous blocks</td>
+                                <td>Check getLargestFreeBlock() before loading</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="warning-box">
+                        <h4>Critical Audio Requirements</h4>
+                        <ul class="constraint-list warning-list">
+                            <li>MUST call vmupro.sound.update() every frame or no audio plays</li>
+                            <li>MUST call audio.startListenMode() before using audio features</li>
+                            <li>MUST call audio.exitListenMode() when done with audio (e.g., screen change)</li>
+                            <li>Forgetting lifecycle management causes memory leaks and audio failures</li>
+                            <li>Infinite looping not implemented (-1), use high repeat count (99) instead</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Waveform Types</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Waveform</th>
+                                <th>Constant</th>
+                                <th>Description</th>
+                                <th>Best Use</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Square</strong></td>
+                                <td>kWaveSquare</td>
+                                <td>Classic 8-bit sound</td>
+                                <td>Chiptune, retro effects</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Triangle</strong></td>
+                                <td>kWaveTriangle</td>
+                                <td>Softer than square</td>
+                                <td>Flutes, bells, soft leads</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sine</strong></td>
+                                <td>kWaveSine</td>
+                                <td>Pure tone</td>
+                                <td>Clean melodies, whistles</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Noise</strong></td>
+                                <td>kWaveNoise</td>
+                                <td>White noise</td>
+                                <td>Drums, explosions, snare</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sawtooth</strong></td>
+                                <td>kWaveSawtooth</td>
+                                <td>Bright, buzzy</td>
+                                <td>Brass, aggressive bass</td>
+                            </tr>
+                            <tr>
+                                <td><strong>PO Phase</strong></td>
+                                <td>kWavePOPhase</td>
+                                <td>Phase modulation</td>
+                                <td>PO-style synthesis</td>
+                            </tr>
+                            <tr>
+                                <td><strong>PO Digital</strong></td>
+                                <td>kWavePODigital</td>
+                                <td>Digital synthesis</td>
+                                <td>PO-style synthesis</td>
+                            </tr>
+                            <tr>
+                                <td><strong>PO Vosim</strong></td>
+                                <td>kWavePOVosim</td>
+                                <td>Vosim synthesis</td>
+                                <td>PO-style synthesis</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3>Code Examples</h3>
+
+                    <div class="code-block"><pre>-- Audio lifecycle management
+function init_audio()
+    vmupro.audio.startListenMode()
+    -- Load sounds and create synths
+end
+
+function cleanup_audio()
+    -- Free all sounds and synths
+    vmupro.sound.sample.free(sfx)
+    vmupro.sound.synth.free(lead_synth)
+    vmupro.audio.exitListenMode()
+end
+
+-- Sound playback
+local jump_sfx = vmupro.sound.sample.new("sfx/jump")
+vmupro.sound.sample.play(jump_sfx, 0)  -- Play once
+
+-- Synthesizer usage
+local lead = vmupro.sound.synth.new(vmupro.sound.kWaveSine)
+vmupro.sound.synth.setAttack(lead, 0.01)
+vmupro.sound.synth.setDecay(lead, 0.1)
+vmupro.sound.synth.setSustain(lead, 0.7)
+vmupro.sound.synth.setRelease(lead, 0.3)
+
+-- In update loop
+function vmupro.update()
+    vmupro.sound.update()  -- CRITICAL: Call every frame
+
+    if vmupro.input.pressed(vmupro.input.A) then
+        vmupro.sound.synth.playMIDINote(lead, 60, 1.0, -1)  -- Middle C
+    end
+
+    if vmupro.input.released(vmupro.input.A) then
+        vmupro.sound.synth.noteOff(lead)  -- Release note
+    end
+end</pre></div>
+                </div>
+            </div>
+
+            <!-- INPUT SECTION -->
+            <div id="input" class="section">
+                <h2>3. Input & Interaction Capabilities</h2>
+
+                <div class="subsection">
+                    <h3>Button Layout</h3>
+                    <div class="info-box">
+                        <h4>Physical Button Configuration</h4>
+                        <div class="code-block"><pre>VMU Pro Device Layout:
+
+        [DISPLAY]
+
+   [UP]           [SLEEP] [MODE]
+[LEFT] [RIGHT]        [A]    [B]
+  [DOWN]
+
+D-Pad: LEFT SIDE (same level as SLEEP/MODE)
+Action Buttons: RIGHT SIDE (under SLEEP/MODE)
+A = Confirm/Primary Action
+B = Dismiss/Secondary Action</pre></div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Button</th>
+                                <th>Constant</th>
+                                <th>Value</th>
+                                <th>Typical Use</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>D-Pad Up</strong></td>
+                                <td>vmupro.input.UP</td>
+                                <td>0</td>
+                                <td>Move up, menu up</td>
+                            </tr>
+                            <tr>
+                                <td><strong>D-Pad Down</strong></td>
+                                <td>vmupro.input.DOWN</td>
+                                <td>1</td>
+                                <td>Move down, menu down</td>
+                            </tr>
+                            <tr>
+                                <td><strong>D-Pad Right</strong></td>
+                                <td>vmupro.input.RIGHT</td>
+                                <td>2</td>
+                                <td>Move right, menu right</td>
+                            </tr>
+                            <tr>
+                                <td><strong>D-Pad Left</strong></td>
+                                <td>vmupro.input.LEFT</td>
+                                <td>3</td>
+                                <td>Move left, menu left</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Power/Sleep</strong></td>
+                                <td>vmupro.input.POWER</td>
+                                <td>4</td>
+                                <td>Sleep mode, power toggle</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Mode</strong></td>
+                                <td>vmupro.input.MODE</td>
+                                <td>5</td>
+                                <td>Mode switch, system menu</td>
+                            </tr>
+                            <tr>
+                                <td><strong>A Button</strong></td>
+                                <td>vmupro.input.A</td>
+                                <td>6</td>
+                                <td>Confirm, jump, shoot</td>
+                            </tr>
+                            <tr>
+                                <td><strong>B Button</strong></td>
+                                <td>vmupro.input.B</td>
+                                <td>7</td>
+                                <td>Dismiss, cancel, alternate fire</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3>Input Detection Methods</h3>
+                    <div class="capability-grid">
+                        <div class="capability-card">
+                            <h4>Edge Detection</h4>
+                            <ul class="feature-list">
+                                <li>pressed() - Button just went down this frame</li>
+                                <li>released() - Button just went up this frame</li>
+                                <li>Ideal for menu navigation</li>
+                                <li>Prevents repeat triggers</li>
+                            </ul>
+                        </div>
+
+                        <div class="capability-card">
+                            <h4>State Detection</h4>
+                            <ul class="feature-list">
+                                <li>held() - Button is currently down</li>
+                                <li>anythingHeld() - Any button is down</li>
+                                <li>Ideal for continuous movement</li>
+                                <li>Good for charging attacks</li>
+                            </ul>
+                        </div>
+
+                        <div class="capability-card">
+                            <h4>Convenience Functions</h4>
+                            <ul class="feature-list">
+                                <li>confirmPressed() - A button edge</li>
+                                <li>confirmReleased() - A button release</li>
+                                <li>dismissPressed() - B button edge</li>
+                                <li>dismissReleased() - B button release</li>
+                                <li>UI-focused helpers</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Input Requirements</h3>
+                    <div class="warning-box">
+                        <h4>Critical Input Requirements</h4>
+                        <ul class="constraint-list warning-list">
+                            <li>MUST call vmupro.input.read() ONCE per frame before checking buttons</li>
+                            <li>Calling read() multiple times per frame will miss edge detections</li>
+                            <li>Not calling read() means stale button state</li>
+                            <li>Edge detection (pressed/released) only works if read() called each frame</li>
+                        </ul>
+                    </div>
+
+                    <div class="tip-box">
+                        <h4>Input Best Practices</h4>
+                        <ul class="feature-list">
+                            <li>Call input.read() once at start of update loop</li>
+                            <li>Use pressed() for menu navigation and one-shot actions</li>
+                            <li>Use held() for continuous movement and charging</li>
+                            <li>Implement deadzone for analog-like control (if needed)</li>
+                            <li>Buffer rapid inputs to prevent accidental triggers</li>
+                            <li>Use confirmPressed/dismissPressed for UI consistency</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Code Examples</h3>
+                    <div class="code-block"><pre>function vmupro.update()
+    -- CRITICAL: Read input once per frame
+    vmupro.input.read()
+
+    -- One-shot actions (edge detection)
+    if vmupro.input.pressed(vmupro.input.A) then
+        player_jump()
+    end
+
+    -- Continuous actions (state detection)
+    if vmupro.input.held(vmupro.input.LEFT) then
+        player.x = player.x - player.speed
+    end
+
+    if vmupro.input.held(vmupro.input.RIGHT) then
+        player.x = player.x + player.speed
+    end
+
+    -- Menu navigation
+    if vmupro.input.pressed(vmupro.input.UP) then
+        menu_index = menu_index - 1
+    end
+
+    if vmupro.input.pressed(vmupro.input.DOWN) then
+        menu_index = menu_index + 1
+    end
+
+    -- UI helpers
+    if vmupro.input.confirmPressed() then
+        activate_menu_item()
+    end
+
+    if vmupro.input.dismissPressed() then
+        close_menu()
+    end
+end</pre></div>
+                </div>
+            </div>
+
+            <!-- TEXT & UI SECTION -->
+            <div id="text" class="section">
+                <h2>4. Text & UI Capabilities</h2>
+
+                <div class="subsection">
+                    <h3>Text Rendering Features</h3>
+                    <div class="capability-grid">
+                        <div class="capability-card">
+                            <h4>Core Features</h4>
+                            <ul class="feature-list">
+                                <li>Built-in bitmap font</li>
+                                <li>Arbitrary text string rendering</li>
+                                <li>Custom foreground color (RGB565)</li>
+                                <li>Custom background color (RGB565)</li>
+                                <li>Pixel-level positioning</li>
+                                <li>No text wrapping (manual)</li>
+                                <li>No font selection (fixed system font)</li>
+                            </ul>
+                        </div>
+
+                        <div class="capability-card">
+                            <h4>Limitations</h4>
+                            <ul class="constraint-list">
+                                <li>No word/line wrapping automation</li>
+                                <li>No custom font loading</li>
+                                <li>No text scaling</li>
+                                <li>No text alignment options</li>
+                                <li>No text effects (shadows, outlines)</li>
+                                <li>Fixed character size (8x8 pixels typically)</li>
+                                <li>Limited character set (ASCII-focused)</li>
+                            </ul>
+                        </div>
+
+                        <div class="capability-card">
+                            <h4>UI Building</h4>
+                            <ul class="feature-list">
+                                <li>Manual text positioning</li>
+                                <li>Background color for text boxes</li>
+                                <li>Primitive-based UI (rectangles, lines)</li>
+                                <li>Sprite-based UI elements</li>
+                                <li>Custom font rendering via sprites (if needed)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Text Best Practices</h3>
+
+                    <div class="tip-box">
+                        <h4>UI Implementation Tips</h4>
+                        <ul class="feature-list">
+                            <li>Use sprites for complex text (custom fonts, styled text)</li>
+                            <li>Implement manual word wrapping for dialog boxes</li>
+                            <li>Cache common text strings as sprites for performance</li>
+                            <li>Use draw primitives for UI frames and borders</li>
+                            <li>Layer UI elements with Z-index for proper overlap</li>
+                            <li>Create text box helper functions for consistency</li>
+                            <li>Pre-render static UI to offscreen buffer if possible</li>
+                        </ul>
+                    </div>
+
+                    <div class="warning-box">
+                        <h4>Text Limitations</h4>
+                        <ul class="constraint-list warning-list">
+                            <li>Cannot load custom TTF/OTF fonts (use sprite fonts instead)</li>
+                            <li>No advanced text rendering (shadows, gradients, warping)</li>
+                            <li>Fixed-width characters only (no proportional spacing adjustment)</li>
+                            <li>Extended characters may have limited support</li>
+                            <li>Text rendering is CPU-intensive (cache as sprites when possible)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Code Examples</h3>
+
+                    <div class="code-block"><pre>-- Text rendering
+vmupro.graphics.drawText("Score: 100", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+
+-- Text box helper
+function draw_text_box(text, x, y, width, height, fg_color, bg_color)
+    -- Draw box background
+    vmupro.graphics.drawFillRect(x, y, x + width, y + height, bg_color)
+
+    -- Draw text
+    vmupro.graphics.drawText(text, x + 4, y + 4, fg_color, bg_color)
+
+    -- Draw border
+    vmupro.graphics.drawRect(x, y, x + width, y + height, fg_color)
+end
+
+-- Manual word wrapping
+function draw_wrapped_text(text, x, y, max_width, fg, bg)
+    local words = {}
+    for word in string.gmatch(text, "[^%s]+") do
+        table.insert(words, word)
+    end
+
+    local line = ""
+    local current_y = y
+    local char_width = 8  -- Assume 8x8 font
+
+    for i, word in ipairs(words) do
+        local test_line = line == "" and word or line .. " " .. word
+        if #test_line * char_width > max_width then
+            vmupro.graphics.drawText(line, x, current_y, fg, bg)
+            current_y = current_y + 10
+            line = word
+        else
+            line = test_line
+        end
+    end
+
+    -- Draw last line
+    vmupro.graphics.drawText(line, x, current_y, fg, bg)
+end</pre></div>
+                </div>
+            </div>
+
+            <!-- SYSTEM SECTION -->
+            <div id="system" class="section">
+                <h2>5. System Features</h2>
+
+                <div class="subsection">
+                    <h3>Timing & Performance</h3>
+                    <div class="capability-grid">
+                        <div class="capability-card">
+                            <h4>Time Functions</h4>
+                            <ul class="feature-list">
+                                <li>getTimeUs() - Microsecond precision</li>
+                                <li>delayUs() - Microsecond delays</li>
+                                <li>delayMs() - Millisecond delays</li>
+                                <li>sleep() - Millisecond sleep</li>
+                                <li>Returns double-precision floats (no overflow)</li>
+                                <li>Measures time since boot</li>
+                            </ul>
+                        </div>
+
+                        <div class="capability-card">
+                            <h4>Frame Rate Control</h4>
+                            <ul class="feature-list">
+                                <li>Manual FPS targeting</li>
+                                <li>Precise frame timing</li>
+                                <li>Delta time calculation</li>
+                                <li>Variable frame rate support</li>
+                                <li>Adaptive quality scaling</li>
+                                <li>Target: 60 FPS = 16.67ms per frame</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Memory Management</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Function</th>
+                                <th>Returns</th>
+                                <th>Use Case</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>getMemoryUsage()</strong></td>
+                                <td>Current bytes used</td>
+                                <td>Monitor memory consumption in real-time</td>
+                            </tr>
+                            <tr>
+                                <td><strong>getMemoryLimit()</strong></td>
+                                <td>Maximum bytes available</td>
+                                <td>Know total Lua VM heap size</td>
+                            </tr>
+                            <tr>
+                                <td><strong>getLargestFreeBlock()</strong></td>
+                                <td>Largest contiguous bytes</td>
+                                <td>CHECK before loading large assets</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="warning-box">
+                        <h4>Memory Constraints</h4>
+                        <ul class="constraint-list warning-list">
+                            <li>Limited Lua VM heap space (check limits with testing)</li>
+                            <li>Fragmentation prevents large allocations even with sufficient free memory</li>
+                            <li>ALWAYS check getLargestFreeBlock() before large asset loads</li>
+                            <li>Free sprites/sounds promptly when no longer needed</li>
+                            <li>Double buffering adds ~115KB memory overhead</li>
+                            <li>No garbage collection control (manual Lua GC only)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Logging & Debug</h3>
+                    <div class="capability-grid">
+                        <div class="capability-card">
+                            <h4>Log Levels</h4>
+                            <ul class="feature-list">
+                                <li>LOG_ERROR (0) - Critical errors</li>
+                                <li>LOG_WARN (1) - Warnings</li>
+                                <li>LOG_INFO (2) - Informational</li>
+                                <li>LOG_DEBUG (3) - Verbose debugging</li>
+                                <li>Tag-based filtering</li>
+                                <li>Message string formatting</li>
+                            </ul>
+                        </div>
+
+                        <div class="capability-card">
+                            <h4>Debug Functions</h4>
+                            <ul class="feature-list">
+                                <li>backtrace() - Stack trace on demand</li>
+                                <li>Requires Developer Mode enabled</li>
+                                <li>Helps diagnose call chains</li>
+                                <li>Limited output when Dev Mode disabled</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Brightness Control</h3>
+                    <div class="capability-card">
+                        <h4>Display Brightness</h4>
+                        <ul class="feature-list">
+                            <li>getGlobalBrightness() - Get current level (0-255)</li>
+                            <li>setGlobalBrightness() - Set brightness (0-255)</li>
+                            <li>255 = maximum brightness</li>
+                            <li>0 = screen off (dark)</li>
+                            <li>128 = 50% brightness</li>
+                            <li>Persists across application lifecycle</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Code Examples</h3>
+
+                    <div class="code-block"><pre>-- 60 FPS game loop with timing
+local frame_time_target = 16667  -- 60 FPS in microseconds
+
+function game_loop()
+    local frame_start = vmupro.system.getTimeUs()
+
+    -- Update game logic
+    update_game()
+
+    -- Render frame
+    render_frame()
+    vmupro.graphics.pushDoubleBufferFrame()
+
+    -- Calculate frame time
+    local frame_time = vmupro.system.getTimeUs() - frame_start
+
+    -- Sleep to maintain 60 FPS
+    if frame_time < frame_time_target then
+        vmupro.system.delayUs(frame_time_target - frame_time)
+    else
+        vmupro.system.log(vmupro.system.LOG_WARN, "Performance",
+            "Frame exceeded budget: " .. frame_time .. "us")
+    end
+end
+
+-- Memory check before loading large asset
+local required_bytes = 50000  -- 50KB
+local largest_free = vmupro.system.getLargestFreeBlock()
+
+if largest_free >= required_bytes then
+    local music = vmupro.sound.sample.new("music/large_track")
+else
+    vmupro.system.log(vmupro.system.LOG_ERROR, "Memory",
+        "Cannot allocate 50KB, largest free: " .. largest_free)
+end
+
+-- Logging examples
+vmupro.system.log(vmupro.system.LOG_INFO, "Game", "Player started")
+vmupro.system.log(vmupro.system.LOG_DEBUG, "Position", "X: " .. x .. " Y: " .. y)
+vmupro.system.log(vmupro.system.LOG_ERROR, "Crash", "Fatal error in AI")</pre></div>
+                </div>
+            </div>
+
+            <!-- FILE I/O SECTION -->
+            <div id="fileio" class="section">
+                <h2>6. File I/O Capabilities</h2>
+
+                <div class="subsection">
+                    <h3>File System Features</h3>
+                    <div class="capability-grid">
+                        <div class="capability-card">
+                            <h4>File Operations</h4>
+                            <ul class="feature-list">
+                                <li>read() - Load entire file into memory</li>
+                                <li>write() - Write data to file</li>
+                                <li>exists() - Check file existence</li>
+                                <li>getSize() - Get file size in bytes</li>
+                                <li>deleteFile() - Remove file</li>
+                                <li>String-based file contents</li>
+                                <li>Binary data support</li>
+                            </ul>
+                        </div>
+
+                        <div class="capability-card">
+                            <h4>Folder Operations</h4>
+                            <ul class="feature-list">
+                                <li>folderExists() - Check folder existence</li>
+                                <li>createFolder() - Create new folder</li>
+                                <li>deleteFolder() - Remove empty folder only</li>
+                                <li>Must delete files before deleting folder</li>
+                            </ul>
+                        </div>
+
+                        <div class="capability-card">
+                            <h4>Helper Functions</h4>
+                            <ul class="feature-list">
+                                <li>createFile() - Create empty file</li>
+                                <li>Returns true if file exists or created</li>
+                                <li>Useful before write() operations</li>
+                                <li>No file listing/traversal functions</li>
+                                <li>No file metadata (timestamp, permissions)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>File System Constraints</h3>
+
+                    <div class="warning-box">
+                        <h4>Critical File Limitations</h4>
+                        <ul class="constraint-list warning-list">
+                            <li><strong>SD CARD ONLY</strong> - Cannot access system files or firmware</li>
+                            <li><strong>/sdcard PREFIX REQUIRED</strong> - All paths must start with /sdcard/</li>
+                            <li><strong>NO DIRECTORY LISTING</strong> - Cannot enumerate files in folders</li>
+                            <li><strong>NO FILE METADATA</strong> - No timestamps, permissions, or attributes</li>
+                            <li><strong>ENTIRE FILE LOADED</strong> - No streaming or chunked reading</li>
+                            <li><strong>MUST EXIST FIRST</strong> - createFile() before write() recommended</li>
+                            <li><strong>FOLDER MUST BE EMPTY</strong> - Cannot delete non-empty folders</li>
+                            <li><strong>NO ABSOLUTE PATHS</strong> - All paths are /sdcard/ relative</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box">
+                        <h4>Save Game Implementation Pattern</h4>
+                        <p>Since you cannot list directory contents, implement versioned saves or fixed-slot saves:</p>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Code Examples</h3>
+
+                    <div class="code-block"><pre>-- Save game data
+function save_game(slot, score, level)
+    local filename = "/sdcard/saves/save" .. slot .. ".dat"
+
+    -- Ensure file exists
+    vmupro.file.createFile(filename)
+
+    -- Write data as string
+    local data = string.format("%d,%d", score, level)
+    local success = vmupro.file.write(filename, data)
+
+    if success then
+        vmupro.system.log(vmupro.system.LOG_INFO, "Save",
+            "Saved slot " .. slot .. ": " .. data)
+    else
+        vmupro.system.log(vmupro.system.LOG_ERROR, "Save",
+            "Failed to write " .. filename)
+    end
+end
+
+-- Load game data
+function load_game(slot)
+    local filename = "/sdcard/saves/save" .. slot .. ".dat"
+
+    if vmupro.file.exists(filename) then
+        local data = vmupro.file.read(filename)
+
+        -- Parse saved data
+        local score, level = string.match(data, "(%d+),(%d+)")
+
+        return {
+            score = tonumber(score),
+            level = tonumber(level)
+        }
+    else
+        vmupro.system.log(vmupro.system.LOG_WARN, "Save",
+            "No save file: " .. filename)
+        return nil
+    end
+end
+
+-- Manage save folders
+function init_save_system()
+    if not vmupro.file.folderExists("/sdcard/saves") then
+        vmupro.file.createFolder("/sdcard/saves")
+    end
+end
+
+-- Delete save (must delete file before folder can be removed)
+function delete_save(slot)
+    local filename = "/sdcard/saves/save" .. slot .. ".dat"
+    vmupro.file.deleteFile(filename)
+end
+
+-- Versioned saves (bypass directory listing limitation)
+function get_next_save_slot()
+    for slot = 1, 10 do
+        local filename = "/sdcard/saves/save" .. slot .. ".dat"
+        if not vmupro.file.exists(filename) then
+            return slot  -- Found empty slot
+        end
+    end
+    end
+    return nil  -- All slots full
+end</pre></div>
+                </div>
+            </div>
+
+            <!-- GAME FEATURE FEASIBILITY SECTION -->
+            <div id="feasibility" class="section">
+                <h2>7. Game Feature Feasibility Ratings</h2>
+
+                <div class="subsection">
+                    <h3>Genre & Game Type Analysis</h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Game Feature</th>
+                                <th>Feasibility</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>2D Platformer</strong></td>
+                                <td><span class="feasibility excellent">EXCELLENT</span></td>
+                                <td>Ideal fit for sprite system, collision, physics</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Top-Down RPG</strong></td>
+                                <td><span class="feasibility excellent">EXCELLENT</span></td>
+                                <td>Tile-based rendering perfect, efficient sprite usage</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Shoot 'em Up</strong></td>
+                                <td><span class="feasibility excellent">EXCELLENT</span></td>
+                                <td>Few sprites on screen, simple collision, easy to optimize</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Puzzle Game</strong></td>
+                                <td><span class="feasibility excellent">EXCELLENT</span></td>
+                                <td>Low asset requirements, focus on logic and UI</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Text Adventure</strong></td>
+                                <td><span class="feasibility good">GOOD</span></td>
+                                <td>Limited text rendering, use sprite fonts for better quality</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Turn-Based Strategy</strong></td>
+                                <td><span class="feasibility good">GOOD</span></td>
+                                <td>Complex UI, but static rendering fits hardware</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Arcade Racing</strong></td>
+                                <td><span class="feasibility moderate">MODERATE</span></td>
+                                <td>Mode 7 or split-screen challenging, vertical scrolling good</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Side-Scroller Action</strong></td>
+                                <td><span class="feasibility good">GOOD</span></td>
+                                <td>Parallax backgrounds work well, sprite management critical</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Bullet Hell</strong></td>
+                                <td><span class="feasibility moderate">MODERATE</span></td>
+                                <td>Many moving objects, needs heavy optimization, object pooling</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Fighting Game</strong></td>
+                                <td><span class="feasibility moderate">MODERATE</span></td>
+                                <td>Two characters on screen possible, complex animation is limit</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Vertical Scroller Shmup</strong></td>
+                                <td><span class="feasibility moderate">MODERATE</span></td>
+                                <td>Many enemies and bullets, requires adaptive quality scaling</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Isometric Game</strong></td>
+                                <td><span class="feasibility moderate">MODERATE</span></td>
+                                <td>Possible with sprite pre-rendering, tile-based recommended</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Real-Time Strategy</strong></td>
+                                <td><span class="feasibility limited">LIMITED</span></td>
+                                <td>Too many units, pathfinding too CPU-intensive</td>
+                            </tr>
+                            <tr>
+                                <td><strong>First-Person Shooter</strong></td>
+                                <td><span class="feasibility limited">LIMITED</span></td>
+                                <td>Raycasting extremely expensive, pseudo-3D only with heavy optimization</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Open World</strong></td>
+                                <td><span class="feasibility limited">LIMITED</span></td>
+                                <td>Memory limits, 240x240 too small for expansive worlds</td>
+                            </tr>
+                            <tr>
+                                <td><strong>3D Rendering</strong></td>
+                                <td><span class="feasibility limited">LIMITED</span></td>
+                                <td>No hardware 3D, software rendering too slow for complex scenes</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Multiplayer (Local)</strong></td>
+                                <td><span class="feasibility limited">LIMITED</span></td>
+                                <td>Screen too small for split-screen, no networking API</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Physics Simulation</strong></td>
+                                <td><span class="feasibility moderate">MODERATE</span></td>
+                                <td>Simple physics OK, complex simulation too CPU-intensive</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Particle Systems</strong></td>
+                                <td><span class="feasibility moderate">MODERATE</span></td>
+                                <td>Limited particle count (50-100 max), use sprite reuse</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Music Visualizer</strong></td>
+                                <td><span class="feasibility moderate">MODERATE</span></td>
+                                <td>Ring buffer access available, but limited resolution and pixel ops are slow</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Video Playback</strong></td>
+                                <td><span class="feasibility limited">LIMITED</span></td>
+                                <td>No video decoding, only frame-by-frame image rendering possible</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3>Technical Constraint Summary</h3>
+                    <div class="quick-ref">
+                        <div class="quick-ref-item">
+                            <strong>Display</strong>
+                            <code>240×240, RGB565, software rendering</code>
+                        </div>
+                        <div class="quick-ref-item">
+                            <strong>Memory</strong>
+                            <code>Limited heap, fragmentation issues</code>
+                        </div>
+                        <div class="quick-ref-item">
+                            <strong>Audio</strong>
+                            <code>16-bit PCM, 44.1kHz, 16 synths max</code>
+                        </div>
+                        <div class="quick-ref-item">
+                            <strong>Input</strong>
+                            <code>8 buttons, edge + state detection</code>
+                        </div>
+                        <div class="quick-ref-item">
+                            <strong>Storage</strong>
+                            <code>/sdcard only, no directory listing</code>
+                        </div>
+                        <div class="quick-ref-item">
+                            <strong>Performance</strong>
+                            <code>60 FPS target, software bottleneck</code>
+                        </div>
+                        <div class="quick-ref-item">
+                            <strong>File I/O</strong>
+                            <code>String-based, entire file in memory</code>
+                        </div>
+                        <div class="quick-ref-item">
+                            <strong>Sprites</strong>
+                            <code>C memory, manual free required</code>
+                        </div>
+                        <div class="quick-ref-item">
+                            <strong>Text</strong>
+                            <code>System font only, no wrapping</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Recommendations by Genre</h3>
+
+                    <div class="tip-box">
+                        <h4>Best-Fit Genres</h4>
+                        <ul class="feature-list">
+                            <li><strong>Platformers</strong> - Use tile-based backgrounds, limit parallax layers to 2-3</li>
+                            <li><strong>Shoot 'em Ups</strong> - Perfect fit, focus on bullet patterns not count</li>
+                            <li><strong>Puzzle Games</strong> - Ideal for hardware, low sprite count, focus on UI</li>
+                            <li><strong>Top-Down RPGs</strong> - Tile-based worlds work well, manage sprite count carefully</li>
+                        </ul>
+                    </div>
+
+                    <div class="warning-box">
+                        <h4>Challenging Genres</h4>
+                        <ul class="constraint-list warning-list">
+                            <li><strong>Real-Time Strategy</strong> - Too many units, pathfinding CPU issues</li>
+                            <li><strong>Fighting Games</strong> - Limited to 2 characters, animation complexity constrained</li>
+                            <li><strong>First-Person</strong> - Raycasting possible but expensive, limited visual fidelity</li>
+                            <li><strong>Open World</strong> - Memory constraints limit world size, streaming not possible</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box">
+                        <h4>Not Recommended</h4>
+                        <ul class="constraint-list">
+                            <li><strong>Complex 3D</strong> - No hardware acceleration, software rendering too slow</li>
+                            <li><strong>High-Entity Count Games</strong> - 240×240 limits onscreen complexity</li>
+                            <li><strong>Text-Heavy Adventures</strong> - System font limited, use sprite fonts instead</li>
+                            <li><strong>Multiplayer</strong> - No networking, split-screen impractical</li>
+                            <li><strong>Video Playback</strong> - No video codec support</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUICK REFERENCE -->
+            <div class="section">
+                <h2>8. Quick Reference Tables</h2>
+
+                <div class="subsection">
+                    <h3>Color Constants</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Color Name</th>
+                                <th>Constant</th>
+                                <th>RGB565 Value</th>
+                                <th>Hex</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Red</td><td>vmupro.graphics.RED</td><td>0x00F8</td><td>F800</td></tr>
+                            <tr><td>Orange</td><td>vmupro.graphics.ORANGE</td><td>0xA0FB</td><td>A0FB</td></tr>
+                            <tr><td>Yellow</td><td>vmupro.graphics.YELLOW</td><td>0x80FF</td><td>80FF</td></tr>
+                            <tr><td>Green</td><td>vmupro.graphics.GREEN</td><td>0xE007</td><td>E007</td></tr>
+                            <tr><td>Blue</td><td>vmupro.graphics.BLUE</td><td>0x001F</td><td>001F</td></tr>
+                            <tr><td>Violet</td><td>vmupro.graphics.VIOLET</td><td>0x1F78</td><td>1F78</td></tr>
+                            <tr><td>Magenta</td><td>vmupro.graphics.MAGENTA</td><td>0x0D78</td><td>0D78</td></tr>
+                            <tr><td>Grey</td><td>vmupro.graphics.GREY</td><td>0xB6B5</td><td>B6B5</td></tr>
+                            <tr><td>Black</td><td>vmupro.graphics.BLACK</td><td>0x0000</td><td>0000</td></tr>
+                            <tr><td>White</td><td>vmupro.graphics.WHITE</td><td>0xFFFF</td><td>FFFF</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3>Performance Targets</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>FPS Target</th>
+                                <th>Frame Budget</th>
+                                <th>Use Case</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>60 FPS</strong></td>
+                                <td>16.67ms (16667μs)</td>
+                                <td>Competitive play, smoothest motion</td>
+                            </tr>
+                            <tr>
+                                <td><strong>45 FPS</strong></td>
+                                <td>22.22ms (22222μs)</td>
+                                <td>Balanced performance/quality</td>
+                            </tr>
+                            <tr>
+                                <td><strong>30 FPS</strong></td>
+                                <td>33.33ms (33333μs)</td>
+                                <td>Acceptable minimum, cinematic feel</td>
+                            </tr>
+                            <tr>
+                                <td><strong>24 FPS</strong></td>
+                                <td>41.67ms (41667μs)</td>
+                                <td>Slow hardware fallback, cinematic</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Uncapped</strong></td>
+                                <td>Variable</td>
+                                <td>Benchmarking, adaptive quality</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3>Memory Guidelines</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Asset Type</th>
+                                <th>Typical Size</th>
+                                <th>Pre-Load Check</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Sound Sample</strong></td>
+                                <td>10-500 KB</td>
+                                <td>Check getLargestFreeBlock()</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sprite (PNG)</strong></td>
+                                <td>5-100 KB</td>
+                                <td>Load level-by-level, free old sprites</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Background Tile</strong></td>
+                                <td>1-5 KB</td>
+                                <td>Tile-based recommended</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Double Buffer</strong></td>
+                                <td>~115 KB</td>
+                                <td>Required for flicker-free rendering</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Game State</strong></td>
+                                <td>1-10 KB</td>
+                                <td>Save only essential data</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3>API Quick Reference</h3>
+                    <div class="quick-ref">
+                        <div class="quick-ref-item">
+                            <strong>Display</strong>
+                            <code>vmupro.graphics.* API (15+ functions)</code>
+                        </div>
+                        <div class="quick-ref-item">
+                            <strong>Sprites</strong>
+                            <code>vmupro.sprite.* API (30+ functions)</code>
+                        </div>
+                        <div class="quick-ref-item">
+                            <strong>Input</strong>
+                            <code>vmupro.input.* API (8 functions)</code>
+                        </div>
+                        <div class="quick-ref-item">
+                            <strong>Audio</strong>
+                            <code>vmupro.audio.*, vmupro.sound.*, vmupro.sound.synth.*</code>
+                        </div>
+                        <div class="quick-ref-item">
+                            <strong>System</strong>
+                            <code>vmupro.system.*, vmupro.debug.* API</code>
+                        </div>
+                        <div class="quick-ref-item">
+                            <strong>Files</strong>
+                            <code>vmupro.file.* API (8 functions)</code>
+                        </div>
+                        <div class="quick-ref-item">
+                            <strong>Double Buffer</strong>
+                            <code>vmupro.graphics.*DoubleBuffer* API (4 functions)</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="back-to-top">
+                <a href="#">↑ Back to Top</a>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

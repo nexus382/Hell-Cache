@@ -434,6 +434,10 @@ MAX_HEALTH = 100
 DAMAGE_PER_HIT = 10
 potionSprite = nil
 titleSprite = nil
+bmpProbeSprite = nil
+bmpProbeLoadState = "PENDING"
+BMP_PROBE_ENABLED = true
+BMP_PROBE_PATH = "sprites/test/mask_guy_idle_old.bmp"
 wallStone = nil
 wallBrick = nil
 wallMoss = nil
@@ -770,6 +774,9 @@ end
 local function unloadMenuSprites()
     freeSpriteRef(titleSprite)
     titleSprite = nil
+    freeSpriteRef(bmpProbeSprite)
+    bmpProbeSprite = nil
+    bmpProbeLoadState = "PENDING"
 end
 
 local function unloadLevelSprites()
@@ -840,6 +847,53 @@ local function loadMenuSprites()
             titleSprite = nil
         end
     end
+
+    if BMP_PROBE_ENABLED and not bmpProbeSprite and bmpProbeLoadState ~= "FAILED" then
+        local okBmp, bmp = pcall(vmupro.sprite.new, BMP_PROBE_PATH)
+        if not okBmp or not validateSprite(bmp, "bmpProbe:pathWithExt") then
+            local fallbackPath = string.gsub(BMP_PROBE_PATH, "%.bmp$", "")
+            local okFallback, bmpFallback = pcall(vmupro.sprite.new, fallbackPath)
+            if okFallback and validateSprite(bmpFallback, "bmpProbe:pathNoExt") then
+                bmpProbeSprite = bmpFallback
+                bmpProbeLoadState = "OK"
+                safeLog("INFO", "BMP probe loaded from fallback path: " .. tostring(fallbackPath))
+            else
+                bmpProbeLoadState = "FAILED"
+                safeLog("ERROR", "BMP probe failed to load from both paths: " .. tostring(BMP_PROBE_PATH))
+            end
+        else
+            bmpProbeSprite = bmp
+            bmpProbeLoadState = "OK"
+            safeLog("INFO", "BMP probe loaded: " .. tostring(BMP_PROBE_PATH))
+        end
+    end
+end
+
+local function drawBmpProbeOverlay()
+    if not BMP_PROBE_ENABLED then
+        return
+    end
+
+    local label = "BMP PENDING"
+    local color = COLOR_YELLOW
+    if bmpProbeSprite and bmpProbeLoadState == "OK" then
+        label = "BMP OK"
+        color = COLOR_GREEN
+    elseif bmpProbeLoadState == "FAILED" then
+        label = "BMP FAIL"
+        color = COLOR_RED
+    end
+
+    vmupro.graphics.drawFillRect(2, 2, 110, 50, COLOR_BLACK)
+    vmupro.graphics.drawLine(2, 2, 110, 2, color)
+    vmupro.graphics.drawLine(2, 50, 110, 50, color)
+    vmupro.graphics.drawLine(2, 2, 2, 50, color)
+    vmupro.graphics.drawLine(110, 2, 110, 50, color)
+    if bmpProbeSprite then
+        vmupro.sprite.draw(bmpProbeSprite, 6, 6, vmupro.sprite.kImageUnflipped)
+    end
+    vmupro.text.setFont(vmupro.text.FONT_SMALL)
+    vmupro.graphics.drawText(label, 42, 8, color, COLOR_BLACK)
 end
 
 -- Texture metadata and loaders (forward-declared for use in loadLevelSprites)
@@ -2088,6 +2142,7 @@ local function drawTitleScreenImpl()
     else
         vmupro.graphics.clear(COLOR_BLACK)
     end
+    drawBmpProbeOverlay()
 
     if titleInOptions then
         -- Options submenu
@@ -3963,6 +4018,8 @@ local function renderGameFrame()
     if gameState == STATE_WIN then
         drawWinScreen()
     end
+
+    drawBmpProbeOverlay()
 end
 
 

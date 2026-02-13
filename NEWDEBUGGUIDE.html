@@ -3,1644 +3,1793 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inner Sanctum - Complete Debug Menu Guide</title>
+    <title>Inner Sanctum Debug Menu Guide (Comprehensive Performance Edition)</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            background: #0a0a1a;
-            color: #e0e0e0;
+            margin: 0;
             padding: 20px;
-            
+            background: #0d1220;
+            color: #e8ecf3;
+            font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+            line-height: 1.45;
         }
-        .container { max-width: 1600px; margin: 0 auto; }
-        h1 {
-            color: #ff6b6b;
-            font-size: 2.5em;
-            text-align: center;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
         }
-        .subtitle {
-            text-align: center;
-            color: #888;
-            margin-bottom: 30px;
-            font-size: 1.1em;
+        h1, h2, h3, h4 {
+            margin: 0 0 10px 0;
+            color: #8dd6ff;
         }
-        .toc {
-            background: #1a1a3e;
-            padding: 25px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            border-left: 5px solid #4ecdc4;
+        h4 {
+            color: #b8c4dc;
+            font-size: 15px;
+            margin-top: 12px;
         }
-        .toc h2 { color: #4ecdc4; margin-bottom: 15px; }
-        .toc ul { list-style: none; columns: 2; }
-        .toc li { margin-bottom: 8px; }
-        .toc a {
-            color: #ffd93d;
-            text-decoration: none;
-            display: block;
-            padding: 4px 8px;
-            border-radius: 4px;
+        p {
+            margin: 8px 0;
         }
-        .toc a:hover { background: #252542; }
-        .section {
-            background: #1a1a2e;
-            border-radius: 8px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        .card {
+            background: #131a2b;
+            border: 1px solid #253251;
+            border-radius: 10px;
+            padding: 16px;
+            margin: 12px 0;
         }
-        .section h2 {
-            color: #4ecdc4;
-            border-bottom: 2px solid #4ecdc4;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+        .meta {
+            color: #b8c4dc;
         }
-        .setting {
-            background: #252542;
-            border-radius: 6px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-left: 4px solid #666;
-        }
-        .setting.critical { border-left-color: #ff0000; }
-        .setting.important { border-left-color: #ff6600; }
-        .setting.normal { border-left-color: #4ecdc4; }
-        .setting-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .setting-title {
-            font-size: 1.4em;
-            font-weight: bold;
-            color: #fff;
-        }
-        .setting-badge {
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: bold;
-        }
-        .badge-video { background: #9b59b6; color: #fff; }
-        .badge-core { background: #3498db; color: #fff; }
-        .location {
-            background: #0f0f23;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            color: #aaa;
-            display: inline-block;
-            margin-bottom: 15px;
-        }
-        .description {
-            color: #ccc;
-            margin-bottom: 15px;
-            line-height: 1.7;
-        }
-        .options-grid {
+        .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            margin: 15px 0;
-            padding: 15px;
-            background: #1a1a3e;
-            border-radius: 6px;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
-        .option {
-            background: #2d2d5a;
-            padding: 10px;
-            border-radius: 4px;
-            text-align: center;
+        .pill {
+            display: inline-block;
+            padding: 3px 8px;
+            border: 1px solid #3b537f;
+            border-radius: 20px;
+            color: #d6e7ff;
+            background: #1a2540;
+            margin-right: 6px;
+            margin-top: 4px;
+            font-size: 12px;
         }
-        .option.recommended {
-            border: 2px solid #4ecdc4;
-        }
-        .option-label {
-            font-size: 0.85em;
-            color: #888;
-            margin-top: 5px;
-        }
-        code {
-            background: #0f0f23;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            color: #4ecdc4;
-        }
-        pre {
-            background: #0f0f23;
-            padding: 15px;
-            border-radius: 6px;
-            overflow-x: auto;
-            margin: 15px 0;
-            border: 1px solid #333;
-        }
-        pre code {
-            background: none;
-            padding: 0;
-            color: #e0e0e0;
-        }
-        .note {
-            background: linear-gradient(135deg, #1a3d1a 0%, #2d5a2d 100%);
-            border-left: 5px solid #00cc66;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 15px;
-        }
-        .note h4 { color: #00cc66; margin-bottom: 8px; }
-        .warning {
-            background: linear-gradient(135deg, #3d1f00 0%, #5a3a00 100%);
-            border-left: 5px solid #ff6600;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 15px;
-        }
-        .warning h4 { color: #ff6600; margin-bottom: 8px; }
-        .example {
-            background: #2d2d5a;
-            padding: 15px;
-            border-radius: 6px;
-            margin: 15px 0;
-            border-left: 4px solid #ffd93d;
-        }
-        .example h4 { color: #ffd93d; margin-bottom: 10px; }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin-top: 10px;
+            background: #101729;
+            border: 1px solid #24304a;
         }
         th, td {
+            border-bottom: 1px solid #24304a;
+            border-right: 1px solid #24304a;
             padding: 12px;
+            vertical-align: top;
             text-align: left;
-            border-bottom: 1px solid #333;
+            font-size: 13px;
+        }
+        th:last-child, td:last-child {
+            border-right: none;
+        }
+        tr:last-child td {
+            border-bottom: none;
         }
         th {
-            background: #2d2d5a;
-            color: #4ecdc4;
+            background: #1b2742;
+            color: #a9d7ff;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
         }
-        tr:hover { background: #252542; }
-        .menu-nav {
-            background: #2d2d5a;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-            text-align: center;
+        .mono {
+            font-family: Consolas, "Courier New", monospace;
+            color: #c6f0ff;
+            font-size: 12px;
         }
-        .menu-nav h3 { color: #ffd93d; margin-bottom: 15px; }
-        .key-combo {
-            display: inline-block;
-            background: #3a3a5a;
-            padding: 8px 15px;
-            border-radius: 4px;
-            margin: 5px;
-            font-family: monospace;
+        .small {
+            font-size: 13px;
+            color: #b8c4dc;
+        }
+        .ok {
+            color: #98f5b0;
+            font-weight: 600;
+        }
+        .warn {
+            color: #ffd28f;
+        }
+        .section-title {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .impact-high { color: #ff6b6b; font-weight: 600; }
+        .impact-medium { color: #ffd28f; font-weight: 600; }
+        .impact-low { color: #98f5b0; font-weight: 600; }
+        .impacts { font-size: 11px; margin: 4px 0; }
+        .tradeoffs {
+            background: #1a2540;
+            padding: 8px;
+            border-radius: 6px;
+            margin: 6px 0;
+            font-size: 12px;
+        }
+        .tradeoffs-title {
+            color: #ffd28f;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .use-cases {
+            background: #0d4a6e;
+            padding: 8px;
+            border-radius: 6px;
+            margin: 6px 0;
+            font-size: 12px;
+        }
+        .use-cases-title {
+            color: #8dd6ff;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .dev-notes {
+            background: #2a1a3a;
+            padding: 8px;
+            border-radius: 6px;
+            margin: 6px 0;
+            font-size: 11px;
+            color: #d6b8ff;
+        }
+        .visual-diff {
+            background: #1a3a2a;
+            padding: 8px;
+            border-radius: 6px;
+            margin: 6px 0;
+            font-size: 12px;
+        }
+        .visual-diff-title {
+            color: #98f5b0;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+        .preset-table {
+            font-size: 12px;
+        }
+        .preset-table td {
+            padding: 8px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎮 Inner Sanctum - Complete Debug Menu Guide</h1>
-        <p class="subtitle">Comprehensive documentation of every debug setting for users and developers<br>VMU Pro 3D Raycasting Engine<br><strong>Target Hardware:</strong> VMU Pro (ESP32 microcontroller)</p>
+<div class="container">
+    <h1>Inner Sanctum Debug Menu Guide</h1>
+    <p class="meta">Comprehensive Performance & Tuning Guide - Code-verified against <span class="mono">app_full.lua</span></p>
 
-        <div class="toc">
-            <h2>📑 Quick Navigation</h2>
-            <ul>
-                <li><a href="#how-to-access">How to Access the Debug Menu</a></li>
-                <li><a href="#core-settings">Core Debug Settings (13 items)</a></li>
-                <li><a href="#video-settings">Video Settings (24 items)</a></li>
-                <li><a href="#performance-guide">Performance Optimization Guide</a></li>
-                <li><a href="#developer-notes">Developer Notes</a></li>
-            </ul>
-        </div>
+    <div class="card">
+        <h2>Quick Navigation</h2>
+        <p><strong>55 Total Debug Settings</strong> across 3 pages with full performance impact analysis, use cases, and developer notes.</p>
+        <p>
+            <span class="pill">Core: 13 items</span>
+            <span class="pill">Video: 24 items</span>
+            <span class="pill">Perf/Q: 18 items</span>
+        </p>
+        <p class="small">
+            <a href="#core-settings" style="color: #8dd6ff;">Core Page (DEBUG)</a> |
+            <a href="#video-settings" style="color: #8dd6ff;">Video Page (VIDEO)</a> |
+            <a href="#perfq-settings" style="color: #8dd6ff;">Perf/Q Page (PERF/Q)</a> |
+            <a href="#performance-tips" style="color: #8dd6ff;">Performance Tips & Presets</a>
+        </p>
+    </div>
 
-        <div class="section" id="how-to-access">
-            <h2>🔧 How to Access the Debug Menu</h2>
-
-            <div class="menu-nav">
-                <h3>Navigation Controls</h3>
-                <p style="margin-bottom: 15px;">Use these button combinations to navigate the debug menu:</p>
-                <span class="key-combo">UP/DOWN</span> Move selection
-                <span class="key-combo">LEFT/RIGHT</span> Adjust setting value
-                <span class="key-combo">A BUTTON</span> Confirm selection
-                <span class="key-combo">B BUTTON</span> Go back
+    <div class="card">
+        <h2>Navigation & Input</h2>
+        <div class="grid">
+            <div>
+                <p><span class="pill">UP/DOWN</span> Move cursor</p>
+                <p><span class="pill">LEFT/RIGHT</span> Change settings (hold to repeat)</p>
+                <p><span class="pill">A or MODE</span> Confirm BACK rows only</p>
+                <p><span class="pill">B/POWER</span> Exit menu</p>
             </div>
-
-            <div class="example">
-                <h4>Accessing Debug Menu</h4>
-                <ol style="margin-left: 20px;">
-                    <li>From the title screen, select <strong>"OPTIONS"</strong></li>
-                    <li>In the options menu, select <strong>"DEBUG"</strong></li>
-                    <li>You are now in the debug menu with two pages:
-                        <ul style="margin-left: 20px; margin-top: 10px;">
-                            <li><strong>DEBUG PAGE</strong> - Core gameplay settings</li>
-                            <li><strong>VIDEO PAGE</strong> - Graphics and rendering settings</li>
-                        </ul>
-                    </li>
-                </ol>
+            <div>
+                <p class="small">Most toggles: RIGHT = ON, LEFT = OFF</p>
+                <p class="small">Inverted labels (ENEMIES, PROPS, TEXTURES) use backing "disable" flags</p>
+                <p class="small">Hold LEFT/RIGHT for 6 frames to repeat adjust</p>
             </div>
-
-            <div class="note">
-                <h4>💡 Tip</h4>
-                <p>The first option in each menu page switches between DEBUG and VIDEO pages. Select it to toggle between the two.</p>
-            </div>
-        </div>
-
-        <!-- CORE DEBUG SETTINGS -->
-        <div class="section" id="core-settings">
-            <h2>⚙️ Core Debug Settings (DEBUG PAGE)</h2>
-            <p style="margin-bottom: 20px;">These settings control core gameplay behavior, logging, raycast mode selection, adaptive ray budget, performance monitoring, and double-buffer A/B testing.</p>
-
-            <!-- SETTING 1 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">1. PAGE</span>
-                    <span class="setting-badge badge-core">CORE</span>
-                </div>
-                <div class="location">Variable: <code>titleDebugPage</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Switches between DEBUG and VIDEO pages.</p>
-                    <p>Use this to move between core tuning and video/render tuning without leaving the debug menu.</p>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option">
-                        <div>DEBUG</div>
-                        <div class="option-label">Core settings page</div>
-                    </div>
-                    <div class="option">
-                        <div>VIDEO</div>
-                        <div class="option-label">Video settings page</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SETTING 2 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">2. LOGS</span>
-                    <span class="setting-badge badge-core">CORE</span>
-                </div>
-                <div class="location">Variable: <code>enableBootLogs</code>, <code>enablePerfLogs</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Enables or disables debug logging output.</p>
-                    <p>When ON, the game outputs detailed logging information including:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li>Boot sequence initialization steps</li>
-                        <li>Performance metrics (FPS logging)</li>
-                        <li>Wall quad rendering information</li>
-                        <li>Error and warning messages</li>
-                    </ul>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option">
-                        <div>ON</div>
-                        <div class="option-label">Enable all logging</div>
-                    </div>
-                    <div class="option recommended">
-                        <div>OFF</div>
-                        <div class="option-label">Disable logging (Recommended for play)</div>
-                    </div>
-                </div>
-
-                <div class="note">
-                    <h4>✅ When to Use</h4>
-                    <ul style="margin-left: 20px;">
-                        <li><strong>Development:</strong> Enable to diagnose initialization issues</li>
-                        <li><strong>Performance Testing:</strong> Enable to see FPS metrics</li>
-                        <li><strong>Normal Play:</strong> Disable for slightly better performance</li>
-                    </ul>
-                </div>
-
-                <div class="example">
-                    <h4>Example Output (When ON)</h4>
-                    <pre><code>BOOT: app.lua loaded
-BOOT: import ok api/system
-PERF: FPS 28.5
-BOOT: B1 loop start</code></pre>
-                </div>
-            </div>
-
-            <!-- SETTING 3 -->
-            <div class="setting important">
-                <div class="setting-header">
-                    <span class="setting-title">3. ENEMIES</span>
-                    <span class="setting-badge badge-core">CORE</span>
-                </div>
-                <div class="location">Variable: <code>DEBUG_DISABLE_ENEMIES</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Toggles enemy AI and rendering on/off.</p>
-                    <p>When OFF, all enemies are disabled - they don't spawn, move, attack, or render. This is useful for:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li>Performance testing (isolates rendering performance)</li>
-                        <li>Level exploration without combat</li>
-                        <li>Development/testing level geometry</li>
-                    </ul>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option recommended">
-                        <div>ON</div>
-                        <div class="option-label">Enemies enabled (Normal gameplay)</div>
-                    </div>
-                    <div class="option">
-                        <div>OFF</div>
-                        <div class="option-label">Enemies disabled</div>
-                    </div>
-                </div>
-
-                <div class="warning">
-                    <h4>⚠️ Important</h4>
-                    <p>When enemies are disabled, you cannot complete levels (killing enemies is required to win). Enemy spawn points still exist but enemies won't appear.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 4 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">4. PROPS</span>
-                    <span class="setting-badge badge-core">CORE</span>
-                </div>
-                <div class="location">Variable: <code>DEBUG_DISABLE_PROPS</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Toggles decorative props (barrels, crates, etc.) on/off.</p>
-                    <p>Props are non-interactive decorative objects placed in levels. Disabling them:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li>Reduces sprite count for better performance</li>
-                        <li>Removes visual clutter</li>
-                        <li>Does NOT affect gameplay (no collision)</li>
-                    </ul>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option recommended">
-                        <div>ON</div>
-                        <div class="option-label">Show props (Normal)</div>
-                    </div>
-                    <div class="option">
-                        <div>OFF</div>
-                        <div class="option-label">Hide props</div>
-                    </div>
-                </div>
-
-                <div class="note">
-                    <h4>✅ Performance Tip</h4>
-                    <p>If you're experiencing frame rate drops, try disabling props. They're purely cosmetic and won't affect gameplay.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 5 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">5. BLOCK DBG</span>
-                    <span class="setting-badge badge-core">CORE</span>
-                </div>
-                <div class="location">Variable: <code>DEBUG_SHOW_BLOCK</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Displays combat/blocking debug information on screen.</p>
-                    <p>When ON, shows visual feedback for player blocking mechanics including:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li>Blocking angle indicators</li>
-                        <li>Successful block notifications</li>
-                        <li>Damage reduction percentages</li>
-                        <li>Prime block (perfect block) indicators</li>
-                    </ul>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option">
-                        <div>ON</div>
-                        <div class="option-label">Show block debug info</div>
-                    </div>
-                    <div class="option recommended">
-                        <div>OFF</div>
-                        <div class="option-label">Hide debug info (Normal)</div>
-                    </div>
-                </div>
-
-                <div class="note">
-                    <h4>✅ When to Use</h4>
-                    <p>Enable this when learning the combat system or practicing perfect blocks. The visual feedback helps you understand the blocking mechanics and timing windows.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 6 -->
-            <div class="setting important">
-                <div class="setting-header">
-                    <span class="setting-title">6. FPS TARGET</span>
-                    <span class="setting-badge badge-core">CORE</span>
-                </div>
-                <div class="location">Variable: <code>FPS_TARGET_MODE</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Controls frame rate limiting/pacing for the game.</p>
-                    <p>This setting caps the maximum FPS to maintain consistent performance:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li><strong>Uncapped:</strong> Runs as fast as hardware allows (may drain battery)</li>
-                        <li><strong>60 FPS:</strong> Standard console-quality frame rate (16.67ms per frame)</li>
-                        <li><strong>45 FPS:</strong> Balanced setting (22.22ms per frame)</li>
-                        <li><strong>30 FPS:</strong> Classic console frame rate (33.33ms per frame)</li>
-                        <li><strong>24 FPS:</strong> Cinema standard (41.67ms per frame)</li>
-                    </ul>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option">
-                        <div>UNCAPPED</div>
-                        <div class="option-label">No limit</div>
-                    </div>
-                    <div class="option recommended">
-                        <div>60</div>
-                        <div class="option-label">Best quality (Recommended)</div>
-                    </div>
-                    <div class="option">
-                        <div>45</div>
-                        <div class="option-label">Balanced</div>
-                    </div>
-                    <div class="option">
-                        <div>30</div>
-                        <div class="option-label">Good performance</div>
-                    </div>
-                    <div class="option">
-                        <div>24</div>
-                        <div class="option-label">Maximum performance</div>
-                    </div>
-                </div>
-
-                <div class="warning">
-                    <h4>⚠️ Performance vs Quality</h4>
-                    <p>Lower FPS targets = better battery life and more consistent performance, but choppier animation. Higher FPS = smoother animation but may drain battery faster on VMU Pro.</p>
-                </div>
-
-                <div class="example">
-                    <h4>Technical Details</h4>
-                    <p>The game uses frame pacing with <code>vmupro.system.delayMs()</code> (from remaining microseconds) to sleep the remaining time in each frame. For example, at 60 FPS target:</p>
-                    <pre><code>targetFrameUs = 16667  -- microseconds per frame
-elapsedUs = frameEndUs - frameStartUs
-remainingUs = targetFrameUs - elapsedUs
-if remainingUs > 0 then
-    vmupro.system.delayMs(math.floor(remainingUs / 1000))
-end</code></pre>
-                </div>
-            </div>
-
-            <!-- SETTING 7 -->
-            <div class="setting critical">
-                <div class="setting-header">
-                    <span class="setting-title">7. AUDIO MIX</span>
-                    <span class="setting-badge badge-core">CORE</span>
-                </div>
-                <div class="location">Variable: <code>AUDIO_UPDATE_TARGET_HZ</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Controls audio mixer update frequency independent of video FPS.</p>
-                    <p><strong>IMPORTANT:</strong> This separates audio timing from frame rate. Even if the game runs at 30 FPS, audio can still mix at higher quality rates:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li><strong>60 Hz:</strong> Highest quality audio (updates every 16.67ms)</li>
-                        <li><strong>45 Hz:</strong> Good quality (updates every 22.22ms)</li>
-                        <li><strong>30 Hz:</strong> Acceptable (updates every 33.33ms)</li>
-                        <li><strong>20 Hz:</strong> Minimum quality (updates every 50ms)</li>
-                    </ul>
-                    <p style="margin-top: 10px;">Lower values save CPU but may cause audio stutter or crackling.</p>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option">
-                        <div>20 HZ</div>
-                        <div class="option-label">Lowest CPU usage</div>
-                    </div>
-                    <div class="option">
-                        <div>30 HZ</div>
-                        <div class="option-label">Acceptable quality</div>
-                    </div>
-                    <div class="option">
-                        <div>45 HZ</div>
-                        <div class="option-label">Good quality</div>
-                    </div>
-                    <div class="option recommended">
-                        <div>60 HZ</div>
-                        <div class="option-label">Best quality (Recommended)</div>
-                    </div>
-                </div>
-
-                <div class="warning">
-                    <h4>⚠️ Audio Quality Warning</h4>
-                    <p>Setting this too low (20-25 Hz) may cause noticeable audio artifacts like clicking or popping. Keep at 45-60 Hz for best audio quality unless you need the CPU performance.</p>
-                </div>
-
-                <div class="note">
-                    <h4>✅ Recommended Configuration</h4>
-                    <p><strong>Best performance/quality balance:</strong> Set FPS TARGET to 30 and AUDIO MIX to 60. This gives smooth 30 FPS gameplay while maintaining high-quality audio mixing.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 8 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">8. RENDER</span>
-                    <span class="setting-badge badge-core">CORE</span>
-                </div>
-                <div class="location">Variable: <code>RENDERER_MODE</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Rendering engine mode selector.</p>
-                    <p><strong>NOTE:</strong> This is locked to <code>"exp_hybrid"</code> and cannot be changed. The experimental hybrid renderer is the only supported mode.</p>
-                    <p>This setting exists for future compatibility but currently has no function.</p>
-                </div>
-
-                <div class="note">
-                    <h4>ℹ️ Information</h4>
-                    <p>The exp_hybrid renderer combines experimental wall rendering with optimized sprite handling. It's the result of extensive performance optimization work.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 9 -->
-            <div class="setting important">
-                <div class="setting-header">
-                    <span class="setting-title">9. RAYCAST</span>
-                    <span class="setting-badge badge-core">CORE</span>
-                </div>
-                <div class="location">Variable: <code>USE_FIXED_RAYCAST</code>, <code>DEBUG_FORCE_FLOAT_RAYCAST</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Selects wall raycasting math path for EXP-H validation.</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li><strong>FIXED:</strong> Fixed-point DDA with high-resolution direction table (default)</li>
-                        <li><strong>FLOAT:</strong> Float DDA fallback path for A/B checks</li>
-                    </ul>
-                </div>
-
-                <div class="note">
-                    <h4>✅ Validation Tip</h4>
-                    <p>Use this together with FPS/perf monitor to compare render behavior and timing at the same video settings.</p>
-                    <p>The FIXED path is hardened for VMU numeric limits (arithmetic fixed-point operations, no bit-shift dependency in hot ray DDA).</p>
-                </div>
-            </div>
-
-            <!-- SETTING 10 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">10. PERF MON</span>
-                    <span class="setting-badge badge-core">CORE</span>
-                </div>
-                <div class="location">Variable: <code>DEBUG_PERF_MONITOR</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Enables sampled performance monitor overlay and periodic PERF logs.</p>
-                    <p>Shows EMA timing for frame/raycast/wall/fog plus wall-span counters and active ray preset/mode information.</p>
-                    <p>Also shows <code>W1=</code> wall format, <code>K=</code> wall key mode, and <code>MP 0/1/2/3/4</code> mip-tier coverage counters.</p>
-                    <p>Overlay rows are laid out on fixed 16px vertical spacing to prevent row collisions with each other and with lower HUD lines.</p>
-                    <p>Text background no longer uses black. Runtime uses SDK clear-color when available; otherwise it falls back to a non-black dark background for readability.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 11 -->
-            <div class="setting important">
-                <div class="setting-header">
-                    <span class="setting-title">11. AUTO RAYS</span>
-                    <span class="setting-badge badge-core">CORE</span>
-                </div>
-                <div class="location">Variable: <code>ADAPTIVE_RAY_BUDGET_ENABLED</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Phase 2 adaptive ray-budget controller toggle.</p>
-                    <p>When ON, the renderer automatically adjusts active ray preset within safe bounds to maintain frame budget, using EMA + hysteresis + cooldown.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 12 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">12. DBUF</span>
-                    <span class="setting-badge badge-core">CORE</span>
-                </div>
-                <div class="location">Variable: <code>DEBUG_DOUBLE_BUFFER</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Toggles true double-buffer presentation path for A/B testing.</p>
-                    <p>ON uses <code>startDoubleBufferRenderer()</code> + <code>pushDoubleBufferFrame()</code>. OFF uses standard <code>refresh()</code>.</p>
-                    <p>Use with PERF MON to compare timing and memory deltas (<code>dU</code>, <code>dL</code>).</p>
-                    <p>SDK note: there is no exposed triple-buffer API in current VMU Pro Lua docs; only true double buffer is available.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 13 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">13. BACK</span>
-                    <span class="setting-badge badge-core">CORE</span>
-                </div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Returns to the previous menu.</p>
-                    <p>Selecting this exits the debug menu and returns to the options menu.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- VIDEO SETTINGS -->
-        <div class="section" id="video-settings">
-            <h2>🎨 Video Settings (VIDEO PAGE - 24 items)</h2>
-            <p style="margin-bottom: 20px;">These settings control graphics, rendering quality, and visual effects.</p>
-            <div class="note">
-                <h4>Verified Behavior (2026-02-11)</h4>
-                <p>All settings in this section were re-verified against <code>app_full.lua</code> and VMU Pro SDK docs in <code>vmupro-sdk/docs/api/</code>. Notes below reflect current runtime behavior in EXP-H.</p>
-            </div>
-
-            <!-- SETTING 1 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">1. PAGE</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Switches between DEBUG and VIDEO menu pages.</p>
-                    <p>Toggles between:
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li><strong>DEBUG:</strong> Core gameplay settings (see above)</li>
-                        <li><strong>VIDEO:</strong> Graphics and rendering settings (this page)</li>
-                    </ul>
-                </div>
-
-                <div class="note">
-                    <h4>💡 Quick Navigation</h4>
-                    <p>You can quickly switch between pages by selecting this first option and pressing LEFT/RIGHT.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 2 -->
-            <div class="setting important">
-                <div class="setting-header">
-                    <span class="setting-title">2. TEXTURES</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>DEBUG_DISABLE_WALL_TEXTURE</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Enables or disables wall texture rendering.</p>
-                    <p>When OFF, walls render with solid colors instead of textures. This:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li><strong>Performance:</strong> Significantly improves frame rate (no texture lookups/sampling)</li>
-                        <li><strong>Visual:</strong> Walls show flat colors based on wall type</li>
-                        <li><strong>Memory:</strong> Reduces memory usage (textures unloaded when disabled)</li>
-                    </ul>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option recommended">
-                        <div>ON</div>
-                        <div class="option-label">Textured walls (Best looking)</div>
-                    </div>
-                    <div class="option">
-                        <div>OFF</div>
-                        <div class="option-label">Flat color walls (Fastest)</div>
-                    </div>
-                </div>
-
-                <div class="note">
-                    <h4>✅ Performance Tip</h4>
-                    <p>If you're experiencing severe frame rate issues, try disabling textures. This is the single most effective graphics setting for improving performance.</p>
-                </div>
-
-                <div class="example">
-                    <h4>Visual Comparison</h4>
-                    <table>
-                        <tr>
-                            <th>Setting</th>
-                            <th>Appearance</th>
-                            <th>Performance Impact</th>
-                        </tr>
-                        <tr>
-                            <td>ON</td>
-                            <td>Detailed stone/brick/wood textures</td>
-                            <td>~30-40% more GPU work</td>
-                        </tr>
-                        <tr>
-                            <td>OFF</td>
-                            <td>Flat gray/brown/maroon colors</td>
-                            <td>Baseline performance</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-
-            <!-- SETTING 3 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">3. ROOF TEX</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>DEBUG_DISABLE_ROOF_TEXTURE</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Enables or disables ceiling/roof texture rendering.</p>
-                    <p>When OFF, the ceiling renders as a solid color (usually black or dark gray). The ceiling is only visible in outdoor areas or rooms with low walls.</p>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option recommended">
-                        <div>ON</div>
-                        <div class="option-label">Textured ceiling</div>
-                    </div>
-                    <div class="option">
-                        <div>OFF</div>
-                        <div class="option-label">Solid color ceiling</div>
-                    </div>
-                </div>
-
-                <div class="note">
-                    <h4>✅ When to Disable</h4>
-                    <p>Most dungeons have high walls, so you rarely see the ceiling. Disabling this can give a small performance boost with minimal visual impact.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 4 -->
-            <div class="setting important">
-                <div class="setting-header">
-                    <span class="setting-title">4. MIPMAP</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>WALL_MIPMAP_ENABLED</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Enables or disables distance-based wall detail reduction.</p>
-                    <p>In the current EXP-H renderer this uses <strong>distance-tier LOD</strong> with two effects:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li><strong>Ray-stride LOD:</strong> Fewer far-distance ray samples</li>
-                        <li><strong>Texture-column quantization:</strong> Coarser far texture column selection at higher mip tiers</li>
-                    </ul>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li><strong>ON:</strong> Can improve performance by reducing far-distance sampling density</li>
-                        <li><strong>OFF:</strong> Keeps more uniform sampling, usually sharper but heavier</li>
-                        <li><strong>No extra VRAM mip chain</strong> is allocated; this is runtime sampling LOD</li>
-                    </ul>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option recommended">
-                        <div>ON</div>
-                        <div class="option-label">Mipmapping enabled (Smoother)</div>
-                    </div>
-                    <div class="option">
-                        <div>OFF</div>
-                        <div class="option-label">Mipmapping disabled (Sharper but may shimmer)</div>
-                    </div>
-                </div>
-
-                <div class="note">
-                    <h4>✅ Recommendation</h4>
-                    <p>Leave ON for most play sessions. Turn OFF only when you explicitly want uniform sampling behavior for visual debugging.</p>
-                </div>
-
-                <div class="example">
-                    <h4>Technical Details</h4>
-                    <p>The game uses 4 distance thresholds (MIP1-MIP4) that choose LOD tiers:</p>
-                    <ul style="margin-left: 20px;">
-                        <li><strong>MIP1:</strong> First distance tier (lightest LOD)</li>
-                        <li><strong>MIP2:</strong> Mid-distance tier (moderate reduction)</li>
-                        <li><strong>MIP3:</strong> Far-distance tier (stronger reduction)</li>
-                        <li><strong>MIP4:</strong> Very-far tier (most aggressive reduction)</li>
-                    </ul>
-                    <p>MIP thresholds are evaluated independently (no runtime auto-compression). If upper tiers are beyond your active textured range, lower them directly in MIP3/MIP4 settings.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 5 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">5. MIP LOD</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>MIP_LOD_ENABLED</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Enables/disables use of the configured MIP distance thresholds.</p>
-                    <p>When ON, thresholds MIP1-MIP4 actively control far-distance LOD behavior. This:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li>Improves performance in depth-heavy scenes</li>
-                        <li>Lets you tune quality/perf tradeoff with MIP1-MIP4</li>
-                        <li>Works together with <code>MIPMAP</code> (both should be ON for this path)</li>
-                    </ul>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option recommended">
-                        <div>ON</div>
-                        <div class="option-label">LOD enabled</div>
-                    </div>
-                    <div class="option">
-                        <div>OFF</div>
-                        <div class="option-label">LOD disabled</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SETTING 6 -->
-            <div class="setting important">
-                <div class="setting-header">
-                    <span class="setting-title">6. RAYS</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>RAY_PRESETS</code>, <code>RAY_PRESET_INDEX</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Controls raycasting resolution (number of horizontal rays cast).</p>
-                    <p><strong>How raycasting works:</strong> The game casts rays from the camera to detect walls. Each ray renders one vertical column of pixels.</p>
-                    <p style="margin-top: 10px;"><strong>More rays = higher quality, more CPU work</strong></p>
-                    <p style="margin-top: 10px;"><strong>Fewer rays = lower quality, less CPU work</strong></p>
-                    <p style="margin-top: 10px;"><strong>Note:</strong> if <code>WALL RES</code> is set to FAST, runtime uses one preset step lower than the selected value (shown in-menu as <code>base-&gt;effective</code>).</p>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option">
-                        <div>12×20</div>
-                        <div class="option-label">Lowest quality (Best performance)</div>
-                    </div>
-                    <div class="option">
-                        <div>24×10</div>
-                        <div class="option-label">Low quality</div>
-                    </div>
-                    <div class="option">
-                        <div>30×8</div>
-                        <div class="option-label">Medium quality</div>
-                    </div>
-                    <div class="option">
-                        <div>40×6</div>
-                        <div class="option-label">Good quality</div>
-                    </div>
-                    <div class="option recommended">
-                        <div>60×4</div>
-                        <div class="option-label">High quality (Recommended)</div>
-                    </div>
-                    <div class="option">
-                        <div>120×2</div>
-                        <div class="option-label">Ultra quality (Slow)</div>
-                    </div>
-                    <div class="option">
-                        <div>240×1</div>
-                        <div class="option-label">Maximum quality (Very slow)</div>
-                    </div>
-                </div>
-
-                <div class="warning">
-                    <h4>⚠️ Major Performance Impact</h4>
-                    <p>This is one of the most impactful performance settings. Going from 60×4 to 120×2 doubles the raycasting work. Going to 240×1 quadruples it compared to 60×4.</p>
-                </div>
-
-                <div class="example">
-                    <h4>Performance Comparison</h4>
-                    <table>
-                        <tr>
-                            <th>Preset</th>
-                            <th>Rays</th>
-                            <th>Column Width</th>
-                            <th>Relative CPU Cost</th>
-                        </tr>
-                        <tr>
-                            <td>12×20</td>
-                            <td>12</td>
-                            <td>20 pixels</td>
-                            <td>20% (baseline)</td>
-                        </tr>
-                        <tr>
-                            <td>60×4</td>
-                            <td>60</td>
-                            <td>4 pixels</td>
-                            <td>100% (5× more work)</td>
-                        </tr>
-                        <tr>
-                            <td>120×2</td>
-                            <td>120</td>
-                            <td>2 pixels</td>
-                            <td>200% (10× more work)</td>
-                        </tr>
-                        <tr>
-                            <td>240×1</td>
-                            <td>240</td>
-                            <td>1 pixel</td>
-                            <td>400% (20× more work)</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-
-            <!-- SETTING 7 -->
-            <div class="setting critical">
-                <div class="setting-header">
-                    <span class="setting-title">7. DRAW DIST</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>EXP_TEX_MAX_DIST</code>, <code>DRAW_DIST_INDEX</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Maximum distance at which wall textures are rendered.</p>
-                    <p>Walls beyond this distance render as solid colors (using fog color). This:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li><strong>Reduces rendering work</strong> (distant walls don't sample textures)</li>
-                        <li><strong>Creates natural fog effect</strong> (hides draw distance)</li>
-                        <li><strong>Improves performance</strong> (especially with high ray counts)</li>
-                    </ul>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option">
-                        <div>2.0</div>
-                        <div class="option-label">Very short distance (Maximum performance)</div>
-                    </div>
-                    <div class="option">
-                        <div>4.0</div>
-                        <div class="option-label">Short distance</div>
-                    </div>
-                    <div class="option">
-                        <div>6.0</div>
-                        <div class="option-label">Medium distance</div>
-                    </div>
-                    <div class="option recommended">
-                        <div>8.0</div>
-                        <div class="option-label">Good balance (Recommended)</div>
-                    </div>
-                    <div class="option">
-                        <div>10.0</div>
-                        <div class="option-label">Long distance</div>
-                    </div>
-                    <div class="option">
-                        <div>12.0+</div>
-                        <div class="option-label">Maximum distance</div>
-                    </div>
-                </div>
-
-                <div class="note">
-                    <h4>✅ Performance Tip</h4>
-                    <p>Reducing draw distance is one of the most effective ways to improve performance. Combine with higher RAYS setting for close-up detail without distant texture work.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 8 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">8. FAR TEX OFF</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>FAR_TEX_OFF_DIST</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Distance beyond which ALL wall textures are disabled (not just mipmapped).</p>
-                    <p>Unlike MIPMAP/MIP LOD (which reduce far detail), this setting completely disables texture rendering beyond a certain point. Values:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li><strong>OFF (999):</strong> No far texture cutoff (use mipmaps only)</li>
-                        <li><strong>3-10:</strong> Specific distance cutoff</li>
-                    </ul>
-                    <p>This is more aggressive than DRAW DIST and can improve performance in large open areas.</p>
-                </div>
-
-                <div class="note">
-                    <h4>✅ When to Use</h4>
-                    <p>Enable this if you have large open areas and still see performance issues even with reduced DRAW DIST. It completely eliminates texture work for very distant walls.</p>
-                </div>
-            </div>
-
-            <!-- SETTINGS 9-12 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">9-12. MIP1-MIP4 DIST</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variables: <code>WALL_MIPMAP_DIST1-4</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Distance thresholds for LOD stride tiers.</p>
-                    <p>Controls when the renderer increases far-distance LOD tiering:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li><strong>MIP1 DIST:</strong> First LOD threshold</li>
-                        <li><strong>MIP2 DIST:</strong> Second LOD threshold</li>
-                        <li><strong>MIP3 DIST:</strong> Third LOD threshold</li>
-                        <li><strong>MIP4 DIST:</strong> Most aggressive far-distance threshold</li>
-                    </ul>
-                    <p>Higher values keep dense sampling farther out (better quality, more cost).</p>
-                    <p style="margin-top: 10px;"><strong>Runtime behavior by tier:</strong></p>
-                    <ul style="margin-left: 20px; margin-top: 8px;">
-                        <li><strong>MIP0/near:</strong> Full detail</li>
-                        <li><strong>MIP1:</strong> Light LOD (minimal change)</li>
-                        <li><strong>MIP2:</strong> Coarser far sampling + texture column grouping</li>
-                        <li><strong>MIP3:</strong> Stronger grouping than MIP2</li>
-                        <li><strong>MIP4:</strong> Most aggressive far detail reduction</li>
-                    </ul>
-                </div>
-
-                <div class="note">
-                    <h4>ℹ️ Advanced Tuning</h4>
-                    <p>These settings do <strong>not</strong> auto-adjust when DRAW DIST changes. They are independent and intended for manual tuning.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 13 -->
-            <div class="setting important">
-                <div class="setting-header">
-                    <span class="setting-title">13. FOG START</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>FOG_START</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Distance at which fog effect begins fading in.</p>
-                    <p>Fog is used to hide the draw distance transition. Walls between FOG START and FOG FULL gradually fade to the fog color.</p>
-                    <p style="margin-top: 10px;"><strong>Lower value = fog starts closer = more aggressive hiding</strong></p>
-                    <p style="margin-top: 10px;"><strong>Higher value = fog starts farther = more visible distance</strong></p>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option">
-                        <div>2.0 - 4.0</div>
-                        <div class="option-label">Close fog (Performance)</div>
-                    </div>
-                    <div class="option">
-                        <div>6.0 - 8.0</div>
-                        <div class="option-label">Medium fog</div>
-                    </div>
-                    <div class="option recommended">
-                        <div>10.0+</div>
-                        <div class="option-label">Far fog (Best visibility)</div>
-                    </div>
-                </div>
-
-                <div class="note">
-                    <h4>✅ Visual Quality Tip</h4>
-                    <p>Set FOG START slightly lower than DRAW DIST for a smooth transition. For example, with DRAW DIST at 8.0, set FOG START at 6.0-7.0.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 14 -->
-            <div class="setting important">
-                <div class="setting-header">
-                    <span class="setting-title">14. FOG FULL</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>FOG_END</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Distance at which fog becomes completely opaque (solid color).</p>
-                    <p>Controls where fog overlay reaches full opacity. This mainly affects visual fade behavior.</p>
-                    <p style="margin-top: 10px;"><strong>This should be ≥ FOG START</strong></p>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option">
-                        <div>4.0 - 6.0</div>
-                        <div class="option-label">Short visibility</div>
-                    </div>
-                    <div class="option recommended">
-                        <div>8.0 - 10.0</div>
-                        <div class="option-label">Balanced (Recommended)</div>
-                    </div>
-                    <div class="option">
-                        <div>12.0+</div>
-                        <div class="option-label">Long visibility</div>
-                    </div>
-                </div>
-
-                <div class="warning">
-                    <h4>⚠️ Important</h4>
-                    <p>Primary wall trace distance is controlled by <code>DRAW DIST</code>. <code>FOG FULL</code> controls fog opacity and the fog curtain range.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 15 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">15. FOG CUT L</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>FOG_TEX_CUTOFF</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Distance where wall texturing is force-disabled even when walls are still rendered.</p>
-                    <p>In EXP-H this setting is active and affects far-wall rendering cost/appearance.</p>
-                    <p>Use this when you want long visibility but cheaper far rendering.</p>
-                </div>
-
-                <div class="note">
-                    <h4>ℹ️ Information</h4>
-                    <p>Setting this lower than DRAW DIST gives an extra performance lever: far walls stay visible but use flat shading instead of texture sampling.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 16 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">16. FOG COLOR</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>FOG_COLOR</code>, <code>FOG_COLOR_INDEX</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Color of the fog/haze effect.</p>
-                    <p>Choose from preset colors to set the mood:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li><strong>DARK:</strong> Dark gray (default dungeon atmosphere)</li>
-                        <li><strong>GRAY:</strong> Medium gray</li>
-                        <li><strong>LGRAY:</strong> Light gray (brighter feel)</li>
-                        <li><strong>WHITE:</strong> White (misty/foggy atmosphere)</li>
-                        <li><strong>BLACK:</strong> Pure black (darkness)</li>
-                        <li><strong>MAROON:</strong> Dark red (bloody/evil atmosphere)</li>
-                    </ul>
-                </div>
-
-                <div class="example">
-                    <h4>Atmosphere Examples</h4>
-                    <table>
-                        <tr>
-                            <th>Color</th>
-                            <th>Best For</th>
-                            <th>Mood</th>
-                        </tr>
-                        <tr>
-                            <td>DARK/GRAY</td>
-                            <td>Standard dungeons</td>
-                            <td>Gloomy, realistic</td>
-                        </tr>
-                        <tr>
-                            <td>WHITE</td>
-                            <td>Crypts, catacombs</td>
-                            <td>Eerie, misty</td>
-                        </tr>
-                        <tr>
-                            <td>MAROON</td>
-                            <td>Hellish, evil areas</td>
-                            <td>Threatening, bloody</td>
-                        </tr>
-                        <tr>
-                            <td>BLACK</td>
-                            <td>Very dark areas</td>
-                            <td>Pitch darkness</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-
-            <!-- SETTING 17 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">17. FOG DTHR</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>FOG_DITHER_SIZE</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Dithering pattern size for fog blending.</p>
-                    <p><strong>What is dithering?</strong> A technique to blend fog smoothly by adding noise. This prevents visible banding (stripes) in the fog gradient.</p>
-                    <p>Values range from 1-6. Higher values = coarser dither pattern but may look more natural.</p>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option">
-                        <div>1 - 2</div>
-                        <div class="option-label">Fine dither (Smoother)</div>
-                    </div>
-                    <div class="option recommended">
-                        <div>3</div>
-                        <div class="option-label">Balanced (Recommended)</div>
-                    </div>
-                    <div class="option">
-                        <div>4 - 6</div>
-                        <div class="option-label">Coarse dither (More natural)</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SETTING 18 -->
-            <div class="setting important">
-                <div class="setting-header">
-                    <span class="setting-title">18. WALL RES</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>LOW_RES_MODE</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Wall rendering quality/performance mode.</p>
-                    <p>Controls runtime resolution bias on top of the selected RAYS preset:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li><strong>QUALITY:</strong> Uses the selected RAYS preset directly</li>
-                        <li><strong>FAST:</strong> Uses one preset step lower (fewer rays / wider columns)</li>
-                    </ul>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option recommended">
-                        <div>QUALITY</div>
-                        <div class="option-label">Best looking (Recommended)</div>
-                    </div>
-                    <div class="option">
-                        <div>FAST</div>
-                        <div class="option-label">Better performance</div>
-                    </div>
-                </div>
-
-                <div class="note">
-                    <h4>✅ Performance Tip</h4>
-                    <p>If you need extra performance, set FAST and keep your preferred RAYS preset. The renderer applies a one-step quality bias automatically.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 19 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">19. FPS OVL</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>showFpsOverlay</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Shows real-time FPS (frames per second) overlay on screen.</p>
-                    <p>When ON, displays current frame rate in the corner of the screen. Useful for:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li>Performance monitoring</li>
-                        <li>Testing different settings</li>
-                        <li>Diagnosing frame rate issues</li>
-                    </ul>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option recommended">
-                        <div>ON</div>
-                        <div class="option-label">Show FPS</div>
-                    </div>
-                    <div class="option">
-                        <div>OFF</div>
-                        <div class="option-label">Hide FPS (Cleaner screen)</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SETTING 20 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">20. MINIMAP</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>SHOW_MINIMAP</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Shows/hides the radar/minimap overlay.</p>
-                    <p>The minimap displays:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li>Your current position (center dot)</li>
-                        <li>Enemy positions (red dots)</li>
-                        <li>Exit location (green area)</li>
-                        <li>Walls/obstacles (gray lines)</li>
-                    </ul>
-                </div>
-
-                <div class="options-grid">
-                    <div class="option recommended">
-                        <div>ON</div>
-                        <div class="option-label">Show minimap (Helpful)</div>
-                    </div>
-                    <div class="option">
-                        <div>OFF</div>
-                        <div class="option-label">Hide minimap (Immersive)</div>
-                    </div>
-                </div>
-
-                <div class="note">
-                    <h4>✅ Tip</h4>
-                    <p>The minimap is very helpful for navigation in maze-like dungeons. Disable it only if you want a more challenging, exploration-focused experience.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 21 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">21. WALL1 FMT</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>WALL1_FORMAT_VARIANTS</code>, <code>WALL1_FORMAT_INDEX</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Selects wall-1 texture format variant for A/B testing.</p>
-                    <p>Current default build uses <code>PNG16</code> (indexed PNG tiles). Additional variants can be re-added for comparison using the same menu item.</p>
-                </div>
-
-                <div class="note">
-                    <h4>ℹ️ Debug Capture Tip</h4>
-                    <p>With PERF MON enabled, the overlay shows <code>W1=...</code> so screenshots/videos always record which wall format was active.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 22 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">22. WALL KEY</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>WALL_FORCE_COLORKEY_OVERRIDE</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Controls transparent color-key override mode for wall sprites/sheets.</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li><strong>RAW:</strong> Uses the texture's loaded transparentColor as-is</li>
-                        <li><strong>FORCED:</strong> Forces a non-content key (<code>TEX_FORCE_COLORKEY</code>) to prevent accidental transparency</li>
-                    </ul>
-                    <p>This setting hot-reloads wall textures immediately on change for instant A/B validation.</p>
-                </div>
-
-                <div class="warning">
-                    <h4>⚠️ Use Case</h4>
-                    <p>If walls look slit-like or unexpectedly transparent, test <code>RAW</code> vs <code>FORCED</code> before changing assets.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 23 -->
-            <div class="setting important">
-                <div class="setting-header">
-                    <span class="setting-title">23. WALL PROJ</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-                <div class="location">Variable: <code>WALL_PROJECTION_MODE</code></div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Controls projection stability strategy for ray columns.</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li><strong>STABLE:</strong> Keeps fixed projection width (no mip-driven ray-stride widening), best for angle consistency and reduced perspective popping</li>
-                        <li><strong>ADAPTIVE:</strong> Enables mip-tier ray-stride widening for extra performance headroom</li>
-                    </ul>
-                    <p>Perf monitor overlay now includes <code>P=STABLE/ADAPTIVE</code> so captures always show projection mode.</p>
-                </div>
-            </div>
-
-            <!-- SETTING 24 -->
-            <div class="setting normal">
-                <div class="setting-header">
-                    <span class="setting-title">24. BACK</span>
-                    <span class="setting-badge badge-video">VIDEO</span>
-                </div>
-
-                <div class="description">
-                    <p><strong>Purpose:</strong> Returns to the previous menu.</p>
-                    <p>Selecting this exits the video settings and returns to the options menu.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- PERFORMANCE GUIDE -->
-        <div class="section" id="performance-guide">
-            <h2>🚀 Performance Optimization Guide</h2>
-
-            <div class="setting critical">
-                <h3 style="color: #ff6b6b; margin-bottom: 15px;">Quick Performance Presets</h3>
-
-                <div class="description">
-                    <p>Recommended setting combinations for different performance goals:</p>
-                    <p><strong>Hardware context:</strong> These recommendations target VMU Pro hardware running on an ESP32 microcontroller.</p>
-                </div>
-
-                <table>
-                    <tr>
-                        <th style="width: 150px;">Preset</th>
-                        <th>Settings</th>
-                        <th style="width: 200px;">Best For</th>
-                    </tr>
-                    <tr>
-                        <td><strong>MAXIMUM QUALITY</strong></td>
-                        <td>
-                            • FPS TARGET: 60<br>
-                            • RAYS: 120×2 or 240×1<br>
-                            • TEXTURES: ON<br>
-                            • MIPMAP: ON<br>
-                            • DRAW DIST: 10-12<br>
-                            • WALL RES: QUALITY
-                        </td>
-                        <td>Powerful hardware, screenshots</td>
-                    </tr>
-                    <tr>
-                        <td><strong>BALANCED (Recommended)</strong></td>
-                        <td>
-                            • FPS TARGET: 45 or 60<br>
-                            • RAYS: 60×4<br>
-                            • TEXTURES: ON<br>
-                            • MIPMAP: ON<br>
-                            • DRAW DIST: 8<br>
-                            • WALL RES: QUALITY<br>
-                            • PROPS: OFF (optional)
-                        </td>
-                        <td>Most gameplay scenarios</td>
-                    </tr>
-                    <tr>
-                        <td><strong>PERFORMANCE</strong></td>
-                        <td>
-                            • FPS TARGET: 30<br>
-                            • RAYS: 24×10 or 30×8<br>
-                            • TEXTURES: OFF or ON<br>
-                            • MIPMAP: ON<br>
-                            • DRAW DIST: 6<br>
-                            • WALL RES: FAST<br>
-                            • PROPS: OFF
-                        </td>
-                        <td>Older hardware, battery saving</td>
-                    </tr>
-                    <tr>
-                        <td><strong>BATTERY SAVER</strong></td>
-                        <td>
-                            • FPS TARGET: 24<br>
-                            • RAYS: 12×20<br>
-                            • TEXTURES: OFF<br>
-                            • MIPMAP: OFF<br>
-                            • DRAW DIST: 4<br>
-                            • WALL RES: FAST<br>
-                            • PROPS: OFF<br>
-                            • MINIMAP: OFF
-                        </td>
-                        <td>Maximum battery life</td>
-                    </tr>
-                </table>
-            </div>
-
-            <div class="setting important">
-                <h3 style="color: #ffd93d; margin-bottom: 15px;">Performance Impact Ranking</h3>
-                <p style="margin-bottom: 15px;">Settings sorted by performance impact (highest to lowest):</p>
-
-                <ol style="margin-left: 20px;">
-                    <li><strong>RAYS</strong> - Most impactful (4-20× CPU difference)</li>
-                    <li><strong>TEXTURES</strong> - Major impact (30-40% GPU work)</li>
-                    <li><strong>DRAW DIST</strong> - Major impact (ray trace depth and far rendering)</li>
-                    <li><strong>FAR TEX OFF / WALL RES</strong> - Medium impact (far texture cost and preset bias)</li>
-                    <li><strong>MIPMAP + MIP LOD</strong> - Medium impact (distance-tier ray + texture LOD)</li>
-                    <li><strong>PROPS</strong> - Minor impact (fewer sprites)</li>
-                    <li><strong>MINIMAP</strong> - Negligible impact</li>
-                </ol>
-            </div>
-
-            <div class="setting important">
-                <h3 style="color: #ffd93d; margin-bottom: 15px;">Q&A: Lower Rays + Higher Texture Resolution</h3>
-
-                <div class="description">
-                    <p><strong>Question:</strong> If I lower rays but load higher-resolution wall images, will it be lighter and still look better?</p>
-                    <p><strong>Answer (for VMU Pro / ESP32):</strong> Usually <strong>no</strong>. Lower rays helps performance a lot, but higher texture resolution does not recover the missing wall-column detail from fewer rays.</p>
-                    <p>In this renderer, rays define scene sampling quality (shape stability, edge smoothness). Texture resolution only improves detail inside each sampled column.</p>
-                </div>
-
-                <table>
-                    <tr>
-                        <th>Ray Preset</th>
-                        <th>Raycasts/Frame</th>
-                        <th>Worst-Case DDA Checks (32 steps max)</th>
-                        <th>Relative Ray CPU vs 240×1</th>
-                    </tr>
-                    <tr><td><strong>240×1</strong></td><td>240</td><td>7,680</td><td>100%</td></tr>
-                    <tr><td><strong>120×2</strong></td><td>120</td><td>3,840</td><td>50%</td></tr>
-                    <tr><td><strong>80×3</strong></td><td>80</td><td>2,560</td><td>33%</td></tr>
-                    <tr><td><strong>60×4</strong></td><td>60</td><td>1,920</td><td>25%</td></tr>
-                    <tr><td><strong>40×6</strong></td><td>40</td><td>1,280</td><td>17%</td></tr>
-                    <tr><td><strong>30×8</strong></td><td>30</td><td>960</td><td>13%</td></tr>
-                    <tr><td><strong>24×10</strong></td><td>24</td><td>768</td><td>10%</td></tr>
-                    <tr><td><strong>12×20</strong></td><td>12</td><td>384</td><td>5%</td></tr>
-                </table>
-
-                <div class="warning">
-                    <h4>⚠️ Result</h4>
-                    <p>Dropping rays gives large CPU savings. Increasing source texture size mostly increases memory/bandwidth pressure and gives limited visual gain on a 240×240 display.</p>
-                    <p>Example: moving from 128×128 wall sheets to 256×256 would be ~4× texel memory per wall type, while low rays would still look coarse.</p>
-                </div>
-
-                <div class="note">
-                    <h4>✅ Practical Recommendation</h4>
-                    <p>Use <strong>moderate rays</strong> (typically 60×4 or 80×3), keep mipmapping enabled, and tune fog/draw distance. This is the best quality/performance balance on ESP32-class hardware.</p>
-                </div>
-            </div>
-
-            <div class="note">
-                <h4>✅ Optimization Strategy</h4>
-                <p><strong>If experiencing poor performance:</strong></p>
-                <ol style="margin-left: 20px;">
-                    <li>Start with <strong>RAYS: 30×8</strong> (major improvement)</li>
-                    <li>If still slow, set <strong>TEXTURES: OFF</strong></li>
-                    <li>Reduce <strong>DRAW DIST to 6.0</strong></li>
-                    <li>Set <strong>WALL RES: FAST</strong></li>
-                    <li>Finally, reduce <strong>RAYS to 12×20</strong> if needed</li>
-                </ol>
-            </div>
-        </div>
-
-        <!-- DEVELOPER NOTES -->
-        <div class="section" id="developer-notes">
-            <h2>👨‍💻 Developer Notes</h2>
-
-            <div class="setting normal">
-                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Adding New Debug Settings</h3>
-
-                <div class="description">
-                    <p>To add a new debug setting:</p>
-                </div>
-
-                <div class="example">
-                    <h4>Step 1: Define the Variable</h4>
-                    <pre><code>-- Add near other debug variables (around line 480-560)
-MY_NEW_SETTING = false  -- or initial value</code></pre>
-
-                    <h4>Step 2: Add to buildDebugMenuItems()</h4>
-                    <pre><code>-- Add menu item label
-local mySettingText = "MY SETTING: " .. (MY_NEW_SETTING and "ON" or "OFF")
-
--- Add to return table
-return {
-    pageText,
-    -- ... existing items ...
-    mySettingText,
-    "BACK"
-}</code></pre>
-
-                    <h4>Step 3: Add to adjustDebugMenuSelection()</h4>
-                    <pre><code>-- Find the next available sel number and add handler
-elseif sel == 24 then  -- Use next available number
-    MY_NEW_SETTING = (step > 0)
-    return true
-end</code></pre>
-                </div>
-            </div>
-
-            <div class="setting normal">
-                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Key Functions Reference</h3>
-
-                <table>
-                    <tr>
-                        <th>Function</th>
-                        <th>Location</th>
-                        <th>Purpose</th>
-                    </tr>
-                    <tr>
-                        <td><code>buildDebugMenuItems()</code></td>
-                        <td>~line 2512</td>
-                        <td>Builds menu text based on current setting values</td>
-                    </tr>
-                    <tr>
-                        <td><code>adjustDebugMenuSelection(sel, delta, wrap)</code></td>
-                        <td>~line 2644</td>
-                        <td>Handles LEFT/RIGHT adjustment for each setting</td>
-                    </tr>
-                    <tr>
-                        <td><code>stepListIndex(idx, delta, count, wrap)</code></td>
-                        <td>~line 2564</td>
-                        <td>Helper for cycling through preset arrays</td>
-                    </tr>
-                    <tr>
-                        <td><code>drawTitleScreenImpl()</code></td>
-                        <td>~line 2870</td>
-                        <td>Renders title/options/debug screens</td>
-                    </tr>
-                </table>
-            </div>
-
-            <div class="setting normal">
-                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Preset Array Format</h3>
-
-                <div class="description">
-                    <p>Many settings use preset arrays. Format:</p>
-                </div>
-                <pre><code>-- Example: RAY_PRESETS
-RAY_PRESETS = {
-    {label = "12×20", rays = 12, colW = 20},
-    {label = "24×10", rays = 24, colW = 10},
-    -- ... more presets
-}
-RAY_PRESET_INDEX = 5  -- Which preset is active</code></pre>
-
-                <div class="note">
-                    <h4>💡 Tip</h4>
-                    <p>When adding presets, always update the corresponding *_INDEX variable and ensure *_PRESETS array has at least one entry.</p>
-                </div>
-            </div>
-
-            <div class="setting normal">
-                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Movement/Collision Notes</h3>
-
-                <div class="description">
-                    <p>Player movement now uses sub-step slide collision with enemy-only sprite blocking.</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li>Wall checks use circular probe points around the player collision radius</li>
-                        <li>Decorative props and pickups are non-blocking for player movement</li>
-                        <li>This reduces false corner snagging while keeping wall clipping protection</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div style="text-align: center; margin-top: 40px; color: #666; font-size: 0.9em; padding: 20px;">
-            <p><strong>Inner Sanctum Debug Menu Guide</strong></p>
-            <p>Generated from code analysis of app_full.lua</p>
-            <p>For questions or issues, refer to the source code at the specified line numbers.</p>
         </div>
     </div>
+
+    <!-- CORE PAGE -->
+    <div class="card" id="core-settings">
+        <div class="section-title">
+            <h2>Core Page (DEBUG)</h2>
+            <span class="small">13 fundamental system controls</span>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 30px;">#</th>
+                <th style="width: 140px;">Menu Label</th>
+                <th style="width: 140px;">Variables</th>
+                <th>Values & Behavior</th>
+                <th style="width: 380px;">Performance & Usage Guide</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>1</td>
+                <td class="mono">PAGE</td>
+                <td class="mono">titleDebugPage</td>
+                <td>Cycles: DEBUG → VIDEO → PERF/Q → DEBUG</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: None</span></div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • Access different tuning categories<br>
+                        • Navigate between debug pages
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td class="mono">LOGS</td>
+                <td class="mono">enableBootLogs<br>enablePerfLogs<br>DEBUG_WALL_QUADS_LOG</td>
+                <td>RIGHT = ON (all 3 log flags), LEFT = OFF</td>
+                <td>
+                    <div class="impacts"><span class="impact-medium">FPS Impact: ~2-5% when active</span></div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        Gain: Performance diagnostics, wall quad visibility, adaptive ray logging<br>
+                        Lose: Frame time (string formatting, I/O), console clutter
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • Debugging rendering issues or performance spikes<br>
+                        • Tuning adaptive ray budget behavior<br>
+                        • Analyzing wall quad patterns
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Logs write every 1 second (PERF_MONITOR_LOG_INTERVAL_US). PERF_MONITOR_ACTIVE_SAMPLE samples every 12 frames to reduce overhead.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td class="mono">ENEMIES</td>
+                <td class="mono">DEBUG_DISABLE_ENEMIES<br>(inverse label)</td>
+                <td>RIGHT = ON, LEFT = OFF (sets disable flag)</td>
+                <td>
+                    <div class="impacts"><span class="impact-high">FPS Impact: ~15-25% when OFF</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        ON: Enemies spawn, path, attack, animate<br>
+                        OFF: Empty corridors, no AI processing, no combat
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        Gain: Massive performance boost (no AI, no collision, no sprite rendering)<br>
+                        Lose: All gameplay, level becomes empty exploration only
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • Benchmarking pure renderer performance<br>
+                        • Taking screenshots without enemies<br>
+                        • Testing level geometry/player movement isolated
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td class="mono">PROPS</td>
+                <td class="mono">DEBUG_DISABLE_PROPS<br>(inverse label)</td>
+                <td>RIGHT = ON, LEFT = OFF (resets cache)</td>
+                <td>
+                    <div class="impacts"><span class="impact-medium">FPS Impact: ~5-12% when OFF</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        ON: Pickup items, barrels, torches, decorations visible<br>
+                        OFF: Bare walls and floors, no interactive objects
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        Gain: Fewer sprites to sort/render, reduced memory<br>
+                        Lose: Visual detail, no items to collect, empty-feeling levels
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • Performance testing focused on walls/enemies only<br>
+                        • Speedrunning (find optimal routes without items)<br>
+                        • Screenshotting architectural elements
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Setting OFF resets spriteOrderCache (sprite ordering optimization cache cleared).
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td class="mono">BLOCK DBG</td>
+                <td class="mono">DEBUG_SHOW_BLOCK</td>
+                <td>RIGHT = ON (block overlay), LEFT = OFF</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: ~0.5-1% (text overlay)</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        OFF: Normal combat HUD<br>
+                        ON: "BLOCK READY" / "BLOCK SUCCESS" / "BLOCK FAIL" text overlays during combat windows
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • Tuning block timing windows<br>
+                        • Learning combat mechanics<br>
+                        • Debugging block detection issues
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Shows shield/block feedback text. Critical for balancing combat difficulty (player reflex vs enemy attack windup).
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td class="mono">FPS TARGET</td>
+                <td class="mono">FPS_TARGET_MODE</td>
+                <td>Cycles: UNCAPPED → 60 → 45 → 30 → 24 → UNCAPPED</td>
+                <td>
+                    <div class="impacts"><span class="impact-high">FPS Impact: Controls pacing, not workload</span></div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        UNCAPPED: Max framerate, varies with scene complexity<br>
+                        60: Smooth motion, highest frame budget (16.67ms)<br>
+                        45: Good balance, more headroom (22.22ms)<br>
+                        30: Playable but choppy, large budget (33.33ms)<br>
+                        24: Minimum acceptable, max budget (41.67ms)
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Recommended For</div>
+                        • UNCAPPED: Benchmarking, competitive play<br>
+                        • 60: Best experience, fast devices<br>
+                        • 45: Balanced performance/quality<br>
+                        • 30: Slow devices, battery saving<br>
+                        • 24: Absolute minimum playability
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Only affects render pacing (sleep duration). Adaptive ray budget uses these targets for downshift/upshift decisions (ADAPTIVE_RAY_DOWN_HYST_US, UP_HYST_US).
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td class="mono">AUDIO MIX</td>
+                <td class="mono">AUDIO_MIX_HZ_PRESETS<br>AUDIO_UPDATE_TARGET_HZ</td>
+                <td>20-60 Hz in 5 Hz increments (9 presets)</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: ~1-3% from 20→60 Hz</span></div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        20 Hz: Most efficient, audio may stutter/crackle<br>
+                        40 Hz: Good balance, smooth enough for most sounds<br>
+                        60 Hz: Smoothest audio, highest CPU cost (3x vs 20 Hz)
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • 60 Hz: Music-focused gameplay, fast device<br>
+                        • 40-45 Hz: Default balanced experience<br>
+                        • 20-30 Hz: Performance critical, battery saving
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Controls audio mixer update frequency. Higher = smoother fade envelopes and effect transitions. Minimal impact on rendering pipeline.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td class="mono">RENDER</td>
+                <td class="mono">lockRendererMode()<br>RENDERER_MODE<br>WALL_TEXTURE_MODE</td>
+                <td>Not a toggle. Forces EXP-H lock + proper texture mode</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: None (just re-applies)</span></div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • Recovery if renderer state corrupted<br>
+                        • Ensuring EXP-H hybrid mode active<br>
+                        • Debugging renderer mode drift
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Single renderer path locked to "exp_hybrid" + "proper" wall texture mode. Any LEFT/RIGHT press re-asserts this configuration. Historically supported multiple renderers; now locked for stability.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>9</td>
+                <td class="mono">RAYCAST</td>
+                <td class="mono">USE_FIXED_RAYCAST<br>DEBUG_FORCE_FLOAT_RAYCAST</td>
+                <td>RIGHT = FIXED, LEFT = FLOAT</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: ~0-2% (path dependent)</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        FIXED: Integer-based raycasting, deterministic, slightly faster<br>
+                        FLOAT: Floating-point raycasting, A/B validation reference
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        FIXED: Faster on integer-only hardware, deterministic results<br>
+                        FLOAT: Better precision, reference implementation
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • FIXED: Production, max performance<br>
+                        • FLOAT: Debugging precision issues, A/B comparison
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> FIXED uses precomputed trig tables (castCos/castSin arrays). FLOAT uses vmupro.math cos/sin. For A/B validation of rendering correctness.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>10</td>
+                <td class="mono">PERF MON</td>
+                <td class="mono">DEBUG_PERF_MONITOR</td>
+                <td>RIGHT = ON (overlay), LEFT = OFF</td>
+                <td>
+                    <div class="impacts"><span class="impact-medium">FPS Impact: ~1-2% (overlay rendering)</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        OFF: Clean HUD<br>
+                        ON: 8-line performance overlay (frame/raycast/wall/fog timing, mip distribution, dbuf stats)
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        Gain: Real-time visibility into bottlenecks (raycast vs wall vs fog), mip level usage, adaptive ray shifts<br>
+                        Lose: Screen space, minor rendering cost
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • Always during performance tuning<br>
+                        • Debugging sudden frame drops<br>
+                        • Verifying adaptive ray budget behavior<br>
+                        • Optimizing mip level distribution
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Samples every 12 frames (PERF_MONITOR_SAMPLE_EVERY). Shows EMA (Exponential Moving Average) with alpha=0.25. Displays: frame time, raycast ms, wall ms, fog ms, column counts, ray preset shifts, double-buffer memory delta.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>11</td>
+                <td class="mono">AUTO RAYS</td>
+                <td class="mono">ADAPTIVE_RAY_BUDGET_ENABLED</td>
+                <td>RIGHT = ON, LEFT = OFF (resets EMA/cooldown)</td>
+                <td>
+                    <div class="impacts"><span class="impact-high">FPS Impact: +15-40% stability</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        OFF: Fixed ray count, framerate varies wildly with scene<br>
+                        ON: Ray count auto-adjusts to maintain target FPS (shows "60x4→48x5→60x4" shifts)
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        ON: Stable framerate, automatic quality scaling<br>
+                        OFF: Consistent visual quality, framerate may dip in complex scenes
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Recommended Combinations</div>
+                        • AUTO RAYS ON + FPS TARGET 60 = Stable smooth gameplay<br>
+                        • AUTO RAYS ON + FPS TARGET UNCAPPED = Max quality with ceiling<br>
+                        • AUTO RAYS OFF + Manual RAYS = A/B testing specific presets
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Uses EMA (alpha=0.2) on frame time. Downshift threshold: target+2.2ms, upshift: target-2.6ms. 18-frame cooldown between shifts (ADAPTIVE_RAY_COOLDOWN_FRAMES). Never exceeds base preset index.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>12</td>
+                <td class="mono">DBUF</td>
+                <td class="mono">applyDoubleBufferMode()<br>DEBUG_DOUBLE_BUFFER<br>DOUBLE_BUFFER_ACTIVE</td>
+                <td>RIGHT = ON, LEFT = OFF</td>
+                <td>
+                    <div class="impacts"><span class="impact-medium">Memory Impact: +3-8 KB/frame buffer</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        OFF: May show tearing during fast camera movement<br>
+                        ON: Smooth, no tearing, stable image
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        ON: No tearing, smoother visual, extra memory overhead<br>
+                        OFF: Saves memory, potential tearing on some devices
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • ON: Production, polished experience<br>
+                        • OFF: Memory-constrained devices, testing tearing impact
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Calls startDoubleBufferRenderer() on enable. Tracks memory delta (DOUBLE_BUFFER_DELTA_USAGE_BYTES). Menu shows ON only when both flag AND active state true. Some devices may not support (falls back to OFF).
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>13</td>
+                <td class="mono">BACK</td>
+                <td class="mono">applyDebugMenuSelection()</td>
+                <td>A/MODE confirms, no LEFT/RIGHT effect</td>
+                <td>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • Exit debug menu and return to Options<br>
+                        • Apply pending changes (though most apply immediately)
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- VIDEO PAGE -->
+    <div class="card" id="video-settings">
+        <div class="section-title">
+            <h2>Video Page (VIDEO)</h2>
+            <span class="small">24 rendering quality controls</span>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 30px;">#</th>
+                <th style="width: 120px;">Menu Label</th>
+                <th style="width: 130px;">Variables</th>
+                <th>Values & Behavior</th>
+                <th>Performance & Usage Guide</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>1</td>
+                <td class="mono">PAGE</td>
+                <td class="mono">titleDebugPage</td>
+                <td>Cycles: VIDEO → PERF/Q → DEBUG → VIDEO</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: None</span></div>
+                </td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td class="mono">TEXTURES</td>
+                <td class="mono">DEBUG_DISABLE_WALL_TEXTURE<br>(inverse label)</td>
+                <td>RIGHT = ON (loads), LEFT = OFF (unloads)</td>
+                <td>
+                    <div class="impacts"><span class="impact-high">FPS Impact: ~20-35% when OFF</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        ON: Full textured walls (brick, stone, moss patterns)<br>
+                        OFF: Flat shaded walls (solid colors only),大幅降低视觉质量
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        OFF: Massive performance gain, saves texture memory (~8-15 KB depending on assets)<br>
+                        ON: Rich visual detail, immersive atmosphere
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • OFF: Absolute minimum spec, retro aesthetic<br>
+                        • ON: Normal gameplay, screenshots
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Calls unloadWallTextures() on disable, loadWallTextures() on enable. 6 wall types + 6 tile sheets + roof texture.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td class="mono">ROOF TEX</td>
+                <td class="mono">DEBUG_DISABLE_ROOF_TEXTURE<br>(inverse label)</td>
+                <td>RIGHT = ON, LEFT = OFF</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: ~2-5% when OFF</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        ON: Textured ceiling (dirt splatter pattern)<br>
+                        OFF: Flat ceiling color
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        OFF: Small performance gain, saves ~1-2 KB<br>
+                        ON: More complete atmosphere, especially when looking up
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • OFF: squeezing last bit of performance<br>
+                        • ON: Normal gameplay
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td class="mono">MIPMAP</td>
+                <td class="mono">WALL_MIPMAP_ENABLED</td>
+                <td>RIGHT = ON, LEFT = OFF</td>
+                <td>
+                    <div class="impacts"><span class="impact-medium">FPS Impact: ~5-15% when properly tuned</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        OFF: Crisp textures at all distances, more aliasing shimmer<br>
+                        ON: Distance-tier texture reduction (MIP1-4), smoother distant surfaces
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        ON: Reduced texture fetches at distance, smoother appearance<br>
+                        OFF: Sharper distant textures, more GPU load, potential shimmering
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Recommended Combinations</div>
+                        • MIPMAP ON + MIP LOD ON + tight MIP distances = Best quality/perf balance<br>
+                        • MIPMAP OFF = Debugging texture artifacts, retro crisp look
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Master toggle for entire mip system. Must be ON for MIP1-4 distance thresholds to have effect. Controls whether getMipLevelForDistance() is consulted during texture sampling.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td class="mono">MIP LOD</td>
+                <td class="mono">MIP_LOD_ENABLED</td>
+                <td>RIGHT = ON, LEFT = OFF</td>
+                <td>
+                    <div class="impacts"><span class="impact-medium">FPS Impact: ~3-10% when ON</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        OFF: MIPMAP enabled but all distances use MIP0 (full res)<br>
+                        ON: Distance tiers active (MIP0→1→2→3→4 based on MIP1-4 DIST settings)
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        ON: Aggressive quality reduction at distance, major performance win<br>
+                        OFF: Full res everywhere within draw distance, heavier
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • ON: All performance-critical scenarios<br>
+                        • OFF: A/B testing, checking if mip distances are the bottleneck
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Controls whether configured MIP distance thresholds (WALL_MIPMAP_DIST1-4) are enforced. When OFF, MIPMAP can be ON but effectively disabled (all columns at MIP0).
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td class="mono">RAYS</td>
+                <td class="mono">RAY_PRESETS<br>RAY_PRESET_INDEX</td>
+                <td>12x20 → 15x16 → 16x15 → 20x12 → 24x10 → 30x8 → 40x6 → 48x5 → 60x4 → 80x3 → 120x2 → 240x1</td>
+                <td>
+                    <div class="impacts"><span class="impact-high">FPS Impact: ~300% variance across presets</span></div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Quality vs Performance</div>
+                        12x20 (240 rays): Lowest quality, fastest (reference minimum)<br>
+                        48x5 (240 rays): Baseline balanced preset<br>
+                        60x4 (240 rays): Default quality preset<br>
+                        80x3 (240 rays): High quality<br>
+                        120x2 (240 rays): Very high quality<br>
+                        240x1 (240 rays): Maximum quality, slowest
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Recommended For</div>
+                        • 12x20-30x8: Performance preset, slow devices<br>
+                        • 48x5: Balanced preset (PERFORMANCE default)<br>
+                        • 60x4-80x3: Balanced preset (BALANCED default)<br>
+                        • 80x3-120x2: Quality preset<br>
+                        • 240x1: Maximum quality (QUALITY targets nearest 120x2, not 240 due to diminishing returns)
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Total rays always 240 (rayCols × colW). More cols = wider FOV, better angular resolution. Fewer cols = faster per-column cost but more total columns. Adaptive mode may override selection at runtime (shows base->effective in menu).
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td class="mono">DRAW DIST</td>
+                <td class="mono">DRAW_DIST_PRESETS<br>EXP_TEX_MAX_DIST</td>
+                <td>3 → 4 → 5 → 6 → 8 → 10 → 12 → 14 → 16 → 20 → 24 (units)</td>
+                <td>
+                    <div class="impacts"><span class="impact-high">FPS Impact: ~40-60% variance (3 vs 24)</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        3-6: Walls fade to black/fog very nearby, claustrophobic<br>
+                        8-12: Balanced visibility, standard gameplay<br>
+                        16-24: See far down corridors, more epic but expensive
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        Lower: Massive performance win (fewer columns textured), intimate atmosphere<br>
+                        Higher: Epic sightlines, more strategic info, heavier rendering
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Preset Mapping</div>
+                        • QUALITY: 16 (max visibility)<br>
+                        • BALANCED: 12 (good balance)<br>
+                        • PERFORMANCE: 8 (visibility limited for speed)
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Controls EXP_TEX_MAX_DIST (texture cutoff). Also syncs FOG_START and FOG_END for smooth fade. Values beyond 16 have diminishing returns due to FOV and corridor geometry.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td class="mono">FAR TEX OFF</td>
+                <td class="mono">FAR_TEX_OFF_PRESETS<br>FAR_TEX_OFF_DIST</td>
+                <td>3-24, then OFF (999). Hard cutoff for textures.</td>
+                <td>
+                    <div class="impacts"><span class="impact-medium">FPS Impact: ~10-20% when set to 8-12</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        OFF: Textures extend to draw distance limit<br>
+                        10: Textures cut at 10 units, geometry continues (flat shading beyond)
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        Setting to 8-12: Keep nearby detail, kill far texture fetches<br>
+                        OFF: Max texture coverage everywhere
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • 8-12: Performance tuning - keep near textures visible<br>
+                        • OFF: Max quality
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Hard cutoff independent of fog. Can create visual discontinuity if not aligned with fog settings. Use FOG CUT L for smoother silhouette-preserving cutoff. FAR_TEX_OFF=999 means OFF.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>9</td>
+                <td class="mono">MIP1 DIST</td>
+                <td class="mono">MIPMAP1_DIST_INDEX<br>WALL_MIPMAP_DIST1</td>
+                <td>1.5-24 (19 presets). Clamped < MIP2.</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: ~2-5% per tier shift</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        Lower (2-3): MIP reduction kicks in very early, aggressive<br>
+                        Higher (5-8): MIP reduction delayed, sharper near-mid textures
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        Lower: More aggressive LOD, better performance<br>
+                        Higher: Sharper textures at medium range
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Tuning Strategy</div>
+                        • Start at 4.0 (default)<br>
+                        • Lower if distant textures are too sharp (wasting perf)<br>
+                        • Raise if medium-distance textures look too blurry
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> First mip level threshold. Distance at which walls transition from MIP0 (full res) to MIP1 (1/2 res). Clamped to stay < MIP2_DIST.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>10</td>
+                <td class="mono">MIP2 DIST</td>
+                <td class="mono">MIPMAP2_DIST_INDEX<br>WALL_MIPMAP_DIST2</td>
+                <td>1.5-24. Clamped between MIP1+1 and MIP3-1.</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: ~2-5% per tier shift</span></div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Tuning Strategy</div>
+                        Default: 4.5 (slightly after MIP1 at 4.0)<br>
+                        Spread out MIP1-2-3-4 for smoother gradient<br>
+                        Bunch them for sharper transitions (more visual popping)
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Second mip threshold. MIP1→MIP2 transition. Controls mid-distance quality. Must be at least 1 step above MIP1 in preset array.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>11</td>
+                <td class="mono">MIP3 DIST</td>
+                <td class="mono">MIPMAP3_DIST_INDEX<br>WALL_MIPMAP_DIST3</td>
+                <td>1.5-24. Clamped between MIP2 and MIP4.</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: ~2-5% per tier shift</span></div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Tuning Strategy</div>
+                        Default: 8.0 (larger jump, aggressive far-distance LOD)<br>
+                        Lower (6-7): Earlier reduction for distant walls<br>
+                        Higher (10-12): Delay far LOD for sharper distance view
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Third mip threshold. MIP2→MIP3 transition. Controls far-distance quality. Default 8.0 creates large gap from MIP2 (4.5), pushing aggressive LOD to distance.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>12</td>
+                <td class="mono">MIP4 DIST</td>
+                <td class="mono">MIPMAP4_DIST_INDEX<br>WALL_MIPMAP_DIST4</td>
+                <td>1.5-24. Clamped > MIP3.</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: ~2-5% per tier shift</span></div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Tuning Strategy</div>
+                        Default: 10.0 (minimum quality beyond 10 units)<br>
+                        Lower: Activate maximum LOD earlier<br>
+                        Higher: Delay minimum LOD
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Fourth/final mip threshold. MIP3→MIP4 transition. Beyond this distance, walls use minimum resolution. Default 10.0 means max LOD at 3/4 of BALANCED draw distance (12).
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>13</td>
+                <td class="mono">FOG START</td>
+                <td class="mono">FOG_START_PRESETS<br>FOG_START</td>
+                <td>2.0-28.0 (29 presets). Enforced < FOG FULL.</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: ~1-3% (fog overlay cost)</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        Lower (6-8): Fog starts nearby, claustrophobic, heavy atmosphere<br>
+                        Higher (12-16): Clear near-mid vision, fog only at distance
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        Lower: Stronger atmosphere, hides distant rendering artifacts<br>
+                        Higher: Better visibility, more tactical information
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Recommended Settings</div>
+                        • 10-11: Balanced (near-clear, distance fade)<br>
+                        • 8-9: Atmospheric, horror mood<br>
+                        • 13-14: Bright environments, less fog
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Distance at which fog fade-in begins. Default 10.0. Creates smooth transition from clear (START) to opaque (FULL). Must be < FOG_END.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>14</td>
+                <td class="mono">FOG FULL</td>
+                <td class="mono">FOG_END_PRESETS<br>FOG_END</td>
+                <td>2.0-28.0. Enforced > FOG START.</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: ~1-3%</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        Lower (10-12): Walls fade to fog color earlier, shorter draw<br>
+                        Higher (16-20): Full visibility to fog point, longer sightlines
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        Lower: Hides more geometry/texture work, saves perf<br>
+                        Higher: See further, more expensive
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Recommended Settings</div>
+                        • 13-14: Balanced (matches FOG START 10-11)<br>
+                        • 11-12: Dense fog, intimate scale<br>
+                        • 16+: Epic corridors, expensive
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Distance at which fog becomes fully opaque (solid color). Default 13.0 creates 3-unit fade zone from START (10.0). syncFogToDrawDistance() maintains proportional relationship.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>15</td>
+                <td class="mono">FOG CUT L</td>
+                <td class="mono">FOG_CUTOFF_PRESETS<br>FOG_TEX_CUTOFF</td>
+                <td>2.0-28.0. Texture-only cutoff, geometry continues.</td>
+                <td>
+                    <div class="impacts"><span class="impact-medium">FPS Impact: ~10-15% when set to 8-12</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        10: Beyond 10 units, geometry visible but flat-shaded (no textures)<br>
+                        24+: Textures extend to geometry limit
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        Lower (8-12): Keep silhouettes, kill expensive texture fetches<br>
+                        Higher: Full texturing to distance
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • 8-12: Performance tuning - silhouette-preserving optimization<br>
+                        • 20+: Near-max quality
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Legacy setting from before EXP-H fog fade. Now used as texture cutoff independent of fog opacity. Can create flat-shaded distant walls (geometry visible, textured surface disabled). More visually pleasing than FAR TEX OFF for silhouette work.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>16</td>
+                <td class="mono">FOG COLOR</td>
+                <td class="mono">FOG_COLOR_LABELS<br>FOG_COLOR_PRESETS</td>
+                <td>DARK → GRAY → LGRAY → WHITE → BLACK → MAROON</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: None</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        DARK: Dark gray haze, dungeon atmosphere (default)<br>
+                        GRAY: Bright haze, overcast feel<br>
+                        WHITE: Thick white mist, horror vibe<br>
+                        BLACK: Void darkness, maximum contrast<br>
+                        MAROON: Blood/red fog, hellish/danger mood
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Recommended For</div>
+                        • DARK: Standard dungeon gameplay<br>
+                        • WHITE: Horror/haunting levels<br>
+                        • BLACK: High contrast, dramatic lighting<br>
+                        • MAROON: Hell/danger themes
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Purely aesthetic. Uses predefined COLOR_* constants. No performance impact. Dither pattern overlays this color.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>17</td>
+                <td class="mono">FOG DTHR</td>
+                <td class="mono">FOG_DITHER_SIZE_PRESETS<br>FOG_DITHER_SIZE</td>
+                <td>1 → 2 → 3 → 4 → 5 → 6 (pixel grid size)</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: ~0-1% (dither rendering)</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        1-2: Fine stipple pattern, smooth gradient, may show banding at distance<br>
+                        3-4: Balanced stipple, good gradient smoothness (default)<br>
+                        5-6: Coarse dither, visible stippling, retro aesthetic
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        Lower (1-2): Smoother appearance, more calculation per pixel<br>
+                        Higher (5-6): Faster, visible "stippled" look, retro feel
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Preset Mapping</div>
+                        • QUALITY: 2 (fine dither)<br>
+                        • BALANCED: 3 (balanced)<br>
+                        • PERFORMANCE: 4 (coarse stipple)
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Controls fog dither matrix size. Larger values = coarser stipple pattern but less per-pixel work. Dither prevents banding in fog gradient. Implementation uses sparse stippling (not every pixel drawn).
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>18</td>
+                <td class="mono">WALL RES</td>
+                <td class="mono">LOW_RES_MODE</td>
+                <td>RIGHT = QUALITY, LEFT = FAST</td>
+                <td>
+                    <div class="impacts"><span class="impact-medium">FPS Impact: ~5-10% (via ray preset bias)</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        QUALITY: RAYS preset used directly (60x4 = 60 rays at 4px width)<br>
+                        FAST: RAYS preset biased -1 step (60x4 behaves like 48x5)
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        QUALITY: Full selected ray resolution<br>
+                        FAST: Automatic 1-step quality reduction for performance
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Recommended For</div>
+                        • QUALITY: All normal gameplay (QUALITY/BALANCED presets)<br>
+                        • FAST: PERFORMANCE preset, slow devices
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> When FAST, getBaseEffectiveRayPresetIndex() subtracts 1 from RAY_PRESET_INDEX (minimum 1). Creates "effective" ray preset lower than selected. Menu shows base->effective (e.g., "80x3->60x4").
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>19</td>
+                <td class="mono">FPS OVL</td>
+                <td class="mono">showFpsOverlay</td>
+                <td>RIGHT = ON, LEFT = OFF</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: ~0.5% (text rendering)</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        OFF: Clean HUD<br>
+                        ON: Current FPS display in corner
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • Always during tuning/benchmarking<br>
+                        • OFF for final screenshots/streaming
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Simple FPS counter. Less detailed than PERF MON but non-intrusive. Good for quick framerate checks.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>20</td>
+                <td class="mono">MINIMAP</td>
+                <td class="mono">SHOW_MINIMAP</td>
+                <td>RIGHT = ON, LEFT = OFF</td>
+                <td>
+                    <div class="impacts"><span class="impact-medium">FPS Impact: ~3-8% when ON</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        OFF: No radar, exploration more challenging<br>
+                        ON: Top-down radar showing walls, player position, nearby entities
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        ON: Navigation aid, tactical awareness, performance cost<br>
+                        OFF: Harder exploration, faster rendering
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • ON: New players, complex levels, speedrunning route planning<br>
+                        • OFF: Hardcore mode, performance testing, screenshots
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>21</td>
+                <td class="mono">WALL1 FMT</td>
+                <td class="mono">WALL1_FORMAT_VARIANTS<br>WALL1_FORMAT_INDEX</td>
+                <td>Cycles format variants (reloads textures)</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: None (same resolution)</span></div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • A/B testing different texture compression formats<br>
+                        • Development/testing (currently only PNG16 available)
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Current build has single variant: PNG16 (128x256 base, 1x128 sheet frames). Additional variants would be: RLET, raw bitmap, etc. Hot-reloads textures if TEXTURES enabled.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>22</td>
+                <td class="mono">WALL KEY</td>
+                <td class="mono">WALL_FORCE_COLORKEY_OVERRIDE</td>
+                <td>RIGHT = FORCED (0x0000), LEFT = RAW source key</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: None</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        RAW: Uses transparency color from sprite metadata (artist-defined)<br>
+                        FORCED: Overrides to pure black (0x0000) transparency
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • FORCED: Debugging accidental transparency, ensuring consistent keying<br>
+                        • RAW: Normal gameplay, asset-accurate transparency
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> TEX_FORCE_COLORKEY = 0x0000. Hot-reloads textures on change. Useful for diagnosing walls that appear "ghostly" due to incorrect transparent color in source assets.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>23</td>
+                <td class="mono">WALL PROJ</td>
+                <td class="mono">WALL_PROJECTION_MODE</td>
+                <td>RIGHT = ADAPTIVE, LEFT = STABLE</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: None (projection method)</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        ADAPTIVE: Projection mode varies per column based on angle/geometry<br>
+                        STABLE: Consistent projection mode, predictable appearance
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        ADAPTIVE: May look better in edge cases, but inconsistent<br>
+                        STABLE: Predictable for A/B testing, consistent artifacts
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • ADAPTIVE: Production (may handle edge cases better)<br>
+                        • STABLE: Debugging, A/B comparison, predictable visuals
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Controls texture projection algorithm. ADAPTIVE may switch between techniques based on wall angle/distance. STABLE locks to single method for consistency.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>24</td>
+                <td class="mono">BACK</td>
+                <td class="mono">applyDebugMenuSelection()</td>
+                <td>A/MODE confirms</td>
+                <td>
+                    <div class="use-cases">
+                        Exit debug menu, return to Options
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PERF/Q PAGE -->
+    <div class="card" id="perfq-settings">
+        <div class="section-title">
+            <h2>Perf/Q Page (PERF/Q)</h2>
+            <span class="small">18 quality preset + UI controls</span>
+        </div>
+
+        <div class="card" style="margin: 8px 0; background: #1a2540;">
+            <h3>Preset Quick Reference</h3>
+            <table class="preset-table">
+                <thead>
+                <tr>
+                    <th>Preset</th>
+                    <th>WALL RES</th>
+                    <th>RAYS</th>
+                    <th>DRAW DIST</th>
+                    <th>FAR TEX OFF</th>
+                    <th>MIPMAP</th>
+                    <th>MIP LOD</th>
+                    <th>FOG DTHR</th>
+                    <th>AUTO RAYS</th>
+                    <th>Best For</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td class="mono" style="color: #98f5b0;">QUALITY</td>
+                    <td>quality</td>
+                    <td>120x2 (max)</td>
+                    <td>16 (max)</td>
+                    <td>OFF</td>
+                    <td>ON</td>
+                    <td>ON</td>
+                    <td>2 (fine)</td>
+                    <td>ON</td>
+                    <td>Fast devices, screenshots</td>
+                </tr>
+                <tr>
+                    <td class="mono" style="color: #ffd28f;">BALANCED</td>
+                    <td>quality</td>
+                    <td>80x3</td>
+                    <td>12</td>
+                    <td>16</td>
+                    <td>ON</td>
+                    <td>ON</td>
+                    <td>3 (medium)</td>
+                    <td>ON</td>
+                    <td>Most gameplay</td>
+                </tr>
+                <tr>
+                    <td class="mono" style="color: #ff6b6b;">PERFORMANCE</td>
+                    <td>fast</td>
+                    <td>48x5</td>
+                    <td>8</td>
+                    <td>10</td>
+                    <td>ON</td>
+                    <td>ON</td>
+                    <td>4 (coarse)</td>
+                    <td>ON</td>
+                    <td>Slow devices, battery saving</td>
+                </tr>
+                </tbody>
+            </table>
+            <p class="small">Applying any preset resets adaptive state and re-syncs fog/draw distance. Manual overrides show "CUSTOM".</p>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 30px;">#</th>
+                <th style="width: 120px;">Menu Label</th>
+                <th style="width: 130px;">Variables</th>
+                <th>Values & Behavior</th>
+                <th>Performance & Usage Guide</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>1</td>
+                <td class="mono">PAGE</td>
+                <td class="mono">titleDebugPage</td>
+                <td>Cycles: PERF/Q → VIDEO → DEBUG → PERF/Q</td>
+                <td><span class="impact-low">FPS Impact: None</span></td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td class="mono">P/Q PRESET</td>
+                <td class="mono">PERF_QUALITY_PRESETS<br>PERF_QUALITY_INDEX<br>applyPerfQualityPreset()</td>
+                <td>QUALITY → BALANCED → PERFORMANCE → (manual = CUSTOM)</td>
+                <td>
+                    <div class="impacts"><span class="impact-high">FPS Impact: ~50-80% variance (PERF vs QUALITY)</span></div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Preset Trade-offs</div>
+                        QUALITY: Max visual fidelity, highest CPU/memory cost<br>
+                        BALANCED: 70% of quality for 40% of cost (best value)<br>
+                        PERFORMANCE: Minimum viable quality, maximum framerate
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Recommended For</div>
+                        • QUALITY: Desktop play, screenshots, benchmarking<br>
+                        • BALANCED: Default for most players/devices<br>
+                        • PERFORMANCE: Low-end hardware, battery conservation
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Calls nearestRayPresetIndex() and nearestPresetIndex() to find closest matching preset. Resets ADAPTIVE_RAY_RUNTIME_INDEX, EMA, cooldown. Calls syncFogToDrawDistance() and normalizeMipmapRanges() for consistency.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td class="mono">WALL RES</td>
+                <td class="mono">LOW_RES_MODE</td>
+                <td>RIGHT = QUALITY, LEFT = FAST (marks CUSTOM)</td>
+                <td>
+                    <div class="impacts"><span class="impact-medium">FPS Impact: ~5-10%</span></div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Override</div>
+                        • Choose FAST with BALANCED preset for extra headroom<br>
+                        • Choose QUALITY with PERFORMANCE preset for sharpness
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Same control as VIDEO page but lives here for convenience. Changing marks preset as CUSTOM (auto-detects manual override).
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td class="mono">RAYS</td>
+                <td class="mono">RAY_PRESET_INDEX</td>
+                <td>Same 12 presets as VIDEO page (marks CUSTOM)</td>
+                <td>
+                    <div class="impacts"><span class="impact-high">FPS Impact: ~300% variance</span></div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Tuning Strategy</div>
+                        • Start with preset (QUALITY=120, BALANCED=80, PERF=48)<br>
+                        • Lower if framerate unstable even with AUTO RAYS ON<br>
+                        • Raise if visual quality insufficient
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td class="mono">AUTO RAYS</td>
+                <td class="mono">ADAPTIVE_RAY_BUDGET_ENABLED</td>
+                <td>RIGHT = ON, LEFT = OFF (resets, marks CUSTOM)</td>
+                <td>
+                    <div class="impacts"><span class="impact-high">FPS Impact: +15-40% stability</span></div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Override</div>
+                        • OFF: A/B testing specific ray presets, disabling auto-adjustment<br>
+                        • ON: Most gameplay scenarios (enabled in all presets)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td class="mono">DRAW DIST</td>
+                <td class="mono">DRAW_DIST_PRESETS<br>EXP_TEX_MAX_DIST</td>
+                <td>3-24 (syncs fog, marks CUSTOM)</td>
+                <td>
+                    <div class="impacts"><span class="impact-high">FPS Impact: ~40-60% variance</span></div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Tuning Strategy</div>
+                        • Lower preset DRAW DIST if FPS drops in complex scenes<br>
+                        • syncFogToDrawDistance() automatically adjusts fog for smooth fade
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td class="mono">FAR TEX OFF</td>
+                <td class="mono">FAR_TEX_OFF_PRESETS<br>FAR_TEX_OFF_DIST</td>
+                <td>3-24, OFF=999 (marks CUSTOM)</td>
+                <td>
+                    <div class="impacts"><span class="impact-medium">FPS Impact: ~10-20% when aggressive (8-12)</span></div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Tuning Strategy</div>
+                        • Set to 8-12 to keep near textures visible while killing far texture work<br>
+                        • normalizeFarTextureCutoff() ensures it respects DRAW DIST
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td class="mono">MIPMAP</td>
+                <td class="mono">WALL_MIPMAP_ENABLED</td>
+                <td>RIGHT = ON, LEFT = OFF (marks CUSTOM)</td>
+                <td>
+                    <div class="impacts"><span class="impact-medium">FPS Impact: ~5-15%</span></div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Override</div>
+                        • OFF: Debugging texture artifacts, checking if mip LOD is causing issues<br>
+                        • ON: All performance-critical gameplay (enabled in all presets)
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>9</td>
+                <td class="mono">MIP LOD</td>
+                <td class="mono">MIP_LOD_ENABLED</td>
+                <td>RIGHT = ON, LEFT = OFF (marks CUSTOM)</td>
+                <td>
+                    <div class="impacts"><span class="impact-medium">FPS Impact: ~3-10%</span></div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Override</div>
+                        • OFF: Force all columns to MIP0 (full resolution) for debugging<br>
+                        • ON: Enable distance-tier quality reduction
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>10</td>
+                <td class="mono">FOG START</td>
+                <td class="mono">FOG_START_PRESETS<br>FOG_START</td>
+                <td>2.0-28.0 (enforced < FOG FULL, marks CUSTOM)</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: ~1-3%</span></div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Tuning Strategy</div>
+                        • Adjust for atmosphere (lower = denser, more claustrophobic)<br>
+                        • Keep 2-3 unit gap from FOG FULL for smooth fade
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>11</td>
+                <td class="mono">FOG FULL</td>
+                <td class="mono">FOG_END_PRESETS<br>FOG_END</td>
+                <td>2.0-28.0 (enforced > FOG START, marks CUSTOM)</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: ~1-3%</span></div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Tuning Strategy</div>
+                        • Lower to hide distant geometry/texture work (saves perf)<br>
+                        • Higher for longer sightlines
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>12</td>
+                <td class="mono">FOG DTHR</td>
+                <td class="mono">FOG_DITHER_SIZE_PRESETS<br>FOG_DITHER_SIZE</td>
+                <td>1-6 (marks CUSTOM)</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: ~0-1%</span></div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Tuning Strategy</div>
+                        • 1-2: Smooth gradient, may show banding<br>
+                        • 3-4: Balanced (default)<br>
+                        • 5-6: Coarse stipple, retro look, faster
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>13</td>
+                <td class="mono">UI TRANSP</td>
+                <td class="mono">UI_TRANSPARENCY_PRESETS<br>UI_TRANSPARENCY_INDEX</td>
+                <td>15 → 25 → 35 → 45 → 55 → 65 (%)</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: None (UI only)</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        15%: Mostly solid panels, minimal see-through<br>
+                        35%: Default balanced transparency<br>
+                        65%: Highly transparent, faint panels, game visible behind menus
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Recommended For</div>
+                        • 15-25: Bright environments, readability focus<br>
+                        • 35-45: Default, most scenarios<br>
+                        • 55-65: Dark environments, cinematic feel, keeping game visible
+                    </div>
+                    <div class="dev-notes">
+                        <strong>DEV:</strong> Simulated transparency via sparse stippling (not true alpha). Higher % = fewer stipple pixels drawn. UI_TEXT_BG_TRANSPARENT setting works with this for complete transparency effect.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>14</td>
+                <td class="mono">UI TXT BG</td>
+                <td class="mono">UI_TEXT_BG_TRANSPARENT</td>
+                <td>RIGHT = CLEAR, LEFT = SOLID</td>
+                <td>
+                    <div class="impacts"><span class="impact-low">FPS Impact: None (may slightly improve by not drawing text bg)</span></div>
+                    <div class="visual-diff">
+                        <div class="visual-diff-title">Visual Before/After</div>
+                        SOLID: Text has colored background block (high legibility)<br>
+                        CLEAR: Text floats, game visible behind (more immersive)
+                    </div>
+                    <div class="tradeoffs">
+                        <div class="tradeoffs-title">Trade-offs</div>
+                        CLEAR: More immersive, harder to read in bright areas<br>
+                        SOLID: Maximum legibility, blocks more of game view
+                    </div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">Recommended For</div>
+                        • CLEAR: Dark environments, high UI_TRANSP, cinematic feel<br>
+                        • SOLID: Bright environments, low UI_TRANSP, competitive play
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>15</td>
+                <td class="mono">FPS TARGET</td>
+                <td class="mono">FPS_TARGET_MODE</td>
+                <td>UNCAPPED → 60 → 45 → 30 → 24</td>
+                <td>
+                    <div class="impacts"><span class="impact-high">Controls pacing, see Core #6 for details</span></div>
+                </td>
+            </tr>
+            <tr>
+                <td>16</td>
+                <td class="mono">PERF MON</td>
+                <td class="mono">DEBUG_PERF_MONITOR</td>
+                <td>RIGHT = ON, LEFT = OFF</td>
+                <td>
+                    <div class="impacts"><span class="impact-medium">FPS Impact: ~1-2%</span></div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • Essential while tuning Perf/Q settings<br>
+                        • See real-time impact of manual overrides
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>17</td>
+                <td class="mono">DBUF</td>
+                <td class="mono">applyDoubleBufferMode()</td>
+                <td>RIGHT = ON, LEFT = OFF</td>
+                <td>
+                    <div class="impacts"><span class="impact-medium">Memory Impact: +3-8 KB/frame buffer</span></div>
+                    <div class="use-cases">
+                        <div class="use-cases-title">When To Use</div>
+                        • Test memory/perf tradeoff with PERF MON visible<br>
+                        • Check DOUBLE_BUFFER_DELTA_USAGE_BYTES in overlay
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>18</td>
+                <td class="mono">BACK</td>
+                <td class="mono">applyDebugMenuSelection()</td>
+                <td>A/MODE confirms</td>
+                <td>Exit debug menu</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PERFORMANCE TIPS -->
+    <div class="card" id="performance-tips">
+        <h2>Performance Tips & Recommended Presets</h2>
+
+        <h3>Scenario-Based Presets</h3>
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 180px;">Scenario</th>
+                <th>Recommended Settings</th>
+                <th>Expected FPS Improvement</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="mono" style="color: #ff6b6b;">Maximum Performance</td>
+                <td>
+                    <div class="small">
+                        <strong>Preset:</strong> PERFORMANCE<br>
+                        <strong>Core:</strong> ENEMIES OFF (if exploring), PROPS OFF, AUTO RAYS ON<br>
+                        <strong>Video:</strong> TEXTURES optional, MIPMAP ON, MIP LOD ON<br>
+                        <strong>Additional:</strong> FAR TEX OFF 8, FOG START 8, FOG FULL 11
+                    </div>
+                </td>
+                <td>
+                    <span class="ok">+80-120% vs QUALITY</span><br>
+                    <span class="small">Best for: Slow devices, battery saving</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="mono" style="color: #ffd28f;">Balanced Gameplay</td>
+                <td>
+                    <div class="small">
+                        <strong>Preset:</strong> BALANCED (recommended default)<br>
+                        <strong>Core:</strong> AUTO RAYS ON, FPS TARGET 60<br>
+                        <strong>Video:</strong> TEXTURES ON, MIPMAP ON, MIP LOD ON<br>
+                        <strong>Additional:</strong> DBUF ON
+                    </div>
+                </td>
+                <td>
+                    <span class="ok">Baseline (0% reference)</span><br>
+                    <span class="small">Best for: Most players, good quality/perf ratio</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="mono" style="color: #98f5b0;">Maximum Quality</td>
+                <td>
+                    <div class="small">
+                        <strong>Preset:</strong> QUALITY<br>
+                        <strong>Core:</strong> AUTO RAYS ON, FPS TARGET UNCAPPED<br>
+                        <strong>Video:</strong> TEXTURES ON, MIPMAP ON, MIP LOD ON, DRAW DIST 16<br>
+                        <strong>Additional:</strong> FAR TEX OFF OFF, FOG DTHR 2, DBUF ON
+                    </div>
+                </td>
+                <td>
+                    <span class="warn">-50% vs BALANCED</span><br>
+                    <span class="small">Best for: Fast devices, screenshots, competitive play</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="mono">Benchmarking</td>
+                <td>
+                    <div class="small">
+                        <strong>Preset:</strong> QUALITY<br>
+                        <strong>Core:</strong> ENEMIES OFF, PROPS OFF, AUTO RAYS OFF<br>
+                        <strong>Video:</strong> RAYS 240x1 (maximum), TEXTURES ON<br>
+                        <strong>Additional:</strong> PERF MON ON, FPS TARGET UNCAPPED
+                    </div>
+                </td>
+                <td>
+                    <span class="small">Pure renderer stress test</span><br>
+                    <span class="small">Best for: profiling, optimization work</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="mono">Speedrunning</td>
+                <td>
+                    <div class="small">
+                        <strong>Preset:</strong> BALANCED or PERFORMANCE<br>
+                        <strong>Core:</strong> ENEMIES ON, FPS TARGET 60, AUTO RAYS ON<br>
+                        <strong>Video:</strong> MINIMAP ON (route planning), TEXTURES ON<br>
+                        <strong>Additional:</strong> DBUF ON (no tearing distractions)
+                    </div>
+                </td>
+                <td>
+                    <span class="small">Stable 60 FPS priority</span><br>
+                    <span class="small">Best for: Competitive timing, consistency</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="mono">Screenshots/Streaming</td>
+                <td>
+                    <div class="small">
+                        <strong>Preset:</strong> QUALITY<br>
+                        <strong>Core:</strong> FPS OVL OFF, PERF MON OFF<br>
+                        <strong>Video:</strong> TEXTURES ON, FOG COLOR artistic choice<br>
+                        <strong>UI:</strong> UI TRANSP 65%, UI TXT BG CLEAR
+                    </div>
+                </td>
+                <td>
+                    <span class="small">Maximum visual fidelity</span><br>
+                    <span class="small">Best for: Content creation, aesthetics</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="mono">Retro/Crisp Aesthetic</td>
+                <td>
+                    <div class="small">
+                        <strong>Preset:</strong> CUSTOM<br>
+                        <strong>Video:</strong> MIPMAP OFF, MIP LOD OFF, TEXTURES ON<br>
+                        <strong>Additional:</strong> RAYS 120x2 or higher, FOG COLOR BLACK
+                    </div>
+                </td>
+                <td>
+                    <span class="warn">Heavier rendering (no LOD)</span><br>
+                    <span class="small">Best for: Pixel-art crispness, retro feel</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <h3>Settings to Avoid Changing Together</h3>
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 200px;">Conflicting Settings</th>
+                <th>Why They Conflict</th>
+                <th>Recommended Approach</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="mono">MIPMAP OFF + MIP LOD ON</td>
+                <td>MIP LOD requires MIPMAP to be active. When MIPMAP is OFF, MIP LOD has no effect (all walls at MIP0).</td>
+                <td>Keep both ON for performance. Turn both OFF for debugging. Avoid mixed state.</td>
+            </tr>
+            <tr>
+                <td class="mono">AUTO RAYS OFF + High RAY preset</td>
+                <td>Without AUTO RAYS, framerate may become unstable in complex scenes with high ray counts.</td>
+                <td>Either use AUTO RAYS ON, or manually select a lower ray preset if turning AUTO off.</td>
+            </tr>
+            <tr>
+                <td class="mono">DRAW DIST 16-24 + Low RAYS</td>
+                <td>High draw distance with low ray resolution looks poor (blocky distant walls waste draw budget).</td>
+                <td>Match draw distance to ray quality: 8-12 with low rays, 16+ with high rays (80x3+).</td>
+            </tr>
+            <tr>
+                <td class="mono">FAR TEX OFF + FOG CUT L</td>
+                <td>Both cut textures at distance. May create visual discontinuity if not aligned.</td>
+                <td>Use one or the other, or align values (FAR_TEX_OFF 12, FOG_CUT_L 12).</td>
+            </tr>
+            <tr>
+                <td class="mono">WALL RES FAST + RAYS 240x1</td>
+                <td>FAST biases rays -1 step, negating the 240x1 selection (shows 120x2).</td>
+                <td>Use WALL RES QUALITY with high ray presets. FAST intended for PERFORMANCE preset.</td>
+            </tr>
+            <tr>
+                <td class="mono">FOG START ≥ FOG FULL</td>
+                <td>Enforced ordering prevents invalid config. Menu will clamp to maintain START < FULL.</td>
+                <td>Keep 2-4 unit gap for smooth fade (START 10, FULL 13).</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <h3>Hidden Interactions & Side Effects</h3>
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 200px;">Setting</th>
+                <th>Hidden Interactions</th>
+                <th>Developer Notes</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="mono">P/Q PRESET</td>
+                <td>Applying preset resets: ADAPTIVE_RAY_RUNTIME_INDEX, ADAPTIVE_RAY_EMA_US, ADAPTIVE_RAY_COOLDOWN. Also calls syncFogToDrawDistance() and normalizeMipmapRanges().</td>
+                <td>Always re-applies fresh state. Adaptive system "forgets" previous performance after preset change.</td>
+            </tr>
+            <tr>
+                <td class="mono">AUTO RAYS</td>
+                <td>Toggling resets adaptive state (EMA, cooldown). Takes ~18 frames (cooldown) to begin adjusting again.</td>
+                <td>Prevents rapid cycling. EMA alpha=0.2 means ~5 frames to settle on new frame time baseline.</td>
+            </tr>
+            <tr>
+                <td class="mono">RAYS (VIDEO page)</td>
+                <td>Changing resets ADAPTIVE_RAY_RUNTIME_INDEX to nil. Adaptive mode restarts from new base.</td>
+                <td>May cause brief quality fluctuation as adaptive system re-learns frame time for new preset.</td>
+            </tr>
+            <tr>
+                <td class="mono">DRAW DIST</td>
+                <td>Calls syncFogToDrawDistance() which adjusts FOG_START and FOG_END proportionally.</td>
+                <td>Maintains smooth fog fade regardless of draw distance. Prevents "hard" fog walls.</td>
+            </tr>
+            <tr>
+                <td class="mono">MIP1-4 DIST</td>
+                <td>Clamped to maintain ordering: MIP1 < MIP2 < MIP3 < MIP4. Menu enforces step distance in preset array.</td>
+                <td>Prevents invalid LOD configurations. normalizeMipmapRanges() called on preset apply.</td>
+            </tr>
+            <tr>
+                <td class="mono">TEXTURES (toggle)</td>
+                <td>Calls unloadWallTextures() or loadWallTextures(). Force-reloads all 6 wall + 6 sheet + roof assets.</td>
+                <td>Slight hitch when enabling (asset loading). ~8-15 KB texture memory restored.</td>
+            </tr>
+            <tr>
+                <td class="mono">WALL1 FMT / WALL KEY</td>
+                <td>Both trigger hot-reload if TEXTURES enabled. unloadWallTextures() then loadWallTextures().</td>
+                <td>For development/debugging. Use sparingly during gameplay (causes texture hitch).</td>
+            </tr>
+            <tr>
+                <td class="mono">PROPS</td>
+                <td>Setting OFF resets spriteOrderCache (sprite ordering optimization cache cleared).</td>
+                <td>Next frame will rebuild cache. May cause brief performance dip on first frame after disable.</td>
+            </tr>
+            <tr>
+                <td class="mono">DBUF</td>
+                <td>Tracks DOUBLE_BUFFER_DELTA_USAGE_BYTES (memory difference between ON and OFF states).</td>
+                <td>Requires hardware support. Falls back gracefully if startDoubleBufferRenderer() fails.</td>
+            </tr>
+            <tr>
+                <td class="mono">FPS TARGET</td>
+                <td>Affects adaptive ray thresholds (ADAPTIVE_RAY_DOWN_HYST_US, UP_HYST_US). Lower target = earlier downshift.</td>
+                <td>60 FPS: downshift at 18.8ms, upshift at 14.0ms. 30 FPS: downshift at 35.5ms, upshift at 30.7ms.</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <h3>Quick Tuning Workflow</h3>
+        <div style="background: #0d4a6e; padding: 12px; border-radius: 6px; margin: 12px 0;">
+            <p><strong>Step 1: Start with preset</strong> - Choose PERFORMANCE, BALANCED, or QUALITY as baseline.</p>
+            <p><strong>Step 2: Enable PERF MON</strong> - See where frame time is spent (raycast vs wall vs fog).</p>
+            <p><strong>Step 3: Adjust one setting at a time</strong> - Change RAYS, test. Change DRAW DIST, test. Avoid changing multiple settings simultaneously.</p>
+            <p><strong>Step 4: Watch adaptive behavior</strong> - If AUTO RAYS ON, monitor "80x3->60x4" shifts in PERF MON. Constant shifting indicates target is too ambitious.</p>
+            <p><strong>Step 5: Find stable config</strong> - Goal: minimal adaptive shifting while maintaining target FPS.</p>
+            <p><strong>Step 6: Save or document</strong> - Manual overrides show CUSTOM. Note settings for future reference.</p>
+        </div>
+
+        <h3>Common Issues & Solutions</h3>
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 180px;">Symptom</th>
+                <th>Diagnosis (via PERF MON)</th>
+                <th>Solution</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="mono">Framerate constantly fluctuates</td>
+                <td>Ray label shifting frequently (e.g., "60x4→48x5→60x4")</td>
+                <td>Lower RAYS preset or reduce DRAW DIST. Adaptive is struggling to maintain stability.</td>
+            </tr>
+            <tr>
+                <td class="mono">Sudden frame drops in certain areas</td>
+                <td>Wall or fog timing spikes in PERF MON</td>
+                <td>Reduce DRAW DIST or enable FAR TEX OFF 8-12 to limit textured wall count.</td>
+            </tr>
+            <tr>
+                <td class="mono">Visual "popping" at medium distance</td>
+                <td>MIP level distribution shows uneven spread (MP 0/50/30/20/0)</td>
+                <td>Adjust MIP1-4 DIST to create smoother gradient (spread values evenly).</td>
+            </tr>
+            <tr>
+                <td class="mono">Distant walls look too blurry</td>
+                <td>High MIP3/MIP4 counts in PERF MON</td>
+                <td>Raise MIP3/MIP4 DIST or reduce DRAW DIST. Consider MIP LOD OFF for testing.</td>
+            </tr>
+            <tr>
+                <td class="mono">Game looks "washed out" or hazy</td>
+                <td>Fog starting too early or too dense</td>
+                <td>Raise FOG START (10→12) or FOG FULL (13→16). Try FOG COLOR BLACK for contrast.</td>
+            </tr>
+            <tr>
+                <td class="mono">UI text hard to read</td>
+                <td>UI_TXT_BG CLEAR with bright game behind text</td>
+                <td>Set UI_TXT_BG SOLID or lower UI_TRANSP (35→25).</td>
+            </tr>
+            <tr>
+                <td class="mono">Menu shows CUSTOM unexpectedly</td>
+                <td>Manual override was accidentally changed</td>
+                <td>Re-apply P/Q PRESET to reset to known configuration.</td>
+            </tr>
+            <tr>
+                <td class="mono">Texture seams visible between columns</td>
+                <td>WALL_TEX_SEAM_OVERDRAW or projection issue</td>
+                <td>Toggle WALL PROJ STABLE for consistency. Check WALL1 FMT (should be PNG16).</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>Coverage Verification</h2>
+        <p class="ok">All 55 menu items documented with performance impacts, use cases, and developer notes.</p>
+        <p class="small">
+            <strong>Core (13):</strong> PAGE, LOGS, ENEMIES, PROPS, BLOCK DBG, FPS TARGET, AUDIO MIX, RENDER, RAYCAST, PERF MON, AUTO RAYS, DBUF, BACK<br>
+            <strong>Video (24):</strong> PAGE, TEXTURES, ROOF TEX, MIPMAP, MIP LOD, RAYS, DRAW DIST, FAR TEX OFF, MIP1-4 DIST, FOG START/FULL/CUT L/COLOR/DTHR, WALL RES, FPS OVL, MINIMAP, WALL1 FMT, WALL KEY, WALL PROJ, BACK<br>
+            <strong>Perf/Q (18):</strong> PAGE, P/Q PRESET, WALL RES, RAYS, AUTO RAYS, DRAW DIST, FAR TEX OFF, MIPMAP, MIP LOD, FOG START/FULL/DTHR, UI TRANSP, UI TXT BG, FPS TARGET, PERF MON, DBUF, BACK
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Documentation Notes</h2>
+        <p>This guide is code-verified against <span class="mono">app_full.lua</span> buildDebugMenuItems(), adjustDebugMenuSelection(), and applyPerfQualityPreset() functions.</p>
+        <p class="warn">If debug menu structure changes in code, regenerate this guide to maintain accuracy.</p>
+        <p class="small">
+            <strong>Performance Impact Estimates:</strong> Based on ray count variance, texture memory, and algorithmic complexity. Actual impact varies by hardware, level geometry, and entity count.<br>
+            <strong>Memory Estimates:</strong> Texture assets ~8-15 KB total. Double buffer adds ~3-8 KB frame buffer. Sprite memory excluded (varies by level).<br>
+            <strong>Adaptive Ray Budget:</strong> EMA alpha=0.2, 18-frame cooldown, ±2.2/2.6ms hysteresis. Targets getAdaptiveRayTargetFrameUs() (16.67ms for 60 FPS).
+        </p>
+    </div>
+</div>
 </body>
 </html>
