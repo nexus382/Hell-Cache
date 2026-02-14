@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inner Sanctum - Stats and Skills Guide</title>
+    <style>
+        :root {
+            --bg: #0f1214;
+            --panel: #171c20;
+            --panel-2: #1d2328;
+            --text: #e7ecef;
+            --muted: #b5c0c7;
+            --accent: #c5a15a;
+            --good: #7acb9a;
+            --line: #2a333b;
+        }
+        body {
+            margin: 0;
+            background: linear-gradient(180deg, #0f1214 0%, #13181c 100%);
+            color: var(--text);
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.45;
+        }
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 28px 20px 40px;
+        }
+        h1, h2, h3 {
+            margin: 0 0 12px 0;
+            letter-spacing: 0.3px;
+        }
+        h1 {
+            font-size: 30px;
+            color: var(--accent);
+        }
+        h2 {
+            font-size: 22px;
+            margin-top: 26px;
+        }
+        h3 {
+            font-size: 18px;
+            margin-top: 18px;
+        }
+        p {
+            margin: 8px 0 12px;
+            color: var(--text);
+        }
+        .muted {
+            color: var(--muted);
+        }
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 16px 16px 14px;
+            margin: 12px 0;
+        }
+        .grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+            background: var(--panel-2);
+            border: 1px solid var(--line);
+        }
+        th, td {
+            border: 1px solid var(--line);
+            padding: 8px 9px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background: #232c33;
+            color: #f4f7f9;
+        }
+        code {
+            background: #212931;
+            border: 1px solid #31404c;
+            color: #eaf1f5;
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-size: 13px;
+        }
+        pre {
+            margin: 8px 0 0;
+            padding: 12px;
+            overflow-x: auto;
+            background: #0e1419;
+            border: 1px solid #2b3741;
+            border-radius: 8px;
+            color: #d6e1e8;
+            font-size: 13px;
+        }
+        .ok {
+            color: var(--good);
+            font-weight: 600;
+        }
+        ul, ol {
+            margin: 8px 0 10px 20px;
+        }
+        li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <h1>Inner Sanctum - User Stats and Skills Guide</h1>
+        <p class="muted">
+            Version 1.2 | Built from current gameplay values in <code>app_full.lua</code> and your requested stat model.
+            All ratings use a <strong>0.00..10.00</strong> scale, and all percentage values are represented as <strong>xx.xx%</strong>.
+        </p>
+
+        <h2>1) Current Gameplay Baseline (Reference)</h2>
+        <div class="card">
+            <ul>
+                <li>Simulation rate: <code>SIM_TARGET_HZ = 24</code></li>
+                <li>Base player hit damage: <code>PLAYER_DAMAGE = 20</code></li>
+                <li>Enemy hit damage: <code>DAMAGE_PER_HIT = 10</code></li>
+                <li>Shield logic today:
+                    <ul>
+                        <li>Prime block = 100.00% damage negation</li>
+                        <li>Missed/late block = 50.00% damage negation (takes 50.00%)</li>
+                    </ul>
+                </li>
+                <li>Current attack animation is short (about 9 frames at 24Hz), so this design adds explicit tuning rules to keep high-end speed under control.</li>
+            </ul>
+        </div>
+
+        <h2>2) Primary Stats (0.00..10.00)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Stat</th>
+                    <th>Per Point Effect</th>
+                    <th>Formula</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Agility</strong></td>
+                    <td>+2.00% dodge chance and -0.10s attack cycle</td>
+                    <td><code>dodge += Agility * 2</code>, <code>attack_sec -= Agility * 0.10</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Power</strong></td>
+                    <td>+1.50% damage scaling</td>
+                    <td><code>damage_mult = 1 + (Power * 0.015)</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Defense</strong></td>
+                    <td>+2.00% missed-block negation and +1.00% dodge chance</td>
+                    <td><code>shield_miss_negation += Defense * 2</code>, <code>dodge += Defense * 1</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>3) Skills (0.00..10.00)</h2>
+        <p class="muted">Skills are character-facing values shown in UI and used in formulas below.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Skill</th>
+                    <th>Effect</th>
+                    <th>Per Point</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Dodge</strong></td>
+                    <td>Extra chance for incoming attack to miss</td>
+                    <td>+1.00% dodge chance</td>
+                </tr>
+                <tr>
+                    <td><strong>Regeneration</strong></td>
+                    <td>Heal when getting a kill</td>
+                    <td>+0.60% Max HP per kill</td>
+                </tr>
+                <tr>
+                    <td><strong>Critical</strong></td>
+                    <td>Chance to deal 2x damage</td>
+                    <td>+1.50% crit chance</td>
+                </tr>
+                <tr>
+                    <td><strong>Atk Speed</strong></td>
+                    <td>Further reduces total attack cycle time</td>
+                    <td>-0.02s attack cycle</td>
+                </tr>
+                <tr>
+                    <td><strong>Shield Bonus</strong></td>
+                    <td>Improves missed-block damage negation beyond 50.00%</td>
+                    <td>+2.00% missed-block negation</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>4) Final Combat Formulas</h2>
+        <div class="card">
+            <h3>4.1 Dodge Chance</h3>
+            <pre>total_dodge_pct = clamp(
+    (Agility * 2.0) + (Defense * 1.0) + (DodgeSkill * 1.0),
+    0.0, 45.0
+)
+-- display as xx.xx%</pre>
+
+            <h3>4.2 Attack Cycle Time (Start -> Hit -> Ready)</h3>
+            <pre>BASE_ATTACK_SEC = 0.86
+attack_cycle_sec = clamp(
+    BASE_ATTACK_SEC - (Agility * 0.10) - (AtkSpeedSkill * 0.02),
+    0.22, 1.20
+)
+-- display as xx.xx seconds</pre>
+            <p class="muted">
+                This preserves your requested <code>-0.10s per Agility point</code>, but protects stability with a floor.
+            </p>
+
+            <h3>4.3 Damage Output</h3>
+            <pre>base_damage = PLAYER_DAMAGE  -- currently 20
+damage_mult = 1.0 + (Power * 0.015)
+crit_chance_pct = clamp(CriticalSkill * 1.5, 0.0, 30.0)
+
+if crit_roll_success then
+    final_damage = floor(base_damage * damage_mult * 2.0 + 0.5)
+else
+    final_damage = floor(base_damage * damage_mult + 0.5)
+end</pre>
+
+            <h3>4.4 Shield Missed-Block Negation</h3>
+            <pre>-- Keep your existing 50.00% baseline
+missed_block_negation_pct = clamp(
+    50.0 + (Defense * 2.0) + (ShieldBonusSkill * 2.0),
+    50.0, 90.0
+)
+
+damage_taken_on_missed_block = incoming_damage * (1.0 - missed_block_negation_pct / 100.0)</pre>
+            <p><span class="ok">Prime/Perfect block remains 100% negation.</span></p>
+
+            <h3>4.5 Regeneration on Kill</h3>
+            <pre>regen_pct = RegenerationSkill * 0.6
+heal_on_kill = floor(MAX_HEALTH * (regen_pct / 100.0) + 0.5)</pre>
+        </div>
+
+        <h2>5) Class Starting Templates (0.00..10.00)</h2>
+        <p class="muted">
+            Baseline reference is current balanced feel at <code>4.00 / 4.00 / 4.00</code> for primary stats.
+            Warrior stays balanced, Archer is faster with lower defense, Mage is higher power with lower everything else.
+        </p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Class</th>
+                    <th>Agility</th>
+                    <th>Power</th>
+                    <th>Defense</th>
+                    <th>Dodge</th>
+                    <th>Regen</th>
+                    <th>Crit</th>
+                    <th>Atk Speed</th>
+                    <th>Shield Bonus</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Warrior</strong></td>
+                    <td>4.00</td>
+                    <td>4.00</td>
+                    <td>4.00</td>
+                    <td>4.00</td>
+                    <td>4.00</td>
+                    <td>4.00</td>
+                    <td>4.00</td>
+                    <td>4.00</td>
+                </tr>
+                <tr>
+                    <td><strong>Archer</strong></td>
+                    <td>5.50</td>
+                    <td>3.75</td>
+                    <td>2.50</td>
+                    <td>5.00</td>
+                    <td>2.50</td>
+                    <td>3.50</td>
+                    <td>5.50</td>
+                    <td>2.00</td>
+                </tr>
+                <tr>
+                    <td><strong>Mage</strong></td>
+                    <td>2.75</td>
+                    <td>5.75</td>
+                    <td>2.25</td>
+                    <td>2.50</td>
+                    <td>2.25</td>
+                    <td>5.25</td>
+                    <td>2.75</td>
+                    <td>1.75</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>6) Weapon Stat System</h2>
+        <div class="card">
+            <p class="muted">Weapons apply modifiers to your base stats within the -10 to +10 range.</p>
+            <h3>6.1 Weapon Stat Modifiers</h3>
+            <pre>final_stat = clamp(
+    base_character_stat + weapon_modifier,
+    0.0, 10.0
+)</pre>
+            <ul>
+                <li><strong>Damage Formula:</strong> <code>final_damage = floor(base_damage * (1 + final_power * 0.015) * weapon_damage_mult)</code></li>
+                <li><strong>Speed Formula:</strong> <code>final_speed = BASE_ATTACK_SEC - final_agility * 0.10 - atk_speed_skill * 0.02</code></li>
+                <li><strong>Result:</strong> Faster weapons reduce attack cycle time but deal less damage</li>
+            </ul>
+
+            <h3>6.2 Weapon Speed Effects</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Speed Mod</th>
+                        <th>Effect on Base 0.86s</th>
+                        <th>Fastest Possible</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>+10 (Very Fast)</td>
+                        <td>-0.80s</td>
+                        <td>0.06s (theoretical)</td>
+                    </tr>
+                    <tr>
+                        <td>+5 (Fast)</td>
+                        <td>-0.40s</td>
+                        <td>0.46s</td>
+                    </tr>
+                    <tr>
+                        <td>0 (Normal)</td>
+                        <td>0.00s</td>
+                        <td>0.86s</td>
+                    </tr>
+                    <tr>
+                        <td>-5 (Slow)</td>
+                        <td>+0.40s</td>
+                        <td>1.26s</td>
+                    </tr>
+                    <tr>
+                        <td>-10 (Very Slow)</td>
+                        <td>+0.80s</td>
+                        <td>1.66s</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>7) Weapon Categories</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Melee Weapons</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Weapon</th>
+                            <th>Damage</th>
+                            <th>Speed</th>
+                            <th>Stat Profile</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Short Sword</td>
+                            <td>±0</td>
+                            <td>±0</td>
+                            <td>Balanced baseline</td>
+                        </tr>
+                        <tr>
+                            <td>Warhammer</td>
+                            <td>+6</td>
+                            <td>-5</td>
+                            <td>High damage, slow</td>
+                        </tr>
+                        <tr>
+                            <td>Rapier</td>
+                            <td>-3</td>
+                            <td>+8</td>
+                            <td>Low damage, very fast</td>
+                        </tr>
+                        <tr>
+                            <td>Heavy Sword</td>
+                            <td>+4</td>
+                            <td>-2</td>
+                            <td>High damage, moderately slow</td>
+                        </tr>
+                        <tr>
+                            <td>Dagger</td>
+                            <td>-2</td>
+                            <td>+6</td>
+                            <td>Low damage, fast</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Ranged Weapons</h3>
+                <p class="muted">Ranged weapons overall have lower stat modifiers than melee (range penalty)</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Weapon</th>
+                            <th>Damage</th>
+                            <th>Speed</th>
+                            <th>Stat Profile</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Shortbow</td>
+                            <td>-2</td>
+                            <td>+4</td>
+                            <td>Low damage, fast</td>
+                        </tr>
+                        <tr>
+                            <td>Longbow</td>
+                            <td>+2</td>
+                            <td>-1</td>
+                            <td>Moderate damage, slightly slow</td>
+                        </tr>
+                        <tr>
+                            <td>Crossbow</td>
+                            <td>+3</td>
+                            <td>-3</td>
+                            <td>High damage, slow</td>
+                        </tr>
+                        <tr>
+                            <td>Throwing Knives</td>
+                            <td>-4</td>
+                            <td>+7</td>
+                            <td>Very low damage, very fast</td>
+                        </tr>
+                        <tr>
+                            <td>Sling</td>
+                            <td>-1</td>
+                            <td>+2</td>
+                            <td>Slightly low damage, fast</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Mage Spell Weapons</h3>
+                <p class="muted">Focus on power with moderate speed trade-offs</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Spell/Weapon</th>
+                            <th>Damage</th>
+                            <th>Speed</th>
+                            <th>Stat Profile</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Staff</td>
+                            <td>+5</td>
+                            <td>-2</td>
+                            <td>High damage, moderately slow</td>
+                        </tr>
+                        <tr>
+                            <td>Wand</td>
+                            <td>+1</td>
+                            <td>+3</td>
+                            <td>Moderate damage, fast</td>
+                        </tr>
+                        <tr>
+                            <td>Orb</td>
+                            <td>+7</td>
+                            <td>-4</td>
+                            <td>Very high damage, slow</td>
+                        </tr>
+                        <tr>
+                            <td>Dagger + Magic</td>
+                            <td>+2</td>
+                            <td>+4</td>
+                            <td>Moderate damage, fast</td>
+                        </tr>
+                        <tr>
+                            <td>Fist + Magic</td>
+                            <td>+3</td>
+                            <td>+1</td>
+                            <td>Moderate damage, slightly fast</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h2>8) Pro/Con Balancing</h2>
+        <div class="card">
+            <h3>8.1 Speed vs Damage Trade-off</h3>
+            <p><strong>Why faster weapons have lower damage:</strong></p>
+            <ul>
+                <li>Fast weapons allow more attacks per second but deal less damage per hit</li>
+                <li>Slow weapons deal massive damage but leave you vulnerable between attacks</li>
+                <li>This creates meaningful gameplay choices between rapid strikes and powerful blows</li>
+                <li>Mathematical balance: DPS = (damage_per_hit / attack_cycle)</li>
+            </ul>
+
+            <h3>8.2 Range Penalty</h3>
+            <p><strong>Why ranged has lower stats than melee:</strong></p>
+            <ul>
+                <li>Ranged weapons provide safety at a distance - this power is balanced by lower stat caps</li>
+                <li>Melee weapons require close combat, so they get higher base modifiers</li>
+                <li>Offset: Ranged weapons don't need to deal with direct collision damage</li>
+                <li>Creates clear risk/reward: safety vs. maximum potential</li>
+            </ul>
+
+            <h3>8.3 Strategic Choices Created</h3>
+            <p><strong>How stat modifiers create strategic depth:</strong></p>
+            <ul>
+                <li><strong>Agility vs Power:</strong> Dodge vs damage - turtle vs glass cannon builds</li>
+                <li><strong>Weapon choice:</strong> Do you want to hit hard or hit often?</li>
+                <li><strong>Class synergy:</strong> Archer + speed weapons, Warrior + slow weapons</li>
+                <li><strong>Counterplay:</strong> High defense builds beat damage-focused builds</li>
+                <li><strong>Team roles:</strong> Fast attackers control the pace, slow attackers deliver bursts</li>
+            </ul>
+
+            <h3>8.4 Optimization Boundaries</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Stat</th>
+                        <th>Min</th>
+                        <th>Max</th>
+                        <th>Optimal Range</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Agility</td>
+                        <td>0.00</td>
+                        <td>10.00</td>
+                        <td>5-7 for dodge, 2-3 for heavy builds</td>
+                    </tr>
+                    <tr>
+                        <td>Power</td>
+                        <td>0.00</td>
+                        <td>10.00</td>
+                        <td>7-10 for pure damage, 4-6 for balanced</td>
+                    </tr>
+                    <tr>
+                        <td>Defense</td>
+                        <td>0.00</td>
+                        <td>10.00</td>
+                        <td>5-8 for survivability, 0-2 for glass cannons</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>9) Example Outputs</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Warrior with Warhammer</h3>
+                <ul>
+                    <li>Base Power: 4.00, Weapon: +6 → <strong>10.00</strong></li>
+                    <li>Base Agility: 4.00, Weapon: -5 → <strong>1.50</strong></li>
+                    <li>Dodge: <code>(1.50*2.00) + (4.00*1.00) + (4.00*1.00) = 11.50%</code></li>
+                    <li>Attack cycle: <code>0.86 - 0.15 - 0.08 = 0.63s</code></li>
+                    <li>Damage multiplier: <code>1.00 + (10.00*0.0150) = 1.1500x</code></li>
+                    <li>Final DPS: <code>20 * 1.15 / 0.63 = 36.51 DPS</code></li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Archer with Rapier</h3>
+                <ul>
+                    <li>Base Agility: 5.50, Weapon: +8 → <strong>9.50</strong> (capped)</li>
+                    <li>Base Power: 3.75, Weapon: -3 → <strong>2.00</strong></li>
+                    <li>Dodge: <code>(9.50*2.00) + (2.50*1.00) + (5.00*1.00) = 26.00%</code></li>
+                    <li>Attack cycle: <code>0.86 - 0.95 - 0.11 = -0.20s → 0.22s (floor)</code></li>
+                    <li>Damage multiplier: <code>1.00 + (2.00*0.0150) = 1.0300x</code></li>
+                    <li>Final DPS: <code>20 * 1.03 / 0.22 = 93.64 DPS</code></li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Mage with Orb</h3>
+                <ul>
+                    <li>Base Power: 5.75, Weapon: +7 → <strong>10.00</strong> (capped)</li>
+                    <li>Base Agility: 2.75, Weapon: -4 → <strong>0.00</strong></li>
+                    <li>Dodge: <code>(0.00*2.00) + (2.25*1.00) + (2.50*1.00) = 4.75%</code></li>
+                    <li>Attack cycle: <code>0.86 - 0.00 - 0.06 = 0.80s</code></li>
+                    <li>Damage multiplier: <code>1.00 + (10.00*0.0150) = 1.1500x</code></li>
+                    <li>Final DPS: <code>20 * 1.15 / 0.80 = 28.75 DPS</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>10) Implementation Order (Code)</h2>
+        <ol>
+            <li>Add stat/skill fields to runtime state and class presets.</li>
+            <li>Implement deterministic dodge/crit rolls (no <code>math.random</code>).</li>
+            <li>Convert attack timing to use <code>attack_cycle_sec</code> and derive frame count from <code>SIM_TARGET_HZ</code>.</li>
+            <li>Apply power scaling to outgoing damage and crit multiplier.</li>
+            <li>Apply defense + shield bonus on missed-block damage path (keep 50.00% baseline).</li>
+            <li>Add regen-on-kill hook after enemy death resolution.</li>
+            <li>Expose all stats/skills in debug/status pages.</li>
+        </ol>
+
+        <h2>12) Acceptance Checks</h2>
+        <ul>
+            <li>Stats/skills clamp correctly to <code>0.00..10.00</code>.</li>
+            <li>Weapon modifiers correctly clamp to <code>0.00..10.00</code> after application.</li>
+            <li>Missed-block baseline remains 50.00% when Defense and Shield Bonus are zero.</li>
+            <li>Prime block still negates 100.00% damage.</li>
+            <li>Attack speed never goes below floor (<code>0.22s</code>) even with maximum speed weapons.</li>
+            <li>Dodge and crit are deterministic and stable on VMU Pro.</li>
+            <li>Final weapon stats respect speed/damage trade-offs (fast = low damage, slow = high damage).</li>
+            <li>Ranged weapons apply appropriate range penalty (lower stat caps than melee).</li>
+        </ul>
+    </div>
+</body>
+</html>

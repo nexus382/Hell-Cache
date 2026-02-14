@@ -364,7 +364,16 @@ tryImport("api/display")
 tryImport("api/input")
 tryImport("api/sprites")
 tryImport("api/audio")
+tryImport("api/file")
 tryImport("api/text")
+tryImport("data/classes")
+tryImport("data/items")
+tryImport("data/loot_tables")
+tryImport("data/achievements")
+tryImport("data/score_model")
+tryImport("data/trader_tiers")
+tryImport("data/persistence")
+tryImport("data/runtime_state")
 
 logBoot(vmupro.system.LOG_ERROR, "after imports")
 
@@ -730,6 +739,10 @@ menuSelection = 1    -- Current menu selection
 inOptionsMenu = false -- Currently in options submenu
 optionsSelection = 1  -- Current options selection
 inGameDebugMenu = false -- In-game options: debug submenu
+inSaveMenu = false    -- In-game save submenu
+saveMenuSelection = 1
+saveMenuMessage = ""
+saveMenuMessageTimer = 0
 
 -- Options settings
 soundEnabled = true   -- Sound on/off
@@ -769,8 +782,16 @@ SOLDIER_SPEED_SCALE = 0.15625 -- Adjusted for 24Hz simulation (legacy 30fps tuni
 playerHealth = 100     -- Current health (0-100)
 MAX_HEALTH = 100
 DAMAGE_PER_HIT = 10
+player_build_state = nil
+inventory_state = nil
+stash_state = nil
+achievement_state = nil
+high_score_state = nil
+score_state = nil
 potionSprite = nil
 titleSprite = nil
+classPortraitSprite = nil
+classPortraitSprites = {}
 wallStone = nil
 wallBrick = nil
 wallMoss = nil
@@ -900,6 +921,38 @@ RENDERER_MODE = "exp_hybrid" -- locked single renderer
 DEBUG_DISABLE_ENEMIES = false
 textureDebugFrame = -1
 textureDebugSamples = 0
+
+local function bootstrapExpansionDataLayer()
+    if not ExpansionRuntimeState or not ExpansionRuntimeState.bootstrap then
+        return
+    end
+    local state = ExpansionRuntimeState.bootstrap()
+    if not state then
+        return
+    end
+    player_build_state = state.player_build_state or player_build_state
+    inventory_state = state.inventory_state or inventory_state
+    stash_state = state.stash_state or stash_state
+    achievement_state = state.achievement_state or achievement_state
+    high_score_state = state.high_score_state or high_score_state
+    score_state = state.score_state or score_state
+end
+
+local function beginExpansionRun(levelId)
+    if not ExpansionRuntimeState or not ExpansionRuntimeState.beginRun then
+        return
+    end
+    local state = ExpansionRuntimeState.beginRun(levelId, currentLevel)
+    if not state then
+        return
+    end
+    player_build_state = state.player_build_state or player_build_state
+    inventory_state = state.inventory_state or inventory_state
+    stash_state = state.stash_state or stash_state
+    achievement_state = state.achievement_state or achievement_state
+    high_score_state = state.high_score_state or high_score_state
+    score_state = state.score_state or score_state
+end
 local function wallQuadLog(msg)
     if enableBootLogs and DEBUG_WALL_QUADS_LOG and wallQuadLogCount < 30 then
         print(msg)
@@ -928,7 +981,11 @@ STATE_GAME_OVER = 2
 STATE_WIN = 3
 STATE_LOADING = 4
 gameState = STATE_TITLE
-titleSelection = 1  -- 1=Start, 2=Options, 3=Exit
+titleSelection = 1  -- 1=New Game, 2=Load Game, 3=Options, 4=Exit
+titleInClassSelect = false
+titleClassSelection = 1
+titleInLoadMenu = false
+titleLoadSelection = 1
 titleInOptions = false
 titleInDebug = false
 titleOptionsSelection = 1
@@ -1199,6 +1256,7 @@ normalizeFogRange()
 normalizeMipmapRanges()
 normalizeFarTextureCutoff()
 refreshExpViewDistance()
+bootstrapExpansionDataLayer()
 
 local function isExpRenderer()
     return true
@@ -1260,6 +1318,634 @@ PLAYER_DAMAGE = 20
 PLAYER_ATTACK_RANGE = 1.0  -- Distance player can hit enemy
 soldiersKilled = 0
 local totalSoldiers = 5
+
+SAVE_SLOT_COUNT = 3
+SAVE_FILE_PATH = "/sdcard/inner_sanctum/saves.dat"
+SAVE_FILE_HEADER = "INNER_SANCTUM_SAVE_V1"
+saveSlots = {}
+CLASS_FALLBACK_ORDER = {"warrior", "archer", "mage"}
+CLASS_SELECT_PORTRAIT_PATHS = {
+    warrior = "sprites/WAARRIOR-CHAR-SELECT-sized",
+    archer = "sprites/ARCH-CHAR-SELECT-sized",
+    mage = "sprites/WIZ-CHAR-SELECT-sized",
+}
+CLASS_FALLBACKS = {
+    warrior = {
+        id = "warrior",
+        name = "Warrior",
+        base_hp = 120,
+        base_damage = 20,
+        base_speed = 1.0,
+        primary = "melee",
+        base_defense = 4.00,
+        template_stats = {
+            agility = 4.00,
+            power = 4.00,
+            defense = 4.00,
+            dodge = 4.00,
+            regen = 4.00,
+            crit = 4.00,
+            atk_speed = 4.00,
+            shield_bonus = 4.00,
+        },
+        growth = {hp = 8, damage = 2, speed = 0.0},
+    },
+    archer = {
+        id = "archer",
+        name = "Archer",
+        base_hp = 90,
+        base_damage = 14,
+        base_speed = 1.15,
+        primary = "ranged",
+        base_defense = 2.50,
+        template_stats = {
+            agility = 5.50,
+            power = 3.75,
+            defense = 2.50,
+            dodge = 5.00,
+            regen = 2.50,
+            crit = 3.50,
+            atk_speed = 5.50,
+            shield_bonus = 2.00,
+        },
+        growth = {hp = 5, damage = 2, speed = 0.01},
+    },
+    mage = {
+        id = "mage",
+        name = "Mage",
+        base_hp = 80,
+        base_damage = 18,
+        base_speed = 1.05,
+        primary = "magic",
+        base_defense = 2.25,
+        template_stats = {
+            agility = 2.75,
+            power = 5.75,
+            defense = 2.25,
+            dodge = 2.50,
+            regen = 2.25,
+            crit = 5.25,
+            atk_speed = 2.75,
+            shield_bonus = 1.75,
+        },
+        growth = {hp = 4, damage = 3, speed = 0.0},
+    },
+}
+
+function getClassDefById(classId)
+    local fallbackId = CLASS_FALLBACK_ORDER[1] or "warrior"
+    if getGameClass then
+        local classDef = getGameClass(classId or fallbackId)
+        if classDef and classDef.id then
+            return classDef
+        end
+    end
+    local id = classId or fallbackId
+    if not CLASS_FALLBACKS[id] then
+        id = fallbackId
+    end
+    return CLASS_FALLBACKS[id]
+end
+
+function getClassOrder()
+    if GameClassOrder and #GameClassOrder > 1 then
+        return GameClassOrder
+    end
+    return CLASS_FALLBACK_ORDER
+end
+
+function sanitizeClassId(classId)
+    local classDef = getClassDefById(classId)
+    if classDef and classDef.id then
+        return classDef.id
+    end
+    return CLASS_FALLBACK_ORDER[1] or "warrior"
+end
+
+function getCurrentClassId()
+    if player_build_state and player_build_state.class_id then
+        return sanitizeClassId(player_build_state.class_id)
+    end
+    return sanitizeClassId(nil)
+end
+
+function setCurrentClassId(classId)
+    local normalized = sanitizeClassId(classId)
+    if not player_build_state then
+        player_build_state = {}
+    end
+    player_build_state.class_id = normalized
+    return normalized
+end
+
+function getClassName(classId)
+    local classDef = getClassDefById(classId)
+    if classDef and classDef.name then
+        return classDef.name
+    end
+    return "Warrior"
+end
+
+function getClassTemplateStats(classId, classDef)
+    local source = classDef or getClassDefById(classId)
+    if source and source.template_stats then
+        return source.template_stats
+    end
+    local fallbackId = sanitizeClassId(classId)
+    local fallbackDef = CLASS_FALLBACKS[fallbackId] or CLASS_FALLBACKS[CLASS_FALLBACK_ORDER[1] or "warrior"]
+    if fallbackDef and fallbackDef.template_stats then
+        return fallbackDef.template_stats
+    end
+    return {
+        agility = 4.00,
+        power = 4.00,
+        defense = 4.00,
+        dodge = 4.00,
+        regen = 4.00,
+        crit = 4.00,
+        atk_speed = 4.00,
+        shield_bonus = 4.00,
+    }
+end
+
+function getClassSelectionIndexForId(classId)
+    local order = getClassOrder()
+    local normalized = sanitizeClassId(classId)
+    for i = 1, #order do
+        if order[i] == normalized then
+            return i
+        end
+    end
+    return 1
+end
+
+function getClassIdForSelection(index)
+    local order = getClassOrder()
+    local count = #order
+    if count <= 0 then
+        return "warrior", 1, 1
+    end
+    local idx = math.floor(index or 1)
+    if idx < 1 then idx = count end
+    if idx > count then idx = 1 end
+    return order[idx], idx, count
+end
+
+function toNumber(value, fallback)
+    local n = tonumber(value)
+    if n == nil then
+        return fallback
+    end
+    return n
+end
+
+function splitByPlain(input, separator)
+    local out = {}
+    if input == nil then
+        return out
+    end
+    local text = tostring(input)
+    local sep = separator or ","
+    if sep == "" then
+        out[1] = text
+        return out
+    end
+    local start = 1
+    while true do
+        local idx = string.find(text, sep, start, true)
+        if not idx then
+            out[#out + 1] = string.sub(text, start)
+            break
+        end
+        out[#out + 1] = string.sub(text, start, idx - 1)
+        start = idx + #sep
+    end
+    return out
+end
+
+function sanitizeSaveToken(value)
+    local text = tostring(value or "")
+    text = string.gsub(text, "\r", "")
+    text = string.gsub(text, "\n", "")
+    text = string.gsub(text, "|", "")
+    return text
+end
+
+function makeEmptySaveSlot(slotIndex)
+    return {
+        slot = slotIndex or 1,
+        used = false,
+        level_id = 1,
+        class_id = sanitizeClassId(nil),
+        player_x = 2.5,
+        player_y = 2.5,
+        player_dir = 0,
+        player_health = MAX_HEALTH or 100,
+        soldiers_killed = 0,
+        total_soldiers = 0,
+        enemy_state = "",
+        potion_state = "",
+    }
+end
+
+function copySaveSlot(slot)
+    local src = slot or makeEmptySaveSlot(1)
+    return {
+        slot = src.slot,
+        used = src.used and true or false,
+        level_id = src.level_id,
+        class_id = src.class_id,
+        player_x = src.player_x,
+        player_y = src.player_y,
+        player_dir = src.player_dir,
+        player_health = src.player_health,
+        soldiers_killed = src.soldiers_killed,
+        total_soldiers = src.total_soldiers,
+        enemy_state = src.enemy_state,
+        potion_state = src.potion_state,
+    }
+end
+
+function normalizeSaveSlots()
+    for i = 1, SAVE_SLOT_COUNT do
+        local slot = saveSlots[i]
+        if not slot then
+            slot = makeEmptySaveSlot(i)
+        else
+            slot = copySaveSlot(slot)
+            slot.slot = i
+            slot.used = slot.used and true or false
+            slot.level_id = math.floor(toNumber(slot.level_id, 1))
+            if not LEVELS[slot.level_id] then
+                slot.level_id = 1
+            end
+            slot.class_id = sanitizeClassId(slot.class_id)
+            slot.player_x = toNumber(slot.player_x, 2.5)
+            slot.player_y = toNumber(slot.player_y, 2.5)
+            slot.player_dir = math.floor(toNumber(slot.player_dir, 0)) % 64
+            slot.player_health = math.floor(toNumber(slot.player_health, MAX_HEALTH or 100))
+            if slot.player_health < 1 then slot.player_health = 1 end
+            if slot.player_health > (MAX_HEALTH or 100) then slot.player_health = (MAX_HEALTH or 100) end
+            slot.soldiers_killed = math.floor(toNumber(slot.soldiers_killed, 0))
+            if slot.soldiers_killed < 0 then slot.soldiers_killed = 0 end
+            slot.total_soldiers = math.floor(toNumber(slot.total_soldiers, 0))
+            if slot.total_soldiers < 0 then slot.total_soldiers = 0 end
+            slot.enemy_state = tostring(slot.enemy_state or "")
+            slot.potion_state = tostring(slot.potion_state or "")
+        end
+        saveSlots[i] = slot
+    end
+end
+
+function serializeSaveSlots()
+    normalizeSaveSlots()
+    local lines = {SAVE_FILE_HEADER}
+    for i = 1, SAVE_SLOT_COUNT do
+        local slot = saveSlots[i] or makeEmptySaveSlot(i)
+        lines[#lines + 1] = table.concat({
+            tostring(i),
+            slot.used and "1" or "0",
+            tostring(slot.level_id or 1),
+            sanitizeSaveToken(slot.class_id or "warrior"),
+            string.format("%.4f", toNumber(slot.player_x, 2.5)),
+            string.format("%.4f", toNumber(slot.player_y, 2.5)),
+            tostring(math.floor(toNumber(slot.player_dir, 0)) % 64),
+            tostring(math.floor(toNumber(slot.player_health, MAX_HEALTH or 100))),
+            tostring(math.floor(toNumber(slot.soldiers_killed, 0))),
+            tostring(math.floor(toNumber(slot.total_soldiers, 0))),
+            sanitizeSaveToken(slot.enemy_state or ""),
+            sanitizeSaveToken(slot.potion_state or ""),
+        }, "|")
+    end
+    return table.concat(lines, "\n")
+end
+
+function deserializeSaveSlots(payload)
+    if not payload or payload == "" then
+        return false, "empty_payload"
+    end
+
+    local normalized = string.gsub(tostring(payload), "\r", "")
+    local lines = {}
+    for line in string.gmatch(normalized, "([^\n]+)") do
+        if line and line ~= "" then
+            lines[#lines + 1] = line
+        end
+    end
+    if #lines == 0 then
+        return false, "empty_lines"
+    end
+    if lines[1] ~= SAVE_FILE_HEADER then
+        return false, "invalid_header"
+    end
+
+    saveSlots = {}
+    for i = 2, #lines do
+        local parts = splitByPlain(lines[i], "|")
+        if #parts >= 12 then
+            local slotIndex = math.floor(toNumber(parts[1], 0))
+            if slotIndex >= 1 and slotIndex <= SAVE_SLOT_COUNT then
+                saveSlots[slotIndex] = {
+                    slot = slotIndex,
+                    used = (toNumber(parts[2], 0) ~= 0),
+                    level_id = math.floor(toNumber(parts[3], 1)),
+                    class_id = sanitizeClassId(parts[4]),
+                    player_x = toNumber(parts[5], 2.5),
+                    player_y = toNumber(parts[6], 2.5),
+                    player_dir = math.floor(toNumber(parts[7], 0)) % 64,
+                    player_health = math.floor(toNumber(parts[8], MAX_HEALTH or 100)),
+                    soldiers_killed = math.floor(toNumber(parts[9], 0)),
+                    total_soldiers = math.floor(toNumber(parts[10], 0)),
+                    enemy_state = parts[11] or "",
+                    potion_state = parts[12] or "",
+                }
+            end
+        end
+    end
+
+    normalizeSaveSlots()
+    return true, nil
+end
+
+function hasFileApi()
+    return vmupro and vmupro.file and vmupro.file.read and vmupro.file.write
+end
+
+function writeSaveSlotsToDisk()
+    normalizeSaveSlots()
+    if not hasFileApi() then
+        return false, "file_api_unavailable"
+    end
+
+    if vmupro.file.folderExists and vmupro.file.createFolder then
+        if not vmupro.file.folderExists("/sdcard/inner_sanctum") then
+            local created = vmupro.file.createFolder("/sdcard/inner_sanctum")
+            if not created then
+                return false, "create_folder_failed"
+            end
+        end
+    end
+
+    if vmupro.file.exists and vmupro.file.createFile and (not vmupro.file.exists(SAVE_FILE_PATH)) then
+        vmupro.file.createFile(SAVE_FILE_PATH)
+    end
+
+    local encoded = serializeSaveSlots()
+    local okWrite = vmupro.file.write(SAVE_FILE_PATH, encoded)
+    if not okWrite then
+        return false, "write_failed"
+    end
+    return true, nil
+end
+
+function loadSaveSlotsFromDisk()
+    normalizeSaveSlots()
+    if not hasFileApi() then
+        return false, "file_api_unavailable"
+    end
+    if vmupro.file.exists and (not vmupro.file.exists(SAVE_FILE_PATH)) then
+        return false, "missing_file"
+    end
+    local payload = vmupro.file.read(SAVE_FILE_PATH)
+    if not payload or payload == "" then
+        return false, "read_failed"
+    end
+    return deserializeSaveSlots(payload)
+end
+
+function getSaveSlotSummary(slotIndex)
+    normalizeSaveSlots()
+    local idx = math.floor(toNumber(slotIndex, 1))
+    if idx < 1 then idx = 1 end
+    if idx > SAVE_SLOT_COUNT then idx = SAVE_SLOT_COUNT end
+    local slot = saveSlots[idx] or makeEmptySaveSlot(idx)
+    if not slot.used then
+        return "SLOT " .. tostring(idx), "EMPTY"
+    end
+    local levelLabel = getLevelLabel(slot.level_id or 1)
+    local classLabel = string.upper(getClassName(slot.class_id))
+    return "SLOT " .. tostring(idx), "LEVEL " .. tostring(levelLabel) .. "  " .. classLabel
+end
+
+function countEnemiesInSprites()
+    if not sprites then return 0 end
+    local total = 0
+    for i = 1, #sprites do
+        local s = sprites[i]
+        if s and isEnemyType(s.t) then
+            total = total + 1
+        end
+    end
+    return total
+end
+
+function countDeadEnemiesInSprites()
+    if not sprites then return 0 end
+    local total = 0
+    for i = 1, #sprites do
+        local s = sprites[i]
+        if s and isEnemyType(s.t) and (s.alive == false or s.dead == true) then
+            total = total + 1
+        end
+    end
+    return total
+end
+
+function buildEnemyStateSnapshot()
+    if not sprites then
+        return ""
+    end
+    local entries = {}
+    for i = 1, #sprites do
+        local s = sprites[i]
+        if s and isEnemyType(s.t) then
+            local alive = 1
+            if s.alive == false or s.dead == true then
+                alive = 0
+            end
+            local hp = math.floor(toNumber(s.hp, ENEMY_MAX_HP))
+            if hp < 0 then hp = 0 end
+            entries[#entries + 1] = tostring(alive) .. ":" .. tostring(hp)
+        end
+    end
+    return table.concat(entries, ";")
+end
+
+function buildPotionStateSnapshot()
+    if not sprites then
+        return ""
+    end
+    local entries = {}
+    for i = 1, #sprites do
+        local s = sprites[i]
+        if s and s.t == 7 then
+            entries[#entries + 1] = s.collected and "1" or "0"
+        end
+    end
+    return table.concat(entries, ";")
+end
+
+function applyEnemyStateSnapshot(snapshot)
+    if not sprites then
+        return 0
+    end
+    local entries = splitByPlain(snapshot or "", ";")
+    local enemyIdx = 1
+    local deadCount = 0
+    for i = 1, #sprites do
+        local s = sprites[i]
+        if s and isEnemyType(s.t) then
+            local entry = entries[enemyIdx] or ""
+            if entry ~= "" then
+                local pair = splitByPlain(entry, ":")
+                local aliveFlag = toNumber(pair[1], 1)
+                local hpValue = math.floor(toNumber(pair[2], s.hp or ENEMY_MAX_HP))
+                if hpValue < 0 then hpValue = 0 end
+                if hpValue > 300 then hpValue = 300 end
+                if aliveFlag ~= 0 and hpValue > 0 then
+                    s.alive = true
+                    s.dead = false
+                    s.dying = false
+                    s.hp = hpValue
+                else
+                    s.alive = false
+                    s.dead = true
+                    s.dying = false
+                    s.hp = 0
+                    deadCount = deadCount + 1
+                end
+                s.attackAnim = 0
+                s.attackFrame = 1
+                s.attackDidHit = false
+                s.state = nil
+                s.deathFrame = nil
+                s.deathTick = nil
+            elseif s.alive == false or s.dead == true then
+                deadCount = deadCount + 1
+            end
+            enemyIdx = enemyIdx + 1
+        end
+    end
+    return deadCount
+end
+
+function applyPotionStateSnapshot(snapshot)
+    if not sprites then
+        return
+    end
+    local entries = splitByPlain(snapshot or "", ";")
+    local potionIdx = 1
+    for i = 1, #sprites do
+        local s = sprites[i]
+        if s and s.t == 7 then
+            local entry = entries[potionIdx] or ""
+            if entry ~= "" then
+                s.collected = (toNumber(entry, 0) ~= 0)
+            end
+            potionIdx = potionIdx + 1
+        end
+    end
+end
+
+function captureCurrentSaveSlot(slotIndex)
+    local slot = makeEmptySaveSlot(slotIndex)
+    slot.used = true
+    slot.level_id = currentLevel or 1
+    if not LEVELS[slot.level_id] then
+        slot.level_id = 1
+    end
+    slot.class_id = getCurrentClassId()
+    slot.player_x = toNumber(px, 2.5)
+    slot.player_y = toNumber(py, 2.5)
+    slot.player_dir = math.floor(toNumber(pdir, 0)) % 64
+    slot.player_health = math.floor(toNumber(playerHealth, MAX_HEALTH or 100))
+    if slot.player_health < 1 then slot.player_health = 1 end
+    if slot.player_health > (MAX_HEALTH or 100) then slot.player_health = (MAX_HEALTH or 100) end
+    slot.enemy_state = buildEnemyStateSnapshot()
+    slot.potion_state = buildPotionStateSnapshot()
+    slot.total_soldiers = countEnemiesInSprites()
+    local observedKilled = countDeadEnemiesInSprites()
+    local trackedKilled = math.floor(toNumber(soldiersKilled, 0))
+    if trackedKilled < observedKilled then
+        trackedKilled = observedKilled
+    end
+    if trackedKilled < 0 then trackedKilled = 0 end
+    if trackedKilled > slot.total_soldiers then trackedKilled = slot.total_soldiers end
+    slot.soldiers_killed = trackedKilled
+    return slot
+end
+
+function saveGameToSlot(slotIndex)
+    local idx = math.floor(toNumber(slotIndex, 1))
+    if idx < 1 or idx > SAVE_SLOT_COUNT then
+        return false, "invalid_slot"
+    end
+    normalizeSaveSlots()
+    saveSlots[idx] = captureCurrentSaveSlot(idx)
+    local okWrite, errWrite = writeSaveSlotsToDisk()
+    if not okWrite and errWrite ~= "file_api_unavailable" then
+        return false, errWrite
+    end
+    return true, nil
+end
+
+function loadGameFromSlot(slotIndex)
+    local idx = math.floor(toNumber(slotIndex, 1))
+    if idx < 1 or idx > SAVE_SLOT_COUNT then
+        return false, "invalid_slot"
+    end
+    normalizeSaveSlots()
+    local slot = saveSlots[idx]
+    if not slot or not slot.used then
+        return false, "empty_slot"
+    end
+    local levelId = math.floor(toNumber(slot.level_id, 1))
+    if not LEVELS[levelId] then
+        return false, "invalid_level"
+    end
+
+    beginLoadLevel(levelId)
+    setCurrentClassId(slot.class_id)
+
+    px = toNumber(slot.player_x, px or 2.5)
+    py = toNumber(slot.player_y, py or 2.5)
+    pdir = math.floor(toNumber(slot.player_dir, pdir or 0)) % 64
+    lastSafeWallX = px
+    lastSafeWallY = py
+
+    playerHealth = math.floor(toNumber(slot.player_health, MAX_HEALTH or 100))
+    if playerHealth < 1 then playerHealth = 1 end
+    if playerHealth > (MAX_HEALTH or 100) then playerHealth = (MAX_HEALTH or 100) end
+
+    local restoredDead = applyEnemyStateSnapshot(slot.enemy_state)
+    applyPotionStateSnapshot(slot.potion_state)
+    totalSoldiers = countEnemiesInSprites()
+    local savedKilled = math.floor(toNumber(slot.soldiers_killed, restoredDead))
+    if savedKilled < restoredDead then savedKilled = restoredDead end
+    if savedKilled < 0 then savedKilled = 0 end
+    if savedKilled > totalSoldiers then savedKilled = totalSoldiers end
+    soldiersKilled = savedKilled
+
+    showMenu = false
+    inOptionsMenu = false
+    inSaveMenu = false
+    saveMenuSelection = 1
+    saveMenuMessage = ""
+    saveMenuMessageTimer = 0
+
+    if totalSoldiers > 0 and soldiersKilled >= totalSoldiers then
+        gameState = STATE_WIN
+        winSelection = 1
+        winCooldown = 0
+        winBannerTimer = winBannerMax
+    end
+
+    return true, nil
+end
+
+normalizeSaveSlots()
+loadSaveSlotsFromDisk()
+titleClassSelection = getClassSelectionIndexForId(getCurrentClassId())
 
 -- Blood particle effects
 local bloodEffects = {}  -- {x, y, particles={{dx, dy, life}...}}
@@ -1499,6 +2185,14 @@ end
 local function unloadMenuSprites()
     freeSpriteRef(titleSprite)
     titleSprite = nil
+    if classPortraitSprites then
+        for _, spriteRef in pairs(classPortraitSprites) do
+            freeSpriteRef(spriteRef)
+        end
+    end
+    classPortraitSprites = {}
+    freeSpriteRef(classPortraitSprite)
+    classPortraitSprite = nil
 end
 
 local function unloadLevelSprites()
@@ -1573,6 +2267,27 @@ local function loadMenuSprites()
         if not validateSprite(titleSprite, "loadMenuSprites") then
             safeLog("ERROR", "Failed to load title sprite")
             titleSprite = nil
+        end
+    end
+    if not classPortraitSprite then
+        classPortraitSprite = vmupro.sprite.new("sprites/level1/warrior_front")
+        if not validateSprite(classPortraitSprite, "classPortraitSprite") then
+            classPortraitSprite = nil
+        end
+    end
+    if not classPortraitSprites then
+        classPortraitSprites = {}
+    end
+    if CLASS_SELECT_PORTRAIT_PATHS then
+        for classId, spritePath in pairs(CLASS_SELECT_PORTRAIT_PATHS) do
+            if spritePath and (not classPortraitSprites[classId]) then
+                local okPortrait, spriteRef = pcall(vmupro.sprite.new, spritePath)
+                if okPortrait and validateSprite(spriteRef, "classPortrait:" .. tostring(classId)) then
+                    classPortraitSprites[classId] = spriteRef
+                else
+                    classPortraitSprites[classId] = nil
+                end
+            end
         end
     end
 end
@@ -2205,9 +2920,21 @@ end
 
 local function enterTitle()
     showMenu = false
+    inOptionsMenu = false
+    inGameDebugMenu = false
+    inSaveMenu = false
+    saveMenuSelection = 1
+    saveMenuMessage = ""
+    saveMenuMessageTimer = 0
     gameState = STATE_TITLE
     titleSelection = 1
+    titleInClassSelect = false
+    titleClassSelection = getClassSelectionIndexForId(getCurrentClassId())
+    titleInLoadMenu = false
+    titleLoadSelection = 1
     titleInOptions = false
+    titleInDebug = false
+    loadSaveSlotsFromDisk()
     titleNeedsRedraw = true
     unloadLevelAudio()
     unloadLevelSprites()
@@ -2221,11 +2948,18 @@ end
 local function initializeLevelState(levelId)
     loadLevel(levelId)
     playerHealth = MAX_HEALTH
+    beginExpansionRun(levelId)
     soldiersKilled = 0
     isAttacking = 0
     isBlocking = false
     blockAnim = 0
     showMenu = false
+    inOptionsMenu = false
+    inGameDebugMenu = false
+    inSaveMenu = false
+    saveMenuSelection = 1
+    saveMenuMessage = ""
+    saveMenuMessageTimer = 0
     bloodEffects = {}
     levelBannerTimer = levelBannerMax
 end
@@ -2254,7 +2988,7 @@ local function restartLevel()
     startLevel(currentLevel)
 end
 
-local function beginLoadLevel(levelId)
+beginLoadLevel = function(levelId)
     pendingLevelStart = nil
     loadingTimer = 0
     loadingLogCount = 0
@@ -3290,7 +4024,99 @@ local function drawTitleScreenImpl()
         vmupro.graphics.clear(COLOR_BLACK)
     end
 
-    if titleInOptions then
+    if titleInClassSelect then
+        vmupro.graphics.clear(COLOR_DARK_GRAY)
+
+        local classId = getClassIdForSelection(titleClassSelection)
+        local classDef = getClassDefById(classId)
+        local className = string.upper(getClassName(classId))
+
+        vmupro.graphics.drawFillRect(8, 8, 232, 32, COLOR_GRAY)
+        drawRectOutline(8, 8, 232, 32, COLOR_LIGHT_GRAY)
+        setFontCached(vmupro.text.FONT_SMALL)
+        local titleText = "< " .. className .. " >"
+        local titleX = 120 - math.floor((#titleText * 8) / 2)
+        if titleX < 12 then titleX = 12 end
+        drawMenuText(titleText, titleX, 14, COLOR_BLACK)
+
+        vmupro.graphics.drawFillRect(8, 40, 116, 232, COLOR_GRAY)
+        drawRectOutline(8, 40, 116, 232, COLOR_LIGHT_GRAY)
+        vmupro.graphics.drawFillRect(124, 40, 232, 232, COLOR_GRAY)
+        drawRectOutline(124, 40, 232, 232, COLOR_LIGHT_GRAY)
+
+        local classPortrait = nil
+        if classPortraitSprites and classPortraitSprites[classId] then
+            classPortrait = classPortraitSprites[classId]
+        else
+            classPortrait = classPortraitSprite
+        end
+        if classPortrait and classPortrait.width and classPortrait.height then
+            local desiredHeight = 187 -- 15% larger than previous 163px target
+            local scale = safeDivide(desiredHeight, classPortrait.height, "titleClassPortraitSingle")
+            local scaledW = classPortrait.width * scale
+            local scaledH = classPortrait.height * scale
+            local drawX = 178 - math.floor(scaledW / 2)
+            local drawY = 224 - math.floor(scaledH)
+            if drawY < 40 then drawY = 40 end
+            vmupro.sprite.drawScaled(classPortrait, drawX, drawY, scale, scale, vmupro.sprite.kImageUnflipped)
+        end
+
+        local stats = getClassTemplateStats(classId, classDef)
+        local statAgi = toNumber(stats.agility, 0.0)
+        local statPow = toNumber(stats.power, 0.0)
+        local statDef = toNumber(stats.defense, 0.0)
+        local statDod = toNumber(stats.dodge, 0.0)
+        local statReg = toNumber(stats.regen, 0.0)
+        local statCrit = toNumber(stats.crit, 0.0)
+        local statAtkSpd = toNumber(stats.atk_speed, 0.0)
+        local statShield = toNumber(stats.shield_bonus, 0.0)
+        local statStartY = 62
+        local statStepY = 13 -- 8px font height + 5px spacing
+
+        setFontCached(vmupro.text.FONT_TINY_6x8)
+        drawMenuText("STATS", 42, 46, COLOR_BLACK)
+        drawMenuText("AGILITY", 12, statStartY + (statStepY * 0), COLOR_BLACK)
+        drawMenuText(string.format("%.2f", statAgi), 76, statStartY + (statStepY * 0), COLOR_BLACK)
+        drawMenuText("POWER", 12, statStartY + (statStepY * 1), COLOR_BLACK)
+        drawMenuText(string.format("%.2f", statPow), 76, statStartY + (statStepY * 1), COLOR_BLACK)
+        drawMenuText("DEFENSE", 12, statStartY + (statStepY * 2), COLOR_BLACK)
+        drawMenuText(string.format("%.2f", statDef), 76, statStartY + (statStepY * 2), COLOR_BLACK)
+        drawMenuText("DODGE", 12, statStartY + (statStepY * 3), COLOR_BLACK)
+        drawMenuText(string.format("%.2f", statDod), 76, statStartY + (statStepY * 3), COLOR_BLACK)
+        drawMenuText("REGEN", 12, statStartY + (statStepY * 4), COLOR_BLACK)
+        drawMenuText(string.format("%.2f", statReg), 76, statStartY + (statStepY * 4), COLOR_BLACK)
+        drawMenuText("CRIT", 12, statStartY + (statStepY * 5), COLOR_BLACK)
+        drawMenuText(string.format("%.2f", statCrit), 76, statStartY + (statStepY * 5), COLOR_BLACK)
+        drawMenuText("ATK SPD", 12, statStartY + (statStepY * 6), COLOR_BLACK)
+        drawMenuText(string.format("%.2f", statAtkSpd), 76, statStartY + (statStepY * 6), COLOR_BLACK)
+        drawMenuText("SHIELD", 12, statStartY + (statStepY * 7), COLOR_BLACK)
+        drawMenuText(string.format("%.2f", statShield), 76, statStartY + (statStepY * 7), COLOR_BLACK)
+
+        vmupro.graphics.drawFillRect(0, 220, 239, 239, COLOR_GRAY)
+        drawRectOutline(0, 220, 239, 239, COLOR_LIGHT_GRAY)
+        setFontCached(vmupro.text.FONT_TINY_6x8)
+        drawUiText("LEFT/RIGHT CHANGE   A CONTINUE   B BACK", 3, 227, COLOR_BLACK, COLOR_GRAY)
+    elseif titleInLoadMenu then
+        drawUiPanel(16, 44, 224, 239, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
+        drawUiPanel(26, 54, 214, 76, COLOR_MAROON, COLOR_WHITE)
+        setFontCached(vmupro.text.FONT_SMALL)
+        drawMenuText("LOAD GAME", 74, 59, COLOR_WHITE)
+        for i = 1, SAVE_SLOT_COUNT do
+            local y = 86 + (i - 1) * 48
+            local textColor = COLOR_LIGHT_GRAY
+            if i == titleLoadSelection then
+                drawUiPanel(26, y, 214, y + 38, COLOR_MAROON, COLOR_WHITE)
+                textColor = COLOR_WHITE
+            end
+            local line1, line2 = getSaveSlotSummary(i)
+            setFontCached(vmupro.text.FONT_SMALL)
+            drawMenuText(line1, 34, y + 4, textColor)
+            setFontCached(vmupro.text.FONT_TINY_6x8)
+            drawMenuText(line2, 34, y + 22, textColor)
+        end
+        setFontCached(vmupro.text.FONT_TINY_6x8)
+        drawMenuText("A/MODE LOAD  B BACK", 56, 228, COLOR_WHITE)
+    elseif titleInOptions then
         -- Options submenu
         logBoot(vmupro.system.LOG_ERROR, "D title options text")
         -- Large single-column menu box (extend to bottom)
@@ -3349,19 +4175,19 @@ local function drawTitleScreenImpl()
     else
         -- Main title menu
         logBoot(vmupro.system.LOG_ERROR, "D title main text")
-        -- Compact menu box for 3 items
-        drawUiPanel(60, 140, 180, 230, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
+        -- Compact menu box for 4 items
+        drawUiPanel(52, 132, 188, 232, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
         setFontCached(vmupro.text.FONT_SMALL)
-        local items = {"START GAME", "OPTIONS", "EXIT"}
+        local items = {"NEW GAME", "LOAD GAME", "OPTIONS", "EXIT"}
         for i, item in ipairs(items) do
-            local y = 153 + (i - 1) * 18
+            local y = 142 + (i - 1) * 22
             local textColor = COLOR_GRAY
             if i == titleSelection then
-                drawUiPanel(70, y, 170, y + 18, COLOR_MAROON, COLOR_WHITE)
+                drawUiPanel(62, y, 178, y + 20, COLOR_MAROON, COLOR_WHITE)
                 textColor = COLOR_WHITE
             end
             setFontCached(vmupro.text.FONT_SMALL)
-            drawMenuText(item, 78, y + 2, textColor)
+            drawMenuText(item, 72, y + 3, textColor)
         end
     end
 end
@@ -3755,6 +4581,16 @@ local function getFogAccentColor(baseColor)
     return COLOR_LIGHT_GRAY
 end
 
+local FOG_HATCH_PROFILES = {
+    -- 1 = finest/thickest, 6 = ultra-light/cheapest
+    [1] = {band_h = 1, fill_gate = 1, diag_a_step = 4,  diag_b_step = 6,  cross_enable_threshold = 2},
+    [2] = {band_h = 2, fill_gate = 1, diag_a_step = 5,  diag_b_step = 7,  cross_enable_threshold = 3},
+    [3] = {band_h = 3, fill_gate = 1, diag_a_step = 7,  diag_b_step = 10, cross_enable_threshold = 4},
+    [4] = {band_h = 4, fill_gate = 2, diag_a_step = 9,  diag_b_step = 13, cross_enable_threshold = 5},
+    [5] = {band_h = 5, fill_gate = 2, diag_a_step = 12, diag_b_step = 16, cross_enable_threshold = 6},
+    [6] = {band_h = 6, fill_gate = 3, diag_a_step = 15, diag_b_step = 20, cross_enable_threshold = 7},
+}
+
 local function drawFogOverlayArea(x1, y1, x2, y2, fogAlpha)
     if fogAlpha <= 0 then
         return
@@ -3772,10 +4608,16 @@ local function drawFogOverlayArea(x1, y1, x2, y2, fogAlpha)
     local ditherSize = FOG_DITHER_SIZE or 3
     if ditherSize < 1 then ditherSize = 1 end
     if ditherSize > 6 then ditherSize = 6 end
-    -- Tie hatch pitch directly to the menu setting:
-    -- lower = finer quality, higher = larger/cheaper hatch.
-    local hatchPitch = (ditherSize * 2) - 1
-    if hatchPitch < 1 then hatchPitch = 1 end
+    local profile = FOG_HATCH_PROFILES[ditherSize] or FOG_HATCH_PROFILES[3]
+    local bandH = profile.band_h or 3
+    local fillGate = profile.fill_gate or 1
+    local diagStepA = profile.diag_a_step or 7
+    local diagStepB = profile.diag_b_step or 10
+    local crossThresh = profile.cross_enable_threshold or 4
+    if bandH < 1 then bandH = 1 end
+    if fillGate < 1 then fillGate = 1 end
+    if diagStepA < 2 then diagStepA = 2 end
+    if diagStepB < 3 then diagStepB = 3 end
 
     if fogAlpha >= 1.0 then
         -- Full fog path must stay cheap: single fill call.
@@ -3783,35 +4625,32 @@ local function drawFogOverlayArea(x1, y1, x2, y2, fogAlpha)
         return
     end
 
-    -- Lightweight cross-hatch fog:
-    -- 1) sparse band fill
-    -- 2) slash hatch
-    -- 3) backslash hatch at higher density
+    -- Quality ladder:
+    -- lower dither profile = denser/thicker hatch
+    -- higher dither profile = sparser/cheaper hatch
     local levels = 12
     local coverage = math.floor((fogAlpha * levels) + 0.5)
     if coverage < 1 then return end
     if coverage > levels then coverage = levels end
-    local bandH = hatchPitch
-    local accentStepA = (hatchPitch * 2) + 3
-    local accentStepB = accentStepA + hatchPitch + 2
-    local xCell = math.floor(x1 / hatchPitch)
+    local xCell = math.floor(x1 / bandH)
     local threshold = coverage / levels
     for y = y1, y2, bandH do
         local yb = y + bandH - 1
         if yb > y2 then yb = y2 end
         local rowIdx = math.floor(y / bandH)
         local bandMix = ((rowIdx * 3 + xCell) % levels) / levels
-        if bandMix < threshold then
+        local passFillGate = (fillGate <= 1) or (((rowIdx + xCell) % fillGate) == 0)
+        if passFillGate and bandMix < threshold then
             vmupro.graphics.drawFillRect(x1, y, x2, yb, fogPrimary)
             if coverage >= 3 then
-                local startA = x1 + ((rowIdx * hatchPitch + x1) % accentStepA)
+                local startA = x1 + ((rowIdx * bandH + x1) % diagStepA)
                 if startA <= x2 then
                     vmupro.graphics.drawFillRect(startA, y, startA, yb, fogAccent)
                 end
             end
-            if coverage >= 7 then
-                local rowPhase = (rowIdx * (hatchPitch + 1) + x1) % accentStepB
-                local startB = x1 + ((accentStepB - rowPhase) % accentStepB)
+            if coverage >= crossThresh then
+                local rowPhase = (rowIdx * (bandH + 1) + x1) % diagStepB
+                local startB = x1 + ((diagStepB - rowPhase) % diagStepB)
                 if startB <= x2 then
                     vmupro.graphics.drawFillRect(startB, y, startB, yb, fogAccentCross)
                 end
@@ -5522,6 +6361,30 @@ local function renderGameFrame()
                     drawMenuText(label, 54, y + 1, textColor)
                 end
             end
+        elseif inSaveMenu then
+            drawUiPanel(32, 42, 208, 234, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
+            drawUiPanel(40, 50, 200, 72, COLOR_MAROON, COLOR_WHITE)
+            setFontCached(vmupro.text.FONT_SMALL)
+            drawMenuText("SAVE GAME", 72, 55, COLOR_WHITE)
+            for i = 1, SAVE_SLOT_COUNT do
+                local y = 82 + (i - 1) * 48
+                local textColor = COLOR_LIGHT_GRAY
+                if i == saveMenuSelection then
+                    drawUiPanel(40, y, 200, y + 40, COLOR_MAROON, COLOR_WHITE)
+                    textColor = COLOR_WHITE
+                end
+                local line1, line2 = getSaveSlotSummary(i)
+                setFontCached(vmupro.text.FONT_SMALL)
+                drawMenuText(line1, 48, y + 5, textColor)
+                setFontCached(vmupro.text.FONT_TINY_6x8)
+                drawMenuText(line2, 48, y + 23, textColor)
+            end
+            setFontCached(vmupro.text.FONT_TINY_6x8)
+            if saveMenuMessage and saveMenuMessage ~= "" and saveMenuMessageTimer > 0 then
+                drawMenuText(saveMenuMessage, 48, 224, COLOR_WHITE)
+            else
+                drawMenuText("A/MODE SAVE  B BACK", 48, 224, COLOR_WHITE)
+            end
         else
             -- Main pause menu
             drawUiPanel(50, 60, 190, 225, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
@@ -5531,7 +6394,7 @@ local function renderGameFrame()
             setFontCached(vmupro.text.FONT_SMALL)
             drawMenuText("PAUSED", 88, 75, COLOR_WHITE)
             -- Menu items
-            local items = {"RESUME", "OPTIONS", "RESTART", "MENU", "QUIT"}
+            local items = {"RESUME", "SAVE GAME", "OPTIONS", "RESTART", "MENU", "QUIT"}
             for i, item in ipairs(items) do
                 local y = 95 + (i - 1) * 20
                 local textColor = COLOR_LIGHT_GRAY
@@ -5622,6 +6485,9 @@ end
 
 local function runSimulationStep()
     simTickCount = simTickCount + 1
+    if saveMenuMessageTimer and saveMenuMessageTimer > 0 then
+        saveMenuMessageTimer = saveMenuMessageTimer - 1
+    end
 
     if gameState == STATE_PLAYING and not showMenu then
         if levelBannerTimer > 0 then
@@ -5825,6 +6691,10 @@ function AppMain()
             -- Title screen handling
             if gameState == STATE_TITLE then
                 local prevTitleSelection = titleSelection
+                local prevTitleInClassSelect = titleInClassSelect
+                local prevTitleClassSelection = titleClassSelection
+                local prevTitleInLoadMenu = titleInLoadMenu
+                local prevTitleLoadSelection = titleLoadSelection
                 local prevTitleInOptions = titleInOptions
                 local prevTitleOptionsSelection = titleOptionsSelection
                 local prevTitleDebugSelection = titleDebugSelection
@@ -5864,7 +6734,48 @@ function AppMain()
                 local prevWall1Format = WALL1_FORMAT_INDEX
                 local prevWallKey = WALL_FORCE_COLORKEY_OVERRIDE
                 local prevWallProjection = WALL_PROJECTION_MODE
-                if titleInOptions then
+                if titleInClassSelect then
+                    local classCount = #getClassOrder()
+                    if classCount < 1 then classCount = 1 end
+                    if classCount > 3 then classCount = 3 end
+                    if titleClassSelection < 1 then titleClassSelection = 1 end
+                    if titleClassSelection > classCount then titleClassSelection = classCount end
+                    if vmupro.input.pressed(vmupro.input.LEFT) or vmupro.input.pressed(vmupro.input.UP) then
+                        titleClassSelection = titleClassSelection - 1
+                        if titleClassSelection < 1 then titleClassSelection = classCount end
+                    end
+                    if vmupro.input.pressed(vmupro.input.RIGHT) or vmupro.input.pressed(vmupro.input.DOWN) then
+                        titleClassSelection = titleClassSelection + 1
+                        if titleClassSelection > classCount then titleClassSelection = 1 end
+                    end
+                    if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
+                        local classId = getClassIdForSelection(titleClassSelection)
+                        setCurrentClassId(classId)
+                        titleInClassSelect = false
+                        local selectedEntry = LEVEL_SELECT_LIST[selectedLevel]
+                        if selectedEntry then
+                            beginLoadLevel(selectedEntry.id)
+                        end
+                    end
+                    if vmupro.input.pressed(vmupro.input.B) or vmupro.input.pressed(vmupro.input.POWER) then
+                        titleInClassSelect = false
+                    end
+                elseif titleInLoadMenu then
+                    if vmupro.input.pressed(vmupro.input.UP) or vmupro.input.pressed(vmupro.input.LEFT) then
+                        titleLoadSelection = titleLoadSelection - 1
+                        if titleLoadSelection < 1 then titleLoadSelection = SAVE_SLOT_COUNT end
+                    end
+                    if vmupro.input.pressed(vmupro.input.DOWN) or vmupro.input.pressed(vmupro.input.RIGHT) then
+                        titleLoadSelection = titleLoadSelection + 1
+                        if titleLoadSelection > SAVE_SLOT_COUNT then titleLoadSelection = 1 end
+                    end
+                    if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
+                        loadGameFromSlot(titleLoadSelection)
+                    end
+                    if vmupro.input.pressed(vmupro.input.B) or vmupro.input.pressed(vmupro.input.POWER) then
+                        titleInLoadMenu = false
+                    end
+                elseif titleInOptions then
                     if titleInDebug then
                         local dbgCount = getDebugMenuItemCount()
                         if vmupro.input.pressed(vmupro.input.UP) then
@@ -5933,30 +6844,33 @@ function AppMain()
                     -- Title main menu
                     if vmupro.input.pressed(vmupro.input.UP) then
                         titleSelection = titleSelection - 1
-                        if titleSelection < 1 then titleSelection = 3 end
+                        if titleSelection < 1 then titleSelection = 4 end
                     end
                     if vmupro.input.pressed(vmupro.input.DOWN) then
                         titleSelection = titleSelection + 1
-                        if titleSelection > 3 then titleSelection = 1 end
+                        if titleSelection > 4 then titleSelection = 1 end
                     end
                     if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
                         if titleSelection == 1 then
-                            -- Start game
-                            local selectedEntry = LEVEL_SELECT_LIST[selectedLevel]
-                            if selectedEntry then
-                                beginLoadLevel(selectedEntry.id)
-                            end
+                            titleInClassSelect = true
+                            titleClassSelection = getClassSelectionIndexForId(getCurrentClassId())
                         elseif titleSelection == 2 then
-                            -- Options
+                            loadSaveSlotsFromDisk()
+                            titleInLoadMenu = true
+                            titleLoadSelection = 1
+                        elseif titleSelection == 3 then
                             titleInOptions = true
                             titleOptionsSelection = 1
-                        elseif titleSelection == 3 then
-                            -- Exit
+                        elseif titleSelection == 4 then
                             quitApp("title exit")
                         end
                     end
                 end
                 if prevTitleSelection ~= titleSelection
+                    or prevTitleInClassSelect ~= titleInClassSelect
+                    or prevTitleClassSelection ~= titleClassSelection
+                    or prevTitleInLoadMenu ~= titleInLoadMenu
+                    or prevTitleLoadSelection ~= titleLoadSelection
                     or prevTitleInOptions ~= titleInOptions
                     or prevTitleOptionsSelection ~= titleOptionsSelection
                     or prevTitleDebugSelection ~= titleDebugSelection
@@ -6113,34 +7027,64 @@ function AppMain()
                             inOptionsMenu = false  -- Back to main menu
                         end
                     end
+                elseif inSaveMenu then
+                    if vmupro.input.pressed(vmupro.input.UP) then
+                        saveMenuSelection = saveMenuSelection - 1
+                        if saveMenuSelection < 1 then saveMenuSelection = SAVE_SLOT_COUNT end
+                    end
+                    if vmupro.input.pressed(vmupro.input.DOWN) then
+                        saveMenuSelection = saveMenuSelection + 1
+                        if saveMenuSelection > SAVE_SLOT_COUNT then saveMenuSelection = 1 end
+                    end
+                    if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
+                        local okSave = false
+                        okSave, _ = saveGameToSlot(saveMenuSelection)
+                        if okSave then
+                            saveMenuMessage = "SAVED TO SLOT " .. tostring(saveMenuSelection)
+                        else
+                            saveMenuMessage = "SAVE FAILED"
+                        end
+                        saveMenuMessageTimer = 90
+                    end
+                    if vmupro.input.pressed(vmupro.input.POWER) or vmupro.input.pressed(vmupro.input.B) then
+                        inSaveMenu = false
+                        saveMenuMessage = ""
+                        saveMenuMessageTimer = 0
+                    end
                 else
                     -- Main pause menu
                     if vmupro.input.pressed(vmupro.input.UP) then
                         menuSelection = menuSelection - 1
-                        if menuSelection < 1 then menuSelection = 5 end
+                        if menuSelection < 1 then menuSelection = 6 end
                     end
                     if vmupro.input.pressed(vmupro.input.DOWN) then
                         menuSelection = menuSelection + 1
-                        if menuSelection > 5 then menuSelection = 1 end
+                        if menuSelection > 6 then menuSelection = 1 end
                     end
                     if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
                         if menuSelection == 1 then
                             showMenu = false  -- Resume
                         elseif menuSelection == 2 then
+                            inSaveMenu = true
+                            saveMenuSelection = 1
+                            saveMenuMessage = ""
+                            saveMenuMessageTimer = 0
+                        elseif menuSelection == 3 then
                             inOptionsMenu = true  -- Enter options
                             optionsSelection = 1
-                        elseif menuSelection == 3 then
+                            inGameDebugMenu = false
+                        elseif menuSelection == 4 then
                             -- Reset position and health
                             px, py, pdir = 2.5, 2.5, 0
                             lastSafeWallX = px
                             lastSafeWallY = py
                             playerHealth = MAX_HEALTH
                             showMenu = false
-                        elseif menuSelection == 4 then
+                        elseif menuSelection == 5 then
                             -- Return to title menu
                             showMenu = false
                             enterTitle()
-                        elseif menuSelection == 5 then
+                        elseif menuSelection == 6 then
                             quitApp("game over quit")  -- Quit
                         end
                     end
@@ -6277,6 +7221,12 @@ function AppMain()
                         if simStep == 1 and pressedPower then
                             showMenu = true
                             menuSelection = 1
+                            inOptionsMenu = false
+                            inGameDebugMenu = false
+                            inSaveMenu = false
+                            saveMenuSelection = 1
+                            saveMenuMessage = ""
+                            saveMenuMessageTimer = 0
                             break
                         end
                     end

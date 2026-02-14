@@ -38,7 +38,7 @@ my_app/
 └── libraries/       # Optional: custom modules
     ├── utils.lua
     └── helpers.lua
-```
+```[p]
 
 2. **Write your main application (`app.lua`):**
 ```lua
