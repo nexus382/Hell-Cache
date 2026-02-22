@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(du:*)",
+      "Bash(python3:*)",
+      "Bash(ls:*)",
+      "mcp__plugin_oh-my-claudecode_omc-tools__lsp_document_symbols",
+      "mcp__plugin_oh-my-claudecode_omc-tools__ast_grep_search"
+    ]
+  }
+}

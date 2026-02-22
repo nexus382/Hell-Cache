@@ -95,6 +95,7 @@
       <a href="#b151-155">Builds 151-155</a>
       <a href="#b156-160">Builds 156-160</a>
       <a href="#b161-165">Builds 161-165</a>
+      <a href="#b166-170">Builds 166-170</a>
     </div>
 
     <div class="panel" id="rules">
@@ -421,6 +422,43 @@
         <ul>
           <li>Fixed full-game mute regression by re-enabling sample audio runtime (<code>ENABLE_SAMPLE_AUDIO = true</code>).</li>
           <li>Title music/voice and gameplay SFX paths are active again because sample load/play early-outs are no longer forced.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 165</h3>
+        <ul>
+          <li>Implemented Doom Plan Phase 0 baseline optimizations in gameplay/UI hot paths.</li>
+          <li>AI loop optimization: in <code>updateSoldiers</code>, range checks now use squared distances first, and <code>safeAtan2</code>-derived player-facing direction is cached per soldier update tick instead of recomputed in multiple branches.</li>
+          <li>Added build-state dirty-flag fast path for <code>ensurePlayerBuildState</code> and wired dirty marks into known mutation points (class change, stat allocation, mastery spend, XP/level mutations, runtime bootstrap/load operations).</li>
+          <li>Moved static title/game-over/pause menu item literals to module-level constants to reduce per-frame table allocations and GC pressure.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="panel" id="b166-170">
+      <h2>Builds 166-170</h2>
+      <div class="build">
+        <h3>Build 166</h3>
+        <ul>
+          <li>Started Doom Plan Phase 1 with a low-risk fog optimization pass: added precomputed fog lookup tables for linear and quantized fog factors.</li>
+          <li>Fog LUTs are rebuilt when fog start/end range is normalized, then reused in render-time fog factor queries to reduce repeated per-column math in hot paths.</li>
+          <li>Kept fallback math paths in <code>getFogFactor</code> and <code>getFogQuantizedFactor</code> for safety if LUT data is unavailable.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 167</h3>
+        <ul>
+          <li>Continued Doom Plan Phase 1 renderer optimization by batching contiguous no-hit fog-curtain columns into a single draw/timing/counter path instead of issuing one curtain draw per segment.</li>
+          <li>Hoisted per-frame constants out of the per-ray loop in <code>renderWallsExperimentalHybrid</code> (near clip, fog cutoff, far texture cutoff flags, and texture-height gate) to reduce hot-path per-column work.</li>
+          <li>Added <code>drawBufferedFogCurtainSpan</code> helper so fog-curtain batching preserves existing fog metrics while lowering draw-call overhead in no-hit regions.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 168</h3>
+        <ul>
+          <li>Implemented Phase 1 wall-column state caching in the textured wall path: added <code>getWallSheetMetricsCached</code> to reuse per-wall-type frame metrics instead of re-reading sprite sheet metadata every column.</li>
+          <li>Optimized textured column draws to reuse already-computed render-loop context by passing cached fog alpha and perf monitor flags into <code>drawWallTextureColumn</code>, removing duplicate per-column hot-path checks.</li>
+          <li>Switched mip frame-group selection to a lookup table (<code>MIP_FRAME_GROUP_SIZE</code>) for cheaper tier quantization in the texture-column loop.</li>
         </ul>
       </div>
     </div>

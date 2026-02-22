@@ -767,6 +767,11 @@ masteryMenuSelection = 1
 masteryMenuMessage = ""
 masteryMenuMessageTimer = 0
 
+-- Static menu labels to avoid per-frame table allocations.
+TITLE_MAIN_MENU_ITEMS = {"NEW GAME", "LOAD GAME", "OPTIONS", "EXIT"}
+GAME_OVER_MENU_ITEMS = {"RESTART", "MENU", "QUIT"}
+PAUSE_MENU_ITEMS = {"RESUME", "SAVE GAME", "STATS", "MASTERIES", "OPTIONS", "RESTART", "MENU", "QUIT"}
+
 -- Options settings
 soundEnabled = true   -- Sound on/off
 ENABLE_SAMPLE_AUDIO = true -- Re-enable sample audio for title/game SFX playback.
@@ -808,6 +813,7 @@ MAX_HEALTH = 100
 DAMAGE_PER_HIT = 10
 playerRegenAccumulator = 0.0
 player_build_state = nil
+playerBuildStateDirty = true
 inventory_state = nil
 stash_state = nil
 achievement_state = nil
@@ -932,6 +938,11 @@ FOG_COLOR = FOG_COLOR_PRESETS[FOG_COLOR_INDEX]
 FOG_DITHER_SIZE_PRESETS = {1, 2, 3, 4, 5, 6}
 FOG_DITHER_SIZE_INDEX = 1
 FOG_DITHER_SIZE = FOG_DITHER_SIZE_PRESETS[FOG_DITHER_SIZE_INDEX]
+FOG_LUT_STEP = 0.0625
+FOG_LUT_INV_STEP = 16.0
+FOG_LUT_DIST_MAX = 0.0
+FOG_LUT_LINEAR = {}
+FOG_LUT_QUANTIZED = {}
 FAR_TEX_OFF_PRESETS = {3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 20, 24, 999}
 FAR_TEX_OFF_INDEX = 8
 FAR_TEX_OFF_DIST = FAR_TEX_OFF_PRESETS[FAR_TEX_OFF_INDEX]
@@ -944,7 +955,7 @@ LOW_RES_MODE = "quality"
 SHOW_MINIMAP = false
 RENDERER_MODE = "exp_hybrid" -- locked single renderer
 DEBUG_DISABLE_ENEMIES = false
-BUILD_COUNT = 164 -- Bump by +1 whenever we ship a new build/test iteration.
+BUILD_COUNT = 168 -- Bump by +1 whenever we ship a new build/test iteration.
 textureDebugFrame = -1
 textureDebugSamples = 0
 
@@ -957,6 +968,7 @@ function bootstrapExpansionDataLayer()
         return
     end
     player_build_state = state.player_build_state or player_build_state
+    playerBuildStateDirty = true
     inventory_state = state.inventory_state or inventory_state
     stash_state = state.stash_state or stash_state
     achievement_state = state.achievement_state or achievement_state
@@ -976,6 +988,7 @@ function beginExpansionRun(levelId)
         return
     end
     player_build_state = state.player_build_state or player_build_state
+    playerBuildStateDirty = true
     inventory_state = state.inventory_state or inventory_state
     stash_state = state.stash_state or stash_state
     achievement_state = state.achievement_state or achievement_state
@@ -1148,6 +1161,58 @@ function refreshExpViewDistance()
     EXP_VIEW_DIST = viewDist
 end
 
+function rebuildFogLUT()
+    local startDist = FOG_START or 0.0
+    local endDist = FOG_END or (startDist + 0.5)
+    if endDist <= startDist then
+        endDist = startDist + 0.5
+    end
+
+    local step = FOG_LUT_STEP or 0.0625
+    if step <= 0 then
+        step = 0.0625
+    end
+    local invStep = 1.0 / step
+    local span = endDist - startDist
+    if span < 0.5 then span = 0.5 end
+    local stepCount = math.max(1, math.floor((span / 0.5) + 0.5))
+    local maxDist = endDist + step
+    if maxDist < 0 then maxDist = 0 end
+    local maxIdx = math.floor((maxDist * invStep) + 0.5)
+
+    local linear = {}
+    local quantized = {}
+    for i = 0, maxIdx do
+        local dist = i * step
+        local raw = 0.0
+        if dist <= startDist then
+            raw = 0.0
+        elseif dist >= endDist then
+            raw = 1.0
+        else
+            raw = (dist - startDist) / (endDist - startDist)
+            if raw < 0 then raw = 0 end
+            if raw > 1 then raw = 1 end
+        end
+        linear[i + 1] = raw
+        if raw <= 0 then
+            quantized[i + 1] = 0.0
+        elseif raw >= 1 then
+            quantized[i + 1] = 1.0
+        else
+            local k = math.ceil(raw * stepCount)
+            if k < 0 then k = 0 end
+            if k > stepCount then k = stepCount end
+            quantized[i + 1] = k / (stepCount + 1)
+        end
+    end
+
+    FOG_LUT_INV_STEP = invStep
+    FOG_LUT_DIST_MAX = maxDist
+    FOG_LUT_LINEAR = linear
+    FOG_LUT_QUANTIZED = quantized
+end
+
 function normalizeFogRange()
     if not FOG_START_PRESETS or not FOG_END_PRESETS then return end
     if not FOG_START_INDEX then FOG_START_INDEX = 1 end
@@ -1170,6 +1235,7 @@ function normalizeFogRange()
     if FOG_END <= FOG_START then
         FOG_END = FOG_START + 0.5
     end
+    rebuildFogLUT()
     refreshExpViewDistance()
 end
 
@@ -1514,9 +1580,16 @@ function sanitizeClassId(classId)
     return CLASS_FALLBACK_ORDER[1] or "warrior"
 end
 
+function markPlayerBuildStateDirty()
+    playerBuildStateDirty = true
+end
+
 function ensurePlayerBuildState()
     if not player_build_state then
         player_build_state = {}
+        playerBuildStateDirty = true
+    elseif not playerBuildStateDirty then
+        return player_build_state
     end
 
     if not player_build_state.class_id or player_build_state.class_id == "" then
@@ -1586,6 +1659,7 @@ function ensurePlayerBuildState()
     if player_build_state.equipment.special_1 == "" then player_build_state.equipment.special_1 = nil end
     if player_build_state.equipment.special_2 == "" then player_build_state.equipment.special_2 = nil end
 
+    playerBuildStateDirty = false
     return player_build_state
 end
 
@@ -1850,6 +1924,7 @@ function allocateWeaponMastery(weaponClass)
     end
     state.weapon_mastery_points = points - 1
     state.weapon_mastery[key] = current + 1
+    markPlayerBuildStateDirty()
     refreshClassGameplayStats(false)
     return true, nil
 end
@@ -1863,6 +1938,7 @@ function setCurrentClassId(classId)
     local state = ensurePlayerBuildState()
     local normalized = sanitizeClassId(classId)
     state.class_id = normalized
+    markPlayerBuildStateDirty()
     if refreshClassGameplayStats then
         refreshClassGameplayStats(false)
     end
@@ -2020,10 +2096,12 @@ function awardPlayerXp(amount)
     if state.level >= maxLevel then
         state.level = maxLevel
         state.xp = 0
+        markPlayerBuildStateDirty()
         return 0
     end
 
     state.xp = state.xp + gain
+    markPlayerBuildStateDirty()
     local levelUps = 0
     while state.level < maxLevel do
         local need = getXpRequiredForLevel(state.level)
@@ -2040,6 +2118,7 @@ function awardPlayerXp(amount)
     if state.level >= maxLevel then
         state.level = maxLevel
         state.xp = 0
+        markPlayerBuildStateDirty()
     end
 
     if levelUps > 0 then
@@ -2069,6 +2148,7 @@ function allocatePlayerStat(statKey)
     end
     state.stats[key] = current + 1
     state.stat_points = state.stat_points - 1
+    markPlayerBuildStateDirty()
     refreshClassGameplayStats(false)
     if playerHealth and playerHealth > MAX_HEALTH then
         playerHealth = MAX_HEALTH
@@ -2655,6 +2735,7 @@ function loadGameFromSlot(slotIndex)
     if build.stats.strength > (BUILD_STAT_MAX or 99) then build.stats.strength = (BUILD_STAT_MAX or 99) end
     if build.stats.dexterity > (BUILD_STAT_MAX or 99) then build.stats.dexterity = (BUILD_STAT_MAX or 99) end
     if build.stats.intellect > (BUILD_STAT_MAX or 99) then build.stats.intellect = (BUILD_STAT_MAX or 99) end
+    markPlayerBuildStateDirty()
 
     setCurrentClassId(slot.class_id)
 
@@ -3934,6 +4015,8 @@ function updateSoldiers()
     if not sprites or #sprites == 0 then
         return
     end
+    local attackRangeSq = ATTACK_RANGE * ATTACK_RANGE
+    local detectionRangeSq = DETECTION_RANGE * DETECTION_RANGE
     for i = 1, #sprites do
         local s = sprites[i]
         if s and s.t == 5 and s.speed then  -- Warriors with movement data
@@ -3959,17 +4042,28 @@ function updateSoldiers()
             if distSq > SOLDIER_ACTIVE_DIST_SQ and (simTickCount % 8) ~= 0 then
                 goto continue
             end
-            local distToPlayer = math.sqrt(distSq)
-            if distToPlayer < 0.001 then
-                distToPlayer = 0.001
+            local inAttackRange = distSq < attackRangeSq
+            local inDetectionRange = distSq < detectionRangeSq
+            local distToPlayer = 0
+            if inDetectionRange and not inAttackRange then
+                distToPlayer = math.sqrt(distSq)
+                if distToPlayer < 0.001 then
+                    distToPlayer = 0.001
+                end
+            end
+            local dirToPlayer = nil
+            if DEBUG_DISABLE_ENEMY_AGGRO or inDetectionRange then
+                dirToPlayer = math.floor((safeAtan2(dy, dx) * 64) / 6.28318) % 64
             end
 
             if DEBUG_DISABLE_ENEMY_AGGRO then
-                distToPlayer = 999  -- Force patrol state
+                -- Force patrol state without burning chase/attack path work.
+                inAttackRange = false
+                inDetectionRange = false
                 s.attackCooldown = 0
-                -- Face the player for consistent side-view testing
-                local angleToPlayer = safeAtan2(dy, dx)
-                s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
+                if dirToPlayer then
+                    s.dir = dirToPlayer
+                end
             end
 
             if DEBUG_WALK_IN_PLACE then
@@ -3989,13 +4083,14 @@ function updateSoldiers()
             end
 
             -- State machine
-            if distToPlayer < ATTACK_RANGE then
+            if inAttackRange then
                 -- Close enough to attack
                 s.state = "attack"
 
                 -- Face the player
-                local angleToPlayer = safeAtan2(dy, dx)
-                s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
+                if dirToPlayer then
+                    s.dir = dirToPlayer
+                end
 
                 -- Attack if cooldown is ready
                 if s.attackCooldown <= 0 then
@@ -4015,7 +4110,7 @@ function updateSoldiers()
 
                 end
 
-            elseif distToPlayer < DETECTION_RANGE then
+            elseif inDetectionRange then
                 -- Player detected - chase!
                 if s.state ~= "chase" and not s.aggroed then
                     s.aggroed = true
@@ -4039,8 +4134,9 @@ function updateSoldiers()
                     s.y = newY
 
                     -- Update facing direction towards player
-                    local angleToPlayer = safeAtan2(dy, dx)
-                    s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
+                    if dirToPlayer then
+                        s.dir = dirToPlayer
+                    end
 
                     -- Update animation frame
                     s.anim = ((s.anim or 0) + 1) % 20
@@ -4084,7 +4180,7 @@ function updateSoldiers()
                 s.attackAnim = s.attackAnim - 1
                 if s.attackAnim == 3 then
                     s.attackFrame = 2
-                    if not s.attackDidHit and distToPlayer <= ATTACK_RANGE then
+                    if not s.attackDidHit and inAttackRange then
                         local rawDamage = DAMAGE_PER_HIT
                         local damage = rawDamage - (PLAYER_DEFENSE or 0)
                         if damage < 1 then
@@ -5108,9 +5204,8 @@ function drawTitleScreenImpl()
         -- Compact menu box for 4 items
         drawUiPanel(52, 132, 188, 232, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
         setFontCached(vmupro.text.FONT_SMALL)
-        local items = {"NEW GAME", "LOAD GAME", "OPTIONS", "EXIT"}
-        for i = 1, #items do
-            local item = items[i]
+        for i = 1, #TITLE_MAIN_MENU_ITEMS do
+            local item = TITLE_MAIN_MENU_ITEMS[i]
             local y = 142 + (i - 1) * 22
             local textColor = COLOR_GRAY
             if i == titleSelection then
@@ -5139,9 +5234,8 @@ function drawGameOver()
     drawMenuText("GAME OVER", 76, 85, COLOR_WHITE)
 
     -- Menu items
-    local items = {"RESTART", "MENU", "QUIT"}
-    for i = 1, #items do
-        local item = items[i]
+    for i = 1, #GAME_OVER_MENU_ITEMS do
+        local item = GAME_OVER_MENU_ITEMS[i]
         local y = 110 + (i - 1) * 18
         local textColor = COLOR_GRAY
         if i == gameOverSelection then
@@ -5699,6 +5793,19 @@ function getFogFactor(dist)
     if DEBUG_DISABLE_FOG then
         return 0.0
     end
+    local lookup = FOG_LUT_LINEAR
+    local invStep = FOG_LUT_INV_STEP or 0.0
+    if lookup and #lookup > 0 and invStep > 0 then
+        local idx = math.floor(((dist or 0.0) * invStep) + 0.5)
+        if idx < 0 then
+            return 0.0
+        end
+        local v = lookup[idx + 1]
+        if v ~= nil then
+            return v
+        end
+        return 1.0
+    end
     local startDist = FOG_START or 0.0
     local endDist = FOG_END or (startDist + 1.0)
     if endDist <= startDist then
@@ -5712,6 +5819,19 @@ end
 function getFogQuantizedFactor(dist)
     if DEBUG_DISABLE_FOG then
         return 0.0
+    end
+    local lookup = FOG_LUT_QUANTIZED
+    local invStep = FOG_LUT_INV_STEP or 0.0
+    if lookup and #lookup > 0 and invStep > 0 then
+        local idx = math.floor(((dist or 0.0) * invStep) + 0.5)
+        if idx < 0 then
+            return 0.0
+        end
+        local v = lookup[idx + 1]
+        if v ~= nil then
+            return v
+        end
+        return 1.0
     end
     local startDist = FOG_START or 0.0
     local endDist = FOG_END or (startDist + 0.5)
@@ -5861,6 +5981,23 @@ function drawFogCurtainColumn(sx, ex, dist)
     vmupro.graphics.drawFillRect(sx, y1, ex, y2, FOG_COLOR or COLOR_GRAY)
 end
 
+function drawBufferedFogCurtainSpan(spanStart, spanEnd, dist, trackCounters, canTime)
+    if spanStart < 0 or spanEnd < spanStart then
+        return
+    end
+    local spanW = (spanEnd - spanStart) + 1
+    if trackCounters then
+        PERF_MONITOR_FOG_COLS = (PERF_MONITOR_FOG_COLS or 0) + spanW
+    end
+    local fogT0
+    if canTime then fogT0 = vmupro.system.getTimeUs() end
+    drawFogCurtainColumn(spanStart, spanEnd, dist)
+    if canTime and fogT0 then
+        local fogT1 = vmupro.system.getTimeUs()
+        PERF_MONITOR_SAMPLE_FOG_US = (PERF_MONITOR_SAMPLE_FOG_US or 0) + (fogT1 - fogT0)
+    end
+end
+
 function getWallSheetForType(wtype)
     if wtype == 1 then return wallSheetStone end
     if wtype == 2 then return wallSheetBrick end
@@ -5871,7 +6008,38 @@ function getWallSheetForType(wtype)
     return wallSheetStone
 end
 
-function drawWallTextureColumn(wtype, side, texCoord, sx, y1, y2, colW, distToWall, mipLevel)
+wallSheetMetricCache = wallSheetMetricCache or {}
+MIP_FRAME_GROUP_SIZE = MIP_FRAME_GROUP_SIZE or {[0] = 1, [1] = 1, [2] = 3, [3] = 4, [4] = 6}
+
+function getWallSheetMetricsCached(wtype)
+    local sheet = getWallSheetForType(wtype)
+    if not sheet then
+        return nil, 0, 0, 0
+    end
+    local cache = wallSheetMetricCache[wtype]
+    if cache and cache.sheet == sheet then
+        return sheet, cache.frameW or 0, cache.frameH or 0, cache.frameCount or 0
+    end
+
+    local frameW = sheet.frameWidth or 0
+    local frameH = sheet.frameHeight or 0
+    local frameCount = sheet.frameCount or 0
+    if frameW <= 0 or frameH <= 0 or frameCount <= 0 then
+        return nil, 0, 0, 0
+    end
+
+    if not cache then
+        cache = {}
+        wallSheetMetricCache[wtype] = cache
+    end
+    cache.sheet = sheet
+    cache.frameW = frameW
+    cache.frameH = frameH
+    cache.frameCount = frameCount
+    return sheet, frameW, frameH, frameCount
+end
+
+function drawWallTextureColumn(wtype, side, texCoord, sx, y1, y2, colW, distToWall, mipLevel, fogAlphaCached, trackCountersOpt, canTimeOpt)
     local wallH = y2 - y1
     if wallH <= 0 then return false end
 
@@ -5893,13 +6061,7 @@ function drawWallTextureColumn(wtype, side, texCoord, sx, y1, y2, colW, distToWa
     end
 
     -- Sheet-column path: sample from 1x128 frame columns.
-    local sheet = getWallSheetForType(wtype)
-    if not sheet or not sheet.frameWidth or not sheet.frameHeight or not sheet.frameCount then
-        return false
-    end
-    local frameW = sheet.frameWidth or 0
-    local frameH = sheet.frameHeight or 0
-    local frameCount = sheet.frameCount or 0
+    local sheet, frameW, frameH, frameCount = getWallSheetMetricsCached(wtype)
     if frameW <= 0 or frameH <= 0 or frameCount <= 0 then
         return false
     end
@@ -5921,14 +6083,7 @@ function drawWallTextureColumn(wtype, side, texCoord, sx, y1, y2, colW, distToWa
     -- MIP1 uses stride-only LOD (no texel quantization) to avoid near-distance angle shimmer.
     local mip = mipLevel or 0
     if mip > 1 then
-        local groupSize = 1
-        if mip >= 4 then
-            groupSize = 6
-        elseif mip == 3 then
-            groupSize = 4
-        elseif mip == 2 then
-            groupSize = 3
-        end
+        local groupSize = MIP_FRAME_GROUP_SIZE[mip] or 6
         if groupSize > 1 and frameCount > groupSize then
             frameIndex = (math.floor((frameIndex - 1) / groupSize) * groupSize) + 1
             if frameIndex ~= frameIndex or frameIndex == math.huge or frameIndex == -math.huge then
@@ -5960,9 +6115,15 @@ function drawWallTextureColumn(wtype, side, texCoord, sx, y1, y2, colW, distToWa
     if scaleX <= 0 or scaleY <= 0 or scaleY ~= scaleY or scaleY == math.huge or scaleY == -math.huge then
         return false
     end
-    local perfSample = (DEBUG_PERF_MONITOR == true) and (PERF_MONITOR_ACTIVE_SAMPLE == true)
-    local trackCounters = (DEBUG_PERF_MONITOR == true)
-    local canTime = perfSample and vmupro and vmupro.system and vmupro.system.getTimeUs
+    local trackCounters = trackCountersOpt
+    if trackCounters == nil then
+        trackCounters = (DEBUG_PERF_MONITOR == true)
+    end
+    local canTime = canTimeOpt
+    if canTime == nil then
+        local perfSample = (DEBUG_PERF_MONITOR == true) and (PERF_MONITOR_ACTIVE_SAMPLE == true)
+        canTime = perfSample and vmupro and vmupro.system and vmupro.system.getTimeUs
+    end
     local t0
     if canTime then
         t0 = vmupro.system.getTimeUs()
@@ -5978,7 +6139,10 @@ function drawWallTextureColumn(wtype, side, texCoord, sx, y1, y2, colW, distToWa
         if x2 > 239 then x2 = 239 end
         if y1 < 0 then y1 = 0 end
         if y2 > 239 then y2 = 239 end
-        local fogAlpha = getFogQuantizedFactor(distToWall)
+        local fogAlpha = fogAlphaCached
+        if fogAlpha == nil then
+            fogAlpha = getFogQuantizedFactor(distToWall)
+        end
         if fogAlpha > 0 then
             if trackCounters then
                 PERF_MONITOR_FOG_COLS = (PERF_MONITOR_FOG_COLS or 0) + drawWidth
@@ -6350,6 +6514,13 @@ function renderWallsExperimentalHybrid()
     if mip2Thresh <= mip1Thresh then mip2Thresh = mip1Thresh + 0.1 end
     if mip3Thresh <= mip2Thresh then mip3Thresh = mip2Thresh + 0.1 end
     if mip4Thresh <= mip3Thresh then mip4Thresh = mip3Thresh + 0.1 end
+    local nearClipDist = getPlayerRenderNearClipDist()
+    local fogCutDist = FOG_TEX_CUTOFF or FOG_END or texView
+    local farTexOff = FAR_TEX_OFF_DIST or 999
+    local farTexByDistEnabled = (farTexOff < 900)
+    local texMaxH = HYBRID_TEX_MAX_H or (VIEWPORT_H - 8)
+    local fogCurtainStart = -1
+    local fogCurtainEnd = -1
 
     local x = 0
     while x < rayCols do
@@ -6377,7 +6548,6 @@ function renderWallsExperimentalHybrid()
             PERF_MONITOR_SAMPLE_RAYCAST_US = (PERF_MONITOR_SAMPLE_RAYCAST_US or 0) + (castT1 - castT0)
         end
         local fixedDist = dist * (castCos * playerCos + castSin * playerSin)
-        local nearClipDist = getPlayerRenderNearClipDist()
         if fixedDist < nearClipDist then fixedDist = nearClipDist end
         if not rayHit then
             fixedDist = fogView
@@ -6431,6 +6601,11 @@ function renderWallsExperimentalHybrid()
             local spanW = (ex - sx) + 1
 
             if rayHit and fixedDist <= hybridViewDist then
+                if fogCurtainStart >= 0 then
+                    drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogView, trackCounters, canTime)
+                    fogCurtainStart = -1
+                    fogCurtainEnd = -1
+                end
                 if trackCounters then
                     PERF_MONITOR_WALL_COLS_TOTAL = (PERF_MONITOR_WALL_COLS_TOTAL or 0) + spanW
                     if mipLevel <= 0 then
@@ -6457,14 +6632,12 @@ function renderWallsExperimentalHybrid()
                 if not DEBUG_DISABLE_FOG then
                     fogAlpha = getFogQuantizedFactor(fixedDist)
                 end
-                local fogCut = FOG_TEX_CUTOFF or FOG_END or texView
-                local farWall = (fixedDist > texView) or (fixedDist >= fogCut) or (fogAlpha >= 1.0)
-                local farTexOff = FAR_TEX_OFF_DIST or 999
-                local forceNoTexByDist = (farTexOff < 900) and (fixedDist >= farTexOff)
+                local farWall = (fixedDist > texView) or (fixedDist >= fogCutDist) or (fogAlpha >= 1.0)
+                local forceNoTexByDist = farTexByDistEnabled and (fixedDist >= farTexOff)
 
                 local wantTex = (WALL_TEXTURE_MODE == "proper"
                     and not DEBUG_DISABLE_WALL_TEXTURE
-                    and (nearForce or (not farWall and h < (HYBRID_TEX_MAX_H or (VIEWPORT_H - 8))))
+                    and (nearForce or (not farWall and h < texMaxH))
                     and not forceNoTexByDist)
                 if not wantTex then
                     local baseColor = getWallColor(wtype, side)
@@ -6498,7 +6671,7 @@ function renderWallsExperimentalHybrid()
                     end
                     if useTex < 0.001 then useTex = 0.001 end
                     if useTex > 0.998 then useTex = 0.998 end
-                    local drewTex = drawWallTextureColumn(wtype, side, useTex, sx, y1, y2, drawColW, fixedDist, mipLevel)
+                    local drewTex = drawWallTextureColumn(wtype, side, useTex, sx, y1, y2, drawColW, fixedDist, mipLevel, fogAlpha, trackCounters, canTime)
                     if not drewTex then
                         if trackCounters then
                             PERF_MONITOR_WALL_COLS_FALLBACK = (PERF_MONITOR_WALL_COLS_FALLBACK or 0) + spanW
@@ -6529,19 +6702,28 @@ function renderWallsExperimentalHybrid()
                     end
                 end
             elseif not rayHit and not DEBUG_DISABLE_FOG then
-                -- Draw a fog curtain when no wall was traced inside draw distance.
-                -- This keeps fog coverage independent from draw-distance cutoff.
-                if trackCounters then
-                    PERF_MONITOR_FOG_COLS = (PERF_MONITOR_FOG_COLS or 0) + spanW
+                -- Batch contiguous no-hit columns into one fog-curtain draw call.
+                if fogCurtainStart < 0 then
+                    fogCurtainStart = sx
+                    fogCurtainEnd = ex
+                elseif sx <= (fogCurtainEnd + 1) then
+                    if ex > fogCurtainEnd then
+                        fogCurtainEnd = ex
+                    end
+                else
+                    drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogView, trackCounters, canTime)
+                    fogCurtainStart = sx
+                    fogCurtainEnd = ex
                 end
-                local fogT0
-                if canTime then fogT0 = vmupro.system.getTimeUs() end
-                drawFogCurtainColumn(sx, ex, fogView)
-                if canTime and fogT0 then
-                    local fogT1 = vmupro.system.getTimeUs()
-                    PERF_MONITOR_SAMPLE_FOG_US = (PERF_MONITOR_SAMPLE_FOG_US or 0) + (fogT1 - fogT0)
-                end
+            elseif fogCurtainStart >= 0 then
+                drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogView, trackCounters, canTime)
+                fogCurtainStart = -1
+                fogCurtainEnd = -1
             end
+        elseif fogCurtainStart >= 0 then
+            drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogView, trackCounters, canTime)
+            fogCurtainStart = -1
+            fogCurtainEnd = -1
         end
 
         if not useFixedRaycast then
@@ -6563,6 +6745,9 @@ function renderWallsExperimentalHybrid()
             rayCos, raySin = newCos, newSin
         end
         x = x + rayStride
+    end
+    if fogCurtainStart >= 0 then
+        drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogView, trackCounters, canTime)
     end
 end
 
@@ -7787,9 +7972,8 @@ function renderGameFrame()
             setFontCached(vmupro.text.FONT_SMALL)
             drawMenuText("PAUSED", 88, 75, COLOR_WHITE)
             -- Menu items
-            local items = {"RESUME", "SAVE GAME", "STATS", "MASTERIES", "OPTIONS", "RESTART", "MENU", "QUIT"}
-            for i = 1, #items do
-                local item = items[i]
+            for i = 1, #PAUSE_MENU_ITEMS do
+                local item = PAUSE_MENU_ITEMS[i]
                 local y = 95 + (i - 1) * 20
                 local textColor = COLOR_LIGHT_GRAY
                 local label = "  " .. item
