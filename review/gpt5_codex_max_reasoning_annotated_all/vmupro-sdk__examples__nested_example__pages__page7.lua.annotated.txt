@@ -1,0 +1,75 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page7.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 7: System - Timing Functions
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page7 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track elapsed time
+00007 [GPT-5-CODEX-MAX-REASONING] local page7_start_time = 0
+00008 [GPT-5-CODEX-MAX-REASONING] local page7_initialized = false
+00009 [GPT-5-CODEX-MAX-REASONING] 
+00010 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 7: System - Timing Functions
+00011 [GPT-5-CODEX-MAX-REASONING] function Page7.render(drawPageCounter)
+00012 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00013 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING]     -- Initialize start time on first render
+00016 [GPT-5-CODEX-MAX-REASONING]     if not page7_initialized then
+00017 [GPT-5-CODEX-MAX-REASONING]         page7_start_time = vmupro.system.getTimeUs()
+00018 [GPT-5-CODEX-MAX-REASONING]         page7_initialized = true
+00019 [GPT-5-CODEX-MAX-REASONING]     end
+00020 [GPT-5-CODEX-MAX-REASONING] 
+00021 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00022 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00023 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Timing Functions", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00024 [GPT-5-CODEX-MAX-REASONING] 
+00025 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00026 [GPT-5-CODEX-MAX-REASONING] 
+00027 [GPT-5-CODEX-MAX-REASONING]     local y_pos = 40
+00028 [GPT-5-CODEX-MAX-REASONING] 
+00029 [GPT-5-CODEX-MAX-REASONING]     -- Test: getTimeUs() - Current timestamp
+00030 [GPT-5-CODEX-MAX-REASONING]     local current_time = vmupro.system.getTimeUs()
+00031 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Current time (us):", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00032 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00033 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(string.format("%.0f", current_time), 10, y_pos, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00034 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 20
+00035 [GPT-5-CODEX-MAX-REASONING] 
+00036 [GPT-5-CODEX-MAX-REASONING]     -- Test: Elapsed time counter
+00037 [GPT-5-CODEX-MAX-REASONING]     local elapsed_us = current_time - page7_start_time
+00038 [GPT-5-CODEX-MAX-REASONING]     local elapsed_seconds = elapsed_us / 1000000.0
+00039 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Elapsed (seconds):", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00040 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00041 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(string.format("%.2f", elapsed_seconds), 10, y_pos, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00042 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 20
+00043 [GPT-5-CODEX-MAX-REASONING] 
+00044 [GPT-5-CODEX-MAX-REASONING]     -- Test: Elapsed time in ms
+00045 [GPT-5-CODEX-MAX-REASONING]     local elapsed_ms = elapsed_us / 1000.0
+00046 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Elapsed (ms):", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00047 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00048 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(string.format("%.1f", elapsed_ms), 10, y_pos, vmupro.graphics.GREEN, vmupro.graphics.BLACK)
+00049 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 20
+00050 [GPT-5-CODEX-MAX-REASONING] 
+00051 [GPT-5-CODEX-MAX-REASONING]     -- Test: delayMs timing accuracy
+00052 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("delayMs(10) test:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00053 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00054 [GPT-5-CODEX-MAX-REASONING]     local delay_start = vmupro.system.getTimeUs()
+00055 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.delayMs(10)
+00056 [GPT-5-CODEX-MAX-REASONING]     local delay_end = vmupro.system.getTimeUs()
+00057 [GPT-5-CODEX-MAX-REASONING]     local delay_actual = (delay_end - delay_start) / 1000.0
+00058 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(string.format("Actual: %.2fms", delay_actual), 10, y_pos, vmupro.graphics.BLUE, vmupro.graphics.BLACK)
+00059 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 20
+00060 [GPT-5-CODEX-MAX-REASONING] 
+00061 [GPT-5-CODEX-MAX-REASONING]     -- Test: delayUs timing accuracy
+00062 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("delayUs(5000) test:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00063 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00064 [GPT-5-CODEX-MAX-REASONING]     local delay_us_start = vmupro.system.getTimeUs()
+00065 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.delayUs(5000)
+00066 [GPT-5-CODEX-MAX-REASONING]     local delay_us_end = vmupro.system.getTimeUs()
+00067 [GPT-5-CODEX-MAX-REASONING]     local delay_us_actual = delay_us_end - delay_us_start
+00068 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(string.format("Actual: %dus", delay_us_actual), 10, y_pos, vmupro.graphics.MAGENTA, vmupro.graphics.BLACK)
+00069 [GPT-5-CODEX-MAX-REASONING] 
+00070 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00071 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 210, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00072 [GPT-5-CODEX-MAX-REASONING] 
+00073 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00074 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00075 [GPT-5-CODEX-MAX-REASONING] end

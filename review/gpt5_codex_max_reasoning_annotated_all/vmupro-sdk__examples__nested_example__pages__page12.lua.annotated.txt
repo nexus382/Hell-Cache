@@ -1,0 +1,131 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page12.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 12: Advanced Graphics - Fill Operations
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page12 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track fill demonstration state
+00007 [GPT-5-CODEX-MAX-REASONING] local fill_state = 1  -- 1 = outlines only, 2 = boundary fill, 3 = tolerance fill
+00008 [GPT-5-CODEX-MAX-REASONING] local max_fill_states = 3
+00009 [GPT-5-CODEX-MAX-REASONING] 
+00010 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 12: Advanced Graphics - Fill Operations
+00011 [GPT-5-CODEX-MAX-REASONING] function Page12.render(drawPageCounter)
+00012 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00013 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00016 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00017 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Fill Ops", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00018 [GPT-5-CODEX-MAX-REASONING] 
+00019 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00020 [GPT-5-CODEX-MAX-REASONING] 
+00021 [GPT-5-CODEX-MAX-REASONING]     local y_pos = 40
+00022 [GPT-5-CODEX-MAX-REASONING] 
+00023 [GPT-5-CODEX-MAX-REASONING]     -- State indicator
+00024 [GPT-5-CODEX-MAX-REASONING]     local state_text = ""
+00025 [GPT-5-CODEX-MAX-REASONING]     if fill_state == 1 then
+00026 [GPT-5-CODEX-MAX-REASONING]         state_text = "1: Outlines Only"
+00027 [GPT-5-CODEX-MAX-REASONING]     elseif fill_state == 2 then
+00028 [GPT-5-CODEX-MAX-REASONING]         state_text = "2: Boundary Fill"
+00029 [GPT-5-CODEX-MAX-REASONING]     elseif fill_state == 3 then
+00030 [GPT-5-CODEX-MAX-REASONING]         state_text = "3: Tolerance Fill"
+00031 [GPT-5-CODEX-MAX-REASONING]     end
+00032 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("State:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00033 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00034 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(state_text, 10, y_pos, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00035 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 20
+00036 [GPT-5-CODEX-MAX-REASONING] 
+00037 [GPT-5-CODEX-MAX-REASONING]     -- Demo area label
+00038 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Demo Area:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00039 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 20
+00040 [GPT-5-CODEX-MAX-REASONING] 
+00041 [GPT-5-CODEX-MAX-REASONING]     -- Drawing area for demonstrations
+00042 [GPT-5-CODEX-MAX-REASONING]     local demo_y = y_pos
+00043 [GPT-5-CODEX-MAX-REASONING] 
+00044 [GPT-5-CODEX-MAX-REASONING]     -- Draw rectangle with outline
+00045 [GPT-5-CODEX-MAX-REASONING]     local rect_x = 15
+00046 [GPT-5-CODEX-MAX-REASONING]     local rect_y = demo_y
+00047 [GPT-5-CODEX-MAX-REASONING]     local rect_w = 60
+00048 [GPT-5-CODEX-MAX-REASONING]     local rect_h = 40
+00049 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawRect(rect_x, rect_y, rect_x + rect_w, rect_y + rect_h, vmupro.graphics.WHITE)
+00050 [GPT-5-CODEX-MAX-REASONING] 
+00051 [GPT-5-CODEX-MAX-REASONING]     -- Draw circle with outline
+00052 [GPT-5-CODEX-MAX-REASONING]     local circle_x = 110
+00053 [GPT-5-CODEX-MAX-REASONING]     local circle_y = demo_y + 20
+00054 [GPT-5-CODEX-MAX-REASONING]     local circle_r = 20
+00055 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawCircle(circle_x, circle_y, circle_r, vmupro.graphics.WHITE)
+00056 [GPT-5-CODEX-MAX-REASONING] 
+00057 [GPT-5-CODEX-MAX-REASONING]     -- Draw another shape for tolerance demo
+00058 [GPT-5-CODEX-MAX-REASONING]     local tri_x1 = 180
+00059 [GPT-5-CODEX-MAX-REASONING]     local tri_y1 = demo_y
+00060 [GPT-5-CODEX-MAX-REASONING]     local tri_x2 = 160
+00061 [GPT-5-CODEX-MAX-REASONING]     local tri_y2 = demo_y + 40
+00062 [GPT-5-CODEX-MAX-REASONING]     local tri_x3 = 200
+00063 [GPT-5-CODEX-MAX-REASONING]     local tri_y3 = demo_y + 40
+00064 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawLine(tri_x1, tri_y1, tri_x2, tri_y2, vmupro.graphics.WHITE)
+00065 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawLine(tri_x2, tri_y2, tri_x3, tri_y3, vmupro.graphics.WHITE)
+00066 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawLine(tri_x3, tri_y3, tri_x1, tri_y1, vmupro.graphics.WHITE)
+00067 [GPT-5-CODEX-MAX-REASONING] 
+00068 [GPT-5-CODEX-MAX-REASONING]     -- Apply fills based on state
+00069 [GPT-5-CODEX-MAX-REASONING]     if fill_state == 2 then
+00070 [GPT-5-CODEX-MAX-REASONING]         -- Boundary fill: fill shapes with boundary color = white
+00071 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.floodFill(rect_x + 5, rect_y + 5, vmupro.graphics.GREEN, vmupro.graphics.WHITE)
+00072 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.floodFill(circle_x, circle_y, vmupro.graphics.BLUE, vmupro.graphics.WHITE)
+00073 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.floodFill(tri_x1, tri_y1 + 10, vmupro.graphics.RED, vmupro.graphics.WHITE)
+00074 [GPT-5-CODEX-MAX-REASONING]     elseif fill_state == 3 then
+00075 [GPT-5-CODEX-MAX-REASONING]         -- First do boundary fill
+00076 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.floodFill(rect_x + 5, rect_y + 5, vmupro.graphics.GREEN, vmupro.graphics.WHITE)
+00077 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.floodFill(circle_x, circle_y, vmupro.graphics.BLUE, vmupro.graphics.WHITE)
+00078 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.floodFill(tri_x1, tri_y1 + 10, vmupro.graphics.RED, vmupro.graphics.WHITE)
+00079 [GPT-5-CODEX-MAX-REASONING] 
+00080 [GPT-5-CODEX-MAX-REASONING]         -- Then demonstrate tolerance fill on a gradient area
+00081 [GPT-5-CODEX-MAX-REASONING]         -- Draw a small gradient-like area
+00082 [GPT-5-CODEX-MAX-REASONING]         local grad_x = 15
+00083 [GPT-5-CODEX-MAX-REASONING]         local grad_y = demo_y + 50
+00084 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawFillRect(grad_x, grad_y, grad_x + 40, grad_y + 20, vmupro.graphics.BLUE)
+00085 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawFillRect(grad_x + 40, grad_y, grad_x + 80, grad_y + 20, vmupro.graphics.NAVY)
+00086 [GPT-5-CODEX-MAX-REASONING] 
+00087 [GPT-5-CODEX-MAX-REASONING]         -- Use tolerance fill to fill similar colors
+00088 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.floodFillTolerance(grad_x + 5, grad_y + 5, vmupro.graphics.YELLOW, 50)
+00089 [GPT-5-CODEX-MAX-REASONING]     end
+00090 [GPT-5-CODEX-MAX-REASONING] 
+00091 [GPT-5-CODEX-MAX-REASONING]     y_pos = demo_y + 80
+00092 [GPT-5-CODEX-MAX-REASONING] 
+00093 [GPT-5-CODEX-MAX-REASONING]     -- Function info
+00094 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_TINY_6x8)
+00095 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Functions:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00096 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 10
+00097 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("floodFill(x,y,color,bound)", 10, y_pos, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00098 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 9
+00099 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("floodFillTolerance(x,y,c,tol)", 10, y_pos, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00100 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00101 [GPT-5-CODEX-MAX-REASONING] 
+00102 [GPT-5-CODEX-MAX-REASONING]     -- Controls
+00103 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Controls:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00104 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 10
+00105 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("A    - Next fill state", 10, y_pos, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00106 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 9
+00107 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("MODE - Reset to outlines", 10, y_pos, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00108 [GPT-5-CODEX-MAX-REASONING] 
+00109 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00110 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00111 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 210, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00112 [GPT-5-CODEX-MAX-REASONING] 
+00113 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00114 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00115 [GPT-5-CODEX-MAX-REASONING] end
+00116 [GPT-5-CODEX-MAX-REASONING] 
+00117 [GPT-5-CODEX-MAX-REASONING] --- @brief Update function for Page 12 (handles fill state changes)
+00118 [GPT-5-CODEX-MAX-REASONING] function Page12.update()
+00119 [GPT-5-CODEX-MAX-REASONING]     -- Cycle through fill states with A button
+00120 [GPT-5-CODEX-MAX-REASONING]     if vmupro.input.pressed(vmupro.input.A) then
+00121 [GPT-5-CODEX-MAX-REASONING]         fill_state = fill_state + 1
+00122 [GPT-5-CODEX-MAX-REASONING]         if fill_state > max_fill_states then
+00123 [GPT-5-CODEX-MAX-REASONING]             fill_state = 1
+00124 [GPT-5-CODEX-MAX-REASONING]         end
+00125 [GPT-5-CODEX-MAX-REASONING]     end
+00126 [GPT-5-CODEX-MAX-REASONING] 
+00127 [GPT-5-CODEX-MAX-REASONING]     -- Reset to outlines only with MODE button
+00128 [GPT-5-CODEX-MAX-REASONING]     if vmupro.input.pressed(vmupro.input.MODE) then
+00129 [GPT-5-CODEX-MAX-REASONING]         fill_state = 1
+00130 [GPT-5-CODEX-MAX-REASONING]     end
+00131 [GPT-5-CODEX-MAX-REASONING] end

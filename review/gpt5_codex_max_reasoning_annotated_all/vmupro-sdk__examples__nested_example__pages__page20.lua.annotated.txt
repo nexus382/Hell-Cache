@@ -1,0 +1,203 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page20.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 20: Alpha Blending (Fade In/Out)
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page20 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- Sprite handles
+00010 [GPT-5-CODEX-MAX-REASONING] local spritesheet_handle = nil
+00011 [GPT-5-CODEX-MAX-REASONING] local sprites_loaded = false
+00012 [GPT-5-CODEX-MAX-REASONING] local load_error = false
+00013 [GPT-5-CODEX-MAX-REASONING] 
+00014 [GPT-5-CODEX-MAX-REASONING] -- Animation state
+00015 [GPT-5-CODEX-MAX-REASONING] local current_frame = 1
+00016 [GPT-5-CODEX-MAX-REASONING] local last_frame_time = 0
+00017 [GPT-5-CODEX-MAX-REASONING] local FRAME_DURATION = 100000  -- 100ms per frame
+00018 [GPT-5-CODEX-MAX-REASONING] 
+00019 [GPT-5-CODEX-MAX-REASONING] -- Character position (center)
+00020 [GPT-5-CODEX-MAX-REASONING] local char_x = 104
+00021 [GPT-5-CODEX-MAX-REASONING] local char_y = 100
+00022 [GPT-5-CODEX-MAX-REASONING] 
+00023 [GPT-5-CODEX-MAX-REASONING] -- Fade state
+00024 [GPT-5-CODEX-MAX-REASONING] local STATE_FADE_IN = 1
+00025 [GPT-5-CODEX-MAX-REASONING] local STATE_VISIBLE = 2
+00026 [GPT-5-CODEX-MAX-REASONING] local STATE_FADE_OUT = 3
+00027 [GPT-5-CODEX-MAX-REASONING] local STATE_INVISIBLE = 4
+00028 [GPT-5-CODEX-MAX-REASONING] 
+00029 [GPT-5-CODEX-MAX-REASONING] local fade_state = STATE_FADE_IN
+00030 [GPT-5-CODEX-MAX-REASONING] local state_start_time = 0
+00031 [GPT-5-CODEX-MAX-REASONING] local alpha_value = 0
+00032 [GPT-5-CODEX-MAX-REASONING] 
+00033 [GPT-5-CODEX-MAX-REASONING] -- Timing constants
+00034 [GPT-5-CODEX-MAX-REASONING] local FADE_IN_DURATION = 1000000      -- 1 second to fade in
+00035 [GPT-5-CODEX-MAX-REASONING] local VISIBLE_DURATION = 1500000      -- 1.5 seconds fully visible
+00036 [GPT-5-CODEX-MAX-REASONING] local FADE_OUT_DURATION = 1000000     -- 1 second to fade out
+00037 [GPT-5-CODEX-MAX-REASONING] local INVISIBLE_DURATION = 500000     -- 0.5 seconds invisible
+00038 [GPT-5-CODEX-MAX-REASONING] 
+00039 [GPT-5-CODEX-MAX-REASONING] --- @brief Load spritesheet
+00040 [GPT-5-CODEX-MAX-REASONING] local function loadSprites()
+00041 [GPT-5-CODEX-MAX-REASONING]     if sprites_loaded or load_error then
+00042 [GPT-5-CODEX-MAX-REASONING]         return
+00043 [GPT-5-CODEX-MAX-REASONING]     end
+00044 [GPT-5-CODEX-MAX-REASONING] 
+00045 [GPT-5-CODEX-MAX-REASONING]     spritesheet_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00046 [GPT-5-CODEX-MAX-REASONING]     if not spritesheet_handle then
+00047 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page20", "Failed to load spritesheet")
+00048 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00049 [GPT-5-CODEX-MAX-REASONING]         return
+00050 [GPT-5-CODEX-MAX-REASONING]     end
+00051 [GPT-5-CODEX-MAX-REASONING] 
+00052 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = true
+00053 [GPT-5-CODEX-MAX-REASONING]     local current_time = vmupro.system.getTimeUs()
+00054 [GPT-5-CODEX-MAX-REASONING]     last_frame_time = current_time
+00055 [GPT-5-CODEX-MAX-REASONING]     state_start_time = current_time
+00056 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page20", "Sprites loaded for alpha blend test")
+00057 [GPT-5-CODEX-MAX-REASONING] end
+00058 [GPT-5-CODEX-MAX-REASONING] 
+00059 [GPT-5-CODEX-MAX-REASONING] --- @brief Update logic
+00060 [GPT-5-CODEX-MAX-REASONING] function Page20.update()
+00061 [GPT-5-CODEX-MAX-REASONING]     -- No update needed - handled in render
+00062 [GPT-5-CODEX-MAX-REASONING] end
+00063 [GPT-5-CODEX-MAX-REASONING] 
+00064 [GPT-5-CODEX-MAX-REASONING] --- @brief Cleanup when leaving page
+00065 [GPT-5-CODEX-MAX-REASONING] function Page20.exit()
+00066 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00067 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00068 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00069 [GPT-5-CODEX-MAX-REASONING]     end
+00070 [GPT-5-CODEX-MAX-REASONING] 
+00071 [GPT-5-CODEX-MAX-REASONING]     if spritesheet_handle then
+00072 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(spritesheet_handle)
+00073 [GPT-5-CODEX-MAX-REASONING]         spritesheet_handle = nil
+00074 [GPT-5-CODEX-MAX-REASONING]     end
+00075 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = false
+00076 [GPT-5-CODEX-MAX-REASONING]     current_frame = 1
+00077 [GPT-5-CODEX-MAX-REASONING]     fade_state = STATE_FADE_IN
+00078 [GPT-5-CODEX-MAX-REASONING]     alpha_value = 0
+00079 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page20", "Sprites freed")
+00080 [GPT-5-CODEX-MAX-REASONING] end
+00081 [GPT-5-CODEX-MAX-REASONING] 
+00082 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 20: Alpha Blend Fade Demo
+00083 [GPT-5-CODEX-MAX-REASONING] function Page20.render(drawPageCounter)
+00084 [GPT-5-CODEX-MAX-REASONING]     -- Start double buffer on first render
+00085 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00086 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00087 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00088 [GPT-5-CODEX-MAX-REASONING]     end
+00089 [GPT-5-CODEX-MAX-REASONING] 
+00090 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00091 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00092 [GPT-5-CODEX-MAX-REASONING] 
+00093 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00094 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00095 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Fade In/Out", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00096 [GPT-5-CODEX-MAX-REASONING] 
+00097 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00098 [GPT-5-CODEX-MAX-REASONING] 
+00099 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites on first render
+00100 [GPT-5-CODEX-MAX-REASONING]     loadSprites()
+00101 [GPT-5-CODEX-MAX-REASONING] 
+00102 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00103 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR: Failed to load", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00104 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("sprites. Check assets.", 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00105 [GPT-5-CODEX-MAX-REASONING]     elseif not sprites_loaded then
+00106 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Loading sprites...", 10, 60, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00107 [GPT-5-CODEX-MAX-REASONING]     elseif spritesheet_handle then
+00108 [GPT-5-CODEX-MAX-REASONING]         local current_time = vmupro.system.getTimeUs()
+00109 [GPT-5-CODEX-MAX-REASONING] 
+00110 [GPT-5-CODEX-MAX-REASONING]         -- Update animation frame
+00111 [GPT-5-CODEX-MAX-REASONING]         if (current_time - last_frame_time) >= FRAME_DURATION then
+00112 [GPT-5-CODEX-MAX-REASONING]             current_frame = current_frame + 1
+00113 [GPT-5-CODEX-MAX-REASONING]             if current_frame > spritesheet_handle.frameCount then
+00114 [GPT-5-CODEX-MAX-REASONING]                 current_frame = 1
+00115 [GPT-5-CODEX-MAX-REASONING]             end
+00116 [GPT-5-CODEX-MAX-REASONING]             last_frame_time = current_time
+00117 [GPT-5-CODEX-MAX-REASONING]         end
+00118 [GPT-5-CODEX-MAX-REASONING] 
+00119 [GPT-5-CODEX-MAX-REASONING]         -- Update fade state machine
+00120 [GPT-5-CODEX-MAX-REASONING]         local elapsed = current_time - state_start_time
+00121 [GPT-5-CODEX-MAX-REASONING] 
+00122 [GPT-5-CODEX-MAX-REASONING]         if fade_state == STATE_FADE_IN then
+00123 [GPT-5-CODEX-MAX-REASONING]             -- Fade in from 0 to 255
+00124 [GPT-5-CODEX-MAX-REASONING]             local progress = elapsed / FADE_IN_DURATION
+00125 [GPT-5-CODEX-MAX-REASONING]             if progress >= 1.0 then
+00126 [GPT-5-CODEX-MAX-REASONING]                 progress = 1.0
+00127 [GPT-5-CODEX-MAX-REASONING]                 fade_state = STATE_VISIBLE
+00128 [GPT-5-CODEX-MAX-REASONING]                 state_start_time = current_time
+00129 [GPT-5-CODEX-MAX-REASONING]                 vmupro.system.log(vmupro.system.LOG_INFO, "Page20", "Fully visible")
+00130 [GPT-5-CODEX-MAX-REASONING]             end
+00131 [GPT-5-CODEX-MAX-REASONING]             alpha_value = math.floor(progress * 255)
+00132 [GPT-5-CODEX-MAX-REASONING] 
+00133 [GPT-5-CODEX-MAX-REASONING]         elseif fade_state == STATE_VISIBLE then
+00134 [GPT-5-CODEX-MAX-REASONING]             alpha_value = 255
+00135 [GPT-5-CODEX-MAX-REASONING]             if elapsed >= VISIBLE_DURATION then
+00136 [GPT-5-CODEX-MAX-REASONING]                 fade_state = STATE_FADE_OUT
+00137 [GPT-5-CODEX-MAX-REASONING]                 state_start_time = current_time
+00138 [GPT-5-CODEX-MAX-REASONING]                 vmupro.system.log(vmupro.system.LOG_INFO, "Page20", "Starting fade out")
+00139 [GPT-5-CODEX-MAX-REASONING]             end
+00140 [GPT-5-CODEX-MAX-REASONING] 
+00141 [GPT-5-CODEX-MAX-REASONING]         elseif fade_state == STATE_FADE_OUT then
+00142 [GPT-5-CODEX-MAX-REASONING]             -- Fade out from 255 to 0
+00143 [GPT-5-CODEX-MAX-REASONING]             local progress = elapsed / FADE_OUT_DURATION
+00144 [GPT-5-CODEX-MAX-REASONING]             if progress >= 1.0 then
+00145 [GPT-5-CODEX-MAX-REASONING]                 progress = 1.0
+00146 [GPT-5-CODEX-MAX-REASONING]                 fade_state = STATE_INVISIBLE
+00147 [GPT-5-CODEX-MAX-REASONING]                 state_start_time = current_time
+00148 [GPT-5-CODEX-MAX-REASONING]                 vmupro.system.log(vmupro.system.LOG_INFO, "Page20", "Fully invisible")
+00149 [GPT-5-CODEX-MAX-REASONING]             end
+00150 [GPT-5-CODEX-MAX-REASONING]             alpha_value = 255 - math.floor(progress * 255)
+00151 [GPT-5-CODEX-MAX-REASONING] 
+00152 [GPT-5-CODEX-MAX-REASONING]         elseif fade_state == STATE_INVISIBLE then
+00153 [GPT-5-CODEX-MAX-REASONING]             alpha_value = 0
+00154 [GPT-5-CODEX-MAX-REASONING]             if elapsed >= INVISIBLE_DURATION then
+00155 [GPT-5-CODEX-MAX-REASONING]                 fade_state = STATE_FADE_IN
+00156 [GPT-5-CODEX-MAX-REASONING]                 state_start_time = current_time
+00157 [GPT-5-CODEX-MAX-REASONING]                 vmupro.system.log(vmupro.system.LOG_INFO, "Page20", "Starting fade in")
+00158 [GPT-5-CODEX-MAX-REASONING]             end
+00159 [GPT-5-CODEX-MAX-REASONING]         end
+00160 [GPT-5-CODEX-MAX-REASONING] 
+00161 [GPT-5-CODEX-MAX-REASONING]         -- Draw character with alpha blending
+00162 [GPT-5-CODEX-MAX-REASONING]         if alpha_value > 0 then
+00163 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.drawFrameBlended(spritesheet_handle, current_frame, char_x, char_y, alpha_value, vmupro.sprite.kImageUnflipped)
+00164 [GPT-5-CODEX-MAX-REASONING]         end
+00165 [GPT-5-CODEX-MAX-REASONING] 
+00166 [GPT-5-CODEX-MAX-REASONING]         -- Status info
+00167 [GPT-5-CODEX-MAX-REASONING]         local state_text = "FADING IN"
+00168 [GPT-5-CODEX-MAX-REASONING]         if fade_state == STATE_VISIBLE then
+00169 [GPT-5-CODEX-MAX-REASONING]             state_text = "FULLY VISIBLE"
+00170 [GPT-5-CODEX-MAX-REASONING]         elseif fade_state == STATE_FADE_OUT then
+00171 [GPT-5-CODEX-MAX-REASONING]             state_text = "FADING OUT"
+00172 [GPT-5-CODEX-MAX-REASONING]         elseif fade_state == STATE_INVISIBLE then
+00173 [GPT-5-CODEX-MAX-REASONING]             state_text = "INVISIBLE"
+00174 [GPT-5-CODEX-MAX-REASONING]         end
+00175 [GPT-5-CODEX-MAX-REASONING] 
+00176 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(state_text, 10, 195, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00177 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(string.format("Alpha: %d/255", alpha_value), 10, 210, vmupro.graphics.BLUE, vmupro.graphics.BLACK)
+00178 [GPT-5-CODEX-MAX-REASONING] 
+00179 [GPT-5-CODEX-MAX-REASONING]         -- Draw alpha bar visualization
+00180 [GPT-5-CODEX-MAX-REASONING]         local bar_x = 10
+00181 [GPT-5-CODEX-MAX-REASONING]         local bar_y = 180
+00182 [GPT-5-CODEX-MAX-REASONING]         local bar_width = 220
+00183 [GPT-5-CODEX-MAX-REASONING]         local bar_height = 8
+00184 [GPT-5-CODEX-MAX-REASONING] 
+00185 [GPT-5-CODEX-MAX-REASONING]         -- Background
+00186 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawFillRect(bar_x, bar_y, bar_x + bar_width, bar_y + bar_height, vmupro.graphics.GREY)
+00187 [GPT-5-CODEX-MAX-REASONING] 
+00188 [GPT-5-CODEX-MAX-REASONING]         -- Alpha fill
+00189 [GPT-5-CODEX-MAX-REASONING]         local fill_width = math.floor((alpha_value / 255) * bar_width)
+00190 [GPT-5-CODEX-MAX-REASONING]         if fill_width > 0 then
+00191 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawFillRect(bar_x, bar_y, bar_x + fill_width, bar_y + bar_height, vmupro.graphics.GREEN)
+00192 [GPT-5-CODEX-MAX-REASONING]         end
+00193 [GPT-5-CODEX-MAX-REASONING] 
+00194 [GPT-5-CODEX-MAX-REASONING]         -- Border
+00195 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawRect(bar_x, bar_y, bar_x + bar_width, bar_y + bar_height, vmupro.graphics.WHITE)
+00196 [GPT-5-CODEX-MAX-REASONING]     end
+00197 [GPT-5-CODEX-MAX-REASONING] 
+00198 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00199 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00200 [GPT-5-CODEX-MAX-REASONING] 
+00201 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00202 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00203 [GPT-5-CODEX-MAX-REASONING] end

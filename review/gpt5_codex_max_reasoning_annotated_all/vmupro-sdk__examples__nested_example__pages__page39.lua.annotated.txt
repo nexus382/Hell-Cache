@@ -1,0 +1,200 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page39.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 39: MIDI Sequence Playback (Settlers Theme)
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page39 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00007 [GPT-5-CODEX-MAX-REASONING] 
+00008 [GPT-5-CODEX-MAX-REASONING] -- Samples
+00009 [GPT-5-CODEX-MAX-REASONING] local string_sample = nil
+00010 [GPT-5-CODEX-MAX-REASONING] local horn_sample = nil
+00011 [GPT-5-CODEX-MAX-REASONING] local clarinet_sample = nil
+00012 [GPT-5-CODEX-MAX-REASONING] local timpani_sample = nil
+00013 [GPT-5-CODEX-MAX-REASONING] local crash_sample = nil
+00014 [GPT-5-CODEX-MAX-REASONING] local ride_sample = nil
+00015 [GPT-5-CODEX-MAX-REASONING] 
+00016 [GPT-5-CODEX-MAX-REASONING] -- Instruments
+00017 [GPT-5-CODEX-MAX-REASONING] local string_inst = nil
+00018 [GPT-5-CODEX-MAX-REASONING] local horn_inst = nil
+00019 [GPT-5-CODEX-MAX-REASONING] local clarinet_inst = nil
+00020 [GPT-5-CODEX-MAX-REASONING] local drum_inst = nil
+00021 [GPT-5-CODEX-MAX-REASONING] 
+00022 [GPT-5-CODEX-MAX-REASONING] -- Sequence
+00023 [GPT-5-CODEX-MAX-REASONING] local sequence = nil
+00024 [GPT-5-CODEX-MAX-REASONING] local is_playing = false
+00025 [GPT-5-CODEX-MAX-REASONING] local load_error = nil
+00026 [GPT-5-CODEX-MAX-REASONING] 
+00027 [GPT-5-CODEX-MAX-REASONING] -- ============================================================================
+00028 [GPT-5-CODEX-MAX-REASONING] -- PAGE LIFECYCLE
+00029 [GPT-5-CODEX-MAX-REASONING] -- ============================================================================
+00030 [GPT-5-CODEX-MAX-REASONING] 
+00031 [GPT-5-CODEX-MAX-REASONING] function Page39.enter()
+00032 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page39", "Entering MIDI demo")
+00033 [GPT-5-CODEX-MAX-REASONING] 
+00034 [GPT-5-CODEX-MAX-REASONING]     vmupro.audio.startListenMode()
+00035 [GPT-5-CODEX-MAX-REASONING] 
+00036 [GPT-5-CODEX-MAX-REASONING]     -- Load samples
+00037 [GPT-5-CODEX-MAX-REASONING]     string_sample = vmupro.sound.sample.new("assets/string_ensemble")
+00038 [GPT-5-CODEX-MAX-REASONING]     horn_sample = vmupro.sound.sample.new("assets/french_horns")
+00039 [GPT-5-CODEX-MAX-REASONING]     clarinet_sample = vmupro.sound.sample.new("assets/clarinet")
+00040 [GPT-5-CODEX-MAX-REASONING]     timpani_sample = vmupro.sound.sample.new("assets/timpani")
+00041 [GPT-5-CODEX-MAX-REASONING]     crash_sample = vmupro.sound.sample.new("assets/crash_cymbal")
+00042 [GPT-5-CODEX-MAX-REASONING]     ride_sample = vmupro.sound.sample.new("assets/ride_cymbal")
+00043 [GPT-5-CODEX-MAX-REASONING] 
+00044 [GPT-5-CODEX-MAX-REASONING]     if not string_sample or not horn_sample or not clarinet_sample or
+00045 [GPT-5-CODEX-MAX-REASONING]        not timpani_sample or not crash_sample or not ride_sample then
+00046 [GPT-5-CODEX-MAX-REASONING]         load_error = "Failed to load one or more samples"
+00047 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page39", load_error)
+00048 [GPT-5-CODEX-MAX-REASONING]         return
+00049 [GPT-5-CODEX-MAX-REASONING]     end
+00050 [GPT-5-CODEX-MAX-REASONING] 
+00051 [GPT-5-CODEX-MAX-REASONING]     -- Create melodic instruments (sample mapped to all notes with nil)
+00052 [GPT-5-CODEX-MAX-REASONING]     string_inst = vmupro.sound.instrument.new()
+00053 [GPT-5-CODEX-MAX-REASONING]     if string_inst then
+00054 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.instrument.addVoice(string_inst, string_sample, nil)
+00055 [GPT-5-CODEX-MAX-REASONING]     end
+00056 [GPT-5-CODEX-MAX-REASONING] 
+00057 [GPT-5-CODEX-MAX-REASONING]     horn_inst = vmupro.sound.instrument.new()
+00058 [GPT-5-CODEX-MAX-REASONING]     if horn_inst then
+00059 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.instrument.addVoice(horn_inst, horn_sample, nil)
+00060 [GPT-5-CODEX-MAX-REASONING]     end
+00061 [GPT-5-CODEX-MAX-REASONING] 
+00062 [GPT-5-CODEX-MAX-REASONING]     clarinet_inst = vmupro.sound.instrument.new()
+00063 [GPT-5-CODEX-MAX-REASONING]     if clarinet_inst then
+00064 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.instrument.addVoice(clarinet_inst, clarinet_sample, nil)
+00065 [GPT-5-CODEX-MAX-REASONING]     end
+00066 [GPT-5-CODEX-MAX-REASONING] 
+00067 [GPT-5-CODEX-MAX-REASONING]     -- Create drum instrument (samples mapped to specific MIDI notes)
+00068 [GPT-5-CODEX-MAX-REASONING]     drum_inst = vmupro.sound.instrument.new()
+00069 [GPT-5-CODEX-MAX-REASONING]     if drum_inst then
+00070 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.instrument.addVoice(drum_inst, timpani_sample, 41)  -- Low Floor Tom
+00071 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.instrument.addVoice(drum_inst, crash_sample, 57)    -- Crash Cymbal
+00072 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.instrument.addVoice(drum_inst, ride_sample, 59)     -- Ride Cymbal
+00073 [GPT-5-CODEX-MAX-REASONING]     end
+00074 [GPT-5-CODEX-MAX-REASONING] 
+00075 [GPT-5-CODEX-MAX-REASONING]     if not string_inst or not horn_inst or not clarinet_inst or not drum_inst then
+00076 [GPT-5-CODEX-MAX-REASONING]         load_error = "Failed to create instruments"
+00077 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page39", load_error)
+00078 [GPT-5-CODEX-MAX-REASONING]         return
+00079 [GPT-5-CODEX-MAX-REASONING]     end
+00080 [GPT-5-CODEX-MAX-REASONING] 
+00081 [GPT-5-CODEX-MAX-REASONING]     -- Load MIDI sequence
+00082 [GPT-5-CODEX-MAX-REASONING]     sequence = vmupro.sound.sequence.new("assets/settlers.mid")
+00083 [GPT-5-CODEX-MAX-REASONING]     if not sequence then
+00084 [GPT-5-CODEX-MAX-REASONING]         load_error = "Failed to load MIDI file"
+00085 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page39", load_error)
+00086 [GPT-5-CODEX-MAX-REASONING]         return
+00087 [GPT-5-CODEX-MAX-REASONING]     end
+00088 [GPT-5-CODEX-MAX-REASONING] 
+00089 [GPT-5-CODEX-MAX-REASONING]     -- Log track count
+00090 [GPT-5-CODEX-MAX-REASONING]     local track_count = vmupro.sound.sequence.getTrackCount(sequence)
+00091 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page39", "MIDI has " .. track_count .. " tracks")
+00092 [GPT-5-CODEX-MAX-REASONING] 
+00093 [GPT-5-CODEX-MAX-REASONING]     -- Set program callback to handle instrument switching based on MIDI program changes
+00094 [GPT-5-CODEX-MAX-REASONING]     vmupro.sound.sequence.setProgramCallback(sequence, function(track, program)
+00095 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_INFO, "Page39",
+00096 [GPT-5-CODEX-MAX-REASONING]             "Program change: track=" .. track .. " program=" .. program)
+00097 [GPT-5-CODEX-MAX-REASONING] 
+00098 [GPT-5-CODEX-MAX-REASONING]         if program == 45 then       -- Pizzicato Strings
+00099 [GPT-5-CODEX-MAX-REASONING]             return string_inst
+00100 [GPT-5-CODEX-MAX-REASONING]         elseif program == 48 then   -- String Ensemble 1
+00101 [GPT-5-CODEX-MAX-REASONING]             return string_inst
+00102 [GPT-5-CODEX-MAX-REASONING]         elseif program == 49 then   -- String Ensemble 2
+00103 [GPT-5-CODEX-MAX-REASONING]             return string_inst
+00104 [GPT-5-CODEX-MAX-REASONING]         elseif program == 60 then   -- French Horn
+00105 [GPT-5-CODEX-MAX-REASONING]             return horn_inst
+00106 [GPT-5-CODEX-MAX-REASONING]         elseif program == 71 then   -- Clarinet
+00107 [GPT-5-CODEX-MAX-REASONING]             return clarinet_inst
+00108 [GPT-5-CODEX-MAX-REASONING]         else
+00109 [GPT-5-CODEX-MAX-REASONING]             -- Default to strings for unknown programs
+00110 [GPT-5-CODEX-MAX-REASONING]             return string_inst
+00111 [GPT-5-CODEX-MAX-REASONING]         end
+00112 [GPT-5-CODEX-MAX-REASONING]     end)
+00113 [GPT-5-CODEX-MAX-REASONING] 
+00114 [GPT-5-CODEX-MAX-REASONING]     -- Assign drum instrument to track 7 (drums don't use program changes)
+00115 [GPT-5-CODEX-MAX-REASONING]     -- Track 7 in Lua (1-based) = Track 6 in firmware (0-based)
+00116 [GPT-5-CODEX-MAX-REASONING]     vmupro.sound.sequence.setTrackInstrument(sequence, 7, drum_inst)
+00117 [GPT-5-CODEX-MAX-REASONING] 
+00118 [GPT-5-CODEX-MAX-REASONING]     -- Start playback with looping
+00119 [GPT-5-CODEX-MAX-REASONING]     vmupro.sound.sequence.setLooping(sequence, true)
+00120 [GPT-5-CODEX-MAX-REASONING]     vmupro.sound.sequence.play(sequence)
+00121 [GPT-5-CODEX-MAX-REASONING]     is_playing = true
+00122 [GPT-5-CODEX-MAX-REASONING] 
+00123 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page39", "MIDI playback started")
+00124 [GPT-5-CODEX-MAX-REASONING] end
+00125 [GPT-5-CODEX-MAX-REASONING] 
+00126 [GPT-5-CODEX-MAX-REASONING] function Page39.update()
+00127 [GPT-5-CODEX-MAX-REASONING]     vmupro.sound.update()
+00128 [GPT-5-CODEX-MAX-REASONING] end
+00129 [GPT-5-CODEX-MAX-REASONING] 
+00130 [GPT-5-CODEX-MAX-REASONING] function Page39.exit()
+00131 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00132 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00133 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00134 [GPT-5-CODEX-MAX-REASONING]     end
+00135 [GPT-5-CODEX-MAX-REASONING] 
+00136 [GPT-5-CODEX-MAX-REASONING]     -- Stop and free sequence
+00137 [GPT-5-CODEX-MAX-REASONING]     if sequence then
+00138 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.sequence.stop(sequence)
+00139 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.sequence.free(sequence)
+00140 [GPT-5-CODEX-MAX-REASONING]         sequence = nil
+00141 [GPT-5-CODEX-MAX-REASONING]     end
+00142 [GPT-5-CODEX-MAX-REASONING] 
+00143 [GPT-5-CODEX-MAX-REASONING]     -- Free instruments
+00144 [GPT-5-CODEX-MAX-REASONING]     if string_inst then vmupro.sound.instrument.free(string_inst); string_inst = nil end
+00145 [GPT-5-CODEX-MAX-REASONING]     if horn_inst then vmupro.sound.instrument.free(horn_inst); horn_inst = nil end
+00146 [GPT-5-CODEX-MAX-REASONING]     if clarinet_inst then vmupro.sound.instrument.free(clarinet_inst); clarinet_inst = nil end
+00147 [GPT-5-CODEX-MAX-REASONING]     if drum_inst then vmupro.sound.instrument.free(drum_inst); drum_inst = nil end
+00148 [GPT-5-CODEX-MAX-REASONING] 
+00149 [GPT-5-CODEX-MAX-REASONING]     -- Free samples
+00150 [GPT-5-CODEX-MAX-REASONING]     if string_sample then vmupro.sound.sample.free(string_sample); string_sample = nil end
+00151 [GPT-5-CODEX-MAX-REASONING]     if horn_sample then vmupro.sound.sample.free(horn_sample); horn_sample = nil end
+00152 [GPT-5-CODEX-MAX-REASONING]     if clarinet_sample then vmupro.sound.sample.free(clarinet_sample); clarinet_sample = nil end
+00153 [GPT-5-CODEX-MAX-REASONING]     if timpani_sample then vmupro.sound.sample.free(timpani_sample); timpani_sample = nil end
+00154 [GPT-5-CODEX-MAX-REASONING]     if crash_sample then vmupro.sound.sample.free(crash_sample); crash_sample = nil end
+00155 [GPT-5-CODEX-MAX-REASONING]     if ride_sample then vmupro.sound.sample.free(ride_sample); ride_sample = nil end
+00156 [GPT-5-CODEX-MAX-REASONING] 
+00157 [GPT-5-CODEX-MAX-REASONING]     vmupro.audio.exitListenMode()
+00158 [GPT-5-CODEX-MAX-REASONING] 
+00159 [GPT-5-CODEX-MAX-REASONING]     is_playing = false
+00160 [GPT-5-CODEX-MAX-REASONING]     load_error = nil
+00161 [GPT-5-CODEX-MAX-REASONING] end
+00162 [GPT-5-CODEX-MAX-REASONING] 
+00163 [GPT-5-CODEX-MAX-REASONING] function Page39.render(drawPageCounter)
+00164 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00165 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00166 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00167 [GPT-5-CODEX-MAX-REASONING]     end
+00168 [GPT-5-CODEX-MAX-REASONING] 
+00169 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00170 [GPT-5-CODEX-MAX-REASONING] 
+00171 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00172 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("MIDI", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00173 [GPT-5-CODEX-MAX-REASONING] 
+00174 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00175 [GPT-5-CODEX-MAX-REASONING] 
+00176 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00177 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Settlers Theme", 10, 40, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00178 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR:", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00179 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(load_error, 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00180 [GPT-5-CODEX-MAX-REASONING]     else
+00181 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Settlers Theme", 10, 40, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00182 [GPT-5-CODEX-MAX-REASONING] 
+00183 [GPT-5-CODEX-MAX-REASONING]         local status = is_playing and "Playing" or "Stopped"
+00184 [GPT-5-CODEX-MAX-REASONING]         local color = is_playing and vmupro.graphics.GREEN or vmupro.graphics.GREY
+00185 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Status: " .. status, 10, 60, color, vmupro.graphics.BLACK)
+00186 [GPT-5-CODEX-MAX-REASONING] 
+00187 [GPT-5-CODEX-MAX-REASONING]         -- Show instruments (via program callback)
+00188 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Program Callback:", 10, 85, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00189 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("45,48,49 -> Strings", 15, 100, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00190 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("60 -> French Horn", 15, 113, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00191 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("71 -> Clarinet", 15, 126, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00192 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Drums (Trk 7)", 15, 139, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00193 [GPT-5-CODEX-MAX-REASONING] 
+00194 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Timpani, Crash, Ride", 25, 152, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00195 [GPT-5-CODEX-MAX-REASONING]     end
+00196 [GPT-5-CODEX-MAX-REASONING] 
+00197 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev    Next >", 55, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00198 [GPT-5-CODEX-MAX-REASONING] 
+00199 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00200 [GPT-5-CODEX-MAX-REASONING] end

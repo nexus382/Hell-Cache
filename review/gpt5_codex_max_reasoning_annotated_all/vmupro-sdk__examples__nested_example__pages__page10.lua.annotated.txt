@@ -1,0 +1,145 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page10.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 10: File I/O - Basic Operations
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page10 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track test state
+00007 [GPT-5-CODEX-MAX-REASONING] local test_folder = "/sdcard/test_vmupro"
+00008 [GPT-5-CODEX-MAX-REASONING] local test_file = "/sdcard/test_vmupro/test.txt"
+00009 [GPT-5-CODEX-MAX-REASONING] local test_data = "Hello VMU Pro!"
+00010 [GPT-5-CODEX-MAX-REASONING] local tests_initialized = false
+00011 [GPT-5-CODEX-MAX-REASONING] local test_results = {}
+00012 [GPT-5-CODEX-MAX-REASONING] 
+00013 [GPT-5-CODEX-MAX-REASONING] --- @brief Initialize file I/O tests
+00014 [GPT-5-CODEX-MAX-REASONING] local function initializeTests()
+00015 [GPT-5-CODEX-MAX-REASONING]     if tests_initialized then
+00016 [GPT-5-CODEX-MAX-REASONING]         return
+00017 [GPT-5-CODEX-MAX-REASONING]     end
+00018 [GPT-5-CODEX-MAX-REASONING] 
+00019 [GPT-5-CODEX-MAX-REASONING]     -- Test 1: Create folder
+00020 [GPT-5-CODEX-MAX-REASONING]     local folder_created = vmupro.file.createFolder(test_folder)
+00021 [GPT-5-CODEX-MAX-REASONING]     test_results.folder_created = folder_created
+00022 [GPT-5-CODEX-MAX-REASONING] 
+00023 [GPT-5-CODEX-MAX-REASONING]     -- Test 2: Check if folder exists
+00024 [GPT-5-CODEX-MAX-REASONING]     test_results.folder_exists = vmupro.file.folderExists(test_folder)
+00025 [GPT-5-CODEX-MAX-REASONING] 
+00026 [GPT-5-CODEX-MAX-REASONING]     -- Test 3: Create empty file
+00027 [GPT-5-CODEX-MAX-REASONING]     local file_created = vmupro.file.createFile(test_file)
+00028 [GPT-5-CODEX-MAX-REASONING]     test_results.file_created = file_created
+00029 [GPT-5-CODEX-MAX-REASONING] 
+00030 [GPT-5-CODEX-MAX-REASONING]     -- Test 4: Write file
+00031 [GPT-5-CODEX-MAX-REASONING]     local write_success = vmupro.file.write(test_file, test_data)
+00032 [GPT-5-CODEX-MAX-REASONING]     test_results.file_written = write_success
+00033 [GPT-5-CODEX-MAX-REASONING] 
+00034 [GPT-5-CODEX-MAX-REASONING]     -- Test 5: Check if file exists
+00035 [GPT-5-CODEX-MAX-REASONING]     test_results.file_exists = vmupro.file.exists(test_file)
+00036 [GPT-5-CODEX-MAX-REASONING] 
+00037 [GPT-5-CODEX-MAX-REASONING]     -- Test 6: Read file
+00038 [GPT-5-CODEX-MAX-REASONING]     if test_results.file_exists then
+00039 [GPT-5-CODEX-MAX-REASONING]         test_results.file_content = vmupro.file.read(test_file)
+00040 [GPT-5-CODEX-MAX-REASONING]     else
+00041 [GPT-5-CODEX-MAX-REASONING]         test_results.file_content = nil
+00042 [GPT-5-CODEX-MAX-REASONING]     end
+00043 [GPT-5-CODEX-MAX-REASONING] 
+00044 [GPT-5-CODEX-MAX-REASONING]     -- Test 7: Get file size
+00045 [GPT-5-CODEX-MAX-REASONING]     if test_results.file_exists then
+00046 [GPT-5-CODEX-MAX-REASONING]         test_results.file_size = vmupro.file.getSize(test_file)
+00047 [GPT-5-CODEX-MAX-REASONING]     else
+00048 [GPT-5-CODEX-MAX-REASONING]         test_results.file_size = 0
+00049 [GPT-5-CODEX-MAX-REASONING]     end
+00050 [GPT-5-CODEX-MAX-REASONING] 
+00051 [GPT-5-CODEX-MAX-REASONING]     -- Test 8: Delete file (cleanup)
+00052 [GPT-5-CODEX-MAX-REASONING]     if test_results.file_exists then
+00053 [GPT-5-CODEX-MAX-REASONING]         test_results.file_deleted = vmupro.file.deleteFile(test_file)
+00054 [GPT-5-CODEX-MAX-REASONING]     else
+00055 [GPT-5-CODEX-MAX-REASONING]         test_results.file_deleted = false
+00056 [GPT-5-CODEX-MAX-REASONING]     end
+00057 [GPT-5-CODEX-MAX-REASONING] 
+00058 [GPT-5-CODEX-MAX-REASONING]     -- Test 9: Verify file no longer exists after deletion
+00059 [GPT-5-CODEX-MAX-REASONING]     test_results.file_exists_after_delete = vmupro.file.exists(test_file)
+00060 [GPT-5-CODEX-MAX-REASONING] 
+00061 [GPT-5-CODEX-MAX-REASONING]     -- Test 10: Delete folder (cleanup)
+00062 [GPT-5-CODEX-MAX-REASONING]     if test_results.folder_exists then
+00063 [GPT-5-CODEX-MAX-REASONING]         test_results.folder_deleted = vmupro.file.deleteFolder(test_folder)
+00064 [GPT-5-CODEX-MAX-REASONING]     else
+00065 [GPT-5-CODEX-MAX-REASONING]         test_results.folder_deleted = false
+00066 [GPT-5-CODEX-MAX-REASONING]     end
+00067 [GPT-5-CODEX-MAX-REASONING] 
+00068 [GPT-5-CODEX-MAX-REASONING]     -- Test 11: Verify folder no longer exists after deletion
+00069 [GPT-5-CODEX-MAX-REASONING]     test_results.folder_exists_after_delete = vmupro.file.folderExists(test_folder)
+00070 [GPT-5-CODEX-MAX-REASONING] 
+00071 [GPT-5-CODEX-MAX-REASONING]     tests_initialized = true
+00072 [GPT-5-CODEX-MAX-REASONING] end
+00073 [GPT-5-CODEX-MAX-REASONING] 
+00074 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 10: File I/O - Basic Operations
+00075 [GPT-5-CODEX-MAX-REASONING] function Page10.render(drawPageCounter)
+00076 [GPT-5-CODEX-MAX-REASONING]     -- Initialize tests on first render
+00077 [GPT-5-CODEX-MAX-REASONING]     initializeTests()
+00078 [GPT-5-CODEX-MAX-REASONING] 
+00079 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00080 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00081 [GPT-5-CODEX-MAX-REASONING] 
+00082 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00083 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00084 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("File I/O", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00085 [GPT-5-CODEX-MAX-REASONING] 
+00086 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_TINY_6x8)
+00087 [GPT-5-CODEX-MAX-REASONING] 
+00088 [GPT-5-CODEX-MAX-REASONING]     local y_pos = 35
+00089 [GPT-5-CODEX-MAX-REASONING] 
+00090 [GPT-5-CODEX-MAX-REASONING]     -- Helper function to show test result
+00091 [GPT-5-CODEX-MAX-REASONING]     local function showTestResult(name, success)
+00092 [GPT-5-CODEX-MAX-REASONING]         local status_text = success and "OK" or "FAIL"
+00093 [GPT-5-CODEX-MAX-REASONING]         local status_color = success and vmupro.graphics.GREEN or vmupro.graphics.RED
+00094 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(name, 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00095 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(status_text, 160, y_pos, status_color, vmupro.graphics.BLACK)
+00096 [GPT-5-CODEX-MAX-REASONING]         y_pos = y_pos + 10
+00097 [GPT-5-CODEX-MAX-REASONING]     end
+00098 [GPT-5-CODEX-MAX-REASONING] 
+00099 [GPT-5-CODEX-MAX-REASONING]     -- Display test results
+00100 [GPT-5-CODEX-MAX-REASONING]     showTestResult("Create folder:", test_results.folder_created or false)
+00101 [GPT-5-CODEX-MAX-REASONING]     showTestResult("Folder exists:", test_results.folder_exists or false)
+00102 [GPT-5-CODEX-MAX-REASONING]     showTestResult("Create file:", test_results.file_created or false)
+00103 [GPT-5-CODEX-MAX-REASONING]     showTestResult("Write file:", test_results.file_written or false)
+00104 [GPT-5-CODEX-MAX-REASONING]     showTestResult("File exists:", test_results.file_exists or false)
+00105 [GPT-5-CODEX-MAX-REASONING] 
+00106 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 3
+00107 [GPT-5-CODEX-MAX-REASONING] 
+00108 [GPT-5-CODEX-MAX-REASONING]     -- Display file size
+00109 [GPT-5-CODEX-MAX-REASONING]     if test_results.file_size then
+00110 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(string.format("File size: %d bytes", test_results.file_size), 10, y_pos, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00111 [GPT-5-CODEX-MAX-REASONING]     else
+00112 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("File size: N/A", 10, y_pos, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00113 [GPT-5-CODEX-MAX-REASONING]     end
+00114 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 12
+00115 [GPT-5-CODEX-MAX-REASONING] 
+00116 [GPT-5-CODEX-MAX-REASONING]     -- Display content verification
+00117 [GPT-5-CODEX-MAX-REASONING]     if test_results.file_content then
+00118 [GPT-5-CODEX-MAX-REASONING]         local content_match = (test_results.file_content == test_data)
+00119 [GPT-5-CODEX-MAX-REASONING]         local match_text = content_match and "Read/Write: MATCH" or "Read/Write: MISMATCH"
+00120 [GPT-5-CODEX-MAX-REASONING]         local match_color = content_match and vmupro.graphics.GREEN or vmupro.graphics.RED
+00121 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(match_text, 10, y_pos, match_color, vmupro.graphics.BLACK)
+00122 [GPT-5-CODEX-MAX-REASONING]     else
+00123 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Read content: FAIL", 10, y_pos, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00124 [GPT-5-CODEX-MAX-REASONING]     end
+00125 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 12
+00126 [GPT-5-CODEX-MAX-REASONING] 
+00127 [GPT-5-CODEX-MAX-REASONING]     -- Separator
+00128 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Cleanup:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00129 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 10
+00130 [GPT-5-CODEX-MAX-REASONING] 
+00131 [GPT-5-CODEX-MAX-REASONING]     -- Display cleanup results
+00132 [GPT-5-CODEX-MAX-REASONING]     showTestResult("Delete file:", test_results.file_deleted or false)
+00133 [GPT-5-CODEX-MAX-REASONING]     local file_gone = not test_results.file_exists_after_delete
+00134 [GPT-5-CODEX-MAX-REASONING]     showTestResult("File gone:", file_gone)
+00135 [GPT-5-CODEX-MAX-REASONING]     showTestResult("Delete folder:", test_results.folder_deleted or false)
+00136 [GPT-5-CODEX-MAX-REASONING]     local folder_gone = not test_results.folder_exists_after_delete
+00137 [GPT-5-CODEX-MAX-REASONING]     showTestResult("Folder gone:", folder_gone)
+00138 [GPT-5-CODEX-MAX-REASONING] 
+00139 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00140 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00141 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 210, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00142 [GPT-5-CODEX-MAX-REASONING] 
+00143 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00144 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00145 [GPT-5-CODEX-MAX-REASONING] end

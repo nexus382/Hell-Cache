@@ -1,0 +1,292 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page30.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 30: Bitmask API (setGroupMask, getGroupMask, setCollidesWithGroupsMask, getCollidesWithGroupsMask)
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page30 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- Collision group constants (bitmask style)
+00010 [GPT-5-CODEX-MAX-REASONING] local GROUP_PLAYER = 0x00000001        -- Group 1 (bit 0)
+00011 [GPT-5-CODEX-MAX-REASONING] local GROUP_ENEMY = 0x00000002         -- Group 2 (bit 1)
+00012 [GPT-5-CODEX-MAX-REASONING] local GROUP_PLAYER_BULLET = 0x00000004 -- Group 3 (bit 2)
+00013 [GPT-5-CODEX-MAX-REASONING] local GROUP_ENEMY_BULLET = 0x00000008  -- Group 4 (bit 3)
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING] -- Sprite handles
+00016 [GPT-5-CODEX-MAX-REASONING] local player_handle = nil
+00017 [GPT-5-CODEX-MAX-REASONING] local enemy_handle = nil
+00018 [GPT-5-CODEX-MAX-REASONING] local player_bullet_handle = nil
+00019 [GPT-5-CODEX-MAX-REASONING] local enemy_bullet_handle = nil
+00020 [GPT-5-CODEX-MAX-REASONING] local sprites_loaded = false
+00021 [GPT-5-CODEX-MAX-REASONING] local load_error = false
+00022 [GPT-5-CODEX-MAX-REASONING] 
+00023 [GPT-5-CODEX-MAX-REASONING] -- Sprite positions
+00024 [GPT-5-CODEX-MAX-REASONING] local player_x = 50
+00025 [GPT-5-CODEX-MAX-REASONING] local player_y = 80
+00026 [GPT-5-CODEX-MAX-REASONING] local enemy_x = 150
+00027 [GPT-5-CODEX-MAX-REASONING] local enemy_y = 80
+00028 [GPT-5-CODEX-MAX-REASONING] local player_bullet_x = 0
+00029 [GPT-5-CODEX-MAX-REASONING] local player_bullet_y = 90  -- Adjusted to pass through enemy
+00030 [GPT-5-CODEX-MAX-REASONING] local enemy_bullet_x = 240
+00031 [GPT-5-CODEX-MAX-REASONING] local enemy_bullet_y = 90  -- Adjusted to pass through player
+00032 [GPT-5-CODEX-MAX-REASONING] 
+00033 [GPT-5-CODEX-MAX-REASONING] -- Bullet movement
+00034 [GPT-5-CODEX-MAX-REASONING] local bullet_speed = 2
+00035 [GPT-5-CODEX-MAX-REASONING] 
+00036 [GPT-5-CODEX-MAX-REASONING] --- @brief Load sprites and set up collision groups using bitmask API
+00037 [GPT-5-CODEX-MAX-REASONING] local function loadSprites()
+00038 [GPT-5-CODEX-MAX-REASONING]     if sprites_loaded or load_error then
+00039 [GPT-5-CODEX-MAX-REASONING]         return
+00040 [GPT-5-CODEX-MAX-REASONING]     end
+00041 [GPT-5-CODEX-MAX-REASONING] 
+00042 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites (using single-frame from spritesheet)
+00043 [GPT-5-CODEX-MAX-REASONING]     player_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00044 [GPT-5-CODEX-MAX-REASONING]     enemy_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00045 [GPT-5-CODEX-MAX-REASONING]     player_bullet_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00046 [GPT-5-CODEX-MAX-REASONING]     enemy_bullet_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00047 [GPT-5-CODEX-MAX-REASONING] 
+00048 [GPT-5-CODEX-MAX-REASONING]     if not player_handle or not enemy_handle or not player_bullet_handle or not enemy_bullet_handle then
+00049 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page30", "Failed to load sprites")
+00050 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00051 [GPT-5-CODEX-MAX-REASONING]         return
+00052 [GPT-5-CODEX-MAX-REASONING]     end
+00053 [GPT-5-CODEX-MAX-REASONING] 
+00054 [GPT-5-CODEX-MAX-REASONING]     -- Set current frame to first frame
+00055 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(player_handle, 0)
+00056 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(enemy_handle, 0)
+00057 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(player_bullet_handle, 0)
+00058 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(enemy_bullet_handle, 0)
+00059 [GPT-5-CODEX-MAX-REASONING] 
+00060 [GPT-5-CODEX-MAX-REASONING]     -- Set collision rects (smaller collision boxes)
+00061 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollisionRect(player_handle, 6, 2, 20, 28)
+00062 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollisionRect(enemy_handle, 6, 2, 20, 28)
+00063 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollisionRect(player_bullet_handle, 10, 10, 12, 12)
+00064 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollisionRect(enemy_bullet_handle, 10, 10, 12, 12)
+00065 [GPT-5-CODEX-MAX-REASONING] 
+00066 [GPT-5-CODEX-MAX-REASONING]     -- Setup collision groups using BITMASK API
+00067 [GPT-5-CODEX-MAX-REASONING]     -- Player: belongs to group 1, collides with enemy (2) and enemy bullets (4)
+00068 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setGroupMask(player_handle, GROUP_PLAYER)
+00069 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollidesWithGroupsMask(player_handle, GROUP_ENEMY | GROUP_ENEMY_BULLET)
+00070 [GPT-5-CODEX-MAX-REASONING] 
+00071 [GPT-5-CODEX-MAX-REASONING]     -- Enemy: belongs to group 2, collides with player (1) and player bullets (3)
+00072 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setGroupMask(enemy_handle, GROUP_ENEMY)
+00073 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollidesWithGroupsMask(enemy_handle, GROUP_PLAYER | GROUP_PLAYER_BULLET)
+00074 [GPT-5-CODEX-MAX-REASONING] 
+00075 [GPT-5-CODEX-MAX-REASONING]     -- Player bullet: belongs to group 3, collides with enemy (2) only
+00076 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setGroupMask(player_bullet_handle, GROUP_PLAYER_BULLET)
+00077 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollidesWithGroupsMask(player_bullet_handle, GROUP_ENEMY)
+00078 [GPT-5-CODEX-MAX-REASONING] 
+00079 [GPT-5-CODEX-MAX-REASONING]     -- Enemy bullet: belongs to group 4, collides with player (1) only
+00080 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setGroupMask(enemy_bullet_handle, GROUP_ENEMY_BULLET)
+00081 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollidesWithGroupsMask(enemy_bullet_handle, GROUP_PLAYER)
+00082 [GPT-5-CODEX-MAX-REASONING] 
+00083 [GPT-5-CODEX-MAX-REASONING]     -- Set initial positions so collision bounds work from first frame
+00084 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(player_handle, player_x, player_y)
+00085 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(enemy_handle, enemy_x, enemy_y)
+00086 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(player_bullet_handle, player_bullet_x, player_bullet_y)
+00087 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(enemy_bullet_handle, enemy_bullet_x, enemy_bullet_y)
+00088 [GPT-5-CODEX-MAX-REASONING] 
+00089 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = true
+00090 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page30", "Sprites loaded with bitmask collision groups")
+00091 [GPT-5-CODEX-MAX-REASONING] end
+00092 [GPT-5-CODEX-MAX-REASONING] 
+00093 [GPT-5-CODEX-MAX-REASONING] --- @brief Check if sprite A should collide with sprite B using bitmask API (efficient)
+00094 [GPT-5-CODEX-MAX-REASONING] local function shouldCollide(spriteA, spriteB)
+00095 [GPT-5-CODEX-MAX-REASONING]     local groupsA = vmupro.sprite.getGroupMask(spriteA)
+00096 [GPT-5-CODEX-MAX-REASONING]     local collidesB = vmupro.sprite.getCollidesWithGroupsMask(spriteB)
+00097 [GPT-5-CODEX-MAX-REASONING] 
+00098 [GPT-5-CODEX-MAX-REASONING]     -- Efficient bitwise AND check
+00099 [GPT-5-CODEX-MAX-REASONING]     return (groupsA & collidesB) ~= 0
+00100 [GPT-5-CODEX-MAX-REASONING] end
+00101 [GPT-5-CODEX-MAX-REASONING] 
+00102 [GPT-5-CODEX-MAX-REASONING] --- @brief Check AABB collision between two sprites
+00103 [GPT-5-CODEX-MAX-REASONING] local function checkAABB(sprite1, sprite2)
+00104 [GPT-5-CODEX-MAX-REASONING]     local bx1, by1, bw1, bh1 = vmupro.sprite.getCollideBounds(sprite1)
+00105 [GPT-5-CODEX-MAX-REASONING]     local bx2, by2, bw2, bh2 = vmupro.sprite.getCollideBounds(sprite2)
+00106 [GPT-5-CODEX-MAX-REASONING] 
+00107 [GPT-5-CODEX-MAX-REASONING]     if not bx1 or not bx2 then
+00108 [GPT-5-CODEX-MAX-REASONING]         return false
+00109 [GPT-5-CODEX-MAX-REASONING]     end
+00110 [GPT-5-CODEX-MAX-REASONING] 
+00111 [GPT-5-CODEX-MAX-REASONING]     return bx1 < bx2 + bw2 and
+00112 [GPT-5-CODEX-MAX-REASONING]            bx1 + bw1 > bx2 and
+00113 [GPT-5-CODEX-MAX-REASONING]            by1 < by2 + bh2 and
+00114 [GPT-5-CODEX-MAX-REASONING]            by1 + bh1 > by2
+00115 [GPT-5-CODEX-MAX-REASONING] end
+00116 [GPT-5-CODEX-MAX-REASONING] 
+00117 [GPT-5-CODEX-MAX-REASONING] --- @brief Update logic - move bullets and check collisions
+00118 [GPT-5-CODEX-MAX-REASONING] function Page30.update()
+00119 [GPT-5-CODEX-MAX-REASONING]     if not sprites_loaded then
+00120 [GPT-5-CODEX-MAX-REASONING]         return
+00121 [GPT-5-CODEX-MAX-REASONING]     end
+00122 [GPT-5-CODEX-MAX-REASONING] 
+00123 [GPT-5-CODEX-MAX-REASONING]     -- Move player bullet to the right
+00124 [GPT-5-CODEX-MAX-REASONING]     player_bullet_x = player_bullet_x + bullet_speed
+00125 [GPT-5-CODEX-MAX-REASONING]     if player_bullet_x > 240 then
+00126 [GPT-5-CODEX-MAX-REASONING]         player_bullet_x = 0
+00127 [GPT-5-CODEX-MAX-REASONING]     end
+00128 [GPT-5-CODEX-MAX-REASONING] 
+00129 [GPT-5-CODEX-MAX-REASONING]     -- Move enemy bullet to the left
+00130 [GPT-5-CODEX-MAX-REASONING]     enemy_bullet_x = enemy_bullet_x - bullet_speed
+00131 [GPT-5-CODEX-MAX-REASONING]     if enemy_bullet_x < -32 then
+00132 [GPT-5-CODEX-MAX-REASONING]         enemy_bullet_x = 240
+00133 [GPT-5-CODEX-MAX-REASONING]     end
+00134 [GPT-5-CODEX-MAX-REASONING] 
+00135 [GPT-5-CODEX-MAX-REASONING]     -- Update sprite positions
+00136 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(player_handle, player_x, player_y)
+00137 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(enemy_handle, enemy_x, enemy_y)
+00138 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(player_bullet_handle, player_bullet_x, player_bullet_y)
+00139 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(enemy_bullet_handle, enemy_bullet_x, enemy_bullet_y)
+00140 [GPT-5-CODEX-MAX-REASONING] end
+00141 [GPT-5-CODEX-MAX-REASONING] 
+00142 [GPT-5-CODEX-MAX-REASONING] --- @brief Cleanup when leaving page
+00143 [GPT-5-CODEX-MAX-REASONING] function Page30.exit()
+00144 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00145 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00146 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00147 [GPT-5-CODEX-MAX-REASONING]     end
+00148 [GPT-5-CODEX-MAX-REASONING] 
+00149 [GPT-5-CODEX-MAX-REASONING]     if player_handle then
+00150 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearCollisionRect(player_handle)
+00151 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(player_handle)
+00152 [GPT-5-CODEX-MAX-REASONING]         player_handle = nil
+00153 [GPT-5-CODEX-MAX-REASONING]     end
+00154 [GPT-5-CODEX-MAX-REASONING]     if enemy_handle then
+00155 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearCollisionRect(enemy_handle)
+00156 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(enemy_handle)
+00157 [GPT-5-CODEX-MAX-REASONING]         enemy_handle = nil
+00158 [GPT-5-CODEX-MAX-REASONING]     end
+00159 [GPT-5-CODEX-MAX-REASONING]     if player_bullet_handle then
+00160 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearCollisionRect(player_bullet_handle)
+00161 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(player_bullet_handle)
+00162 [GPT-5-CODEX-MAX-REASONING]         player_bullet_handle = nil
+00163 [GPT-5-CODEX-MAX-REASONING]     end
+00164 [GPT-5-CODEX-MAX-REASONING]     if enemy_bullet_handle then
+00165 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearCollisionRect(enemy_bullet_handle)
+00166 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(enemy_bullet_handle)
+00167 [GPT-5-CODEX-MAX-REASONING]         enemy_bullet_handle = nil
+00168 [GPT-5-CODEX-MAX-REASONING]     end
+00169 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = false
+00170 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page30", "Collision groups cleared, sprites freed")
+00171 [GPT-5-CODEX-MAX-REASONING] end
+00172 [GPT-5-CODEX-MAX-REASONING] 
+00173 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 30: Bitmask API Demo
+00174 [GPT-5-CODEX-MAX-REASONING] function Page30.render(drawPageCounter)
+00175 [GPT-5-CODEX-MAX-REASONING]     -- Start double buffer on first render
+00176 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00177 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00178 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00179 [GPT-5-CODEX-MAX-REASONING]     end
+00180 [GPT-5-CODEX-MAX-REASONING] 
+00181 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00182 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00183 [GPT-5-CODEX-MAX-REASONING] 
+00184 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00185 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00186 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Bitmask API", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00187 [GPT-5-CODEX-MAX-REASONING] 
+00188 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00189 [GPT-5-CODEX-MAX-REASONING] 
+00190 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites on first render
+00191 [GPT-5-CODEX-MAX-REASONING]     loadSprites()
+00192 [GPT-5-CODEX-MAX-REASONING] 
+00193 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00194 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR: Failed to load", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00195 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("sprites. Check assets.", 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00196 [GPT-5-CODEX-MAX-REASONING]     elseif not sprites_loaded then
+00197 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Loading sprites...", 10, 60, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00198 [GPT-5-CODEX-MAX-REASONING]     elseif player_handle and enemy_handle and player_bullet_handle and enemy_bullet_handle then
+00199 [GPT-5-CODEX-MAX-REASONING]         -- Draw sprites
+00200 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawFrame(player_handle, 1, player_x, player_y, vmupro.sprite.kImageUnflipped)
+00201 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawFrame(enemy_handle, 1, enemy_x, enemy_y, vmupro.sprite.kImageUnflipped)
+00202 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawFrame(player_bullet_handle, 1, player_bullet_x, player_bullet_y, vmupro.sprite.kImageUnflipped)
+00203 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawFrame(enemy_bullet_handle, 1, enemy_bullet_x, enemy_bullet_y, vmupro.sprite.kImageUnflipped)
+00204 [GPT-5-CODEX-MAX-REASONING] 
+00205 [GPT-5-CODEX-MAX-REASONING]         -- Check collisions with group filtering (using bitmask API)
+00206 [GPT-5-CODEX-MAX-REASONING]         local pb_vs_enemy_aabb = checkAABB(player_bullet_handle, enemy_handle)
+00207 [GPT-5-CODEX-MAX-REASONING]         local pb_vs_enemy_group = shouldCollide(player_bullet_handle, enemy_handle)
+00208 [GPT-5-CODEX-MAX-REASONING]         local pb_vs_enemy = pb_vs_enemy_aabb and pb_vs_enemy_group
+00209 [GPT-5-CODEX-MAX-REASONING] 
+00210 [GPT-5-CODEX-MAX-REASONING]         local eb_vs_player_aabb = checkAABB(enemy_bullet_handle, player_handle)
+00211 [GPT-5-CODEX-MAX-REASONING]         local eb_vs_player_group = shouldCollide(enemy_bullet_handle, player_handle)
+00212 [GPT-5-CODEX-MAX-REASONING]         local eb_vs_player = eb_vs_player_aabb and eb_vs_player_group
+00213 [GPT-5-CODEX-MAX-REASONING] 
+00214 [GPT-5-CODEX-MAX-REASONING]         -- Get collision bounds for all sprites
+00215 [GPT-5-CODEX-MAX-REASONING]         local pbx, pby, pbw, pbh = vmupro.sprite.getCollideBounds(player_handle)
+00216 [GPT-5-CODEX-MAX-REASONING]         local ebx, eby, ebw, ebh = vmupro.sprite.getCollideBounds(enemy_handle)
+00217 [GPT-5-CODEX-MAX-REASONING]         local pbbx, pbby, pbbw, pbbh = vmupro.sprite.getCollideBounds(player_bullet_handle)
+00218 [GPT-5-CODEX-MAX-REASONING]         local ebbx, ebby, ebbw, ebbh = vmupro.sprite.getCollideBounds(enemy_bullet_handle)
+00219 [GPT-5-CODEX-MAX-REASONING] 
+00220 [GPT-5-CODEX-MAX-REASONING]         -- Draw collision boxes with THICK borders when colliding
+00221 [GPT-5-CODEX-MAX-REASONING]         if pbx then
+00222 [GPT-5-CODEX-MAX-REASONING]             local color = eb_vs_player and vmupro.graphics.RED or vmupro.graphics.GREEN
+00223 [GPT-5-CODEX-MAX-REASONING]             -- Draw thicker rectangle when colliding
+00224 [GPT-5-CODEX-MAX-REASONING]             if eb_vs_player then
+00225 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawRect(pbx-1, pby-1, pbx + pbw, pby + pbh, color)
+00226 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawRect(pbx, pby, pbx + pbw - 1, pby + pbh - 1, color)
+00227 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawRect(pbx+1, pby+1, pbx + pbw - 2, pby + pbh - 2, color)
+00228 [GPT-5-CODEX-MAX-REASONING]             else
+00229 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawRect(pbx, pby, pbx + pbw - 1, pby + pbh - 1, color)
+00230 [GPT-5-CODEX-MAX-REASONING]             end
+00231 [GPT-5-CODEX-MAX-REASONING]         end
+00232 [GPT-5-CODEX-MAX-REASONING]         if ebx then
+00233 [GPT-5-CODEX-MAX-REASONING]             local color = pb_vs_enemy and vmupro.graphics.RED or vmupro.graphics.ORANGE
+00234 [GPT-5-CODEX-MAX-REASONING]             -- Draw thicker rectangle when colliding
+00235 [GPT-5-CODEX-MAX-REASONING]             if pb_vs_enemy then
+00236 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawRect(ebx-1, eby-1, ebx + ebw, eby + ebh, color)
+00237 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawRect(ebx, eby, ebx + ebw - 1, eby + ebh - 1, color)
+00238 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawRect(ebx+1, eby+1, ebx + ebw - 2, eby + ebh - 2, color)
+00239 [GPT-5-CODEX-MAX-REASONING]             else
+00240 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawRect(ebx, eby, ebx + ebw - 1, eby + ebh - 1, color)
+00241 [GPT-5-CODEX-MAX-REASONING]             end
+00242 [GPT-5-CODEX-MAX-REASONING]         end
+00243 [GPT-5-CODEX-MAX-REASONING]         if pbbx then
+00244 [GPT-5-CODEX-MAX-REASONING]             local color = pb_vs_enemy and vmupro.graphics.RED or vmupro.graphics.BLUE
+00245 [GPT-5-CODEX-MAX-REASONING]             if pb_vs_enemy then
+00246 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawRect(pbbx-1, pbby-1, pbbx + pbbw, pbby + pbbh, color)
+00247 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawRect(pbbx, pbby, pbbx + pbbw - 1, pbby + pbbh - 1, color)
+00248 [GPT-5-CODEX-MAX-REASONING]             else
+00249 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawRect(pbbx, pbby, pbbx + pbbw - 1, pbby + pbbh - 1, color)
+00250 [GPT-5-CODEX-MAX-REASONING]             end
+00251 [GPT-5-CODEX-MAX-REASONING]         end
+00252 [GPT-5-CODEX-MAX-REASONING]         if ebbx then
+00253 [GPT-5-CODEX-MAX-REASONING]             local color = eb_vs_player and vmupro.graphics.RED or vmupro.graphics.VIOLET
+00254 [GPT-5-CODEX-MAX-REASONING]             if eb_vs_player then
+00255 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawRect(ebbx-1, ebby-1, ebbx + ebbw, ebby + ebbh, color)
+00256 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawRect(ebbx, ebby, ebbx + ebbw - 1, ebby + ebbh - 1, color)
+00257 [GPT-5-CODEX-MAX-REASONING]             else
+00258 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawRect(ebbx, ebby, ebbx + ebbw - 1, ebby + ebbh - 1, color)
+00259 [GPT-5-CODEX-MAX-REASONING]             end
+00260 [GPT-5-CODEX-MAX-REASONING]         end
+00261 [GPT-5-CODEX-MAX-REASONING] 
+00262 [GPT-5-CODEX-MAX-REASONING]         -- Display bitmask info
+00263 [GPT-5-CODEX-MAX-REASONING]         local y_info = 155
+00264 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("P:0x01 E:0x02 PB:0x04 EB:0x08", 10, y_info, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00265 [GPT-5-CODEX-MAX-REASONING]         y_info = y_info + 15
+00266 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("PB mask & E collides", 10, y_info, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00267 [GPT-5-CODEX-MAX-REASONING]         y_info = y_info + 15
+00268 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("EB mask & P collides", 10, y_info, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00269 [GPT-5-CODEX-MAX-REASONING] 
+00270 [GPT-5-CODEX-MAX-REASONING]         -- Collision status - LARGE and prominent
+00271 [GPT-5-CODEX-MAX-REASONING]         local collision_y = 130
+00272 [GPT-5-CODEX-MAX-REASONING]         if pb_vs_enemy then
+00273 [GPT-5-CODEX-MAX-REASONING]             vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00274 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("PB>E!", 10, collision_y, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00275 [GPT-5-CODEX-MAX-REASONING]             vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00276 [GPT-5-CODEX-MAX-REASONING]         end
+00277 [GPT-5-CODEX-MAX-REASONING]         if eb_vs_player then
+00278 [GPT-5-CODEX-MAX-REASONING]             vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00279 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("EB>P!", 150, collision_y, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00280 [GPT-5-CODEX-MAX-REASONING]             vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00281 [GPT-5-CODEX-MAX-REASONING]         end
+00282 [GPT-5-CODEX-MAX-REASONING]     end
+00283 [GPT-5-CODEX-MAX-REASONING] 
+00284 [GPT-5-CODEX-MAX-REASONING]     -- Description at top
+00285 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Efficient bitmask filtering", 10, 40, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00286 [GPT-5-CODEX-MAX-REASONING] 
+00287 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00288 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00289 [GPT-5-CODEX-MAX-REASONING] 
+00290 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00291 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00292 [GPT-5-CODEX-MAX-REASONING] end

@@ -1,0 +1,67 @@
+00001 [GPT-5-CODEX-MAX-REASONING] # GPT-5-CODEX-MAX-REASONING Feedback
+00002 [GPT-5-CODEX-MAX-REASONING] 
+00003 [GPT-5-CODEX-MAX-REASONING] ## Findings (ordered by severity)
+00004 [GPT-5-CODEX-MAX-REASONING] 
+00005 [GPT-5-CODEX-MAX-REASONING] 1. **[HIGH] Sample-audio API is still used in gameplay and title paths despite project crash constraints**  
+00006 [GPT-5-CODEX-MAX-REASONING]    Evidence: `app_full.lua:2697`, `app_full.lua:2705`, `app_full.lua:2713`, `app_full.lua:2721`, `app_full.lua:2729`, `app_full.lua:2737`, `app_full.lua:2766`, `app_full.lua:2769`, `app_full.lua:7178`, `app_full.lua:7190`  
+00007 [GPT-5-CODEX-MAX-REASONING]    Why it matters: repo guidance says sample playback is a VMU Pro crash risk; these calls are active and several playback calls are not wrapped in `pcall`.
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] 2. **[HIGH] `metadata_level1.json` / `metadata_level2.json` are incompatible with the current entrypoint layout**  
+00010 [GPT-5-CODEX-MAX-REASONING]    Evidence: `app.lua:8` imports `app_full`; level metadata files do not include `app_full.lua` (no match for `app_full.lua` in `metadata_level1.json` or `metadata_level2.json`).  
+00011 [GPT-5-CODEX-MAX-REASONING]    Why it matters: level-specific builds can boot the wrapper and fail to import runtime code, causing non-functional builds.
+00012 [GPT-5-CODEX-MAX-REASONING] 
+00013 [GPT-5-CODEX-MAX-REASONING] 3. **[HIGH] Level metadata sound lists do not include the sounds actually referenced by code**  
+00014 [GPT-5-CODEX-MAX-REASONING]    Evidence: code references `sounds/Intro_45sec`, `sounds/arg_death1`, `sounds/grunt`, `sounds/inner_sanctum_44k1_adpcm_stereo`, `sounds/sword_miss`, `sounds/sword_swing_connect`, `sounds/win_level`, `sounds/yah` (from `app_full.lua`), while level metadata only lists `sounds/sword_swoosh.wav` (`metadata_level1.json:70`, `metadata_level2.json:70`).  
+00015 [GPT-5-CODEX-MAX-REASONING]    Why it matters: if built from level metadata, audio resources used at runtime are absent.
+00016 [GPT-5-CODEX-MAX-REASONING] 
+00017 [GPT-5-CODEX-MAX-REASONING] 4. **[MEDIUM] Data-layer imports are attempted but data modules are not packaged in `metadata.json`**  
+00018 [GPT-5-CODEX-MAX-REASONING]    Evidence: imports attempted in `app_full.lua:367` through `app_full.lua:374`; `metadata.json` includes `app_full.lua` and `api/text.lua` but no `data/*.lua` entries.  
+00019 [GPT-5-CODEX-MAX-REASONING]    Why it matters: expansion/data features silently fall back to internal defaults, making behavior dependent on packaging rather than code intent.
+00020 [GPT-5-CODEX-MAX-REASONING] 
+00021 [GPT-5-CODEX-MAX-REASONING] 5. **[MEDIUM] Audio update loop does not gate on active audio state**  
+00022 [GPT-5-CODEX-MAX-REASONING]    Evidence: `app_full.lua:6486` repeatedly calls `vmupro.sound.update()` based only on accumulator thresholds.  
+00023 [GPT-5-CODEX-MAX-REASONING]    Why it matters: avoidable CPU work during silent periods can hurt frame stability.
+00024 [GPT-5-CODEX-MAX-REASONING] 
+00025 [GPT-5-CODEX-MAX-REASONING] 6. **[LOW] Documentation and code are out of sync on audio architecture**  
+00026 [GPT-5-CODEX-MAX-REASONING]    Evidence: synth-only claim in `README.md` and `AGENTS.md`; active sample API usage in `app_full.lua` paths above.  
+00027 [GPT-5-CODEX-MAX-REASONING]    Why it matters: contributors may make incorrect optimization decisions from stale docs.
+00028 [GPT-5-CODEX-MAX-REASONING] 
+00029 [GPT-5-CODEX-MAX-REASONING] ## Confirmed Good Checks
+00030 [GPT-5-CODEX-MAX-REASONING] 
+00031 [GPT-5-CODEX-MAX-REASONING] - No `math.atan2` usage detected in project Lua files.  
+00032 [GPT-5-CODEX-MAX-REASONING] - No `math.random` usage detected in project Lua files.  
+00033 [GPT-5-CODEX-MAX-REASONING] - `safeAtan2` exists and is used in core AI direction paths (`app_full.lua:3017`, `app_full.lua:3070`, `app_full.lua:3096`, `app_full.lua:3141`).
+00034 [GPT-5-CODEX-MAX-REASONING] 
+00035 [GPT-5-CODEX-MAX-REASONING] ## Evidence List (commands run)
+00036 [GPT-5-CODEX-MAX-REASONING] 
+00037 [GPT-5-CODEX-MAX-REASONING] - `rg -n "math\.random|math\.atan2\(" app_full.lua app.lua api data/*.lua`
+00038 [GPT-5-CODEX-MAX-REASONING] - `rg -n "vmupro\.sound\.sample\.new\(|startListenMode\(|exitListenMode\(" app_full.lua`
+00039 [GPT-5-CODEX-MAX-REASONING] - `rg -n "app_full\.lua|api/text\.lua|data/classes\.lua|sounds/Intro_45sec\.wav|sounds/grunt\.wav|sounds/sword_swoosh\.wav" metadata*.json`
+00040 [GPT-5-CODEX-MAX-REASONING] - Resource diff (code sound refs vs level metadata refs) via `comm` on extracted lists.
+00041 [GPT-5-CODEX-MAX-REASONING] 
+00042 [GPT-5-CODEX-MAX-REASONING] ## Impact Map
+00043 [GPT-5-CODEX-MAX-REASONING] 
+00044 [GPT-5-CODEX-MAX-REASONING] - Direct paths: `app.lua` -> `app_full.lua` boot/import; `app_full.lua` -> audio load/play/update; `metadata*.json` -> packaged resource set.
+00045 [GPT-5-CODEX-MAX-REASONING] - Indirect effects: build profile choice (`metadata.json` vs `metadata_level*.json`) changes runtime behavior and can disable features or break boot/audio.
+00046 [GPT-5-CODEX-MAX-REASONING] 
+00047 [GPT-5-CODEX-MAX-REASONING] ## Risk Notes + Mitigations
+00048 [GPT-5-CODEX-MAX-REASONING] 
+00049 [GPT-5-CODEX-MAX-REASONING] - Risk: runtime instability on hardware from sample API usage.  
+00050 [GPT-5-CODEX-MAX-REASONING]   Mitigation: migrate critical SFX/music to synth/sequence path or isolate sample usage behind a hard feature flag per hardware target.
+00051 [GPT-5-CODEX-MAX-REASONING] - Risk: broken level-specific package builds.  
+00052 [GPT-5-CODEX-MAX-REASONING]   Mitigation: add CI/resource validation that checks entrypoint imports and all literal asset refs are included in selected metadata.
+00053 [GPT-5-CODEX-MAX-REASONING] - Risk: silent fallback behavior hides missing modules.  
+00054 [GPT-5-CODEX-MAX-REASONING]   Mitigation: elevate import failure to explicit on-screen warning in debug builds.
+00055 [GPT-5-CODEX-MAX-REASONING] 
+00056 [GPT-5-CODEX-MAX-REASONING] ## Validation Plan
+00057 [GPT-5-CODEX-MAX-REASONING] 
+00058 [GPT-5-CODEX-MAX-REASONING] - Build and boot with each metadata file: `metadata.json`, `metadata_level1.json`, `metadata_level2.json`.
+00059 [GPT-5-CODEX-MAX-REASONING] - On hardware, verify title -> gameplay -> combat -> level transition audio paths.
+00060 [GPT-5-CODEX-MAX-REASONING] - Add a pre-pack validation script that checks:
+00061 [GPT-5-CODEX-MAX-REASONING]   1. all `import "..."` dependencies needed at runtime are present in metadata,
+00062 [GPT-5-CODEX-MAX-REASONING]   2. all literal `sounds/...` and `sprites/...` refs are present,
+00063 [GPT-5-CODEX-MAX-REASONING]   3. no stale-only assets in metadata unless intentionally optional.
+00064 [GPT-5-CODEX-MAX-REASONING] 
+00065 [GPT-5-CODEX-MAX-REASONING] ## Open Questions
+00066 [GPT-5-CODEX-MAX-REASONING] 
+00067 [GPT-5-CODEX-MAX-REASONING] - Are `metadata_level1.json` and `metadata_level2.json` still intended build targets, or historical artifacts?

@@ -1,0 +1,31 @@
+00001 [GPT-5-CODEX-MAX-REASONING] --- @file log.lua
+00002 [GPT-5-CODEX-MAX-REASONING] --- @brief VMU Pro LUA SDK - Logging API
+00003 [GPT-5-CODEX-MAX-REASONING] --- @author 8BitMods
+00004 [GPT-5-CODEX-MAX-REASONING] --- @version 1.0.0
+00005 [GPT-5-CODEX-MAX-REASONING] --- @date 2025-09-18
+00006 [GPT-5-CODEX-MAX-REASONING] --- @copyright Copyright (c) 2025 8BitMods. All rights reserved.
+00007 [GPT-5-CODEX-MAX-REASONING] ---
+00008 [GPT-5-CODEX-MAX-REASONING] --- The logging API provides functions for outputting debug and informational
+00009 [GPT-5-CODEX-MAX-REASONING] --- messages from LUA applications running on VMU Pro devices.
+00010 [GPT-5-CODEX-MAX-REASONING] --- Functions are available under the vmupro.system namespace.
+00011 [GPT-5-CODEX-MAX-REASONING] 
+00012 [GPT-5-CODEX-MAX-REASONING] -- Ensure vmupro namespace exists
+00013 [GPT-5-CODEX-MAX-REASONING] vmupro = vmupro or {}
+00014 [GPT-5-CODEX-MAX-REASONING] vmupro.system = vmupro.system or {}
+00015 [GPT-5-CODEX-MAX-REASONING] 
+00016 [GPT-5-CODEX-MAX-REASONING] --- @brief Log a message to the console
+00017 [GPT-5-CODEX-MAX-REASONING] --- @param level number Log level (LOG_ERROR=1, LOG_WARN=2, LOG_INFO=3, LOG_DEBUG=4)
+00018 [GPT-5-CODEX-MAX-REASONING] --- @param tag string Tag to identify the source of the log message
+00019 [GPT-5-CODEX-MAX-REASONING] --- @param message string The message to log
+00020 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.system.log(vmupro.system.LOG_INFO, "MyApp", "Hello World!")
+00021 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.system.log(vmupro.system.LOG_ERROR, "MyApp", "Something went wrong")
+00022 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00023 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00024 [GPT-5-CODEX-MAX-REASONING] function vmupro.system.log(level, tag, message) end
+00025 [GPT-5-CODEX-MAX-REASONING] 
+00026 [GPT-5-CODEX-MAX-REASONING] -- Log level constants (provided by firmware)
+00027 [GPT-5-CODEX-MAX-REASONING] vmupro.system.LOG_NONE = LOG_NONE or 0
+00028 [GPT-5-CODEX-MAX-REASONING] vmupro.system.LOG_ERROR = LOG_ERROR or 1
+00029 [GPT-5-CODEX-MAX-REASONING] vmupro.system.LOG_WARN = LOG_WARN or 2
+00030 [GPT-5-CODEX-MAX-REASONING] vmupro.system.LOG_INFO = LOG_INFO or 3
+00031 [GPT-5-CODEX-MAX-REASONING] vmupro.system.LOG_DEBUG = LOG_DEBUG or 4

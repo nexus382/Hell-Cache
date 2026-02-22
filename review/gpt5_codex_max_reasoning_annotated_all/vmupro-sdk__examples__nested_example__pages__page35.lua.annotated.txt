@@ -1,0 +1,217 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page35.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 35: Rotating Laser with Damage Flash
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page35 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- Sprite handles
+00010 [GPT-5-CODEX-MAX-REASONING] local left_sprite = nil
+00011 [GPT-5-CODEX-MAX-REASONING] local right_sprite = nil
+00012 [GPT-5-CODEX-MAX-REASONING] local sprites_loaded = false
+00013 [GPT-5-CODEX-MAX-REASONING] local load_error = false
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING] -- Sprite tags for identification
+00016 [GPT-5-CODEX-MAX-REASONING] local TAG_LEFT = 1
+00017 [GPT-5-CODEX-MAX-REASONING] local TAG_RIGHT = 2
+00018 [GPT-5-CODEX-MAX-REASONING] 
+00019 [GPT-5-CODEX-MAX-REASONING] -- Laser state
+00020 [GPT-5-CODEX-MAX-REASONING] local laser_angle = 0
+00021 [GPT-5-CODEX-MAX-REASONING] local laser_length = 150
+00022 [GPT-5-CODEX-MAX-REASONING] local laser_rotation_speed = 0.03  -- radians per frame
+00023 [GPT-5-CODEX-MAX-REASONING] local center_x = 120
+00024 [GPT-5-CODEX-MAX-REASONING] local center_y = 120
+00025 [GPT-5-CODEX-MAX-REASONING] 
+00026 [GPT-5-CODEX-MAX-REASONING] -- Damage flash state
+00027 [GPT-5-CODEX-MAX-REASONING] local left_flash_time = 0
+00028 [GPT-5-CODEX-MAX-REASONING] local right_flash_time = 0
+00029 [GPT-5-CODEX-MAX-REASONING] local flash_duration = 200000  -- 200ms in microseconds
+00030 [GPT-5-CODEX-MAX-REASONING] 
+00031 [GPT-5-CODEX-MAX-REASONING] --- @brief Load sprites
+00032 [GPT-5-CODEX-MAX-REASONING] local function loadSprites()
+00033 [GPT-5-CODEX-MAX-REASONING]     if sprites_loaded or load_error then
+00034 [GPT-5-CODEX-MAX-REASONING]         return
+00035 [GPT-5-CODEX-MAX-REASONING]     end
+00036 [GPT-5-CODEX-MAX-REASONING] 
+00037 [GPT-5-CODEX-MAX-REASONING]     -- Load left sprite
+00038 [GPT-5-CODEX-MAX-REASONING]     left_sprite = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00039 [GPT-5-CODEX-MAX-REASONING]     if not left_sprite then
+00040 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page35", "Failed to load left sprite")
+00041 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00042 [GPT-5-CODEX-MAX-REASONING]         return
+00043 [GPT-5-CODEX-MAX-REASONING]     end
+00044 [GPT-5-CODEX-MAX-REASONING] 
+00045 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(left_sprite, 1)
+00046 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.moveTo(left_sprite, 40, 104)
+00047 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollisionRect(left_sprite, 0, 0, 32, 32)
+00048 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setTag(left_sprite, TAG_LEFT)
+00049 [GPT-5-CODEX-MAX-REASONING] 
+00050 [GPT-5-CODEX-MAX-REASONING]     -- Set draw callback for damage flash
+00051 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setDrawFunction(left_sprite, function(x, y, w, h)
+00052 [GPT-5-CODEX-MAX-REASONING]         local current_time = vmupro.system.getTimeUs()
+00053 [GPT-5-CODEX-MAX-REASONING]         local is_flashing = (current_time - left_flash_time < flash_duration)
+00054 [GPT-5-CODEX-MAX-REASONING] 
+00055 [GPT-5-CODEX-MAX-REASONING]         if is_flashing then
+00056 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.drawFrameColorAdd(left_sprite, vmupro.sprite.getCurrentFrame(left_sprite),
+00057 [GPT-5-CODEX-MAX-REASONING]                 x, y, vmupro.graphics.WHITE, vmupro.sprite.kImageUnflipped)
+00058 [GPT-5-CODEX-MAX-REASONING]         else
+00059 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.drawFrame(left_sprite, vmupro.sprite.getCurrentFrame(left_sprite),
+00060 [GPT-5-CODEX-MAX-REASONING]                 x, y, vmupro.sprite.kImageUnflipped)
+00061 [GPT-5-CODEX-MAX-REASONING]         end
+00062 [GPT-5-CODEX-MAX-REASONING]     end)
+00063 [GPT-5-CODEX-MAX-REASONING] 
+00064 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(left_sprite)
+00065 [GPT-5-CODEX-MAX-REASONING] 
+00066 [GPT-5-CODEX-MAX-REASONING]     -- Load right sprite
+00067 [GPT-5-CODEX-MAX-REASONING]     right_sprite = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00068 [GPT-5-CODEX-MAX-REASONING]     if not right_sprite then
+00069 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page35", "Failed to load right sprite")
+00070 [GPT-5-CODEX-MAX-REASONING]         if left_sprite then
+00071 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.remove(left_sprite)
+00072 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.clearCollisionRect(left_sprite)
+00073 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.setDrawFunction(left_sprite, nil)
+00074 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.free(left_sprite)
+00075 [GPT-5-CODEX-MAX-REASONING]             left_sprite = nil
+00076 [GPT-5-CODEX-MAX-REASONING]         end
+00077 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00078 [GPT-5-CODEX-MAX-REASONING]         return
+00079 [GPT-5-CODEX-MAX-REASONING]     end
+00080 [GPT-5-CODEX-MAX-REASONING] 
+00081 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(right_sprite, 2)
+00082 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.moveTo(right_sprite, 168, 104)
+00083 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollisionRect(right_sprite, 0, 0, 32, 32)
+00084 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setTag(right_sprite, TAG_RIGHT)
+00085 [GPT-5-CODEX-MAX-REASONING] 
+00086 [GPT-5-CODEX-MAX-REASONING]     -- Set draw callback for damage flash
+00087 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setDrawFunction(right_sprite, function(x, y, w, h)
+00088 [GPT-5-CODEX-MAX-REASONING]         local current_time = vmupro.system.getTimeUs()
+00089 [GPT-5-CODEX-MAX-REASONING]         local is_flashing = (current_time - right_flash_time < flash_duration)
+00090 [GPT-5-CODEX-MAX-REASONING] 
+00091 [GPT-5-CODEX-MAX-REASONING]         if is_flashing then
+00092 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.drawFrameColorAdd(right_sprite, vmupro.sprite.getCurrentFrame(right_sprite),
+00093 [GPT-5-CODEX-MAX-REASONING]                 x, y, vmupro.graphics.WHITE, vmupro.sprite.kImageUnflipped)
+00094 [GPT-5-CODEX-MAX-REASONING]         else
+00095 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.drawFrame(right_sprite, vmupro.sprite.getCurrentFrame(right_sprite),
+00096 [GPT-5-CODEX-MAX-REASONING]                 x, y, vmupro.sprite.kImageUnflipped)
+00097 [GPT-5-CODEX-MAX-REASONING]         end
+00098 [GPT-5-CODEX-MAX-REASONING]     end)
+00099 [GPT-5-CODEX-MAX-REASONING] 
+00100 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(right_sprite)
+00101 [GPT-5-CODEX-MAX-REASONING] 
+00102 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = true
+00103 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page35", "Sprites loaded for laser demo")
+00104 [GPT-5-CODEX-MAX-REASONING] end
+00105 [GPT-5-CODEX-MAX-REASONING] 
+00106 [GPT-5-CODEX-MAX-REASONING] --- @brief Update logic - rotate laser and check hits
+00107 [GPT-5-CODEX-MAX-REASONING] function Page35.update()
+00108 [GPT-5-CODEX-MAX-REASONING]     if not sprites_loaded then
+00109 [GPT-5-CODEX-MAX-REASONING]         return
+00110 [GPT-5-CODEX-MAX-REASONING]     end
+00111 [GPT-5-CODEX-MAX-REASONING] 
+00112 [GPT-5-CODEX-MAX-REASONING]     local current_time = vmupro.system.getTimeUs()
+00113 [GPT-5-CODEX-MAX-REASONING] 
+00114 [GPT-5-CODEX-MAX-REASONING]     -- Rotate laser
+00115 [GPT-5-CODEX-MAX-REASONING]     laser_angle = laser_angle + laser_rotation_speed
+00116 [GPT-5-CODEX-MAX-REASONING] 
+00117 [GPT-5-CODEX-MAX-REASONING]     -- Calculate laser end point (floored to match rendering)
+00118 [GPT-5-CODEX-MAX-REASONING]     local end_x = math.floor(center_x + math.cos(laser_angle) * laser_length)
+00119 [GPT-5-CODEX-MAX-REASONING]     local end_y = math.floor(center_y + math.sin(laser_angle) * laser_length)
+00120 [GPT-5-CODEX-MAX-REASONING] 
+00121 [GPT-5-CODEX-MAX-REASONING]     -- Query sprites hit by laser line
+00122 [GPT-5-CODEX-MAX-REASONING]     local hit_sprites = vmupro.sprite.querySpritesAlongLine(center_x, center_y, end_x, end_y)
+00123 [GPT-5-CODEX-MAX-REASONING] 
+00124 [GPT-5-CODEX-MAX-REASONING]     -- Check if any sprites were hit and update flash times
+00125 [GPT-5-CODEX-MAX-REASONING]     if hit_sprites and #hit_sprites > 0 then
+00126 [GPT-5-CODEX-MAX-REASONING]         for i = 1, #hit_sprites do
+00127 [GPT-5-CODEX-MAX-REASONING]             local sprite = hit_sprites[i]
+00128 [GPT-5-CODEX-MAX-REASONING]             local tag = vmupro.sprite.getTag(sprite)
+00129 [GPT-5-CODEX-MAX-REASONING] 
+00130 [GPT-5-CODEX-MAX-REASONING]             if tag == TAG_LEFT then
+00131 [GPT-5-CODEX-MAX-REASONING]                 left_flash_time = current_time
+00132 [GPT-5-CODEX-MAX-REASONING]                 vmupro.system.log(vmupro.system.LOG_DEBUG, "Page35", "Left sprite hit!")
+00133 [GPT-5-CODEX-MAX-REASONING]             elseif tag == TAG_RIGHT then
+00134 [GPT-5-CODEX-MAX-REASONING]                 right_flash_time = current_time
+00135 [GPT-5-CODEX-MAX-REASONING]                 vmupro.system.log(vmupro.system.LOG_DEBUG, "Page35", "Right sprite hit!")
+00136 [GPT-5-CODEX-MAX-REASONING]             end
+00137 [GPT-5-CODEX-MAX-REASONING]         end
+00138 [GPT-5-CODEX-MAX-REASONING]     end
+00139 [GPT-5-CODEX-MAX-REASONING] end
+00140 [GPT-5-CODEX-MAX-REASONING] 
+00141 [GPT-5-CODEX-MAX-REASONING] --- @brief Cleanup when leaving page
+00142 [GPT-5-CODEX-MAX-REASONING] function Page35.exit()
+00143 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00144 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00145 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00146 [GPT-5-CODEX-MAX-REASONING]     end
+00147 [GPT-5-CODEX-MAX-REASONING] 
+00148 [GPT-5-CODEX-MAX-REASONING]     -- Remove all sprites from scene
+00149 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.removeAll()
+00150 [GPT-5-CODEX-MAX-REASONING] 
+00151 [GPT-5-CODEX-MAX-REASONING]     if left_sprite then
+00152 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearCollisionRect(left_sprite)
+00153 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.setDrawFunction(left_sprite, nil)
+00154 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(left_sprite)
+00155 [GPT-5-CODEX-MAX-REASONING]         left_sprite = nil
+00156 [GPT-5-CODEX-MAX-REASONING]     end
+00157 [GPT-5-CODEX-MAX-REASONING] 
+00158 [GPT-5-CODEX-MAX-REASONING]     if right_sprite then
+00159 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearCollisionRect(right_sprite)
+00160 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.setDrawFunction(right_sprite, nil)
+00161 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(right_sprite)
+00162 [GPT-5-CODEX-MAX-REASONING]         right_sprite = nil
+00163 [GPT-5-CODEX-MAX-REASONING]     end
+00164 [GPT-5-CODEX-MAX-REASONING] 
+00165 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = false
+00166 [GPT-5-CODEX-MAX-REASONING]     load_error = false
+00167 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page35", "Laser demo cleaned up")
+00168 [GPT-5-CODEX-MAX-REASONING] end
+00169 [GPT-5-CODEX-MAX-REASONING] 
+00170 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 35: Rotating Laser Demo
+00171 [GPT-5-CODEX-MAX-REASONING] function Page35.render(drawPageCounter)
+00172 [GPT-5-CODEX-MAX-REASONING]     -- Start double buffer on first render
+00173 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00174 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00175 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00176 [GPT-5-CODEX-MAX-REASONING]     end
+00177 [GPT-5-CODEX-MAX-REASONING] 
+00178 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00179 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00180 [GPT-5-CODEX-MAX-REASONING] 
+00181 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00182 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00183 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Laser Demo", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00184 [GPT-5-CODEX-MAX-REASONING] 
+00185 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00186 [GPT-5-CODEX-MAX-REASONING] 
+00187 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites on first render
+00188 [GPT-5-CODEX-MAX-REASONING]     loadSprites()
+00189 [GPT-5-CODEX-MAX-REASONING] 
+00190 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00191 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR: Failed to load", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00192 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("sprites. Check assets.", 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00193 [GPT-5-CODEX-MAX-REASONING]     elseif not sprites_loaded then
+00194 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Loading sprites...", 10, 60, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00195 [GPT-5-CODEX-MAX-REASONING]     else
+00196 [GPT-5-CODEX-MAX-REASONING]         -- Draw all sprites (automatic rendering from scene)
+00197 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawAll()
+00198 [GPT-5-CODEX-MAX-REASONING] 
+00199 [GPT-5-CODEX-MAX-REASONING]         -- Calculate and draw laser beam
+00200 [GPT-5-CODEX-MAX-REASONING]         local end_x = math.floor(center_x + math.cos(laser_angle) * laser_length)
+00201 [GPT-5-CODEX-MAX-REASONING]         local end_y = math.floor(center_y + math.sin(laser_angle) * laser_length)
+00202 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawLine(center_x, center_y, end_x, end_y, vmupro.graphics.BLUE)
+00203 [GPT-5-CODEX-MAX-REASONING] 
+00204 [GPT-5-CODEX-MAX-REASONING]         -- Draw center point
+00205 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawCircleFilled(center_x, center_y, 3, vmupro.graphics.YELLOW)
+00206 [GPT-5-CODEX-MAX-REASONING] 
+00207 [GPT-5-CODEX-MAX-REASONING]         -- Info text
+00208 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Rotating blue laser", 10, 40, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00209 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Sprites flash when hit", 10, 52, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00210 [GPT-5-CODEX-MAX-REASONING]     end
+00211 [GPT-5-CODEX-MAX-REASONING] 
+00212 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00213 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00214 [GPT-5-CODEX-MAX-REASONING] 
+00215 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00216 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00217 [GPT-5-CODEX-MAX-REASONING] end

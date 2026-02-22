@@ -1,0 +1,40 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page2.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 2: Basic Graphics - Circles & Ellipses
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page2 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 2: Basic Graphics - Circles & Ellipses
+00007 [GPT-5-CODEX-MAX-REASONING] function Page2.render(drawPageCounter)
+00008 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00009 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00012 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00013 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Circles & Ellipses", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_OPEN_SANS_15x18)
+00016 [GPT-5-CODEX-MAX-REASONING] 
+00017 [GPT-5-CODEX-MAX-REASONING]     -- Test: Outline circles (2 sizes)
+00018 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Outline circles:", 10, 35, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00019 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawCircle(40, 70, 20, vmupro.graphics.RED)      -- Radius 20
+00020 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawCircle(100, 70, 15, vmupro.graphics.GREEN)   -- Radius 15
+00021 [GPT-5-CODEX-MAX-REASONING] 
+00022 [GPT-5-CODEX-MAX-REASONING]     -- Test: Filled circles (2 sizes)
+00023 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Filled circles:", 10, 100, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00024 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawCircleFilled(40, 135, 20, vmupro.graphics.RED)      -- Radius 20
+00025 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawCircleFilled(100, 135, 15, vmupro.graphics.GREEN)   -- Radius 15
+00026 [GPT-5-CODEX-MAX-REASONING] 
+00027 [GPT-5-CODEX-MAX-REASONING]     -- Test: Outline ellipse
+00028 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Outline ellipse:", 10, 165, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00029 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawEllipse(70, 195, 30, 12, vmupro.graphics.MAGENTA)   -- Wide ellipse
+00030 [GPT-5-CODEX-MAX-REASONING] 
+00031 [GPT-5-CODEX-MAX-REASONING]     -- Test: Filled ellipse
+00032 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Filled ellipse:", 140, 35, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00033 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawEllipseFilled(190, 100, 40, 25, vmupro.graphics.MAGENTA)   -- Wide ellipse
+00034 [GPT-5-CODEX-MAX-REASONING] 
+00035 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00036 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 210, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00037 [GPT-5-CODEX-MAX-REASONING] 
+00038 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00039 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00040 [GPT-5-CODEX-MAX-REASONING] end

@@ -21,12 +21,20 @@ end
 local function makeDefaultBuildState()
     return {
         class_id = "warrior",
+        level = 1,
+        xp = 0,
         stat_points = 0,
+        weapon_mastery_points = 0,
         stats = {
             vitality = 0,
             strength = 0,
             dexterity = 0,
             intellect = 0,
+        },
+        weapon_mastery = {
+            [1] = 0, -- melee
+            [2] = 0, -- ranged
+            [3] = 0, -- magic
         },
         equipment = {
             weapon = nil,

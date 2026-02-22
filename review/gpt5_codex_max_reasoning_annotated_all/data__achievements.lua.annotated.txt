@@ -1,0 +1,43 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- Data layer: achievement registry and state helpers.
+00002 [GPT-5-CODEX-MAX-REASONING] 
+00003 [GPT-5-CODEX-MAX-REASONING] GameAchievements = {
+00004 [GPT-5-CODEX-MAX-REASONING]     first_blood = {
+00005 [GPT-5-CODEX-MAX-REASONING]         id = "first_blood",
+00006 [GPT-5-CODEX-MAX-REASONING]         name = "First Blood",
+00007 [GPT-5-CODEX-MAX-REASONING]         trigger = "kill_count",
+00008 [GPT-5-CODEX-MAX-REASONING]         threshold = 1,
+00009 [GPT-5-CODEX-MAX-REASONING]         reward = {score_bonus = 100},
+00010 [GPT-5-CODEX-MAX-REASONING]     },
+00011 [GPT-5-CODEX-MAX-REASONING]     survivor_10 = {
+00012 [GPT-5-CODEX-MAX-REASONING]         id = "survivor_10",
+00013 [GPT-5-CODEX-MAX-REASONING]         name = "Survivor 10",
+00014 [GPT-5-CODEX-MAX-REASONING]         trigger = "levels_cleared",
+00015 [GPT-5-CODEX-MAX-REASONING]         threshold = 10,
+00016 [GPT-5-CODEX-MAX-REASONING]         reward = {score_bonus = 300},
+00017 [GPT-5-CODEX-MAX-REASONING]     },
+00018 [GPT-5-CODEX-MAX-REASONING]     flawless_1 = {
+00019 [GPT-5-CODEX-MAX-REASONING]         id = "flawless_1",
+00020 [GPT-5-CODEX-MAX-REASONING]         name = "Flawless",
+00021 [GPT-5-CODEX-MAX-REASONING]         trigger = "no_damage_level",
+00022 [GPT-5-CODEX-MAX-REASONING]         threshold = 1,
+00023 [GPT-5-CODEX-MAX-REASONING]         reward = {score_bonus = 250},
+00024 [GPT-5-CODEX-MAX-REASONING]     },
+00025 [GPT-5-CODEX-MAX-REASONING] }
+00026 [GPT-5-CODEX-MAX-REASONING] 
+00027 [GPT-5-CODEX-MAX-REASONING] function newAchievementState()
+00028 [GPT-5-CODEX-MAX-REASONING]     return {
+00029 [GPT-5-CODEX-MAX-REASONING]         unlocked = {},
+00030 [GPT-5-CODEX-MAX-REASONING]         progress = {},
+00031 [GPT-5-CODEX-MAX-REASONING]     }
+00032 [GPT-5-CODEX-MAX-REASONING] end
+00033 [GPT-5-CODEX-MAX-REASONING] 
+00034 [GPT-5-CODEX-MAX-REASONING] function markAchievementUnlocked(state, achievementId)
+00035 [GPT-5-CODEX-MAX-REASONING]     if not state or not achievementId then
+00036 [GPT-5-CODEX-MAX-REASONING]         return false
+00037 [GPT-5-CODEX-MAX-REASONING]     end
+00038 [GPT-5-CODEX-MAX-REASONING]     if state.unlocked[achievementId] then
+00039 [GPT-5-CODEX-MAX-REASONING]         return false
+00040 [GPT-5-CODEX-MAX-REASONING]     end
+00041 [GPT-5-CODEX-MAX-REASONING]     state.unlocked[achievementId] = true
+00042 [GPT-5-CODEX-MAX-REASONING]     return true
+00043 [GPT-5-CODEX-MAX-REASONING] end

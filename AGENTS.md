@@ -157,3 +157,12 @@ Output: `inner_sanctum.vmupack` → copy to SD card `D:\apps\`
 - Store reference files in `sounds/` for documentation
 
 <!-- MANUAL: Custom project notes can be added below -->
+
+## Manual Project Note: Build + Changelog Discipline
+
+- For every code change, increment `BUILD_COUNT` in `app_full.lua`.
+- For every code change, update `CHANGE_LOG.html`.
+- Keep changelog sections grouped in 5-build ranges (for example: `136-140`, `141-145`).
+- On every 10th build slot (140, 150, 160...), include:
+  - normal build entry, and
+  - "Summary of last 10 changes" entry.

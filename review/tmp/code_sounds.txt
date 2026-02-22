@@ -1,0 +1,8 @@
+sounds/Intro_45sec
+sounds/arg_death1
+sounds/grunt
+sounds/inner_sanctum_44k1_adpcm_stereo
+sounds/sword_miss
+sounds/sword_swing_connect
+sounds/win_level
+sounds/yah

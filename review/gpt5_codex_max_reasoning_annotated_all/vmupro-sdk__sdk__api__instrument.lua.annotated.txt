@@ -1,0 +1,46 @@
+00001 [GPT-5-CODEX-MAX-REASONING] --- @file instrument.lua
+00002 [GPT-5-CODEX-MAX-REASONING] --- @brief VMU Pro LUA SDK - Instrument (Voice Mapping) Functions
+00003 [GPT-5-CODEX-MAX-REASONING] --- @author 8BitMods
+00004 [GPT-5-CODEX-MAX-REASONING] --- @version 1.0.0
+00005 [GPT-5-CODEX-MAX-REASONING] --- @date 2025-12-14
+00006 [GPT-5-CODEX-MAX-REASONING] --- @copyright Copyright (c) 2025 8BitMods. All rights reserved.
+00007 [GPT-5-CODEX-MAX-REASONING] ---
+00008 [GPT-5-CODEX-MAX-REASONING] --- Instrument functions for mapping synths and samples to MIDI notes.
+00009 [GPT-5-CODEX-MAX-REASONING] --- Functions are available under the vmupro.sound.instrument namespace.
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING] -- Ensure vmupro namespace exists
+00012 [GPT-5-CODEX-MAX-REASONING] vmupro = vmupro or {}
+00013 [GPT-5-CODEX-MAX-REASONING] vmupro.sound = vmupro.sound or {}
+00014 [GPT-5-CODEX-MAX-REASONING] vmupro.sound.instrument = vmupro.sound.instrument or {}
+00015 [GPT-5-CODEX-MAX-REASONING] 
+00016 [GPT-5-CODEX-MAX-REASONING] --- @class InstrumentObject
+00017 [GPT-5-CODEX-MAX-REASONING] --- @field id number Internal handle for the instrument
+00018 [GPT-5-CODEX-MAX-REASONING] 
+00019 [GPT-5-CODEX-MAX-REASONING] --- @brief Create a new instrument for voice mapping
+00020 [GPT-5-CODEX-MAX-REASONING] --- @return InstrumentObject|nil Instrument object, or nil on error
+00021 [GPT-5-CODEX-MAX-REASONING] --- @return string|nil Error message if failed
+00022 [GPT-5-CODEX-MAX-REASONING] --- @usage local inst = vmupro.sound.instrument.new()
+00023 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00024 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00025 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.instrument.new() end
+00026 [GPT-5-CODEX-MAX-REASONING] 
+00027 [GPT-5-CODEX-MAX-REASONING] --- @brief Add a voice (synth or sample) mapped to a MIDI note
+00028 [GPT-5-CODEX-MAX-REASONING] --- @param inst InstrumentObject Instrument to add voice to
+00029 [GPT-5-CODEX-MAX-REASONING] --- @param voice SynthObject|SampleObject Synth or sample to use
+00030 [GPT-5-CODEX-MAX-REASONING] --- @param midiNote number|nil MIDI note number (0-127), or nil for wildcard (responds to all notes)
+00031 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.instrument.addVoice(inst, synth, nil)   -- synth for all notes
+00032 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.instrument.addVoice(inst, kick, 36)     -- sample at C2
+00033 [GPT-5-CODEX-MAX-REASONING] --- @note Use nil to map a voice to all notes (for melodic instruments)
+00034 [GPT-5-CODEX-MAX-REASONING] --- @note Use specific note numbers for drum kits where each note is a different sound
+00035 [GPT-5-CODEX-MAX-REASONING] --- @note Max 16 voices per instrument (MAX_VOICES_PER_INSTRUMENT)
+00036 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00037 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00038 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.instrument.addVoice(inst, voice, midiNote) end
+00039 [GPT-5-CODEX-MAX-REASONING] 
+00040 [GPT-5-CODEX-MAX-REASONING] --- @brief Free an instrument and release its resources
+00041 [GPT-5-CODEX-MAX-REASONING] --- @param inst InstrumentObject Instrument to free
+00042 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.instrument.free(inst)
+00043 [GPT-5-CODEX-MAX-REASONING] --- @note Does not free the underlying synths or samples - free those separately
+00044 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00045 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00046 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.instrument.free(inst) end

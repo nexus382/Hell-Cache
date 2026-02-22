@@ -1,0 +1,490 @@
+{
+  "analysis_stage": "Item Requirements and Equipment Systems",
+  "data_date": "2026-02-14",
+  "stat_system": {
+    "description": "Items use 6 core stat modifiers (range: -10 to +10)",
+    "stat_modifiers": {
+      "stat_speed": "Affects attack cycle time (positive = faster attacks)",
+      "stat_damage": "Affects damage output (positive = more damage)",
+      "stat_range": "Affects attack range (positive = longer range)",
+      "stat_agility": "Affects movement/dodging (positive = more agile)",
+      "stat_power": "Affects ability effectiveness (positive = stronger abilities)",
+      "stat_defense": "Affects damage reduction (positive = more defense)"
+    }
+  },
+  "equipment_slots": {
+    "slots": [
+      "weapon",
+      "armor",
+      "special_1",
+      "special_2"
+    ],
+    "description": "Players have 4 equipment slots that can hold items",
+    "default_state": "All slots start as nil (empty)"
+  },
+  "player_stats": {
+    "allocatable_stats": {
+      "vitality": "Affects health pool",
+      "strength": "Primary for warrior damage",
+      "dexterity": "Primary for archer speed/damage",
+      "intellect": "Primary for mage spell power"
+    },
+    "stat_points": 0,
+    "description": "Players allocate stat_points into vitality/strength/dexterity/intellect"
+  },
+  "class_base_stats": {
+    "warrior": {
+      "base_hp": 120,
+      "base_damage": 20,
+      "base_speed": 1.0,
+      "base_defense": 4.0,
+      "template_stats": {
+        "agility": 4.0,
+        "power": 4.0,
+        "defense": 4.0,
+        "dodge": 4.0,
+        "regen": 4.0,
+        "crit": 4.0,
+        "atk_speed": 4.0,
+        "shield_bonus": 4.0
+      },
+      "growth": {
+        "hp": 8,
+        "damage": 2,
+        "speed": 0.0
+      }
+    },
+    "archer": {
+      "base_hp": 90,
+      "base_damage": 14,
+      "base_speed": 1.15,
+      "base_defense": 2.5,
+      "template_stats": {
+        "agility": 5.5,
+        "power": 3.75,
+        "defense": 2.5,
+        "dodge": 5.0,
+        "regen": 2.5,
+        "crit": 3.5,
+        "atk_speed": 5.5,
+        "shield_bonus": 2.0
+      },
+      "growth": {
+        "hp": 5,
+        "damage": 2,
+        "speed": 0.01
+      }
+    },
+    "mage": {
+      "base_hp": 80,
+      "base_damage": 18,
+      "base_speed": 1.05,
+      "base_defense": 2.25,
+      "template_stats": {
+        "agility": 2.75,
+        "power": 5.75,
+        "defense": 2.25,
+        "dodge": 2.5,
+        "regen": 2.25,
+        "crit": 5.25,
+        "atk_speed": 2.75,
+        "shield_bonus": 1.75
+      },
+      "growth": {
+        "hp": 4,
+        "damage": 3,
+        "speed": 0.0
+      }
+    }
+  },
+  "weapon_categories": {
+    "melee_warrior": [
+      {
+        "id": "sword_iron",
+        "name": "Iron Sword",
+        "value": 110,
+        "stats": {
+          "stat_speed": 0,
+          "stat_damage": 4,
+          "stat_range": 0,
+          "stat_agility": 0,
+          "stat_power": 0,
+          "stat_defense": 0
+        }
+      },
+      {
+        "id": "weapon_dagger",
+        "name": "Dagger",
+        "value": 65,
+        "stats": {
+          "stat_speed": 5,
+          "stat_damage": -4,
+          "stat_range": -3,
+          "stat_agility": 4,
+          "stat_power": 0,
+          "stat_defense": -2
+        }
+      },
+      {
+        "id": "weapon_axe",
+        "name": "Battle Axe",
+        "value": 140,
+        "stats": {
+          "stat_speed": -5,
+          "stat_damage": 6,
+          "stat_range": 2,
+          "stat_agility": -3,
+          "stat_power": 3,
+          "stat_defense": 0
+        }
+      },
+      {
+        "id": "weapon_spear",
+        "name": "Spear",
+        "value": 115,
+        "stats": {
+          "stat_speed": 1,
+          "stat_damage": 2,
+          "stat_range": 5,
+          "stat_agility": 2,
+          "stat_power": 1,
+          "stat_defense": -1
+        }
+      },
+      {
+        "id": "weapon_hammer",
+        "name": "War Hammer",
+        "value": 160,
+        "stats": {
+          "stat_speed": -8,
+          "stat_damage": 10,
+          "stat_range": -2,
+          "stat_agility": -5,
+          "stat_power": 6,
+          "stat_defense": 2
+        }
+      }
+    ],
+    "ranged_archer": [
+      {
+        "id": "bow_short",
+        "name": "Short Bow",
+        "value": 105,
+        "stats": {
+          "stat_speed": 2,
+          "stat_damage": 3,
+          "stat_range": 4,
+          "stat_agility": 1,
+          "stat_power": 0,
+          "stat_defense": -1
+        }
+      },
+      {
+        "id": "weapon_longbow",
+        "name": "Longbow",
+        "value": 175,
+        "stats": {
+          "stat_speed": -4,
+          "stat_damage": 7,
+          "stat_range": 8,
+          "stat_agility": 0,
+          "stat_power": 3,
+          "stat_defense": -2
+        }
+      },
+      {
+        "id": "weapon_crossbow",
+        "name": "Crossbow",
+        "value": 190,
+        "stats": {
+          "stat_speed": -7,
+          "stat_damage": 9,
+          "stat_range": 6,
+          "stat_agility": -4,
+          "stat_power": 5,
+          "stat_defense": 0
+        }
+      }
+    ],
+    "magic_mage": {
+      "focus": [
+        {
+          "id": "focus_ember",
+          "name": "Ember Focus",
+          "value": 120,
+          "stats": {
+            "stat_speed": 0,
+            "stat_damage": 5,
+            "stat_range": 2,
+            "stat_agility": 0,
+            "stat_power": 3,
+            "stat_defense": 0
+          }
+        }
+      ],
+      "projectile": [
+        {
+          "id": "spell_fireball",
+          "name": "Fireball",
+          "value": 200
+        },
+        {
+          "id": "spell_icebolt",
+          "name": "Ice Bolt",
+          "value": 165
+        },
+        {
+          "id": "spell_lightning",
+          "name": "Lightning Bolt",
+          "value": 185
+        },
+        {
+          "id": "spell_arcanebolt",
+          "name": "Arcane Bolt",
+          "value": 150
+        },
+        {
+          "id": "spell_magma",
+          "name": "Magma Strike",
+          "value": 225
+        },
+        {
+          "id": "spell_poison",
+          "name": "Venom Dart",
+          "value": 175
+        }
+      ],
+      "beam": [
+        {
+          "id": "spell_arcanebeam",
+          "name": "Arcane Beam",
+          "value": 220
+        },
+        {
+          "id": "spell_deathray",
+          "name": "Death Ray",
+          "value": 250
+        },
+        {
+          "id": "spell_frostbeam",
+          "name": "Frost Beam",
+          "value": 205
+        },
+        {
+          "id": "spell_lifedrain",
+          "name": "Life Drain",
+          "value": 240
+        }
+      ],
+      "aoe": [
+        {
+          "id": "spell_froznova",
+          "name": "Frost Nova",
+          "value": 210
+        },
+        {
+          "id": "spell_chainlight",
+          "name": "Chain Lightning",
+          "value": 230
+        },
+        {
+          "id": "spell_meteor",
+          "name": "Meteor Shower",
+          "value": 260
+        },
+        {
+          "id": "spell_voidzone",
+          "name": "Void Zone",
+          "value": 215
+        }
+      ],
+      "utility": [
+        {
+          "id": "spell_teleport",
+          "name": "Teleport",
+          "value": 200,
+          "stats": {
+            "stat_speed": 8,
+            "stat_damage": -5,
+            "stat_range": 0,
+            "stat_agility": 6,
+            "stat_power": 3,
+            "stat_defense": 0
+          }
+        },
+        {
+          "id": "spell_shield",
+          "name": "Arcane Shield",
+          "value": 180,
+          "stats": {
+            "stat_speed": 3,
+            "stat_damage": -3,
+            "stat_range": 0,
+            "stat_agility": 0,
+            "stat_power": 5,
+            "stat_defense": 5
+          }
+        },
+        {
+          "id": "spell_haste",
+          "name": "Haste",
+          "value": 190,
+          "stats": {
+            "stat_speed": 5,
+            "stat_damage": 1,
+            "stat_range": 0,
+            "stat_agility": 4,
+            "stat_power": 4,
+            "stat_defense": 1
+          }
+        },
+        {
+          "id": "spell_phaseshift",
+          "name": "Phase Shift",
+          "value": 210,
+          "stats": {
+            "stat_speed": 4,
+            "stat_damage": -2,
+            "stat_range": 0,
+            "stat_agility": 5,
+            "stat_power": 6,
+            "stat_defense": 2
+          }
+        },
+        {
+          "id": "spell_manaflare",
+          "name": "Mana Flare",
+          "value": 195
+        }
+      ]
+    }
+  },
+  "equipment": {
+    "available_items": [
+      {
+        "id": "charm_guard",
+        "name": "Guard Charm",
+        "kind": "equipment",
+        "class_affinity": "any",
+        "value": 90,
+        "stats": {
+          "stat_speed": 0,
+          "stat_damage": 0,
+          "stat_range": 0,
+          "stat_agility": 0,
+          "stat_power": 0,
+          "stat_defense": 2
+        }
+      }
+    ]
+  },
+  "consumables": [
+    {
+      "id": "potion_small",
+      "name": "Small Potion",
+      "value": 25,
+      "effect": {
+        "heal": 25
+      },
+      "stack_max": 5
+    },
+    {
+      "id": "potion_large",
+      "name": "Large Potion",
+      "value": 60,
+      "effect": {
+        "heal": 55
+      },
+      "stack_max": 3
+    }
+  ],
+  "item_requirements": {
+    "class_affinity": {
+      "description": "Items restricted by class type",
+      "types": [
+        "warrior",
+        "archer",
+        "mage",
+        "any"
+      ],
+      "examples": {
+        "warrior": "Melee weapons (sword, axe, spear, hammer)",
+        "archer": "Ranged weapons (bow, longbow, crossbow)",
+        "mage": "All spells and magic foci",
+        "any": "Consumables and some equipment (e.g., Guard Charm)"
+      }
+    },
+    "stat_requirements": {
+      "found": false,
+      "description": "NO explicit stat requirements found in codebase",
+      "notes": "Items do not require minimum vitality/strength/dexterity/intellect to equip"
+    }
+  },
+  "stat_formulas": {
+    "damage_formula": {
+      "components": [
+        "base_damage (class)",
+        "stat_damage (equipment)",
+        "growth (level)"
+      ],
+      "base_values": {
+        "warrior": 20,
+        "archer": 14,
+        "mage": 18
+      },
+      "equipment_modifier": "stat_damage from equipped weapon",
+      "growth_modifier": "damage growth per level (warrior: 2, archer: 2, mage: 3)",
+      "formula_estimated": "final_damage = base_damage + equipment.stat_damage + (level * growth.damage)"
+    },
+    "defense_formula": {
+      "components": [
+        "base_defense (class)",
+        "stat_defense (equipment)",
+        "shield_bonus (class template)"
+      ],
+      "base_values": {
+        "warrior": 4.0,
+        "archer": 2.5,
+        "mage": 2.25
+      },
+      "shield_bonus": {
+        "warrior": 4.0,
+        "archer": 2.0,
+        "mage": 1.75
+      },
+      "equipment_modifier": "stat_defense from equipment"
+    },
+    "speed_formula": {
+      "components": [
+        "base_speed (class)",
+        "stat_speed (equipment)",
+        "atk_speed (class template)",
+        "growth (level)"
+      ],
+      "base_values": {
+        "warrior": 1.0,
+        "archer": 1.15,
+        "mage": 1.05
+      },
+      "attack_speed_stats": {
+        "warrior": 4.0,
+        "archer": 5.5,
+        "mage": 2.75
+      },
+      "equipment_modifier": "stat_speed from weapon (affects attack cycle time)"
+    },
+    "range_formula": {
+      "components": [
+        "stat_range (equipment only)"
+      ],
+      "description": "No base range in class stats - range comes entirely from equipment",
+      "equipment_modifier": "stat_range from weapon"
+    }
+  },
+  "limitations": [
+    "Damage calculation formula not explicitly found in code - formula is estimated from class stats and item modifiers",
+    "No explicit player level system found in reviewed files - growth.stats may be unused or implemented elsewhere",
+    "Stat-to-damage conversion ratio not found (e.g., how much strength = how much damage)",
+    "Equipment stacking behavior unknown (whether stats add or multiply)"
+  ]
+}

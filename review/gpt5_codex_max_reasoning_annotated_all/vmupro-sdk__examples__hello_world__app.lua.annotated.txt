@@ -1,0 +1,129 @@
+00001 [GPT-5-CODEX-MAX-REASONING] --- @file app.lua
+00002 [GPT-5-CODEX-MAX-REASONING] --- @brief Hello World example for VMU Pro LUA SDK
+00003 [GPT-5-CODEX-MAX-REASONING] --- @author 8BitMods
+00004 [GPT-5-CODEX-MAX-REASONING] --- @version 1.0.0
+00005 [GPT-5-CODEX-MAX-REASONING] --- @date 2025-09-29
+00006 [GPT-5-CODEX-MAX-REASONING] --- @copyright Copyright (c) 2025 8BitMods. All rights reserved.
+00007 [GPT-5-CODEX-MAX-REASONING] ---
+00008 [GPT-5-CODEX-MAX-REASONING] --- A comprehensive Hello World application that demonstrates VMU Pro LUA SDK features.
+00009 [GPT-5-CODEX-MAX-REASONING] --- Shows namespace usage, graphics, input handling, and proper application structure.
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING] import "api/system"
+00012 [GPT-5-CODEX-MAX-REASONING] import "api/display"
+00013 [GPT-5-CODEX-MAX-REASONING] import "api/input"
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING] -- Application state
+00016 [GPT-5-CODEX-MAX-REASONING] local app_running = true
+00017 [GPT-5-CODEX-MAX-REASONING] local frame_count = 0
+00018 [GPT-5-CODEX-MAX-REASONING] local start_time = 0
+00019 [GPT-5-CODEX-MAX-REASONING] 
+00020 [GPT-5-CODEX-MAX-REASONING] --- @brief Initialize the application
+00021 [GPT-5-CODEX-MAX-REASONING] local function init_app()
+00022 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "HelloWorld", "Initializing VMU Pro Hello World Demo")
+00023 [GPT-5-CODEX-MAX-REASONING] 
+00024 [GPT-5-CODEX-MAX-REASONING]     -- Get and log the actual SDK version from hardware
+00025 [GPT-5-CODEX-MAX-REASONING]     local sdk_version = vmupro.apiVersion()
+00026 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "HelloWorld", "SDK Version: " .. sdk_version)
+00027 [GPT-5-CODEX-MAX-REASONING] 
+00028 [GPT-5-CODEX-MAX-REASONING]     -- Get start time for uptime display
+00029 [GPT-5-CODEX-MAX-REASONING]     start_time = vmupro.system.getTimeUs()
+00030 [GPT-5-CODEX-MAX-REASONING] 
+00031 [GPT-5-CODEX-MAX-REASONING]     -- Initialize graphics and set smaller font
+00032 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL) -- Use small font for better spacing
+00033 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00034 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.refresh()
+00035 [GPT-5-CODEX-MAX-REASONING] 
+00036 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_DEBUG, "HelloWorld", "Initialization complete")
+00037 [GPT-5-CODEX-MAX-REASONING] end
+00038 [GPT-5-CODEX-MAX-REASONING] 
+00039 [GPT-5-CODEX-MAX-REASONING] --- @brief Update application logic
+00040 [GPT-5-CODEX-MAX-REASONING] local function update()
+00041 [GPT-5-CODEX-MAX-REASONING]     frame_count = frame_count + 1
+00042 [GPT-5-CODEX-MAX-REASONING] 
+00043 [GPT-5-CODEX-MAX-REASONING]     -- Read input
+00044 [GPT-5-CODEX-MAX-REASONING]     vmupro.input.read()
+00045 [GPT-5-CODEX-MAX-REASONING] 
+00046 [GPT-5-CODEX-MAX-REASONING]     -- Check for exit condition (B button)
+00047 [GPT-5-CODEX-MAX-REASONING]     if vmupro.input.pressed(vmupro.input.B) then
+00048 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_INFO, "HelloWorld", "Exit requested by user")
+00049 [GPT-5-CODEX-MAX-REASONING]         app_running = false
+00050 [GPT-5-CODEX-MAX-REASONING]     end
+00051 [GPT-5-CODEX-MAX-REASONING] end
+00052 [GPT-5-CODEX-MAX-REASONING] 
+00053 [GPT-5-CODEX-MAX-REASONING] --- @brief Render the application
+00054 [GPT-5-CODEX-MAX-REASONING] local function render()
+00055 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen with VMU green background
+00056 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.VMUGREEN)
+00057 [GPT-5-CODEX-MAX-REASONING] 
+00058 [GPT-5-CODEX-MAX-REASONING]     -- Draw title
+00059 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_22x24)
+00060 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("VMUPro SDK Demo", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.VMUGREEN)
+00061 [GPT-5-CODEX-MAX-REASONING] 
+00062 [GPT-5-CODEX-MAX-REASONING]     -- Draw hello world message
+00063 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00064 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Hello World!", 10, 35, vmupro.graphics.WHITE, vmupro.graphics.VMUGREEN)
+00065 [GPT-5-CODEX-MAX-REASONING] 
+00066 [GPT-5-CODEX-MAX-REASONING]     -- Draw frame counter
+00067 [GPT-5-CODEX-MAX-REASONING]     local frame_text = "Frame: " .. frame_count
+00068 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(frame_text, 10, 55, vmupro.graphics.YELLOW, vmupro.graphics.VMUGREEN)
+00069 [GPT-5-CODEX-MAX-REASONING] 
+00070 [GPT-5-CODEX-MAX-REASONING]     -- Draw uptime
+00071 [GPT-5-CODEX-MAX-REASONING]     local current_time = vmupro.system.getTimeUs()
+00072 [GPT-5-CODEX-MAX-REASONING]     local uptime_ms = math.floor((current_time - start_time) / 1000)
+00073 [GPT-5-CODEX-MAX-REASONING]     local uptime_text = "Uptime: " .. uptime_ms .. "ms"
+00074 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(uptime_text, 10, 75, vmupro.graphics.BLUE, vmupro.graphics.VMUGREEN)
+00075 [GPT-5-CODEX-MAX-REASONING] 
+00076 [GPT-5-CODEX-MAX-REASONING]     -- Draw available namespaces info
+00077 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Namespaces:", 10, 105, vmupro.graphics.WHITE, vmupro.graphics.VMUGREEN)
+00078 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("graphics, sprites, audio", 10, 125, vmupro.graphics.GREY, vmupro.graphics.VMUGREEN)
+00079 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("input, file, system, text", 10, 145, vmupro.graphics.GREY, vmupro.graphics.VMUGREEN)
+00080 [GPT-5-CODEX-MAX-REASONING] 
+00081 [GPT-5-CODEX-MAX-REASONING]     -- Draw controls
+00082 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Press B to exit", 10, 175, vmupro.graphics.WHITE, vmupro.graphics.VMUGREEN)
+00083 [GPT-5-CODEX-MAX-REASONING] 
+00084 [GPT-5-CODEX-MAX-REASONING]     -- Draw a simple rectangle as decoration
+00085 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawRect(5, 5, 230, 230, vmupro.graphics.WHITE)
+00086 [GPT-5-CODEX-MAX-REASONING] 
+00087 [GPT-5-CODEX-MAX-REASONING]     -- Refresh display
+00088 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.refresh()
+00089 [GPT-5-CODEX-MAX-REASONING] end
+00090 [GPT-5-CODEX-MAX-REASONING] 
+00091 [GPT-5-CODEX-MAX-REASONING] --- @brief Main application entry point
+00092 [GPT-5-CODEX-MAX-REASONING] --- @details This function is called by the VMU Pro firmware when the application starts.
+00093 [GPT-5-CODEX-MAX-REASONING] --- All LUA applications must implement this function.
+00094 [GPT-5-CODEX-MAX-REASONING] --- @return number Exit code (0 = success, non-zero = error)
+00095 [GPT-5-CODEX-MAX-REASONING] function AppMain()
+00096 [GPT-5-CODEX-MAX-REASONING]     -- Initialize application
+00097 [GPT-5-CODEX-MAX-REASONING]     init_app()
+00098 [GPT-5-CODEX-MAX-REASONING] 
+00099 [GPT-5-CODEX-MAX-REASONING]     -- Main loop
+00100 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "HelloWorld", "Entering main loop")
+00101 [GPT-5-CODEX-MAX-REASONING] 
+00102 [GPT-5-CODEX-MAX-REASONING]     while app_running do
+00103 [GPT-5-CODEX-MAX-REASONING]         -- Update logic
+00104 [GPT-5-CODEX-MAX-REASONING]         update()
+00105 [GPT-5-CODEX-MAX-REASONING] 
+00106 [GPT-5-CODEX-MAX-REASONING]         -- Render frame
+00107 [GPT-5-CODEX-MAX-REASONING]         render()
+00108 [GPT-5-CODEX-MAX-REASONING] 
+00109 [GPT-5-CODEX-MAX-REASONING]         -- Small delay to prevent excessive CPU usage
+00110 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.delayMs(16) -- ~60 FPS
+00111 [GPT-5-CODEX-MAX-REASONING] 
+00112 [GPT-5-CODEX-MAX-REASONING]         -- Log every 60 frames
+00113 [GPT-5-CODEX-MAX-REASONING]         if frame_count % 60 == 0 then
+00114 [GPT-5-CODEX-MAX-REASONING]             vmupro.system.log(vmupro.system.LOG_DEBUG, "HelloWorld", "Running... Frame: " .. frame_count)
+00115 [GPT-5-CODEX-MAX-REASONING]         end
+00116 [GPT-5-CODEX-MAX-REASONING] 
+00117 [GPT-5-CODEX-MAX-REASONING]         -- Safety exit after many frames (prevent infinite loop in testing)
+00118 [GPT-5-CODEX-MAX-REASONING]         if frame_count > 1800 then -- 30 seconds at 60fps
+00119 [GPT-5-CODEX-MAX-REASONING]             vmupro.system.log(vmupro.system.LOG_INFO, "HelloWorld", "Auto-exit after timeout")
+00120 [GPT-5-CODEX-MAX-REASONING]             break
+00121 [GPT-5-CODEX-MAX-REASONING]         end
+00122 [GPT-5-CODEX-MAX-REASONING]     end
+00123 [GPT-5-CODEX-MAX-REASONING] 
+00124 [GPT-5-CODEX-MAX-REASONING]     -- Cleanup and exit
+00125 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "HelloWorld", "Application completed successfully")
+00126 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "HelloWorld", "Total frames rendered: " .. frame_count)
+00127 [GPT-5-CODEX-MAX-REASONING] 
+00128 [GPT-5-CODEX-MAX-REASONING]     return 0
+00129 [GPT-5-CODEX-MAX-REASONING] end

@@ -1,0 +1,59 @@
+00001 [GPT-5-CODEX-MAX-REASONING] --- @file utilities.lua
+00002 [GPT-5-CODEX-MAX-REASONING] --- @brief VMU Pro LUA SDK - Utility Functions
+00003 [GPT-5-CODEX-MAX-REASONING] --- @author 8BitMods
+00004 [GPT-5-CODEX-MAX-REASONING] --- @version 1.0.0
+00005 [GPT-5-CODEX-MAX-REASONING] --- @date 2025-09-18
+00006 [GPT-5-CODEX-MAX-REASONING] --- @copyright Copyright (c) 2025 8BitMods. All rights reserved.
+00007 [GPT-5-CODEX-MAX-REASONING] ---
+00008 [GPT-5-CODEX-MAX-REASONING] --- Utility functions for VMU Pro LUA applications.
+00009 [GPT-5-CODEX-MAX-REASONING] --- Functions are available under the vmupro.system namespace.
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING] -- Ensure vmupro namespace exists
+00012 [GPT-5-CODEX-MAX-REASONING] vmupro = vmupro or {}
+00013 [GPT-5-CODEX-MAX-REASONING] vmupro.system = vmupro.system or {}
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING] --- @brief Sleep for a specified number of milliseconds
+00016 [GPT-5-CODEX-MAX-REASONING] --- @param milliseconds number Time to sleep in milliseconds
+00017 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.system.sleepMs(1000) -- Sleep for 1 second
+00018 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.system.sleepMs(500)  -- Sleep for 0.5 seconds
+00019 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00020 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00021 [GPT-5-CODEX-MAX-REASONING] function vmupro.system.sleepMs(milliseconds) end
+00022 [GPT-5-CODEX-MAX-REASONING] 
+00023 [GPT-5-CODEX-MAX-REASONING] --- @brief Get current time in microseconds
+00024 [GPT-5-CODEX-MAX-REASONING] --- @return number Current time in microseconds since boot
+00025 [GPT-5-CODEX-MAX-REASONING] --- @usage local time = vmupro.system.getTimeUs()
+00026 [GPT-5-CODEX-MAX-REASONING] --- @usage local elapsed = vmupro.system.getTimeUs() - start_time
+00027 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00028 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00029 [GPT-5-CODEX-MAX-REASONING] function vmupro.system.getTimeUs() end
+00030 [GPT-5-CODEX-MAX-REASONING] 
+00031 [GPT-5-CODEX-MAX-REASONING] --- @brief Get current LUA memory usage statistics
+00032 [GPT-5-CODEX-MAX-REASONING] --- @return number current_memory Current memory usage in bytes
+00033 [GPT-5-CODEX-MAX-REASONING] --- @return number max_memory Maximum allowed memory in bytes
+00034 [GPT-5-CODEX-MAX-REASONING] --- @usage local current, max = vmupro.system.getMemoryUsage()
+00035 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.system.log(vmupro.system.LOG_INFO, "Memory", "Using " .. current .. " / " .. max .. " bytes")
+00036 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00037 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00038 [GPT-5-CODEX-MAX-REASONING] function vmupro.system.getMemoryUsage() end
+00039 [GPT-5-CODEX-MAX-REASONING] 
+00040 [GPT-5-CODEX-MAX-REASONING] --- @brief Delay execution for microseconds
+00041 [GPT-5-CODEX-MAX-REASONING] --- @param microseconds number Time to delay in microseconds
+00042 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.system.delayUs(1000) -- Delay for 1 millisecond
+00043 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00044 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00045 [GPT-5-CODEX-MAX-REASONING] function vmupro.system.delayUs(microseconds) end
+00046 [GPT-5-CODEX-MAX-REASONING] 
+00047 [GPT-5-CODEX-MAX-REASONING] --- @brief Delay execution for milliseconds
+00048 [GPT-5-CODEX-MAX-REASONING] --- @param milliseconds number Time to delay in milliseconds
+00049 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.system.delayMs(100) -- Delay for 100 milliseconds
+00050 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00051 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00052 [GPT-5-CODEX-MAX-REASONING] function vmupro.system.delayMs(milliseconds) end
+00053 [GPT-5-CODEX-MAX-REASONING] 
+00054 [GPT-5-CODEX-MAX-REASONING] --- @brief Set the global log level
+00055 [GPT-5-CODEX-MAX-REASONING] --- @param level number Log level (LOG_ERROR=1, LOG_WARN=2, LOG_INFO=3, LOG_DEBUG=4)
+00056 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.system.setLogLevel(vmupro.system.LOG_DEBUG) -- Enable all log levels
+00057 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00058 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00059 [GPT-5-CODEX-MAX-REASONING] function vmupro.system.setLogLevel(level) end

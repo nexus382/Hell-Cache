@@ -1,0 +1,97 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page8.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 8: System - Logging & Info
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page8 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track last log time
+00007 [GPT-5-CODEX-MAX-REASONING] local last_log_time = nil
+00008 [GPT-5-CODEX-MAX-REASONING] local log_interval = 5000000  -- Log once every 5 seconds (in microseconds)
+00009 [GPT-5-CODEX-MAX-REASONING] local page8_initialized = false
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING] -- Track memory update time
+00012 [GPT-5-CODEX-MAX-REASONING] local last_mem_update = 0
+00013 [GPT-5-CODEX-MAX-REASONING] local mem_update_interval = 1000000  -- Update memory every 1 second (in microseconds)
+00014 [GPT-5-CODEX-MAX-REASONING] local cached_mem_usage = 0
+00015 [GPT-5-CODEX-MAX-REASONING] local cached_mem_limit = 0
+00016 [GPT-5-CODEX-MAX-REASONING] local cached_largest_block = 0
+00017 [GPT-5-CODEX-MAX-REASONING] 
+00018 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 8: System - Logging & Info
+00019 [GPT-5-CODEX-MAX-REASONING] function Page8.render(drawPageCounter)
+00020 [GPT-5-CODEX-MAX-REASONING]     -- Initialize on first render
+00021 [GPT-5-CODEX-MAX-REASONING]     if not page8_initialized then
+00022 [GPT-5-CODEX-MAX-REASONING]         last_log_time = vmupro.system.getTimeUs()
+00023 [GPT-5-CODEX-MAX-REASONING]         last_mem_update = vmupro.system.getTimeUs()
+00024 [GPT-5-CODEX-MAX-REASONING]         page8_initialized = true
+00025 [GPT-5-CODEX-MAX-REASONING]     end
+00026 [GPT-5-CODEX-MAX-REASONING] 
+00027 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00028 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00029 [GPT-5-CODEX-MAX-REASONING] 
+00030 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00031 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00032 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Logging & Info", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00033 [GPT-5-CODEX-MAX-REASONING] 
+00034 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00035 [GPT-5-CODEX-MAX-REASONING] 
+00036 [GPT-5-CODEX-MAX-REASONING]     local y_pos = 40
+00037 [GPT-5-CODEX-MAX-REASONING] 
+00038 [GPT-5-CODEX-MAX-REASONING]     -- Test: API Version
+00039 [GPT-5-CODEX-MAX-REASONING]     local api_version = vmupro.apiVersion()
+00040 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("SDK Version:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00041 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00042 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(api_version, 10, y_pos, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00043 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 20
+00044 [GPT-5-CODEX-MAX-REASONING] 
+00045 [GPT-5-CODEX-MAX-REASONING]     -- Test: Memory Usage (update every 2 seconds)
+00046 [GPT-5-CODEX-MAX-REASONING]     local current_time_mem = vmupro.system.getTimeUs()
+00047 [GPT-5-CODEX-MAX-REASONING]     if current_time_mem - last_mem_update >= mem_update_interval then
+00048 [GPT-5-CODEX-MAX-REASONING]         cached_mem_usage = vmupro.system.getMemoryUsage()
+00049 [GPT-5-CODEX-MAX-REASONING]         cached_mem_limit = vmupro.system.getMemoryLimit()
+00050 [GPT-5-CODEX-MAX-REASONING]         cached_largest_block = vmupro.system.getLargestFreeBlock()
+00051 [GPT-5-CODEX-MAX-REASONING]         last_mem_update = current_time_mem
+00052 [GPT-5-CODEX-MAX-REASONING]     end
+00053 [GPT-5-CODEX-MAX-REASONING] 
+00054 [GPT-5-CODEX-MAX-REASONING]     local mem_usage_kb = math.floor(cached_mem_usage / 1024)
+00055 [GPT-5-CODEX-MAX-REASONING]     local mem_limit_kb = math.floor(cached_mem_limit / 1024)
+00056 [GPT-5-CODEX-MAX-REASONING]     local largest_block_kb = math.floor(cached_largest_block / 1024)
+00057 [GPT-5-CODEX-MAX-REASONING]     local mem_percent = 0
+00058 [GPT-5-CODEX-MAX-REASONING]     if cached_mem_limit > 0 then
+00059 [GPT-5-CODEX-MAX-REASONING]         mem_percent = math.floor((cached_mem_usage / cached_mem_limit) * 100)
+00060 [GPT-5-CODEX-MAX-REASONING]     end
+00061 [GPT-5-CODEX-MAX-REASONING] 
+00062 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Memory:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00063 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00064 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(string.format("%d/%d KB (%d%%)", mem_usage_kb, mem_limit_kb, mem_percent), 10, y_pos, vmupro.graphics.BLUE, vmupro.graphics.BLACK)
+00065 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00066 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(string.format("Largest: %d KB", largest_block_kb), 10, y_pos, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00067 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 20
+00068 [GPT-5-CODEX-MAX-REASONING] 
+00069 [GPT-5-CODEX-MAX-REASONING]     -- Test: Send log messages (throttled - check serial)
+00070 [GPT-5-CODEX-MAX-REASONING]     local current_time_log = vmupro.system.getTimeUs()
+00071 [GPT-5-CODEX-MAX-REASONING]     local should_log = (current_time_log - last_log_time >= log_interval)
+00072 [GPT-5-CODEX-MAX-REASONING] 
+00073 [GPT-5-CODEX-MAX-REASONING]     if should_log then
+00074 [GPT-5-CODEX-MAX-REASONING]         -- Set log level to DEBUG to show all messages
+00075 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.setLogLevel(vmupro.system.LOG_DEBUG)
+00076 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page8", "Test ERROR msg")
+00077 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_WARN, "Page8", "Test WARN msg")
+00078 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_INFO, "Page8", "Test INFO msg")
+00079 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_DEBUG, "Page8", "Test DEBUG msg")
+00080 [GPT-5-CODEX-MAX-REASONING]         last_log_time = current_time_log
+00081 [GPT-5-CODEX-MAX-REASONING]     end
+00082 [GPT-5-CODEX-MAX-REASONING] 
+00083 [GPT-5-CODEX-MAX-REASONING]     local time_since_last = (current_time_log - last_log_time) / 1000000.0
+00084 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Logs (5s, serial):", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00085 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00086 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(string.format("Last: %.1fs", time_since_last), 10, y_pos, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00087 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00088 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_TINY_6x8)
+00089 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("ERROR/WARN/INFO/DEBUG", 10, y_pos, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00090 [GPT-5-CODEX-MAX-REASONING] 
+00091 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00092 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00093 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 210, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00094 [GPT-5-CODEX-MAX-REASONING] 
+00095 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00096 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00097 [GPT-5-CODEX-MAX-REASONING] end

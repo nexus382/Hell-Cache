@@ -1,0 +1,87 @@
+00001 [GPT-5-Codex] -- Data layer runtime state bootstrap and per-run initialization.
+00002 [GPT-5-Codex] 
+00003 [GPT-5-Codex] ExpansionRuntimeState = {}
+00004 [GPT-5-Codex] ExpansionImplementationQueue = {
+00005 [GPT-5-Codex]     "classes_combat_split",
+00006 [GPT-5-Codex]     "chest_drop_conversion",
+00007 [GPT-5-Codex]     "inventory_stash_weight",
+00008 [GPT-5-Codex]     "trader_economy_loop",
+00009 [GPT-5-Codex]     "high_score_death_flow_achievements_ui",
+00010 [GPT-5-Codex] }
+00011 [GPT-5-Codex] 
+00012 [GPT-5-Codex] local function copyList(src)
+00013 [GPT-5-Codex]     local out = {}
+00014 [GPT-5-Codex]     if not src then return out end
+00015 [GPT-5-Codex]     for i = 1, #src do
+00016 [GPT-5-Codex]         out[i] = src[i]
+00017 [GPT-5-Codex]     end
+00018 [GPT-5-Codex]     return out
+00019 [GPT-5-Codex] end
+00020 [GPT-5-Codex] 
+00021 [GPT-5-Codex] local function makeDefaultBuildState()
+00022 [GPT-5-Codex]     return {
+00023 [GPT-5-Codex]         class_id = "warrior",
+00024 [GPT-5-Codex]         stat_points = 0,
+00025 [GPT-5-Codex]         stats = {
+00026 [GPT-5-Codex]             vitality = 0,
+00027 [GPT-5-Codex]             strength = 0,
+00028 [GPT-5-Codex]             dexterity = 0,
+00029 [GPT-5-Codex]             intellect = 0,
+00030 [GPT-5-Codex]         },
+00031 [GPT-5-Codex]         equipment = {
+00032 [GPT-5-Codex]             weapon = nil,
+00033 [GPT-5-Codex]             armor = nil,
+00034 [GPT-5-Codex]             special_1 = nil,
+00035 [GPT-5-Codex]             special_2 = nil,
+00036 [GPT-5-Codex]         },
+00037 [GPT-5-Codex]     }
+00038 [GPT-5-Codex] end
+00039 [GPT-5-Codex] 
+00040 [GPT-5-Codex] local function makeDefaultInventoryState()
+00041 [GPT-5-Codex]     return {
+00042 [GPT-5-Codex]         max_weight = 30,
+00043 [GPT-5-Codex]         current_weight = 0,
+00044 [GPT-5-Codex]         items = {},
+00045 [GPT-5-Codex]         quick_slots = {nil, nil, nil},
+00046 [GPT-5-Codex]     }
+00047 [GPT-5-Codex] end
+00048 [GPT-5-Codex] 
+00049 [GPT-5-Codex] local function makeDefaultStashState()
+00050 [GPT-5-Codex]     return {
+00051 [GPT-5-Codex]         max_weight = 120,
+00052 [GPT-5-Codex]         current_weight = 0,
+00053 [GPT-5-Codex]         items = {},
+00054 [GPT-5-Codex]     }
+00055 [GPT-5-Codex] end
+00056 [GPT-5-Codex] 
+00057 [GPT-5-Codex] function ExpansionRuntimeState.bootstrap()
+00058 [GPT-5-Codex]     local defaultScores = {}
+00059 [GPT-5-Codex]     local defaultAchievementState = newAchievementState and newAchievementState() or {unlocked = {}, progress = {}}
+00060 [GPT-5-Codex]     local loadedScores = defaultScores
+00061 [GPT-5-Codex]     local loadedAchievements = defaultAchievementState
+00062 [GPT-5-Codex]     if ExpansionPersistence and ExpansionPersistence.loadHighScores then
+00063 [GPT-5-Codex]         loadedScores = ExpansionPersistence.loadHighScores(defaultScores)
+00064 [GPT-5-Codex]     end
+00065 [GPT-5-Codex]     if ExpansionPersistence and ExpansionPersistence.loadAchievementState then
+00066 [GPT-5-Codex]         loadedAchievements = ExpansionPersistence.loadAchievementState(defaultAchievementState)
+00067 [GPT-5-Codex]     end
+00068 [GPT-5-Codex] 
+00069 [GPT-5-Codex]     return {
+00070 [GPT-5-Codex]         player_build_state = makeDefaultBuildState(),
+00071 [GPT-5-Codex]         inventory_state = makeDefaultInventoryState(),
+00072 [GPT-5-Codex]         stash_state = makeDefaultStashState(),
+00073 [GPT-5-Codex]         achievement_state = loadedAchievements,
+00074 [GPT-5-Codex]         high_score_state = {entries = copyList(loadedScores)},
+00075 [GPT-5-Codex]         score_state = GameScoreModel and GameScoreModel.newRun and GameScoreModel.newRun() or {current = 0},
+00076 [GPT-5-Codex]     }
+00077 [GPT-5-Codex] end
+00078 [GPT-5-Codex] 
+00079 [GPT-5-Codex] function ExpansionRuntimeState.beginRun(levelId, fallbackLevel)
+00080 [GPT-5-Codex]     local startLevel = levelId or fallbackLevel or 1
+00081 [GPT-5-Codex]     local runState = GameScoreModel and GameScoreModel.newRun and GameScoreModel.newRun() or {current = 0}
+00082 [GPT-5-Codex]     runState.started_level = startLevel
+00083 [GPT-5-Codex]     runState.ended_level = startLevel
+00084 [GPT-5-Codex]     return {
+00085 [GPT-5-Codex]         score_state = runState
+00086 [GPT-5-Codex]     }
+00087 [GPT-5-Codex] end

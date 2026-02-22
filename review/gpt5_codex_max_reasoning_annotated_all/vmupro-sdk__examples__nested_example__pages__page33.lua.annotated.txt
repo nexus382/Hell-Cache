@@ -1,0 +1,254 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page33.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 33: Tag System & Userdata Demo
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page33 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- Sprite handles
+00010 [GPT-5-CODEX-MAX-REASONING] local player_handle = nil
+00011 [GPT-5-CODEX-MAX-REASONING] local enemy_handle = nil
+00012 [GPT-5-CODEX-MAX-REASONING] local collectible_handle = nil
+00013 [GPT-5-CODEX-MAX-REASONING] local sprites_loaded = false
+00014 [GPT-5-CODEX-MAX-REASONING] local load_error = false
+00015 [GPT-5-CODEX-MAX-REASONING] 
+00016 [GPT-5-CODEX-MAX-REASONING] -- Sprite type tags
+00017 [GPT-5-CODEX-MAX-REASONING] local TAG_PLAYER = 1
+00018 [GPT-5-CODEX-MAX-REASONING] local TAG_ENEMY = 2
+00019 [GPT-5-CODEX-MAX-REASONING] local TAG_COLLECTIBLE = 3
+00020 [GPT-5-CODEX-MAX-REASONING] 
+00021 [GPT-5-CODEX-MAX-REASONING] -- Animation counters
+00022 [GPT-5-CODEX-MAX-REASONING] local frame_count = 0
+00023 [GPT-5-CODEX-MAX-REASONING] 
+00024 [GPT-5-CODEX-MAX-REASONING] --- @brief Load sprites and set up tags/userdata
+00025 [GPT-5-CODEX-MAX-REASONING] local function loadSprites()
+00026 [GPT-5-CODEX-MAX-REASONING]     if sprites_loaded or load_error then
+00027 [GPT-5-CODEX-MAX-REASONING]         return
+00028 [GPT-5-CODEX-MAX-REASONING]     end
+00029 [GPT-5-CODEX-MAX-REASONING] 
+00030 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites
+00031 [GPT-5-CODEX-MAX-REASONING]     player_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00032 [GPT-5-CODEX-MAX-REASONING]     enemy_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00033 [GPT-5-CODEX-MAX-REASONING]     collectible_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00034 [GPT-5-CODEX-MAX-REASONING] 
+00035 [GPT-5-CODEX-MAX-REASONING]     if not player_handle or not enemy_handle or not collectible_handle then
+00036 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page33", "Failed to load sprites")
+00037 [GPT-5-CODEX-MAX-REASONING]         -- Clean up any sprites that were successfully loaded
+00038 [GPT-5-CODEX-MAX-REASONING]         if player_handle then
+00039 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.free(player_handle)
+00040 [GPT-5-CODEX-MAX-REASONING]             player_handle = nil
+00041 [GPT-5-CODEX-MAX-REASONING]         end
+00042 [GPT-5-CODEX-MAX-REASONING]         if enemy_handle then
+00043 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.free(enemy_handle)
+00044 [GPT-5-CODEX-MAX-REASONING]             enemy_handle = nil
+00045 [GPT-5-CODEX-MAX-REASONING]         end
+00046 [GPT-5-CODEX-MAX-REASONING]         if collectible_handle then
+00047 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.free(collectible_handle)
+00048 [GPT-5-CODEX-MAX-REASONING]             collectible_handle = nil
+00049 [GPT-5-CODEX-MAX-REASONING]         end
+00050 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00051 [GPT-5-CODEX-MAX-REASONING]         return
+00052 [GPT-5-CODEX-MAX-REASONING]     end
+00053 [GPT-5-CODEX-MAX-REASONING] 
+00054 [GPT-5-CODEX-MAX-REASONING]     -- Set current frame
+00055 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(player_handle, 0)
+00056 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(enemy_handle, 1)
+00057 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(collectible_handle, 2)
+00058 [GPT-5-CODEX-MAX-REASONING] 
+00059 [GPT-5-CODEX-MAX-REASONING]     -- Set positions
+00060 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.moveTo(player_handle, 60, 120)
+00061 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.moveTo(enemy_handle, 120, 120)
+00062 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.moveTo(collectible_handle, 180, 120)
+00063 [GPT-5-CODEX-MAX-REASONING] 
+00064 [GPT-5-CODEX-MAX-REASONING]     -- Add to scene
+00065 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(player_handle)
+00066 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(enemy_handle)
+00067 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(collectible_handle)
+00068 [GPT-5-CODEX-MAX-REASONING] 
+00069 [GPT-5-CODEX-MAX-REASONING]     -- Set tags for sprite type identification
+00070 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setTag(player_handle, TAG_PLAYER)
+00071 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setTag(enemy_handle, TAG_ENEMY)
+00072 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setTag(collectible_handle, TAG_COLLECTIBLE)
+00073 [GPT-5-CODEX-MAX-REASONING] 
+00074 [GPT-5-CODEX-MAX-REASONING]     -- Set userdata with game state
+00075 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setUserdata(player_handle, {
+00076 [GPT-5-CODEX-MAX-REASONING]         health = 100,
+00077 [GPT-5-CODEX-MAX-REASONING]         max_health = 100,
+00078 [GPT-5-CODEX-MAX-REASONING]         lives = 3,
+00079 [GPT-5-CODEX-MAX-REASONING]         score = 0
+00080 [GPT-5-CODEX-MAX-REASONING]     })
+00081 [GPT-5-CODEX-MAX-REASONING] 
+00082 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setUserdata(enemy_handle, {
+00083 [GPT-5-CODEX-MAX-REASONING]         ai_state = "patrol",
+00084 [GPT-5-CODEX-MAX-REASONING]         health = 50,
+00085 [GPT-5-CODEX-MAX-REASONING]         damage = 10
+00086 [GPT-5-CODEX-MAX-REASONING]     })
+00087 [GPT-5-CODEX-MAX-REASONING] 
+00088 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setUserdata(collectible_handle, {
+00089 [GPT-5-CODEX-MAX-REASONING]         item_type = "coin",
+00090 [GPT-5-CODEX-MAX-REASONING]         value = 10,
+00091 [GPT-5-CODEX-MAX-REASONING]         collected = false
+00092 [GPT-5-CODEX-MAX-REASONING]     })
+00093 [GPT-5-CODEX-MAX-REASONING] 
+00094 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = true
+00095 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page33", "Sprites loaded for tag/userdata demo")
+00096 [GPT-5-CODEX-MAX-REASONING] end
+00097 [GPT-5-CODEX-MAX-REASONING] 
+00098 [GPT-5-CODEX-MAX-REASONING] --- @brief Update logic - simulate game state changes
+00099 [GPT-5-CODEX-MAX-REASONING] function Page33.update()
+00100 [GPT-5-CODEX-MAX-REASONING]     if not sprites_loaded then
+00101 [GPT-5-CODEX-MAX-REASONING]         return
+00102 [GPT-5-CODEX-MAX-REASONING]     end
+00103 [GPT-5-CODEX-MAX-REASONING] 
+00104 [GPT-5-CODEX-MAX-REASONING]     frame_count = frame_count + 1
+00105 [GPT-5-CODEX-MAX-REASONING] 
+00106 [GPT-5-CODEX-MAX-REASONING]     -- Every 60 frames, modify player health
+00107 [GPT-5-CODEX-MAX-REASONING]     if frame_count % 60 == 0 then
+00108 [GPT-5-CODEX-MAX-REASONING]         local player_data = vmupro.sprite.getUserdata(player_handle)
+00109 [GPT-5-CODEX-MAX-REASONING]         if player_data then
+00110 [GPT-5-CODEX-MAX-REASONING]             player_data.health = player_data.health - 5
+00111 [GPT-5-CODEX-MAX-REASONING]             if player_data.health <= 0 then
+00112 [GPT-5-CODEX-MAX-REASONING]                 player_data.health = player_data.max_health
+00113 [GPT-5-CODEX-MAX-REASONING]                 player_data.lives = player_data.lives - 1
+00114 [GPT-5-CODEX-MAX-REASONING]                 if player_data.lives < 0 then
+00115 [GPT-5-CODEX-MAX-REASONING]                     player_data.lives = 3  -- Reset
+00116 [GPT-5-CODEX-MAX-REASONING]                 end
+00117 [GPT-5-CODEX-MAX-REASONING]             end
+00118 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.setUserdata(player_handle, player_data)
+00119 [GPT-5-CODEX-MAX-REASONING]         end
+00120 [GPT-5-CODEX-MAX-REASONING]     end
+00121 [GPT-5-CODEX-MAX-REASONING] 
+00122 [GPT-5-CODEX-MAX-REASONING]     -- Every 90 frames, toggle enemy AI state
+00123 [GPT-5-CODEX-MAX-REASONING]     if frame_count % 90 == 0 then
+00124 [GPT-5-CODEX-MAX-REASONING]         local enemy_data = vmupro.sprite.getUserdata(enemy_handle)
+00125 [GPT-5-CODEX-MAX-REASONING]         if enemy_data then
+00126 [GPT-5-CODEX-MAX-REASONING]             if enemy_data.ai_state == "patrol" then
+00127 [GPT-5-CODEX-MAX-REASONING]                 enemy_data.ai_state = "chase"
+00128 [GPT-5-CODEX-MAX-REASONING]             else
+00129 [GPT-5-CODEX-MAX-REASONING]                 enemy_data.ai_state = "patrol"
+00130 [GPT-5-CODEX-MAX-REASONING]             end
+00131 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.setUserdata(enemy_handle, enemy_data)
+00132 [GPT-5-CODEX-MAX-REASONING]         end
+00133 [GPT-5-CODEX-MAX-REASONING]     end
+00134 [GPT-5-CODEX-MAX-REASONING] 
+00135 [GPT-5-CODEX-MAX-REASONING]     -- Every 120 frames, increment score
+00136 [GPT-5-CODEX-MAX-REASONING]     if frame_count % 120 == 0 then
+00137 [GPT-5-CODEX-MAX-REASONING]         local player_data = vmupro.sprite.getUserdata(player_handle)
+00138 [GPT-5-CODEX-MAX-REASONING]         if player_data then
+00139 [GPT-5-CODEX-MAX-REASONING]             player_data.score = player_data.score + 10
+00140 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.setUserdata(player_handle, player_data)
+00141 [GPT-5-CODEX-MAX-REASONING]         end
+00142 [GPT-5-CODEX-MAX-REASONING]     end
+00143 [GPT-5-CODEX-MAX-REASONING] end
+00144 [GPT-5-CODEX-MAX-REASONING] 
+00145 [GPT-5-CODEX-MAX-REASONING] --- @brief Cleanup when leaving page
+00146 [GPT-5-CODEX-MAX-REASONING] function Page33.exit()
+00147 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00148 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00149 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00150 [GPT-5-CODEX-MAX-REASONING]     end
+00151 [GPT-5-CODEX-MAX-REASONING] 
+00152 [GPT-5-CODEX-MAX-REASONING]     -- Remove all sprites from scene
+00153 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.removeAll()
+00154 [GPT-5-CODEX-MAX-REASONING] 
+00155 [GPT-5-CODEX-MAX-REASONING]     -- Free individual sprites
+00156 [GPT-5-CODEX-MAX-REASONING]     if player_handle then
+00157 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(player_handle)
+00158 [GPT-5-CODEX-MAX-REASONING]         player_handle = nil
+00159 [GPT-5-CODEX-MAX-REASONING]     end
+00160 [GPT-5-CODEX-MAX-REASONING]     if enemy_handle then
+00161 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(enemy_handle)
+00162 [GPT-5-CODEX-MAX-REASONING]         enemy_handle = nil
+00163 [GPT-5-CODEX-MAX-REASONING]     end
+00164 [GPT-5-CODEX-MAX-REASONING]     if collectible_handle then
+00165 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(collectible_handle)
+00166 [GPT-5-CODEX-MAX-REASONING]         collectible_handle = nil
+00167 [GPT-5-CODEX-MAX-REASONING]     end
+00168 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = false
+00169 [GPT-5-CODEX-MAX-REASONING]     load_error = false
+00170 [GPT-5-CODEX-MAX-REASONING]     frame_count = 0
+00171 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page33", "Tag/userdata demo cleaned up")
+00172 [GPT-5-CODEX-MAX-REASONING] end
+00173 [GPT-5-CODEX-MAX-REASONING] 
+00174 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 33: Tag System & Userdata Demo
+00175 [GPT-5-CODEX-MAX-REASONING] function Page33.render(drawPageCounter)
+00176 [GPT-5-CODEX-MAX-REASONING]     -- Start double buffer on first render
+00177 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00178 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00179 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00180 [GPT-5-CODEX-MAX-REASONING]     end
+00181 [GPT-5-CODEX-MAX-REASONING] 
+00182 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00183 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00184 [GPT-5-CODEX-MAX-REASONING] 
+00185 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00186 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00187 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Tag+Userdata", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00188 [GPT-5-CODEX-MAX-REASONING] 
+00189 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00190 [GPT-5-CODEX-MAX-REASONING] 
+00191 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites on first render
+00192 [GPT-5-CODEX-MAX-REASONING]     loadSprites()
+00193 [GPT-5-CODEX-MAX-REASONING] 
+00194 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00195 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR: Failed to load", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00196 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("sprites. Check assets.", 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00197 [GPT-5-CODEX-MAX-REASONING]     elseif not sprites_loaded then
+00198 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Loading sprites...", 10, 60, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00199 [GPT-5-CODEX-MAX-REASONING]     elseif player_handle and enemy_handle and collectible_handle then
+00200 [GPT-5-CODEX-MAX-REASONING]         -- Draw all sprites
+00201 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawAll()
+00202 [GPT-5-CODEX-MAX-REASONING] 
+00203 [GPT-5-CODEX-MAX-REASONING]         -- Display sprite information
+00204 [GPT-5-CODEX-MAX-REASONING]         local y_pos = 40
+00205 [GPT-5-CODEX-MAX-REASONING] 
+00206 [GPT-5-CODEX-MAX-REASONING]         -- Player info
+00207 [GPT-5-CODEX-MAX-REASONING]         local player_tag = vmupro.sprite.getTag(player_handle)
+00208 [GPT-5-CODEX-MAX-REASONING]         local player_data = vmupro.sprite.getUserdata(player_handle)
+00209 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("PLAYER (tag:" .. player_tag .. ")", 10, y_pos, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00210 [GPT-5-CODEX-MAX-REASONING]         y_pos = y_pos + 12
+00211 [GPT-5-CODEX-MAX-REASONING]         if player_data then
+00212 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("HP:" .. player_data.health .. "/" .. player_data.max_health, 10, y_pos, vmupro.graphics.GREEN, vmupro.graphics.BLACK)
+00213 [GPT-5-CODEX-MAX-REASONING]             y_pos = y_pos + 12
+00214 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("Lives:" .. player_data.lives, 10, y_pos, vmupro.graphics.GREEN, vmupro.graphics.BLACK)
+00215 [GPT-5-CODEX-MAX-REASONING]             y_pos = y_pos + 12
+00216 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("Score:" .. player_data.score, 10, y_pos, vmupro.graphics.GREEN, vmupro.graphics.BLACK)
+00217 [GPT-5-CODEX-MAX-REASONING]         end
+00218 [GPT-5-CODEX-MAX-REASONING]         y_pos = y_pos + 15
+00219 [GPT-5-CODEX-MAX-REASONING] 
+00220 [GPT-5-CODEX-MAX-REASONING]         -- Enemy info
+00221 [GPT-5-CODEX-MAX-REASONING]         local enemy_tag = vmupro.sprite.getTag(enemy_handle)
+00222 [GPT-5-CODEX-MAX-REASONING]         local enemy_data = vmupro.sprite.getUserdata(enemy_handle)
+00223 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ENEMY (tag:" .. enemy_tag .. ")", 10, y_pos, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00224 [GPT-5-CODEX-MAX-REASONING]         y_pos = y_pos + 12
+00225 [GPT-5-CODEX-MAX-REASONING]         if enemy_data then
+00226 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("AI:" .. enemy_data.ai_state, 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00227 [GPT-5-CODEX-MAX-REASONING]             y_pos = y_pos + 12
+00228 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("HP:" .. enemy_data.health, 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00229 [GPT-5-CODEX-MAX-REASONING]             y_pos = y_pos + 12
+00230 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("DMG:" .. enemy_data.damage, 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00231 [GPT-5-CODEX-MAX-REASONING]         end
+00232 [GPT-5-CODEX-MAX-REASONING]         y_pos = y_pos + 15
+00233 [GPT-5-CODEX-MAX-REASONING] 
+00234 [GPT-5-CODEX-MAX-REASONING]         -- Collectible info
+00235 [GPT-5-CODEX-MAX-REASONING]         local collect_tag = vmupro.sprite.getTag(collectible_handle)
+00236 [GPT-5-CODEX-MAX-REASONING]         local collect_data = vmupro.sprite.getUserdata(collectible_handle)
+00237 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ITEM (tag:" .. collect_tag .. ")", 10, y_pos, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00238 [GPT-5-CODEX-MAX-REASONING]         y_pos = y_pos + 12
+00239 [GPT-5-CODEX-MAX-REASONING]         if collect_data then
+00240 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("Type:" .. collect_data.item_type, 10, y_pos, vmupro.graphics.GREEN, vmupro.graphics.BLACK)
+00241 [GPT-5-CODEX-MAX-REASONING]             y_pos = y_pos + 12
+00242 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("Val:" .. collect_data.value, 10, y_pos, vmupro.graphics.GREEN, vmupro.graphics.BLACK)
+00243 [GPT-5-CODEX-MAX-REASONING]         end
+00244 [GPT-5-CODEX-MAX-REASONING] 
+00245 [GPT-5-CODEX-MAX-REASONING]         -- Info text at bottom
+00246 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Auto-updating userdata", 10, 210, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00247 [GPT-5-CODEX-MAX-REASONING]     end
+00248 [GPT-5-CODEX-MAX-REASONING] 
+00249 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00250 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00251 [GPT-5-CODEX-MAX-REASONING] 
+00252 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00253 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00254 [GPT-5-CODEX-MAX-REASONING] end

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inner Sanctum Change Log</title>
+  <style>
+    :root {
+      --bg: #f4f1e8;
+      --panel: #fffdf7;
+      --ink: #1f1a14;
+      --muted: #6c6257;
+      --line: #d9cfbf;
+      --accent: #7a2e12;
+      --accent-soft: #f6e7db;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+    h1, h2, h3 { margin: 0 0 10px; }
+    h1 { font-size: 28px; }
+    h2 {
+      margin-top: 26px;
+      padding: 10px 12px;
+      background: var(--accent-soft);
+      border-left: 4px solid var(--accent);
+      border-radius: 4px;
+      font-size: 20px;
+    }
+    h3 { margin-top: 18px; font-size: 17px; }
+    p { margin: 6px 0 10px; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-top: 12px;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .index a {
+      color: var(--accent);
+      text-decoration: none;
+      margin-right: 12px;
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+    .index a:hover { text-decoration: underline; }
+    ul { margin: 8px 0 8px 20px; }
+    .build {
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+    .summary10 {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: #edf5ea;
+      border: 1px solid #bdd3b4;
+      border-radius: 6px;
+    }
+    code {
+      background: #f1ebe0;
+      padding: 1px 4px;
+      border-radius: 4px;
+      font-size: 90%;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Inner Sanctum Change Log</h1>
+    <p class="meta">Build-tracked log for active development and testing iterations.</p>
+
+    <div class="panel index">
+      <h2 id="index">Index</h2>
+      <a href="#rules">Log Rules</a>
+      <a href="#prenotated">Pre-notated (Today)</a>
+      <a href="#b131-135">Builds 131-135</a>
+      <a href="#b136-140">Builds 136-140</a>
+      <a href="#b141-145">Builds 141-145</a>
+      <a href="#b146-150">Builds 146-150</a>
+      <a href="#b151-155">Builds 151-155</a>
+      <a href="#b156-160">Builds 156-160</a>
+      <a href="#b161-165">Builds 161-165</a>
+    </div>
+
+    <div class="panel" id="rules">
+      <h2>Log Rules</h2>
+      <ul>
+        <li>Every code change increments <code>BUILD_COUNT</code> in <code>app_full.lua</code>.</li>
+        <li>Every code change gets a changelog entry.</li>
+        <li>Build entries are grouped by ranges of 5.</li>
+        <li>On every 10th build slot (140, 150, 160...), add a normal entry plus a "Summary of last 10 changes".</li>
+      </ul>
+    </div>
+
+    <div class="panel" id="prenotated">
+      <h2>Pre-notated (Today, Before Build-System Logging Was Added)</h2>
+      <p class="meta">Start point: prompt referencing <code>STATS_TO_GAMEPLAY.md</code>. These are reconstructed so another developer can see what happened before formal per-build logging began.</p>
+      <ul>
+        <li>Applied class-driven combat baseline: class HP, class damage scaling, and defense integration into incoming damage.</li>
+        <li>Attempted deterministic dodge/crit layer; stability issues were found during testing.</li>
+        <li>Rolled back the unstable dodge/crit attempt to restore runtime stability.</li>
+        <li>Fixed a startup parse/header regression that caused app crash before open.</li>
+      </ul>
+      <p class="meta">These map to the work period now represented by Builds 134-137.</p>
+    </div>
+
+    <div class="panel" id="b131-135">
+      <h2>Builds 131-135</h2>
+      <div class="build">
+        <h3>Build 132</h3>
+        <ul>
+          <li>Added main menu build counter display (<code>BUILD N</code>).</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 133</h3>
+        <ul>
+          <li>Increased wall accent spawn rates for diamond/window tiles.</li>
+          <li>Doubled dead-end bonus factor.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 134</h3>
+        <ul>
+          <li>Implemented class-driven gameplay stats in combat/init paths (HP, base damage, defense).</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 135</h3>
+        <ul>
+          <li>Attempted deterministic dodge/crit integration (later adjusted).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="panel" id="b136-140">
+      <h2>Builds 136-140</h2>
+      <div class="build">
+        <h3>Build 136</h3>
+        <ul>
+          <li>Rolled back unstable dodge/crit layer; retained HP/base damage/defense gains.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 137</h3>
+        <ul>
+          <li>Fixed startup parse regression at file header in <code>app_full.lua</code>.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 138</h3>
+        <ul>
+          <li>Started structured changelog process.</li>
+          <li>Player damage now scales by class <code>power</code>.</li>
+          <li>Shield block reduction now scales with class <code>shield_bonus</code>.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 139</h3>
+        <ul>
+          <li>Added deterministic class-based dodge and crit (no <code>math.random</code>).</li>
+          <li>Enemy hits can be dodged; melee hits can crit for 1.5x.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 140</h3>
+        <ul>
+          <li>Added top-screen damage debug popups (2 seconds): <code>DMG TAKEN</code> and <code>DMG DEALT</code>.</li>
+        </ul>
+        <div class="summary10">
+          <strong>Summary of last 10 changes (Builds 131-140):</strong>
+          <ul>
+            <li>Build tracking became visible in UI and now drives release/test bookkeeping.</li>
+            <li>Map-gen rarity tuning increased special tile presence and dead-end reward weighting.</li>
+            <li>Core class stats were moved from data-only to live combat behavior.</li>
+            <li>An unstable combat iteration was reverted, then replaced with deterministic stable mechanics.</li>
+            <li>Debug visibility improved with live damage popup telemetry.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="b141-145">
+      <h2>Builds 141-145</h2>
+      <div class="build">
+        <h3>Build 141</h3>
+        <ul>
+          <li>Implemented class-based attack speed from <code>atk_speed</code>.</li>
+          <li>Player swing timing now scales by class via attack-frame scaling.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 142</h3>
+        <ul>
+          <li>Prepared agility/regen stat hooks by adding movement and regen runtime fields.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 143</h3>
+        <ul>
+          <li>Implemented class <code>agility</code> into player movement speed scaling.</li>
+          <li>Implemented class <code>regen</code> into fixed-step health regeneration while playing.</li>
+          <li>Migrated changelog to indexed HTML format with pre-notated history and 10-build summary policy.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 144</h3>
+        <ul>
+          <li>Implemented XP + level-growth plumbing using class growth tables and deterministic kill XP rewards.</li>
+          <li>Added persistent player progression fields (level/xp/stat points/allocated stats) to runtime defaults and save slots.</li>
+          <li>Expanded save serialization/deserialization so stat builds and progression survive save/load across sessions.</li>
+          <li>Added in-game <code>STATS</code> submenu (pause menu) for allocating <code>vitality/strength/dexterity/intellect</code> points.</li>
+          <li>Applied allocated stats to gameplay scaling (HP, damage, dodge, speed, power/crit) and added level indicator on HUD.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 145</h3>
+        <ul>
+          <li>Implemented weapon-class mastery foundations (weapon classes: <code>1=melee</code>, <code>2=ranged</code>, <code>3=magic</code>).</li>
+          <li>Added <code>MASTERIES</code> pause submenu to view baseline points, mastery levels, effective points, and resulting damage/speed multipliers.</li>
+          <li>Extended save slots to persist mastery currency + mastery levels, and wired load/save so the build state restores correctly.</li>
+          <li>Fixed save backward compatibility: deserializer now supports old 19-field saves (Build &lt;= 144) and new 23-field saves (Build &gt;= 145) without misreading stats.</li>
+          <li>Tagged every weapon in <code>data/items.lua</code> with <code>weapon_class</code> numeric IDs to drive future weapon behavior profiles.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="panel" id="b146-150">
+      <h2>Builds 146-150</h2>
+      <div class="build">
+        <h3>Build 146</h3>
+        <ul>
+          <li>Updated mastery balance: all classes are 100% effective with all weapon classes at 0 mastery; each class gets +5 bonus points in its primary weapon class.</li>
+          <li>Applied mastery multipliers to melee combat (damage and swing timing) based on the equipped weapon class (defaults to melee until equipment selection is exposed).</li>
+          <li>Adjusted STATS and MASTERIES menu layout to reduce text overlap (condensed rows, more vertical spacing, and per-stat effect line).</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 147</h3>
+        <ul>
+          <li>Implemented player projectile combat for non-melee weapon classes: ranged and magic attacks now spawn forward projectiles with deterministic movement, wall collision, enemy hit checks, and TTL expiry.</li>
+          <li>Added in-world projectile rendering with wall-depth occlusion support and sprite fallback drawing when placeholder projectile art is not present.</li>
+          <li>Completed first-person attack overlay routing by weapon class: melee uses sword overlay, ranged uses <code>bow_attack*</code>, magic uses <code>staff_cast*</code>, each with primitive fallback visuals.</li>
+          <li>Added optional sprite hooks for upcoming placeholder art: <code>bow_attack1/2</code>, <code>staff_cast1/2</code>, <code>projectile_arrow</code>, <code>projectile_magic</code>, <code>projectile_impact</code>.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 148</h3>
+        <ul>
+          <li>Added placeholder sprite-name fallback loading for your current assets: bow overlay now falls back to <code>bow_idle</code> and <code>bow_drawn</code> when <code>bow_attack1/2</code> are missing.</li>
+          <li>Added staff overlay fallback to single <code>STAFF</code> (or <code>staff</code>) sprite, reused for both cast frames.</li>
+          <li>Mapped <code>explosion</code> as temporary magic projectile art when <code>projectile_magic</code> is missing, and as fallback impact sprite.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 149</h3>
+        <ul>
+          <li>Added mosaic effect pass for new weapon overlays: ranged bow and magic staff first-person attack sprites now render with sprite mosaic.</li>
+          <li>Added mosaic effect pass for player projectiles (arrow/magic), including fallback projectile rectangles.</li>
+          <li>Added mosaic effect pass for world item pickup sprite rendering (potion/item draw path).</li>
+          <li>Added safe clamped region helper for mosaic screen application to avoid off-screen region issues.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 150</h3>
+        <ul>
+          <li>Fixed startup stability regression by gating mosaic rendering behind <code>ENABLE_MOSAIC_EFFECTS</code> (default: <code>false</code>).</li>
+          <li>Added safe mosaic draw fallback so weapon overlays use normal sprite draw when mosaic support is unavailable/disabled.</li>
+          <li>Raised mosaic block defaults to safer values (<code>4</code>) for future opt-in testing.</li>
+        </ul>
+        <div class="summary10">
+          <strong>Summary of last 10 changes (Builds 141-150):</strong>
+          <ul>
+            <li>Class stats were moved deeper into combat pacing: attack speed, movement speed, and regeneration now affect runtime behavior.</li>
+            <li>Progression systems were expanded with XP, leveling, stat allocation, and save/load persistence improvements.</li>
+            <li>Weapon mastery foundations were introduced, then rebalanced so all classes remain baseline-viable with class-native bonus specialization.</li>
+            <li>Ranged/magic combat plumbing was added: projectile spawn, travel, collisions, and first-person weapon overlays.</li>
+            <li>Placeholder art integration and fallback loading were added for bow, staff, and temporary magic projectile visuals, followed by a stability fix for optional mosaic effects.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="b151-155">
+      <h2>Builds 151-155</h2>
+      <div class="build">
+        <h3>Build 151</h3>
+        <ul>
+          <li>Fixed placeholder weapon/projectile asset loading so global sprites in <code>sprites/</code> are used even when levels load from <code>sprites/level1/</code> or <code>sprites/level2/</code>.</li>
+          <li>Added projectile sprite fallbacks: <code>sprites/arrow</code> for ranged projectiles and <code>sprites/explosion</code> for magic projectile/impact when class-specific projectile assets are missing.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 152</h3>
+        <ul>
+          <li>Added your new placeholder sprites to packaging manifests so they are embedded in the vmupack and can be loaded at runtime: <code>sprites/bow_idle.png</code>, <code>sprites/bow_drawn.png</code>, <code>sprites/arrow.png</code>, <code>sprites/explosion.png</code>, <code>sprites/STAFF.png</code>.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 153</h3>
+        <ul>
+          <li>Improved ranged bow feel: holding <code>MODE+UP</code> now charges (draws) the bow, and releasing <code>UP</code> fires the arrow.</li>
+          <li>Reduced projectile hit forgiveness so ranged requires more precise aiming (smaller hit radius), and arrows now despawn after traveling 4 tiles.</li>
+          <li>Added a simple on-screen charge bar and preview overlay while charging.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 154</h3>
+        <ul>
+          <li>Fixed startup crash by restoring the missing <code>end</code> that closes <code>renderGameFrame()</code> after the bow-charge overlay edits.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 155</h3>
+        <ul>
+          <li>Fixed remaining pre-boot crash by removing a stray extra <code>end</code> after <code>renderGameFrame()</code> that caused Lua load-time failure.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="panel" id="b156-160">
+      <h2>Builds 156-160</h2>
+      <div class="build">
+        <h3>Build 156</h3>
+        <ul>
+          <li>Rebuilt ranged bow combat as true hold-to-draw and release-to-fire (no instant shot for ranged on press).</li>
+          <li>Added 3 draw tiers with visible stage transitions: initial idle bow, snap-to-drawn, then brief idle flash at each stage-up before returning drawn.</li>
+          <li>Added bow/player stat-based charge profile math for future scalability: mastery speed and weapon <code>stat_speed/stat_damage/stat_range</code> now drive hold timing and per-tier projectile multipliers.</li>
+          <li>Added per-shot tier effects: different damage/range/projectile-speed scaling by draw tier, plus ranged max travel distance enforcement via projectile range tracking.</li>
+          <li>Added graceful release behavior for both <code>UP</code> release and <code>MODE</code> release while charging so charged shots still fire consistently.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 157</h3>
+        <ul>
+          <li>Fixed regression from the partial rollback: removed stale calls to <code>releaseRangedDrawShot(...)</code> in gameplay input logic after that helper had been removed.</li>
+          <li>Restored the <code>modeHeld</code> combat branch to the known-stable instant-shot path for ranged/magic so startup is not blocked by broken charge wiring.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 158</h3>
+        <ul>
+          <li>Completed full rollback of unfinished Build 156 charge scaffolding that was no longer wired: removed ranged draw globals/constants/helpers and related reset hooks.</li>
+          <li>Kept the gameplay path on the previously stable instant-shot behavior to prioritize boot/runtime stability before re-attempting hold-to-draw.</li>
+          <li>Fixed a hard startup syntax regression in perf monitor logging (malformed token in the <code>string.format</code> argument list) that could prevent <code>app_full.lua</code> from importing.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 159</h3>
+        <ul>
+          <li>Re-landed the expandable 3-tier ranged bow charge path on the stable input/render/projectile flow: hold <code>MODE+UP</code> to charge, release to fire, with stage transitions and tier-based shot scaling.</li>
+          <li>Kept tier behavior data-driven using tier arrays (<code>hold/damage/range/speed</code>) so adding more charge stages only requires extending constants.</li>
+          <li>Hardened weapon/projectile placeholder loading with candidate-path resolution and global-first priority for user-provided textures.</li>
+          <li>Arrow projectile loading now explicitly prioritizes <code>sprites/arrow.png</code> before legacy projectile names to ensure the custom arrow texture is used.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 160</h3>
+        <ul>
+          <li>Fixed a new pre-boot crash regression by replacing speculative weapon/projectile sprite probing with deterministic placeholder loading in <code>loadLevelSprites</code>.</li>
+          <li>Removed multi-candidate probe loops for bow/staff/projectile placeholders and switched to direct global-first loads of known assets, with level fallback only.</li>
+          <li>Kept custom arrow texture routing explicit: ranged projectile now resolves <code>sprites/arrow.png</code> first in a minimal code path.</li>
+          <li>Preserved the 3-tier bow charge gameplay logic; this build only stabilizes boot-time sprite initialization paths.</li>
+        </ul>
+        <div class="summary10">
+          <strong>Summary of last 10 changes (Builds 151-160):</strong>
+          <ul>
+            <li>Weapon and projectile placeholder assets were integrated and packaging manifests were expanded to include bow/staff/arrow/explosion resources.</li>
+            <li>Ranged combat evolved from instant fire to hold/release charging with staged draw behavior and tuned projectile limits.</li>
+            <li>Multiple startup regressions were fixed across render/combat edits (missing or extra <code>end</code>, stale helper references, malformed syntax token).</li>
+            <li>The 3-tier bow system was rebuilt in an expandable, data-driven form tied to weapon/mastery stat multipliers.</li>
+            <li>Boot stability was then hardened by simplifying placeholder sprite initialization to deterministic known-path loads.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="b161-165">
+      <h2>Builds 161-165</h2>
+      <div class="build">
+        <h3>Build 161</h3>
+        <ul>
+          <li>Added startup hardening in <code>startLevel</code>: <code>loadLevelSprites</code> and <code>loadLevelAudio</code> now run behind <code>pcall</code> guards.</li>
+          <li>If sprite/audio init throws a Lua error, the game now logs the failure and continues initialization instead of force-closing before title/load.</li>
+          <li>This build is crash-containment only; no gameplay tuning changes were made.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 162</h3>
+        <ul>
+          <li>Applied SDK crash-rule compliance for audio: sample-based audio is now disabled by default via <code>ENABLE_SAMPLE_AUDIO = false</code> to avoid known VMU Pro sample API force-close behavior.</li>
+          <li>Title/level sample loading paths now early-out in safe mode, preventing sample init/play calls during boot flow.</li>
+          <li>Added wrapper boot diagnostics in <code>app.lua</code>: if <code>import \"app_full\"</code> fails, the app now shows an on-screen boot error message instead of silently closing.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 163</h3>
+        <ul>
+          <li>Fixed VMU Lua compile-limit boot crash (<code>too many local variables (limit is 200) in main function</code>) by removing top-chunk local-function slot pressure.</li>
+          <li>Refactored top-level helper declarations from <code>local function ...</code> to chunk/global function declarations in <code>app_full.lua</code>, preserving behavior while reclaiming local slots for future development headroom.</li>
+          <li>This is a structural compile-stability refactor only; gameplay logic and data flow were intentionally left unchanged.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 164</h3>
+        <ul>
+          <li>Fixed full-game mute regression by re-enabling sample audio runtime (<code>ENABLE_SAMPLE_AUDIO = true</code>).</li>
+          <li>Title music/voice and gameplay SFX paths are active again because sample load/play early-outs are no longer forced.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

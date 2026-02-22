@@ -1,0 +1,50 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page3.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 3: Basic Graphics - Polygons
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page3 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 3: Basic Graphics - Polygons
+00007 [GPT-5-CODEX-MAX-REASONING] function Page3.render(drawPageCounter)
+00008 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00009 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00012 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00013 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Polygons", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_OPEN_SANS_15x18)
+00016 [GPT-5-CODEX-MAX-REASONING] 
+00017 [GPT-5-CODEX-MAX-REASONING]     -- Test: Outline polygons
+00018 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Outline:", 10, 35, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00019 [GPT-5-CODEX-MAX-REASONING] 
+00020 [GPT-5-CODEX-MAX-REASONING]     -- Triangle (3 points)
+00021 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawPolygon({{35, 55}, {20, 85}, {50, 85}}, vmupro.graphics.RED)
+00022 [GPT-5-CODEX-MAX-REASONING] 
+00023 [GPT-5-CODEX-MAX-REASONING]     -- Pentagon (5 points)
+00024 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawPolygon({{95, 55}, {110, 65}, {103, 85}, {87, 85}, {80, 65}}, vmupro.graphics.GREEN)
+00025 [GPT-5-CODEX-MAX-REASONING] 
+00026 [GPT-5-CODEX-MAX-REASONING]     -- Star (5-pointed, 10 points)
+00027 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawPolygon({{165, 55}, {170, 68}, {185, 68}, {173, 77}, {178, 90}, {165, 81}, {152, 90}, {157, 77}, {145, 68}, {160, 68}}, vmupro.graphics.YELLOW)
+00028 [GPT-5-CODEX-MAX-REASONING] 
+00029 [GPT-5-CODEX-MAX-REASONING]     -- Test: Filled polygons
+00030 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Filled:", 10, 100, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00031 [GPT-5-CODEX-MAX-REASONING] 
+00032 [GPT-5-CODEX-MAX-REASONING]     -- Triangle filled
+00033 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawPolygonFilled({{35, 120}, {20, 150}, {50, 150}}, vmupro.graphics.RED)
+00034 [GPT-5-CODEX-MAX-REASONING] 
+00035 [GPT-5-CODEX-MAX-REASONING]     -- Pentagon filled
+00036 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawPolygonFilled({{95, 120}, {110, 130}, {103, 150}, {87, 150}, {80, 130}}, vmupro.graphics.GREEN)
+00037 [GPT-5-CODEX-MAX-REASONING] 
+00038 [GPT-5-CODEX-MAX-REASONING]     -- Diamond (4 points)
+00039 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawPolygonFilled({{165, 120}, {180, 135}, {165, 150}, {150, 135}}, vmupro.graphics.BLUE)
+00040 [GPT-5-CODEX-MAX-REASONING] 
+00041 [GPT-5-CODEX-MAX-REASONING]     -- Test: Irregular polygon
+00042 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Irregular:", 10, 165, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00043 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawPolygonFilled({{20, 185}, {40, 180}, {60, 190}, {55, 205}, {25, 200}}, vmupro.graphics.MAGENTA)
+00044 [GPT-5-CODEX-MAX-REASONING] 
+00045 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00046 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 210, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00047 [GPT-5-CODEX-MAX-REASONING] 
+00048 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00049 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00050 [GPT-5-CODEX-MAX-REASONING] end

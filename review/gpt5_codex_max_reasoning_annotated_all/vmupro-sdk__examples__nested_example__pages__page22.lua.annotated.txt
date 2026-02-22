@@ -1,0 +1,136 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page22.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 22: Sprite Positioning (setPosition, moveBy, getPosition)
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page22 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- Sprite handles
+00010 [GPT-5-CODEX-MAX-REASONING] local sprite_handle = nil
+00011 [GPT-5-CODEX-MAX-REASONING] local sprites_loaded = false
+00012 [GPT-5-CODEX-MAX-REASONING] local load_error = false
+00013 [GPT-5-CODEX-MAX-REASONING] 
+00014 [GPT-5-CODEX-MAX-REASONING] -- Movement state
+00015 [GPT-5-CODEX-MAX-REASONING] local velocity_x = 2
+00016 [GPT-5-CODEX-MAX-REASONING] local velocity_y = 1.5
+00017 [GPT-5-CODEX-MAX-REASONING] 
+00018 [GPT-5-CODEX-MAX-REASONING] --- @brief Load sprite
+00019 [GPT-5-CODEX-MAX-REASONING] local function loadSprites()
+00020 [GPT-5-CODEX-MAX-REASONING]     if sprites_loaded or load_error then
+00021 [GPT-5-CODEX-MAX-REASONING]         return
+00022 [GPT-5-CODEX-MAX-REASONING]     end
+00023 [GPT-5-CODEX-MAX-REASONING] 
+00024 [GPT-5-CODEX-MAX-REASONING]     sprite_handle = vmupro.sprite.new("assets/mask_guy_idle")
+00025 [GPT-5-CODEX-MAX-REASONING]     if not sprite_handle then
+00026 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page22", "Failed to load sprite")
+00027 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00028 [GPT-5-CODEX-MAX-REASONING]         return
+00029 [GPT-5-CODEX-MAX-REASONING]     end
+00030 [GPT-5-CODEX-MAX-REASONING] 
+00031 [GPT-5-CODEX-MAX-REASONING]     -- Set initial position to center of screen
+00032 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(sprite_handle, 104, 100)
+00033 [GPT-5-CODEX-MAX-REASONING] 
+00034 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = true
+00035 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page22", "Sprites loaded for positioning test")
+00036 [GPT-5-CODEX-MAX-REASONING] end
+00037 [GPT-5-CODEX-MAX-REASONING] 
+00038 [GPT-5-CODEX-MAX-REASONING] --- @brief Update logic - automatic bouncing movement
+00039 [GPT-5-CODEX-MAX-REASONING] function Page22.update()
+00040 [GPT-5-CODEX-MAX-REASONING]     if not sprites_loaded or not sprite_handle then
+00041 [GPT-5-CODEX-MAX-REASONING]         return
+00042 [GPT-5-CODEX-MAX-REASONING]     end
+00043 [GPT-5-CODEX-MAX-REASONING] 
+00044 [GPT-5-CODEX-MAX-REASONING]     -- Move sprite using moveBy
+00045 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.moveBy(sprite_handle, velocity_x, velocity_y)
+00046 [GPT-5-CODEX-MAX-REASONING] 
+00047 [GPT-5-CODEX-MAX-REASONING]     -- Get current position using getPosition
+00048 [GPT-5-CODEX-MAX-REASONING]     local x, y = vmupro.sprite.getPosition(sprite_handle)
+00049 [GPT-5-CODEX-MAX-REASONING] 
+00050 [GPT-5-CODEX-MAX-REASONING]     -- Bounce off screen edges
+00051 [GPT-5-CODEX-MAX-REASONING]     if x <= 0 or x >= 208 then  -- 240 - 32 (sprite width)
+00052 [GPT-5-CODEX-MAX-REASONING]         velocity_x = -velocity_x
+00053 [GPT-5-CODEX-MAX-REASONING]         -- Clamp position to bounds using setPosition
+00054 [GPT-5-CODEX-MAX-REASONING]         if x < 0 then
+00055 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.setPosition(sprite_handle, 0, y)
+00056 [GPT-5-CODEX-MAX-REASONING]         else
+00057 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.setPosition(sprite_handle, 208, y)
+00058 [GPT-5-CODEX-MAX-REASONING]         end
+00059 [GPT-5-CODEX-MAX-REASONING]     end
+00060 [GPT-5-CODEX-MAX-REASONING] 
+00061 [GPT-5-CODEX-MAX-REASONING]     if y <= 0 or y >= 208 then  -- 240 - 32 (sprite height)
+00062 [GPT-5-CODEX-MAX-REASONING]         velocity_y = -velocity_y
+00063 [GPT-5-CODEX-MAX-REASONING]         -- Clamp position to bounds using setPosition
+00064 [GPT-5-CODEX-MAX-REASONING]         local current_x, _ = vmupro.sprite.getPosition(sprite_handle)
+00065 [GPT-5-CODEX-MAX-REASONING]         if y < 0 then
+00066 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.setPosition(sprite_handle, current_x, 0)
+00067 [GPT-5-CODEX-MAX-REASONING]         else
+00068 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.setPosition(sprite_handle, current_x, 208)
+00069 [GPT-5-CODEX-MAX-REASONING]         end
+00070 [GPT-5-CODEX-MAX-REASONING]     end
+00071 [GPT-5-CODEX-MAX-REASONING] end
+00072 [GPT-5-CODEX-MAX-REASONING] 
+00073 [GPT-5-CODEX-MAX-REASONING] --- @brief Cleanup when leaving page
+00074 [GPT-5-CODEX-MAX-REASONING] function Page22.exit()
+00075 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00076 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00077 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00078 [GPT-5-CODEX-MAX-REASONING]     end
+00079 [GPT-5-CODEX-MAX-REASONING] 
+00080 [GPT-5-CODEX-MAX-REASONING]     if sprite_handle then
+00081 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite_handle)
+00082 [GPT-5-CODEX-MAX-REASONING]         sprite_handle = nil
+00083 [GPT-5-CODEX-MAX-REASONING]     end
+00084 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = false
+00085 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page22", "Sprites freed")
+00086 [GPT-5-CODEX-MAX-REASONING] end
+00087 [GPT-5-CODEX-MAX-REASONING] 
+00088 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 22: Sprite Positioning Demo
+00089 [GPT-5-CODEX-MAX-REASONING] function Page22.render(drawPageCounter)
+00090 [GPT-5-CODEX-MAX-REASONING]     -- Start double buffer on first render
+00091 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00092 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00093 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00094 [GPT-5-CODEX-MAX-REASONING]     end
+00095 [GPT-5-CODEX-MAX-REASONING] 
+00096 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00097 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00098 [GPT-5-CODEX-MAX-REASONING] 
+00099 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00100 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00101 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Position", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00102 [GPT-5-CODEX-MAX-REASONING] 
+00103 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00104 [GPT-5-CODEX-MAX-REASONING] 
+00105 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites on first render
+00106 [GPT-5-CODEX-MAX-REASONING]     loadSprites()
+00107 [GPT-5-CODEX-MAX-REASONING] 
+00108 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00109 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR: Failed to load", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00110 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("sprites. Check assets.", 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00111 [GPT-5-CODEX-MAX-REASONING]     elseif not sprites_loaded then
+00112 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Loading sprites...", 10, 60, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00113 [GPT-5-CODEX-MAX-REASONING]     elseif sprite_handle then
+00114 [GPT-5-CODEX-MAX-REASONING]         -- Get current position
+00115 [GPT-5-CODEX-MAX-REASONING]         local x, y = vmupro.sprite.getPosition(sprite_handle)
+00116 [GPT-5-CODEX-MAX-REASONING] 
+00117 [GPT-5-CODEX-MAX-REASONING]         -- Draw sprite at current position (floor to integers for drawing)
+00118 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.draw(sprite_handle, math.floor(x), math.floor(y), vmupro.sprite.kImageUnflipped)
+00119 [GPT-5-CODEX-MAX-REASONING] 
+00120 [GPT-5-CODEX-MAX-REASONING]         -- Display position info
+00121 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(string.format("Position: (%d, %d)", math.floor(x), math.floor(y)), 10, 40, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00122 [GPT-5-CODEX-MAX-REASONING] 
+00123 [GPT-5-CODEX-MAX-REASONING]         -- Display velocity info
+00124 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(string.format("Velocity: (%.1f, %.1f)", velocity_x, velocity_y), 10, 55, vmupro.graphics.GREEN, vmupro.graphics.BLACK)
+00125 [GPT-5-CODEX-MAX-REASONING] 
+00126 [GPT-5-CODEX-MAX-REASONING]         -- Info text
+00127 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Auto-bouncing demo", 10, 195, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00128 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Using moveBy/getPosition", 10, 210, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00129 [GPT-5-CODEX-MAX-REASONING]     end
+00130 [GPT-5-CODEX-MAX-REASONING] 
+00131 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00132 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00133 [GPT-5-CODEX-MAX-REASONING] 
+00134 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00135 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00136 [GPT-5-CODEX-MAX-REASONING] end

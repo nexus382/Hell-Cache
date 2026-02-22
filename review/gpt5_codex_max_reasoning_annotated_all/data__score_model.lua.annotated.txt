@@ -1,0 +1,67 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- Data layer: run score and top-10 high score helpers.
+00002 [GPT-5-CODEX-MAX-REASONING] 
+00003 [GPT-5-CODEX-MAX-REASONING] GameScoreModel = {}
+00004 [GPT-5-CODEX-MAX-REASONING] 
+00005 [GPT-5-CODEX-MAX-REASONING] function GameScoreModel.newRun()
+00006 [GPT-5-CODEX-MAX-REASONING]     return {
+00007 [GPT-5-CODEX-MAX-REASONING]         current = 0,
+00008 [GPT-5-CODEX-MAX-REASONING]         kills = 0,
+00009 [GPT-5-CODEX-MAX-REASONING]         levels_cleared = 0,
+00010 [GPT-5-CODEX-MAX-REASONING]         started_level = 1,
+00011 [GPT-5-CODEX-MAX-REASONING]         ended_level = 1,
+00012 [GPT-5-CODEX-MAX-REASONING]     }
+00013 [GPT-5-CODEX-MAX-REASONING] end
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING] function GameScoreModel.addPoints(runState, amount)
+00016 [GPT-5-CODEX-MAX-REASONING]     if not runState then
+00017 [GPT-5-CODEX-MAX-REASONING]         return 0
+00018 [GPT-5-CODEX-MAX-REASONING]     end
+00019 [GPT-5-CODEX-MAX-REASONING]     local delta = amount or 0
+00020 [GPT-5-CODEX-MAX-REASONING]     if delta < 0 then delta = 0 end
+00021 [GPT-5-CODEX-MAX-REASONING]     runState.current = (runState.current or 0) + delta
+00022 [GPT-5-CODEX-MAX-REASONING]     return runState.current
+00023 [GPT-5-CODEX-MAX-REASONING] end
+00024 [GPT-5-CODEX-MAX-REASONING] 
+00025 [GPT-5-CODEX-MAX-REASONING] function GameScoreModel.sanitizeInitials(initials)
+00026 [GPT-5-CODEX-MAX-REASONING]     local s = tostring(initials or "AAA"):upper()
+00027 [GPT-5-CODEX-MAX-REASONING]     local out = ""
+00028 [GPT-5-CODEX-MAX-REASONING]     for i = 1, #s do
+00029 [GPT-5-CODEX-MAX-REASONING]         local c = s:sub(i, i)
+00030 [GPT-5-CODEX-MAX-REASONING]         if c >= "A" and c <= "Z" then
+00031 [GPT-5-CODEX-MAX-REASONING]             out = out .. c
+00032 [GPT-5-CODEX-MAX-REASONING]         end
+00033 [GPT-5-CODEX-MAX-REASONING]         if #out == 3 then
+00034 [GPT-5-CODEX-MAX-REASONING]             break
+00035 [GPT-5-CODEX-MAX-REASONING]         end
+00036 [GPT-5-CODEX-MAX-REASONING]     end
+00037 [GPT-5-CODEX-MAX-REASONING]     while #out < 3 do
+00038 [GPT-5-CODEX-MAX-REASONING]         out = out .. "A"
+00039 [GPT-5-CODEX-MAX-REASONING]     end
+00040 [GPT-5-CODEX-MAX-REASONING]     return out
+00041 [GPT-5-CODEX-MAX-REASONING] end
+00042 [GPT-5-CODEX-MAX-REASONING] 
+00043 [GPT-5-CODEX-MAX-REASONING] function GameScoreModel.createEntry(initials, score, levelReached)
+00044 [GPT-5-CODEX-MAX-REASONING]     return {
+00045 [GPT-5-CODEX-MAX-REASONING]         initials = GameScoreModel.sanitizeInitials(initials),
+00046 [GPT-5-CODEX-MAX-REASONING]         score = math.max(0, math.floor(score or 0)),
+00047 [GPT-5-CODEX-MAX-REASONING]         level = math.max(1, math.floor(levelReached or 1)),
+00048 [GPT-5-CODEX-MAX-REASONING]     }
+00049 [GPT-5-CODEX-MAX-REASONING] end
+00050 [GPT-5-CODEX-MAX-REASONING] 
+00051 [GPT-5-CODEX-MAX-REASONING] function GameScoreModel.insertHighScore(list, entry, maxEntries)
+00052 [GPT-5-CODEX-MAX-REASONING]     local scores = list or {}
+00053 [GPT-5-CODEX-MAX-REASONING]     scores[#scores + 1] = entry
+00054 [GPT-5-CODEX-MAX-REASONING]     table.sort(scores, function(a, b)
+00055 [GPT-5-CODEX-MAX-REASONING]         local sa = (a and a.score) or 0
+00056 [GPT-5-CODEX-MAX-REASONING]         local sb = (b and b.score) or 0
+00057 [GPT-5-CODEX-MAX-REASONING]         if sa == sb then
+00058 [GPT-5-CODEX-MAX-REASONING]             return ((a and a.level) or 0) > ((b and b.level) or 0)
+00059 [GPT-5-CODEX-MAX-REASONING]         end
+00060 [GPT-5-CODEX-MAX-REASONING]         return sa > sb
+00061 [GPT-5-CODEX-MAX-REASONING]     end)
+00062 [GPT-5-CODEX-MAX-REASONING]     local limit = maxEntries or 10
+00063 [GPT-5-CODEX-MAX-REASONING]     while #scores > limit do
+00064 [GPT-5-CODEX-MAX-REASONING]         table.remove(scores)
+00065 [GPT-5-CODEX-MAX-REASONING]     end
+00066 [GPT-5-CODEX-MAX-REASONING]     return scores
+00067 [GPT-5-CODEX-MAX-REASONING] end

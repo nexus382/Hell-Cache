@@ -1,0 +1,174 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page16.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 16: Sprite Scaling
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page16 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- Sprite handles
+00010 [GPT-5-CODEX-MAX-REASONING] local single_sprite = nil
+00011 [GPT-5-CODEX-MAX-REASONING] local spritesheet_handle = nil
+00012 [GPT-5-CODEX-MAX-REASONING] local sprites_loaded = false
+00013 [GPT-5-CODEX-MAX-REASONING] local load_error = false
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING] -- Animation state
+00016 [GPT-5-CODEX-MAX-REASONING] local current_frame = 1
+00017 [GPT-5-CODEX-MAX-REASONING] local last_frame_time = 0
+00018 [GPT-5-CODEX-MAX-REASONING] local FRAME_DURATION = 150000  -- 150ms per frame (faster animation)
+00019 [GPT-5-CODEX-MAX-REASONING] 
+00020 [GPT-5-CODEX-MAX-REASONING] -- Scaling state
+00021 [GPT-5-CODEX-MAX-REASONING] local scale_value = 1.0
+00022 [GPT-5-CODEX-MAX-REASONING] local scale_direction = 1  -- 1 = growing, -1 = shrinking
+00023 [GPT-5-CODEX-MAX-REASONING] local last_scale_time = 0
+00024 [GPT-5-CODEX-MAX-REASONING] local SCALE_INTERVAL = 50000  -- Update scale every 50ms
+00025 [GPT-5-CODEX-MAX-REASONING] local MIN_SCALE = 0.5
+00026 [GPT-5-CODEX-MAX-REASONING] local MAX_SCALE = 3.0
+00027 [GPT-5-CODEX-MAX-REASONING] local SCALE_STEP = 0.05
+00028 [GPT-5-CODEX-MAX-REASONING] 
+00029 [GPT-5-CODEX-MAX-REASONING] --- @brief Initialize/load sprites
+00030 [GPT-5-CODEX-MAX-REASONING] local function loadSprites()
+00031 [GPT-5-CODEX-MAX-REASONING]     if sprites_loaded or load_error then
+00032 [GPT-5-CODEX-MAX-REASONING]         return
+00033 [GPT-5-CODEX-MAX-REASONING]     end
+00034 [GPT-5-CODEX-MAX-REASONING] 
+00035 [GPT-5-CODEX-MAX-REASONING]     -- Load single sprite
+00036 [GPT-5-CODEX-MAX-REASONING]     single_sprite = vmupro.sprite.new("assets/mask_guy_idle")
+00037 [GPT-5-CODEX-MAX-REASONING]     if not single_sprite then
+00038 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page16", "Failed to load single sprite")
+00039 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00040 [GPT-5-CODEX-MAX-REASONING]         return
+00041 [GPT-5-CODEX-MAX-REASONING]     end
+00042 [GPT-5-CODEX-MAX-REASONING] 
+00043 [GPT-5-CODEX-MAX-REASONING]     -- Load spritesheet
+00044 [GPT-5-CODEX-MAX-REASONING]     spritesheet_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00045 [GPT-5-CODEX-MAX-REASONING]     if not spritesheet_handle then
+00046 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page16", "Failed to load spritesheet")
+00047 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(single_sprite)
+00048 [GPT-5-CODEX-MAX-REASONING]         single_sprite = nil
+00049 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00050 [GPT-5-CODEX-MAX-REASONING]         return
+00051 [GPT-5-CODEX-MAX-REASONING]     end
+00052 [GPT-5-CODEX-MAX-REASONING] 
+00053 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = true
+00054 [GPT-5-CODEX-MAX-REASONING]     local current_time = vmupro.system.getTimeUs()
+00055 [GPT-5-CODEX-MAX-REASONING]     last_frame_time = current_time
+00056 [GPT-5-CODEX-MAX-REASONING]     last_scale_time = current_time
+00057 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page16", "Sprites loaded for scaling test")
+00058 [GPT-5-CODEX-MAX-REASONING] end
+00059 [GPT-5-CODEX-MAX-REASONING] 
+00060 [GPT-5-CODEX-MAX-REASONING] --- @brief Update animation state
+00061 [GPT-5-CODEX-MAX-REASONING] function Page16.update()
+00062 [GPT-5-CODEX-MAX-REASONING]     -- No update needed - handled in render
+00063 [GPT-5-CODEX-MAX-REASONING] end
+00064 [GPT-5-CODEX-MAX-REASONING] 
+00065 [GPT-5-CODEX-MAX-REASONING] --- @brief Cleanup sprites when leaving page
+00066 [GPT-5-CODEX-MAX-REASONING] function Page16.exit()
+00067 [GPT-5-CODEX-MAX-REASONING]     -- Stop double buffer renderer
+00068 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00069 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00070 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00071 [GPT-5-CODEX-MAX-REASONING]     end
+00072 [GPT-5-CODEX-MAX-REASONING] 
+00073 [GPT-5-CODEX-MAX-REASONING]     -- Free sprites
+00074 [GPT-5-CODEX-MAX-REASONING]     if single_sprite then
+00075 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(single_sprite)
+00076 [GPT-5-CODEX-MAX-REASONING]         single_sprite = nil
+00077 [GPT-5-CODEX-MAX-REASONING]     end
+00078 [GPT-5-CODEX-MAX-REASONING]     if spritesheet_handle then
+00079 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(spritesheet_handle)
+00080 [GPT-5-CODEX-MAX-REASONING]         spritesheet_handle = nil
+00081 [GPT-5-CODEX-MAX-REASONING]     end
+00082 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = false
+00083 [GPT-5-CODEX-MAX-REASONING]     current_frame = 1
+00084 [GPT-5-CODEX-MAX-REASONING]     scale_value = 1.0
+00085 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page16", "Sprites freed")
+00086 [GPT-5-CODEX-MAX-REASONING] end
+00087 [GPT-5-CODEX-MAX-REASONING] 
+00088 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 16: Sprite Scaling
+00089 [GPT-5-CODEX-MAX-REASONING] function Page16.render(drawPageCounter)
+00090 [GPT-5-CODEX-MAX-REASONING]     -- Start double buffer on first render only
+00091 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00092 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00093 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00094 [GPT-5-CODEX-MAX-REASONING]     end
+00095 [GPT-5-CODEX-MAX-REASONING] 
+00096 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00097 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00098 [GPT-5-CODEX-MAX-REASONING] 
+00099 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00100 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00101 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Sprite Scaling", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00102 [GPT-5-CODEX-MAX-REASONING] 
+00103 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00104 [GPT-5-CODEX-MAX-REASONING] 
+00105 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites on first render
+00106 [GPT-5-CODEX-MAX-REASONING]     loadSprites()
+00107 [GPT-5-CODEX-MAX-REASONING] 
+00108 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00109 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR: Failed to load", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00110 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("sprites. Check assets.", 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00111 [GPT-5-CODEX-MAX-REASONING]     elseif not sprites_loaded then
+00112 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Loading sprites...", 10, 60, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00113 [GPT-5-CODEX-MAX-REASONING]     elseif single_sprite and spritesheet_handle then
+00114 [GPT-5-CODEX-MAX-REASONING]         local current_time = vmupro.system.getTimeUs()
+00115 [GPT-5-CODEX-MAX-REASONING] 
+00116 [GPT-5-CODEX-MAX-REASONING]         -- Update scale value (ping-pong between MIN and MAX)
+00117 [GPT-5-CODEX-MAX-REASONING]         if (current_time - last_scale_time) >= SCALE_INTERVAL then
+00118 [GPT-5-CODEX-MAX-REASONING]             scale_value = scale_value + (SCALE_STEP * scale_direction)
+00119 [GPT-5-CODEX-MAX-REASONING]             if scale_value >= MAX_SCALE then
+00120 [GPT-5-CODEX-MAX-REASONING]                 scale_value = MAX_SCALE
+00121 [GPT-5-CODEX-MAX-REASONING]                 scale_direction = -1
+00122 [GPT-5-CODEX-MAX-REASONING]             elseif scale_value <= MIN_SCALE then
+00123 [GPT-5-CODEX-MAX-REASONING]                 scale_value = MIN_SCALE
+00124 [GPT-5-CODEX-MAX-REASONING]                 scale_direction = 1
+00125 [GPT-5-CODEX-MAX-REASONING]             end
+00126 [GPT-5-CODEX-MAX-REASONING]             last_scale_time = current_time
+00127 [GPT-5-CODEX-MAX-REASONING]         end
+00128 [GPT-5-CODEX-MAX-REASONING] 
+00129 [GPT-5-CODEX-MAX-REASONING]         -- Update animation frame
+00130 [GPT-5-CODEX-MAX-REASONING]         if (current_time - last_frame_time) >= FRAME_DURATION then
+00131 [GPT-5-CODEX-MAX-REASONING]             current_frame = current_frame + 1
+00132 [GPT-5-CODEX-MAX-REASONING]             if current_frame > spritesheet_handle.frameCount then
+00133 [GPT-5-CODEX-MAX-REASONING]                 current_frame = 1
+00134 [GPT-5-CODEX-MAX-REASONING]             end
+00135 [GPT-5-CODEX-MAX-REASONING]             last_frame_time = current_time
+00136 [GPT-5-CODEX-MAX-REASONING]         end
+00137 [GPT-5-CODEX-MAX-REASONING] 
+00138 [GPT-5-CODEX-MAX-REASONING]         -- Calculate center positions
+00139 [GPT-5-CODEX-MAX-REASONING]         local center_y = 120
+00140 [GPT-5-CODEX-MAX-REASONING] 
+00141 [GPT-5-CODEX-MAX-REASONING]         -- Left side: Single sprite with scaling
+00142 [GPT-5-CODEX-MAX-REASONING]         local left_x = 60
+00143 [GPT-5-CODEX-MAX-REASONING]         local scaled_width = single_sprite.width * scale_value
+00144 [GPT-5-CODEX-MAX-REASONING]         local scaled_height = single_sprite.height * scale_value
+00145 [GPT-5-CODEX-MAX-REASONING]         local sprite_x = math.floor(left_x - (scaled_width / 2))
+00146 [GPT-5-CODEX-MAX-REASONING]         local sprite_y = math.floor(center_y - (scaled_height / 2))
+00147 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawScaled(single_sprite, sprite_x, sprite_y, scale_value, scale_value, vmupro.sprite.kImageUnflipped)
+00148 [GPT-5-CODEX-MAX-REASONING] 
+00149 [GPT-5-CODEX-MAX-REASONING]         -- Right side: Spritesheet animation with scaling
+00150 [GPT-5-CODEX-MAX-REASONING]         local right_x = 180
+00151 [GPT-5-CODEX-MAX-REASONING]         local frame_scaled_width = spritesheet_handle.frameWidth * scale_value
+00152 [GPT-5-CODEX-MAX-REASONING]         local frame_scaled_height = spritesheet_handle.frameHeight * scale_value
+00153 [GPT-5-CODEX-MAX-REASONING]         local frame_x = math.floor(right_x - (frame_scaled_width / 2))
+00154 [GPT-5-CODEX-MAX-REASONING]         local frame_y = math.floor(center_y - (frame_scaled_height / 2))
+00155 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawFrameScaled(spritesheet_handle, current_frame, frame_x, frame_y, scale_value, scale_value, vmupro.sprite.kImageUnflipped)
+00156 [GPT-5-CODEX-MAX-REASONING] 
+00157 [GPT-5-CODEX-MAX-REASONING]         -- Draw labels
+00158 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Single Sprite", 30, 40, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00159 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Spritesheet", 145, 40, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00160 [GPT-5-CODEX-MAX-REASONING] 
+00161 [GPT-5-CODEX-MAX-REASONING]         -- Display scaling info
+00162 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(string.format("Scale: %.2fx", scale_value), 10, 190, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00163 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(string.format("Frame: %d/%d", current_frame, spritesheet_handle.frameCount), 10, 205, vmupro.graphics.BLUE, vmupro.graphics.BLACK)
+00164 [GPT-5-CODEX-MAX-REASONING] 
+00165 [GPT-5-CODEX-MAX-REASONING]         -- Draw center line for reference
+00166 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawLine(120, 50, 120, 180, vmupro.graphics.GREY)
+00167 [GPT-5-CODEX-MAX-REASONING]     end
+00168 [GPT-5-CODEX-MAX-REASONING] 
+00169 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00170 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00171 [GPT-5-CODEX-MAX-REASONING] 
+00172 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00173 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00174 [GPT-5-CODEX-MAX-REASONING] end

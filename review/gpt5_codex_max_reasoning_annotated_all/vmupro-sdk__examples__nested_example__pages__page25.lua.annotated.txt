@@ -1,0 +1,209 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page25.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 25: Sprite Center Point (setCenter, getCenter)
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page25 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- Sprite handles
+00010 [GPT-5-CODEX-MAX-REASONING] local sprite1_handle = nil
+00011 [GPT-5-CODEX-MAX-REASONING] local sprite2_handle = nil
+00012 [GPT-5-CODEX-MAX-REASONING] local sprite3_handle = nil
+00013 [GPT-5-CODEX-MAX-REASONING] local sprite4_handle = nil
+00014 [GPT-5-CODEX-MAX-REASONING] local sprites_loaded = false
+00015 [GPT-5-CODEX-MAX-REASONING] local load_error = false
+00016 [GPT-5-CODEX-MAX-REASONING] 
+00017 [GPT-5-CODEX-MAX-REASONING] -- Center point cycling
+00018 [GPT-5-CODEX-MAX-REASONING] local cycle_interval = 1500000  -- 1.5 seconds
+00019 [GPT-5-CODEX-MAX-REASONING] local last_cycle_time = 0
+00020 [GPT-5-CODEX-MAX-REASONING] local cycle_state = 0  -- 0-3 for different center configurations
+00021 [GPT-5-CODEX-MAX-REASONING] 
+00022 [GPT-5-CODEX-MAX-REASONING] -- Center point configurations
+00023 [GPT-5-CODEX-MAX-REASONING] local center_configs = {
+00024 [GPT-5-CODEX-MAX-REASONING]     {0.5, 0.5},  -- Center (default)
+00025 [GPT-5-CODEX-MAX-REASONING]     {0.0, 0.0},  -- Top-left
+00026 [GPT-5-CODEX-MAX-REASONING]     {1.0, 0.0},  -- Top-right
+00027 [GPT-5-CODEX-MAX-REASONING]     {0.5, 1.0}   -- Bottom center
+00028 [GPT-5-CODEX-MAX-REASONING] }
+00029 [GPT-5-CODEX-MAX-REASONING] 
+00030 [GPT-5-CODEX-MAX-REASONING] --- @brief Load sprites
+00031 [GPT-5-CODEX-MAX-REASONING] local function loadSprites()
+00032 [GPT-5-CODEX-MAX-REASONING]     if sprites_loaded or load_error then
+00033 [GPT-5-CODEX-MAX-REASONING]         return
+00034 [GPT-5-CODEX-MAX-REASONING]     end
+00035 [GPT-5-CODEX-MAX-REASONING] 
+00036 [GPT-5-CODEX-MAX-REASONING]     sprite1_handle = vmupro.sprite.new("assets/mask_guy_idle")
+00037 [GPT-5-CODEX-MAX-REASONING]     sprite2_handle = vmupro.sprite.new("assets/mask_guy_idle")
+00038 [GPT-5-CODEX-MAX-REASONING]     sprite3_handle = vmupro.sprite.new("assets/mask_guy_idle")
+00039 [GPT-5-CODEX-MAX-REASONING]     sprite4_handle = vmupro.sprite.new("assets/mask_guy_idle")
+00040 [GPT-5-CODEX-MAX-REASONING] 
+00041 [GPT-5-CODEX-MAX-REASONING]     if not sprite1_handle or not sprite2_handle or not sprite3_handle or not sprite4_handle then
+00042 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page25", "Failed to load sprites")
+00043 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00044 [GPT-5-CODEX-MAX-REASONING]         return
+00045 [GPT-5-CODEX-MAX-REASONING]     end
+00046 [GPT-5-CODEX-MAX-REASONING] 
+00047 [GPT-5-CODEX-MAX-REASONING]     -- Set positions for 4 sprites in a grid
+00048 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(sprite1_handle, 55, 70)
+00049 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(sprite2_handle, 145, 70)
+00050 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(sprite3_handle, 55, 150)
+00051 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(sprite4_handle, 145, 150)
+00052 [GPT-5-CODEX-MAX-REASONING] 
+00053 [GPT-5-CODEX-MAX-REASONING]     -- Set different center points for each sprite
+00054 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCenter(sprite1_handle, 0.5, 0.5)  -- Center
+00055 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCenter(sprite2_handle, 0.0, 0.0)  -- Top-left
+00056 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCenter(sprite3_handle, 1.0, 0.0)  -- Top-right
+00057 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCenter(sprite4_handle, 0.5, 1.0)  -- Bottom center
+00058 [GPT-5-CODEX-MAX-REASONING] 
+00059 [GPT-5-CODEX-MAX-REASONING]     -- Add sprites to scene for automatic rendering
+00060 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(sprite1_handle)
+00061 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(sprite2_handle)
+00062 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(sprite3_handle)
+00063 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(sprite4_handle)
+00064 [GPT-5-CODEX-MAX-REASONING] 
+00065 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = true
+00066 [GPT-5-CODEX-MAX-REASONING]     last_cycle_time = vmupro.system.getTimeUs()
+00067 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page25", "Sprites loaded and added to scene")
+00068 [GPT-5-CODEX-MAX-REASONING] end
+00069 [GPT-5-CODEX-MAX-REASONING] 
+00070 [GPT-5-CODEX-MAX-REASONING] --- @brief Update logic - cycle through center point on sprite 1
+00071 [GPT-5-CODEX-MAX-REASONING] function Page25.update()
+00072 [GPT-5-CODEX-MAX-REASONING]     if not sprites_loaded then
+00073 [GPT-5-CODEX-MAX-REASONING]         return
+00074 [GPT-5-CODEX-MAX-REASONING]     end
+00075 [GPT-5-CODEX-MAX-REASONING] 
+00076 [GPT-5-CODEX-MAX-REASONING]     local current_time = vmupro.system.getTimeUs()
+00077 [GPT-5-CODEX-MAX-REASONING] 
+00078 [GPT-5-CODEX-MAX-REASONING]     -- Cycle sprite1's center point every 1.5 seconds to show the effect
+00079 [GPT-5-CODEX-MAX-REASONING]     if (current_time - last_cycle_time) >= cycle_interval then
+00080 [GPT-5-CODEX-MAX-REASONING]         cycle_state = (cycle_state + 1) % 4
+00081 [GPT-5-CODEX-MAX-REASONING]         local config = center_configs[cycle_state + 1]
+00082 [GPT-5-CODEX-MAX-REASONING] 
+00083 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.setCenter(sprite1_handle, config[1], config[2])
+00084 [GPT-5-CODEX-MAX-REASONING] 
+00085 [GPT-5-CODEX-MAX-REASONING]         last_cycle_time = current_time
+00086 [GPT-5-CODEX-MAX-REASONING] 
+00087 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_INFO, "Page25",
+00088 [GPT-5-CODEX-MAX-REASONING]             string.format("Sprite1 center: (%.1f, %.1f)", config[1], config[2]))
+00089 [GPT-5-CODEX-MAX-REASONING]     end
+00090 [GPT-5-CODEX-MAX-REASONING] end
+00091 [GPT-5-CODEX-MAX-REASONING] 
+00092 [GPT-5-CODEX-MAX-REASONING] --- @brief Cleanup when leaving page
+00093 [GPT-5-CODEX-MAX-REASONING] function Page25.exit()
+00094 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00095 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00096 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00097 [GPT-5-CODEX-MAX-REASONING]     end
+00098 [GPT-5-CODEX-MAX-REASONING] 
+00099 [GPT-5-CODEX-MAX-REASONING]     -- Remove all sprites from scene
+00100 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.removeAll()
+00101 [GPT-5-CODEX-MAX-REASONING] 
+00102 [GPT-5-CODEX-MAX-REASONING]     -- Free individual sprites
+00103 [GPT-5-CODEX-MAX-REASONING]     if sprite1_handle then
+00104 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite1_handle)
+00105 [GPT-5-CODEX-MAX-REASONING]         sprite1_handle = nil
+00106 [GPT-5-CODEX-MAX-REASONING]     end
+00107 [GPT-5-CODEX-MAX-REASONING]     if sprite2_handle then
+00108 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite2_handle)
+00109 [GPT-5-CODEX-MAX-REASONING]         sprite2_handle = nil
+00110 [GPT-5-CODEX-MAX-REASONING]     end
+00111 [GPT-5-CODEX-MAX-REASONING]     if sprite3_handle then
+00112 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite3_handle)
+00113 [GPT-5-CODEX-MAX-REASONING]         sprite3_handle = nil
+00114 [GPT-5-CODEX-MAX-REASONING]     end
+00115 [GPT-5-CODEX-MAX-REASONING]     if sprite4_handle then
+00116 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite4_handle)
+00117 [GPT-5-CODEX-MAX-REASONING]         sprite4_handle = nil
+00118 [GPT-5-CODEX-MAX-REASONING]     end
+00119 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = false
+00120 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page25", "Sprites removed and freed")
+00121 [GPT-5-CODEX-MAX-REASONING] end
+00122 [GPT-5-CODEX-MAX-REASONING] 
+00123 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a small crosshair at a position
+00124 [GPT-5-CODEX-MAX-REASONING] local function drawCrosshair(x, y, color)
+00125 [GPT-5-CODEX-MAX-REASONING]     local size = 4
+00126 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawLine(x - size, y, x + size, y, color)
+00127 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawLine(x, y - size, x, y + size, color)
+00128 [GPT-5-CODEX-MAX-REASONING]     -- Draw a circle around it for better visibility
+00129 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawCircle(x, y, 2, color)
+00130 [GPT-5-CODEX-MAX-REASONING] end
+00131 [GPT-5-CODEX-MAX-REASONING] 
+00132 [GPT-5-CODEX-MAX-REASONING] 
+00133 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 25: Center Point Demo
+00134 [GPT-5-CODEX-MAX-REASONING] function Page25.render(drawPageCounter)
+00135 [GPT-5-CODEX-MAX-REASONING]     -- Start double buffer on first render
+00136 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00137 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00138 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00139 [GPT-5-CODEX-MAX-REASONING]     end
+00140 [GPT-5-CODEX-MAX-REASONING] 
+00141 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00142 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00143 [GPT-5-CODEX-MAX-REASONING] 
+00144 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00145 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00146 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Center Point", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00147 [GPT-5-CODEX-MAX-REASONING] 
+00148 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00149 [GPT-5-CODEX-MAX-REASONING] 
+00150 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites on first render
+00151 [GPT-5-CODEX-MAX-REASONING]     loadSprites()
+00152 [GPT-5-CODEX-MAX-REASONING] 
+00153 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00154 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR: Failed to load", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00155 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("sprites. Check assets.", 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00156 [GPT-5-CODEX-MAX-REASONING]     elseif not sprites_loaded then
+00157 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Loading sprites...", 10, 60, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00158 [GPT-5-CODEX-MAX-REASONING]     elseif sprite1_handle and sprite2_handle and sprite3_handle and sprite4_handle then
+00159 [GPT-5-CODEX-MAX-REASONING]         -- Get positions for anchor points
+00160 [GPT-5-CODEX-MAX-REASONING]         local x1, y1 = vmupro.sprite.getPosition(sprite1_handle)
+00161 [GPT-5-CODEX-MAX-REASONING]         local x2, y2 = vmupro.sprite.getPosition(sprite2_handle)
+00162 [GPT-5-CODEX-MAX-REASONING]         local x3, y3 = vmupro.sprite.getPosition(sprite3_handle)
+00163 [GPT-5-CODEX-MAX-REASONING]         local x4, y4 = vmupro.sprite.getPosition(sprite4_handle)
+00164 [GPT-5-CODEX-MAX-REASONING] 
+00165 [GPT-5-CODEX-MAX-REASONING]         -- Get center for sprite 1 (to display current value)
+00166 [GPT-5-CODEX-MAX-REASONING]         local cx1, cy1 = vmupro.sprite.getCenter(sprite1_handle)
+00167 [GPT-5-CODEX-MAX-REASONING] 
+00168 [GPT-5-CODEX-MAX-REASONING]         -- Draw all sprites in scene (respects center points automatically)
+00169 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawAll()
+00170 [GPT-5-CODEX-MAX-REASONING] 
+00171 [GPT-5-CODEX-MAX-REASONING]         -- Draw bounding boxes using getBounds() to show actual screen positions
+00172 [GPT-5-CODEX-MAX-REASONING]         local bx1, by1, bw1, bh1 = vmupro.sprite.getBounds(sprite1_handle)
+00173 [GPT-5-CODEX-MAX-REASONING]         local bx2, by2, bw2, bh2 = vmupro.sprite.getBounds(sprite2_handle)
+00174 [GPT-5-CODEX-MAX-REASONING]         local bx3, by3, bw3, bh3 = vmupro.sprite.getBounds(sprite3_handle)
+00175 [GPT-5-CODEX-MAX-REASONING]         local bx4, by4, bw4, bh4 = vmupro.sprite.getBounds(sprite4_handle)
+00176 [GPT-5-CODEX-MAX-REASONING] 
+00177 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawRect(bx1, by1, bx1 + bw1 - 1, by1 + bh1 - 1, vmupro.graphics.RED)
+00178 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawRect(bx2, by2, bx2 + bw2 - 1, by2 + bh2 - 1, vmupro.graphics.GREEN)
+00179 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawRect(bx3, by3, bx3 + bw3 - 1, by3 + bh3 - 1, vmupro.graphics.BLUE)
+00180 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawRect(bx4, by4, bx4 + bw4 - 1, by4 + bh4 - 1, vmupro.graphics.YELLOW)
+00181 [GPT-5-CODEX-MAX-REASONING] 
+00182 [GPT-5-CODEX-MAX-REASONING]         -- Draw crosshairs at sprite anchor points (position)
+00183 [GPT-5-CODEX-MAX-REASONING]         drawCrosshair(math.floor(x1), math.floor(y1), vmupro.graphics.RED)
+00184 [GPT-5-CODEX-MAX-REASONING]         drawCrosshair(math.floor(x2), math.floor(y2), vmupro.graphics.GREEN)
+00185 [GPT-5-CODEX-MAX-REASONING]         drawCrosshair(math.floor(x3), math.floor(y3), vmupro.graphics.BLUE)
+00186 [GPT-5-CODEX-MAX-REASONING]         drawCrosshair(math.floor(x4), math.floor(y4), vmupro.graphics.YELLOW)
+00187 [GPT-5-CODEX-MAX-REASONING] 
+00188 [GPT-5-CODEX-MAX-REASONING]         -- Display info for each sprite
+00189 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("1:(" .. string.format("%.1f,%.1f", cx1, cy1) .. ")", 10, 170, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00190 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("2:(0.0,0.0)", 60, 170, vmupro.graphics.GREEN, vmupro.graphics.BLACK)
+00191 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("3:(1.0,0.0)", 125, 170, vmupro.graphics.BLUE, vmupro.graphics.BLACK)
+00192 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("4:(0.5,1.0)", 190, 170, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00193 [GPT-5-CODEX-MAX-REASONING] 
+00194 [GPT-5-CODEX-MAX-REASONING]         -- Explanation text
+00195 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("X = anchor (fixed)", 10, 185, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00196 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Box shows sprite", 10, 200, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00197 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("#1 cycles configs", 120, 185, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00198 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Watch sprite move!", 120, 200, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00199 [GPT-5-CODEX-MAX-REASONING]     end
+00200 [GPT-5-CODEX-MAX-REASONING] 
+00201 [GPT-5-CODEX-MAX-REASONING]     -- Description at top
+00202 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Center defines sprite pos", 10, 40, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00203 [GPT-5-CODEX-MAX-REASONING] 
+00204 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00205 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00206 [GPT-5-CODEX-MAX-REASONING] 
+00207 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00208 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00209 [GPT-5-CODEX-MAX-REASONING] end

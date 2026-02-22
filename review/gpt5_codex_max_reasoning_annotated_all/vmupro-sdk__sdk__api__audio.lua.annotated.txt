@@ -1,0 +1,159 @@
+00001 [GPT-5-CODEX-MAX-REASONING] --- @file audio.lua
+00002 [GPT-5-CODEX-MAX-REASONING] --- @brief VMU Pro LUA SDK - Audio Functions
+00003 [GPT-5-CODEX-MAX-REASONING] --- @author 8BitMods
+00004 [GPT-5-CODEX-MAX-REASONING] --- @version 1.0.0
+00005 [GPT-5-CODEX-MAX-REASONING] --- @date 2025-12-14
+00006 [GPT-5-CODEX-MAX-REASONING] --- @copyright Copyright (c) 2025 8BitMods. All rights reserved.
+00007 [GPT-5-CODEX-MAX-REASONING] ---
+00008 [GPT-5-CODEX-MAX-REASONING] --- Audio utilities for VMU Pro LUA applications.
+00009 [GPT-5-CODEX-MAX-REASONING] --- Functions are available under the vmupro.audio and vmupro.sound namespaces.
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING] -- Ensure vmupro namespace exists
+00012 [GPT-5-CODEX-MAX-REASONING] vmupro = vmupro or {}
+00013 [GPT-5-CODEX-MAX-REASONING] vmupro.audio = vmupro.audio or {}
+00014 [GPT-5-CODEX-MAX-REASONING] vmupro.sound = vmupro.sound or {}
+00015 [GPT-5-CODEX-MAX-REASONING] vmupro.sound.sample = vmupro.sound.sample or {}
+00016 [GPT-5-CODEX-MAX-REASONING] 
+00017 [GPT-5-CODEX-MAX-REASONING] -- =============================================================================
+00018 [GPT-5-CODEX-MAX-REASONING] -- AUDIO SYSTEM CONTROL (vmupro.audio)
+00019 [GPT-5-CODEX-MAX-REASONING] -- =============================================================================
+00020 [GPT-5-CODEX-MAX-REASONING] 
+00021 [GPT-5-CODEX-MAX-REASONING] --- @brief Get the current global volume level
+00022 [GPT-5-CODEX-MAX-REASONING] --- @return number Volume level (0-10)
+00023 [GPT-5-CODEX-MAX-REASONING] --- @usage local volume = vmupro.audio.getGlobalVolume()
+00024 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00025 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00026 [GPT-5-CODEX-MAX-REASONING] function vmupro.audio.getGlobalVolume() end
+00027 [GPT-5-CODEX-MAX-REASONING] 
+00028 [GPT-5-CODEX-MAX-REASONING] --- @brief Set the global volume level
+00029 [GPT-5-CODEX-MAX-REASONING] --- @param volume number Volume level (0-10, where 0 is mute and 10 is maximum)
+00030 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.audio.setGlobalVolume(5)
+00031 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00032 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00033 [GPT-5-CODEX-MAX-REASONING] function vmupro.audio.setGlobalVolume(volume) end
+00034 [GPT-5-CODEX-MAX-REASONING] 
+00035 [GPT-5-CODEX-MAX-REASONING] --- @brief Start audio listen mode for playback
+00036 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.audio.startListenMode()
+00037 [GPT-5-CODEX-MAX-REASONING] --- @note Required before using synths or playing samples
+00038 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00039 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00040 [GPT-5-CODEX-MAX-REASONING] function vmupro.audio.startListenMode() end
+00041 [GPT-5-CODEX-MAX-REASONING] 
+00042 [GPT-5-CODEX-MAX-REASONING] --- @brief Exit audio listen mode
+00043 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.audio.exitListenMode()
+00044 [GPT-5-CODEX-MAX-REASONING] --- @note Call when done with audio to clean up
+00045 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00046 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00047 [GPT-5-CODEX-MAX-REASONING] function vmupro.audio.exitListenMode() end
+00048 [GPT-5-CODEX-MAX-REASONING] 
+00049 [GPT-5-CODEX-MAX-REASONING] --- @brief Clear the audio ring buffer
+00050 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.audio.clearRingBuffer()
+00051 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00052 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00053 [GPT-5-CODEX-MAX-REASONING] function vmupro.audio.clearRingBuffer() end
+00054 [GPT-5-CODEX-MAX-REASONING] 
+00055 [GPT-5-CODEX-MAX-REASONING] --- @brief Get the current fill state of the audio ring buffer
+00056 [GPT-5-CODEX-MAX-REASONING] --- @return number Number of samples currently in the ring buffer
+00057 [GPT-5-CODEX-MAX-REASONING] --- @usage local fill_state = vmupro.audio.getRingbufferFillState()
+00058 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00059 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00060 [GPT-5-CODEX-MAX-REASONING] function vmupro.audio.getRingbufferFillState() end
+00061 [GPT-5-CODEX-MAX-REASONING] 
+00062 [GPT-5-CODEX-MAX-REASONING] -- Audio mode constants
+00063 [GPT-5-CODEX-MAX-REASONING] vmupro.audio.MONO = 0    --- Mono audio mode
+00064 [GPT-5-CODEX-MAX-REASONING] vmupro.audio.STEREO = 1  --- Stereo audio mode
+00065 [GPT-5-CODEX-MAX-REASONING] 
+00066 [GPT-5-CODEX-MAX-REASONING] -- =============================================================================
+00067 [GPT-5-CODEX-MAX-REASONING] -- SAMPLE PLAYBACK (vmupro.sound.sample)
+00068 [GPT-5-CODEX-MAX-REASONING] -- =============================================================================
+00069 [GPT-5-CODEX-MAX-REASONING] 
+00070 [GPT-5-CODEX-MAX-REASONING] --- @class SampleObject
+00071 [GPT-5-CODEX-MAX-REASONING] --- @field id number Internal handle for the sample
+00072 [GPT-5-CODEX-MAX-REASONING] 
+00073 [GPT-5-CODEX-MAX-REASONING] --- @brief Load a WAV file from the SD card
+00074 [GPT-5-CODEX-MAX-REASONING] --- @param path string Path relative to /sdcard/, without .wav extension
+00075 [GPT-5-CODEX-MAX-REASONING] --- @return SampleObject|nil Sample object, or nil on error
+00076 [GPT-5-CODEX-MAX-REASONING] --- @usage local kick = vmupro.sound.sample.new("assets/kick")
+00077 [GPT-5-CODEX-MAX-REASONING] --- @note Supported formats: PCM or ADPCM WAV, mono or stereo
+00078 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00079 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00080 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sample.new(path) end
+00081 [GPT-5-CODEX-MAX-REASONING] 
+00082 [GPT-5-CODEX-MAX-REASONING] --- @brief Play a loaded sample
+00083 [GPT-5-CODEX-MAX-REASONING] --- @param sample SampleObject Sample object returned from new()
+00084 [GPT-5-CODEX-MAX-REASONING] --- @param repeatCount number Number of times to repeat (0 = once, 1 = twice, etc.)
+00085 [GPT-5-CODEX-MAX-REASONING] --- @param callback function|nil Optional callback when playback finishes
+00086 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.sample.play(kick, 0)
+00087 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.sample.play(sfx, 0, function() vmupro.system.log(vmupro.system.LOG_DEBUG, "Audio", "Done!") end)
+00088 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00089 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00090 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sample.play(sample, repeatCount, callback) end
+00091 [GPT-5-CODEX-MAX-REASONING] 
+00092 [GPT-5-CODEX-MAX-REASONING] --- @brief Set the stereo volume for a sample
+00093 [GPT-5-CODEX-MAX-REASONING] --- @param sample SampleObject Sample object to adjust
+00094 [GPT-5-CODEX-MAX-REASONING] --- @param left number Left channel volume (0.0 to 1.0)
+00095 [GPT-5-CODEX-MAX-REASONING] --- @param right number Right channel volume (0.0 to 1.0)
+00096 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.sample.setVolume(kick, 1.0, 1.0)
+00097 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00098 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00099 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sample.setVolume(sample, left, right) end
+00100 [GPT-5-CODEX-MAX-REASONING] 
+00101 [GPT-5-CODEX-MAX-REASONING] --- @brief Set the playback rate (speed/pitch) for a sample
+00102 [GPT-5-CODEX-MAX-REASONING] --- @param sample SampleObject Sample object to adjust
+00103 [GPT-5-CODEX-MAX-REASONING] --- @param rate number Playback rate multiplier (1.0 = normal, 0.5 = half, 2.0 = double)
+00104 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.sample.setRate(kick, 1.0)
+00105 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00106 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00107 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sample.setRate(sample, rate) end
+00108 [GPT-5-CODEX-MAX-REASONING] 
+00109 [GPT-5-CODEX-MAX-REASONING] --- @brief Stop a playing sample
+00110 [GPT-5-CODEX-MAX-REASONING] --- @param sample SampleObject Sample object to stop
+00111 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.sample.stop(kick)
+00112 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00113 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00114 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sample.stop(sample) end
+00115 [GPT-5-CODEX-MAX-REASONING] 
+00116 [GPT-5-CODEX-MAX-REASONING] --- @brief Check if a sample is currently playing
+00117 [GPT-5-CODEX-MAX-REASONING] --- @param sample SampleObject Sample object to check
+00118 [GPT-5-CODEX-MAX-REASONING] --- @return boolean true if playing, false otherwise
+00119 [GPT-5-CODEX-MAX-REASONING] --- @usage if vmupro.sound.sample.isPlaying(kick) then vmupro.system.log(vmupro.system.LOG_DEBUG, "Audio", "Playing") end
+00120 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00121 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00122 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sample.isPlaying(sample) end
+00123 [GPT-5-CODEX-MAX-REASONING] 
+00124 [GPT-5-CODEX-MAX-REASONING] --- @brief Free a sample and release memory
+00125 [GPT-5-CODEX-MAX-REASONING] --- @param sample SampleObject Sample object to free
+00126 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.sample.free(kick)
+00127 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00128 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00129 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sample.free(sample) end
+00130 [GPT-5-CODEX-MAX-REASONING] 
+00131 [GPT-5-CODEX-MAX-REASONING] --- @brief Get the current stereo volume for a sound sample
+00132 [GPT-5-CODEX-MAX-REASONING] --- @param sample SampleObject Sample object to query
+00133 [GPT-5-CODEX-MAX-REASONING] --- @return number Left channel volume (0.0 to 1.0)
+00134 [GPT-5-CODEX-MAX-REASONING] --- @return number Right channel volume (0.0 to 1.0)
+00135 [GPT-5-CODEX-MAX-REASONING] --- @usage local left, right = vmupro.sound.sample.getVolume(kick)
+00136 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00137 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00138 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sample.getVolume(sample) end
+00139 [GPT-5-CODEX-MAX-REASONING] 
+00140 [GPT-5-CODEX-MAX-REASONING] --- @brief Get the current playback rate for a sound sample
+00141 [GPT-5-CODEX-MAX-REASONING] --- @param sample SampleObject Sample object to query
+00142 [GPT-5-CODEX-MAX-REASONING] --- @return number Current playback rate multiplier (1.0 = normal speed)
+00143 [GPT-5-CODEX-MAX-REASONING] --- @usage local rate = vmupro.sound.sample.getRate(kick)
+00144 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00145 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00146 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sample.getRate(sample) end
+00147 [GPT-5-CODEX-MAX-REASONING] 
+00148 [GPT-5-CODEX-MAX-REASONING] -- =============================================================================
+00149 [GPT-5-CODEX-MAX-REASONING] -- AUDIO UPDATE (vmupro.sound)
+00150 [GPT-5-CODEX-MAX-REASONING] -- =============================================================================
+00151 [GPT-5-CODEX-MAX-REASONING] 
+00152 [GPT-5-CODEX-MAX-REASONING] --- @brief Mix and output audio to device (MUST be called every frame)
+00153 [GPT-5-CODEX-MAX-REASONING] --- @usage function vmupro.update()
+00154 [GPT-5-CODEX-MAX-REASONING] --- @usage     vmupro.sound.update()  -- CRITICAL for audio to work
+00155 [GPT-5-CODEX-MAX-REASONING] --- @usage end
+00156 [GPT-5-CODEX-MAX-REASONING] --- @note Without calling this every frame, no audio will be heard
+00157 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00158 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00159 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.update() end

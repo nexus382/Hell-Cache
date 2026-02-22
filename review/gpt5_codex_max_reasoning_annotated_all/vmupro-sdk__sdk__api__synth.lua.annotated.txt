@@ -1,0 +1,164 @@
+00001 [GPT-5-CODEX-MAX-REASONING] --- @file synth.lua
+00002 [GPT-5-CODEX-MAX-REASONING] --- @brief VMU Pro LUA SDK - Synthesizer Functions
+00003 [GPT-5-CODEX-MAX-REASONING] --- @author 8BitMods
+00004 [GPT-5-CODEX-MAX-REASONING] --- @version 1.0.0
+00005 [GPT-5-CODEX-MAX-REASONING] --- @date 2025-12-14
+00006 [GPT-5-CODEX-MAX-REASONING] --- @copyright Copyright (c) 2025 8BitMods. All rights reserved.
+00007 [GPT-5-CODEX-MAX-REASONING] ---
+00008 [GPT-5-CODEX-MAX-REASONING] --- Synthesizer functions for VMU Pro LUA applications.
+00009 [GPT-5-CODEX-MAX-REASONING] --- Functions are available under the vmupro.sound.synth namespace.
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING] -- Ensure vmupro namespace exists
+00012 [GPT-5-CODEX-MAX-REASONING] vmupro = vmupro or {}
+00013 [GPT-5-CODEX-MAX-REASONING] vmupro.sound = vmupro.sound or {}
+00014 [GPT-5-CODEX-MAX-REASONING] vmupro.sound.synth = vmupro.sound.synth or {}
+00015 [GPT-5-CODEX-MAX-REASONING] 
+00016 [GPT-5-CODEX-MAX-REASONING] -- Waveform type constants
+00017 [GPT-5-CODEX-MAX-REASONING] vmupro.sound.kWaveSquare = 0     --- Square wave - classic 8-bit sound
+00018 [GPT-5-CODEX-MAX-REASONING] vmupro.sound.kWaveTriangle = 1   --- Triangle wave - softer than square
+00019 [GPT-5-CODEX-MAX-REASONING] vmupro.sound.kWaveSine = 2       --- Sine wave - pure tone
+00020 [GPT-5-CODEX-MAX-REASONING] vmupro.sound.kWaveNoise = 3      --- White noise - useful for drums/effects
+00021 [GPT-5-CODEX-MAX-REASONING] vmupro.sound.kWaveSawtooth = 4   --- Sawtooth wave - bright, buzzy sound
+00022 [GPT-5-CODEX-MAX-REASONING] vmupro.sound.kWavePOPhase = 5    --- PO Phase modulation synthesis
+00023 [GPT-5-CODEX-MAX-REASONING] vmupro.sound.kWavePODigital = 6  --- PO Digital synthesis
+00024 [GPT-5-CODEX-MAX-REASONING] vmupro.sound.kWavePOVosim = 7    --- PO Vosim synthesis
+00025 [GPT-5-CODEX-MAX-REASONING] 
+00026 [GPT-5-CODEX-MAX-REASONING] --- @class SynthObject
+00027 [GPT-5-CODEX-MAX-REASONING] --- @field id number Internal handle for the synth
+00028 [GPT-5-CODEX-MAX-REASONING] 
+00029 [GPT-5-CODEX-MAX-REASONING] --- @brief Create a new synthesizer with specified waveform
+00030 [GPT-5-CODEX-MAX-REASONING] --- @param waveform number Waveform type (use vmupro.sound.kWave* constants)
+00031 [GPT-5-CODEX-MAX-REASONING] --- @return SynthObject|nil Synth object, or nil on error
+00032 [GPT-5-CODEX-MAX-REASONING] --- @usage local synth = vmupro.sound.synth.new(vmupro.sound.kWaveSquare)
+00033 [GPT-5-CODEX-MAX-REASONING] --- @note Maximum of 16 synths can be active simultaneously
+00034 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00035 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00036 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.synth.new(waveform) end
+00037 [GPT-5-CODEX-MAX-REASONING] 
+00038 [GPT-5-CODEX-MAX-REASONING] --- @brief Set the ADSR envelope attack time
+00039 [GPT-5-CODEX-MAX-REASONING] --- @param synth SynthObject Synth object to modify
+00040 [GPT-5-CODEX-MAX-REASONING] --- @param time number Attack time in seconds
+00041 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.synth.setAttack(synth, 0.01)
+00042 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00043 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00044 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.synth.setAttack(synth, time) end
+00045 [GPT-5-CODEX-MAX-REASONING] 
+00046 [GPT-5-CODEX-MAX-REASONING] --- @brief Set the ADSR envelope decay time
+00047 [GPT-5-CODEX-MAX-REASONING] --- @param synth SynthObject Synth object to modify
+00048 [GPT-5-CODEX-MAX-REASONING] --- @param time number Decay time in seconds
+00049 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.synth.setDecay(synth, 0.1)
+00050 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00051 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00052 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.synth.setDecay(synth, time) end
+00053 [GPT-5-CODEX-MAX-REASONING] 
+00054 [GPT-5-CODEX-MAX-REASONING] --- @brief Set the ADSR envelope sustain level
+00055 [GPT-5-CODEX-MAX-REASONING] --- @param synth SynthObject Synth object to modify
+00056 [GPT-5-CODEX-MAX-REASONING] --- @param level number Sustain level (0.0 to 1.0)
+00057 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.synth.setSustain(synth, 0.7)
+00058 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00059 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00060 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.synth.setSustain(synth, level) end
+00061 [GPT-5-CODEX-MAX-REASONING] 
+00062 [GPT-5-CODEX-MAX-REASONING] --- @brief Set the ADSR envelope release time
+00063 [GPT-5-CODEX-MAX-REASONING] --- @param synth SynthObject Synth object to modify
+00064 [GPT-5-CODEX-MAX-REASONING] --- @param time number Release time in seconds
+00065 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.synth.setRelease(synth, 0.3)
+00066 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00067 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00068 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.synth.setRelease(synth, time) end
+00069 [GPT-5-CODEX-MAX-REASONING] 
+00070 [GPT-5-CODEX-MAX-REASONING] --- @brief Set the stereo volume for a synth
+00071 [GPT-5-CODEX-MAX-REASONING] --- @param synth SynthObject Synth object to adjust
+00072 [GPT-5-CODEX-MAX-REASONING] --- @param left number Left channel volume (0.0 to 1.0)
+00073 [GPT-5-CODEX-MAX-REASONING] --- @param right number Right channel volume (0.0 to 1.0)
+00074 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.synth.setVolume(synth, 1.0, 1.0)
+00075 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00076 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00077 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.synth.setVolume(synth, left, right) end
+00078 [GPT-5-CODEX-MAX-REASONING] 
+00079 [GPT-5-CODEX-MAX-REASONING] --- @brief Play a note at specified frequency
+00080 [GPT-5-CODEX-MAX-REASONING] --- @param synth SynthObject Synth object to play
+00081 [GPT-5-CODEX-MAX-REASONING] --- @param frequency number Frequency in Hz (e.g., 440.0 for A4)
+00082 [GPT-5-CODEX-MAX-REASONING] --- @param velocity number Note velocity/volume (0.0 to 1.0)
+00083 [GPT-5-CODEX-MAX-REASONING] --- @param length number Note length in seconds, or -1 for indefinite
+00084 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.synth.playNote(synth, 440.0, 1.0, 0.5)
+00085 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00086 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00087 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.synth.playNote(synth, frequency, velocity, length) end
+00088 [GPT-5-CODEX-MAX-REASONING] 
+00089 [GPT-5-CODEX-MAX-REASONING] --- @brief Play a MIDI note
+00090 [GPT-5-CODEX-MAX-REASONING] --- @param synth SynthObject Synth object to play
+00091 [GPT-5-CODEX-MAX-REASONING] --- @param note number MIDI note number (0-127, 60 = Middle C)
+00092 [GPT-5-CODEX-MAX-REASONING] --- @param velocity number Note velocity/volume (0.0 to 1.0)
+00093 [GPT-5-CODEX-MAX-REASONING] --- @param length number Note length in seconds, or -1 for indefinite
+00094 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.synth.playMIDINote(synth, 60, 1.0, 0.5)
+00095 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00096 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00097 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.synth.playMIDINote(synth, note, velocity, length) end
+00098 [GPT-5-CODEX-MAX-REASONING] 
+00099 [GPT-5-CODEX-MAX-REASONING] --- @brief Release the current note (enter release phase of envelope)
+00100 [GPT-5-CODEX-MAX-REASONING] --- @param synth SynthObject Synth object to release
+00101 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.synth.noteOff(synth)
+00102 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00103 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00104 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.synth.noteOff(synth) end
+00105 [GPT-5-CODEX-MAX-REASONING] 
+00106 [GPT-5-CODEX-MAX-REASONING] --- @brief Free a synthesizer and release resources
+00107 [GPT-5-CODEX-MAX-REASONING] --- @param synth SynthObject Synth object to free
+00108 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.synth.free(synth)
+00109 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00110 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00111 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.synth.free(synth) end
+00112 [GPT-5-CODEX-MAX-REASONING] 
+00113 [GPT-5-CODEX-MAX-REASONING] --- @brief Check if a synth is currently playing
+00114 [GPT-5-CODEX-MAX-REASONING] --- @param synth SynthObject Synth object to check
+00115 [GPT-5-CODEX-MAX-REASONING] --- @return boolean true if playing, false otherwise
+00116 [GPT-5-CODEX-MAX-REASONING] --- @usage if vmupro.sound.synth.isPlaying(synth) then vmupro.system.log(vmupro.system.LOG_DEBUG, "Synth", "Playing") end
+00117 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00118 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00119 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.synth.isPlaying(synth) end
+00120 [GPT-5-CODEX-MAX-REASONING] 
+00121 [GPT-5-CODEX-MAX-REASONING] --- @brief Change the waveform type of an existing synth
+00122 [GPT-5-CODEX-MAX-REASONING] --- @param synth SynthObject Synth object to modify
+00123 [GPT-5-CODEX-MAX-REASONING] --- @param waveform number New waveform type (use vmupro.sound.kWave* constants)
+00124 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.synth.setWaveform(synth, vmupro.sound.kWaveSquare)
+00125 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00126 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00127 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.synth.setWaveform(synth, waveform) end
+00128 [GPT-5-CODEX-MAX-REASONING] 
+00129 [GPT-5-CODEX-MAX-REASONING] --- @brief Stop the synth immediately without going through release phase
+00130 [GPT-5-CODEX-MAX-REASONING] --- @param synth SynthObject Synth object to stop
+00131 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.synth.stop(synth)
+00132 [GPT-5-CODEX-MAX-REASONING] --- @note Unlike noteOff(), this stops the sound immediately
+00133 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00134 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00135 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.synth.stop(synth) end
+00136 [GPT-5-CODEX-MAX-REASONING] 
+00137 [GPT-5-CODEX-MAX-REASONING] --- @brief Get the current stereo volume for a synth
+00138 [GPT-5-CODEX-MAX-REASONING] --- @param synth SynthObject Synth object to query
+00139 [GPT-5-CODEX-MAX-REASONING] --- @return number Left channel volume (0.0 to 1.0)
+00140 [GPT-5-CODEX-MAX-REASONING] --- @return number Right channel volume (0.0 to 1.0)
+00141 [GPT-5-CODEX-MAX-REASONING] --- @usage local left, right = vmupro.sound.synth.getVolume(synth)
+00142 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00143 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00144 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.synth.getVolume(synth) end
+00145 [GPT-5-CODEX-MAX-REASONING] 
+00146 [GPT-5-CODEX-MAX-REASONING] --- @brief Set a parameter for PO waveforms
+00147 [GPT-5-CODEX-MAX-REASONING] --- @param synth SynthObject Synth object to modify
+00148 [GPT-5-CODEX-MAX-REASONING] --- @param param_index number Parameter index (0 or 1)
+00149 [GPT-5-CODEX-MAX-REASONING] --- @param value number Parameter value (0.0 to 1.0)
+00150 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.synth.setParameter(synth, 0, 0.5)
+00151 [GPT-5-CODEX-MAX-REASONING] --- @note Only applicable to PO waveform types (kWavePOPhase, kWavePODigital, kWavePOVosim)
+00152 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00153 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00154 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.synth.setParameter(synth, param_index, value) end
+00155 [GPT-5-CODEX-MAX-REASONING] 
+00156 [GPT-5-CODEX-MAX-REASONING] --- @brief Get a parameter value for PO waveforms
+00157 [GPT-5-CODEX-MAX-REASONING] --- @param synth SynthObject Synth object to query
+00158 [GPT-5-CODEX-MAX-REASONING] --- @param param_index number Parameter index (0 or 1)
+00159 [GPT-5-CODEX-MAX-REASONING] --- @return number Parameter value (0.0 to 1.0)
+00160 [GPT-5-CODEX-MAX-REASONING] --- @usage local value = vmupro.sound.synth.getParameter(synth, 0)
+00161 [GPT-5-CODEX-MAX-REASONING] --- @note Only applicable to PO waveform types (kWavePOPhase, kWavePODigital, kWavePOVosim)
+00162 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00163 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00164 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.synth.getParameter(synth, param_index) end

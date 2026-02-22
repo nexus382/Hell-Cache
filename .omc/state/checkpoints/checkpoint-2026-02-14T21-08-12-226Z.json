@@ -1,0 +1,15 @@
+{
+  "created_at": "2026-02-14T21:08:12.218Z",
+  "trigger": "auto",
+  "active_modes": {
+    "ultrawork": {
+      "original_prompt": " your running a new more powerful model, and i would like to test it out. using ultra work uw mode, i want yuou to go thru and write me out a well edetailed plan to boost performance with out hurting quality, from inefficent code, or bad code, or code that just needs to be updated and fixded up. make a well formated HTML file, be specific, give detiled exampels and data and guides to do this plan, research deep in hte code and use anywhere up to 16 parellel workers if needed."
+    }
+  },
+  "todo_summary": {
+    "pending": 0,
+    "in_progress": 0,
+    "completed": 0
+  },
+  "wisdom_exported": false
+}

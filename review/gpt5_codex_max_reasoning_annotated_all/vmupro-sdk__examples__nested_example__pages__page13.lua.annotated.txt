@@ -1,0 +1,75 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page13.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 13: Advanced Graphics - Framebuffer Access
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page13 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] local frame_count = 0
+00009 [GPT-5-CODEX-MAX-REASONING] 
+00010 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 13: Advanced Graphics - Framebuffer Access
+00011 [GPT-5-CODEX-MAX-REASONING] function Page13.render(drawPageCounter)
+00012 [GPT-5-CODEX-MAX-REASONING]     -- Start double buffer on first render only
+00013 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00014 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00015 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00016 [GPT-5-CODEX-MAX-REASONING]     end
+00017 [GPT-5-CODEX-MAX-REASONING] 
+00018 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen (draws to back buffer)
+00019 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00020 [GPT-5-CODEX-MAX-REASONING] 
+00021 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00022 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00023 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Double Buffer", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00024 [GPT-5-CODEX-MAX-REASONING] 
+00025 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00026 [GPT-5-CODEX-MAX-REASONING] 
+00027 [GPT-5-CODEX-MAX-REASONING]     local y_pos = 40
+00028 [GPT-5-CODEX-MAX-REASONING] 
+00029 [GPT-5-CODEX-MAX-REASONING]     -- Show double buffer status
+00030 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Renderer Status:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00031 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00032 [GPT-5-CODEX-MAX-REASONING]     local status_text = db_running and "RUNNING" or "STOPPED"
+00033 [GPT-5-CODEX-MAX-REASONING]     local status_color = db_running and vmupro.graphics.GREEN or vmupro.graphics.RED
+00034 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(status_text, 10, y_pos, status_color, vmupro.graphics.BLACK)
+00035 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 20
+00036 [GPT-5-CODEX-MAX-REASONING] 
+00037 [GPT-5-CODEX-MAX-REASONING]     -- Show last blitted framebuffer side
+00038 [GPT-5-CODEX-MAX-REASONING]     local fb_side = vmupro.system.getLastBlittedFBSide()
+00039 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Last Blitted Side:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00040 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00041 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(string.format("Side %d", fb_side), 10, y_pos, vmupro.graphics.BLUE, vmupro.graphics.BLACK)
+00042 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 20
+00043 [GPT-5-CODEX-MAX-REASONING] 
+00044 [GPT-5-CODEX-MAX-REASONING]     -- Frame counter
+00045 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Frames Rendered:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00046 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00047 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(string.format("%d", frame_count), 10, y_pos, vmupro.graphics.YELLOWGREEN,
+00048 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.BLACK)
+00049 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 20
+00050 [GPT-5-CODEX-MAX-REASONING] 
+00051 [GPT-5-CODEX-MAX-REASONING]     -- Moving circle based on frame count
+00052 [GPT-5-CODEX-MAX-REASONING]     local circle_x = 20 + ((frame_count * 3) % 200)
+00053 [GPT-5-CODEX-MAX-REASONING]     local circle_y = y_pos + 15
+00054 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawCircleFilled(circle_x, circle_y, 8, vmupro.graphics.GREEN)
+00055 [GPT-5-CODEX-MAX-REASONING] 
+00056 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 35
+00057 [GPT-5-CODEX-MAX-REASONING] 
+00058 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00059 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00060 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 210, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00061 [GPT-5-CODEX-MAX-REASONING] 
+00062 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00063 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00064 [GPT-5-CODEX-MAX-REASONING] 
+00065 [GPT-5-CODEX-MAX-REASONING]     frame_count = frame_count + 1
+00066 [GPT-5-CODEX-MAX-REASONING] end
+00067 [GPT-5-CODEX-MAX-REASONING] 
+00068 [GPT-5-CODEX-MAX-REASONING] --- @brief Exit function for Page 13 (cleanup when leaving page)
+00069 [GPT-5-CODEX-MAX-REASONING] function Page13.exit()
+00070 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00071 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00072 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00073 [GPT-5-CODEX-MAX-REASONING]         frame_count = 0
+00074 [GPT-5-CODEX-MAX-REASONING]     end
+00075 [GPT-5-CODEX-MAX-REASONING] end

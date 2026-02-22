@@ -1,0 +1,90 @@
+{
+  "string_optimizations": [
+    {
+      "priority": "HIGH",
+      "function": "drawMenuText",
+      "line": 4270,
+      "issue": "Multiple string concatenations in render hot path",
+      "current_code": "drawMenuText(\"PF \" .. raysLabel .. \"->\" .. effLabel .. \" \" .. modeLabel .. string.format(\" B%d R%d S%d\", moveBlocked, wallRecoveries, rayStartSolid), ...)",
+      "fix_template": "Cache debug text string, update only when values change. Build string once, reuse across frames.",
+      "estimated_speedup": "10-20%",
+      "impact": "Called every frame when perf monitor active"
+    },
+    {
+      "priority": "HIGH",
+      "function": "drawPerfMonitorOverlay",
+      "lines": [
+        4280,
+        4283,
+        4284
+      ],
+      "issue": "String concatenation rebuilding every frame",
+      "current_code": "local pageText = \"PAGE: \" .. pageName",
+      "fix_template": "Create perfMonitorCache table at module init. Cache pageText, texturesText, roofText. Update cache only when settings change.",
+      "estimated_speedup": "15-25%",
+      "impact": "Called every frame perf monitor is visible"
+    },
+    {
+      "priority": "MEDIUM",
+      "function": "drawMenuText",
+      "lines": [
+        4268,
+        4269
+      ],
+      "issue": "string.format() in render loop",
+      "current_code": "drawMenuText(string.format(\"PF F%.2f R%.2f W%.2f G%.2f\", frameMs, rayMs, wallMs, fogMs), ...)",
+      "fix_template": "Pre-format timing text into local variable before drawMenuText call. Reduces formatting overhead.",
+      "estimated_speedup": "20-30%",
+      "impact": "Called every frame for perf monitor timing display"
+    },
+    {
+      "priority": "LOW",
+      "function": "drawTitleScreen",
+      "lines": [
+        405,
+        409,
+        413
+      ],
+      "issue": "String concatenation in error logging",
+      "current_code": "safeLog(\"ERROR\", \"Sprite is nil in context: \" .. (context or \"unknown\"))",
+      "fix_template": "Keep as-is - error paths are cold, only execute on failures.",
+      "estimated_speedup": "N/A",
+      "impact": "Only executes on errors"
+    }
+  ],
+  "table_optimizations": [
+    {
+      "priority": "HIGH",
+      "function": "unloadLevelData",
+      "line": 2821,
+      "issue": "pairs() used for potential array iteration",
+      "current_code": "for _, spriteRef in pairs(classPortraitSprites) do",
+      "fix_template": "Replace pairs() with ipairs() if classPortraitSprites is dense array. Verify table has only numeric indices 1..N.",
+      "estimated_speedup": "30-50%",
+      "impact": "Level unload happens between levels, user-facing delay",
+      "verification_needed": "Check if classPortraitSprites has only numeric keys 1..N"
+    },
+    {
+      "priority": "NONE",
+      "function": "global",
+      "line": 3332,
+      "issue": "pairs() with string keys",
+      "current_code": "for name, metadata in pairs(textureMetadata) do",
+      "fix_template": "Keep as-is - pairs() required for string key iteration.",
+      "estimated_speedup": "N/A",
+      "impact": "Texture metadata iteration requires string keys"
+    }
+  ],
+  "summary": {
+    "total_string_concats": 173,
+    "total_concatenation_operators": 237,
+    "string_format_calls": 39,
+    "table_insert_calls": 0,
+    "pairs_calls": 5,
+    "ipairs_calls": 0,
+    "high_priority_optimizations": 3,
+    "medium_priority_optimizations": 1,
+    "low_priority_optimizations": 5,
+    "total_estimated_speedup": "15-35% for perf monitor rendering"
+  }
+}
