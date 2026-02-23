@@ -955,7 +955,7 @@ LOW_RES_MODE = "quality"
 SHOW_MINIMAP = false
 RENDERER_MODE = "exp_hybrid" -- locked single renderer
 DEBUG_DISABLE_ENEMIES = false
-BUILD_COUNT = 168 -- Bump by +1 whenever we ship a new build/test iteration.
+BUILD_COUNT = 170 -- Bump by +1 whenever we ship a new build/test iteration.
 textureDebugFrame = -1
 textureDebugSamples = 0
 
@@ -2789,6 +2789,8 @@ titleClassSelection = getClassSelectionIndexForId(getCurrentClassId())
 
 -- Blood particle effects
 local bloodEffects = {}  -- {x, y, particles={{dx, dy, life}...}}
+BLOOD_PARTICLE_COUNT = BLOOD_PARTICLE_COUNT or 12
+BLOOD_EFFECT_POOL_FREE = BLOOD_EFFECT_POOL_FREE or {}
 
 -- Load warrior sprites for 4 directions
 local warriorFront = nil
@@ -2830,8 +2832,119 @@ local knightBack = nil
 local knightLeft = nil
 local knightRight = nil
 local playerProjectiles = {}
+PROJECTILE_POOL_FREE = PROJECTILE_POOL_FREE or {}
 local projectileNextId = 1
 local lastAttackWeaponClass = WEAPON_CLASS_MELEE
+
+function makePooledBloodEffect()
+    local effect = {x = 0, y = 0, life = 0, particles = {}}
+    local particles = effect.particles
+    for i = 1, (BLOOD_PARTICLE_COUNT or 12) do
+        particles[i] = {dx = 0, dy = 0, ox = 0, oy = 0}
+    end
+    return effect
+end
+
+function acquireBloodEffect()
+    local freePool = BLOOD_EFFECT_POOL_FREE
+    local n = #freePool
+    if n > 0 then
+        local effect = freePool[n]
+        freePool[n] = nil
+        return effect
+    end
+    return makePooledBloodEffect()
+end
+
+function releaseBloodEffect(effect)
+    if not effect then
+        return
+    end
+    effect.life = 0
+    effect.x = 0
+    effect.y = 0
+    local particles = effect.particles
+    if particles then
+        for i = 1, #particles do
+            local p = particles[i]
+            if p then
+                p.dx = 0
+                p.dy = 0
+                p.ox = 0
+                p.oy = 0
+            end
+        end
+    end
+    local freePool = BLOOD_EFFECT_POOL_FREE
+    freePool[#freePool + 1] = effect
+end
+
+function clearBloodEffectsActive()
+    if not bloodEffects then
+        bloodEffects = {}
+        return
+    end
+    for i = 1, #bloodEffects do
+        releaseBloodEffect(bloodEffects[i])
+    end
+    bloodEffects = {}
+end
+
+function makePooledProjectile()
+    return {
+        id = 0,
+        weaponClass = WEAPON_CLASS_RANGED,
+        x = 0, y = 0,
+        startX = 0, startY = 0,
+        dx = 0, dy = 0,
+        speed = 0,
+        damage = 1,
+        maxRangeSq = 0,
+        ttl = 0,
+    }
+end
+
+function acquireProjectile()
+    local freePool = PROJECTILE_POOL_FREE
+    local n = #freePool
+    if n > 0 then
+        local projectile = freePool[n]
+        freePool[n] = nil
+        return projectile
+    end
+    return makePooledProjectile()
+end
+
+function releaseProjectile(projectile)
+    if not projectile then
+        return
+    end
+    projectile.id = 0
+    projectile.weaponClass = WEAPON_CLASS_RANGED
+    projectile.x = 0
+    projectile.y = 0
+    projectile.startX = 0
+    projectile.startY = 0
+    projectile.dx = 0
+    projectile.dy = 0
+    projectile.speed = 0
+    projectile.damage = 1
+    projectile.maxRangeSq = 0
+    projectile.ttl = 0
+    local freePool = PROJECTILE_POOL_FREE
+    freePool[#freePool + 1] = projectile
+end
+
+function clearPlayerProjectilesActive()
+    if not playerProjectiles then
+        playerProjectiles = {}
+        return
+    end
+    for i = 1, #playerProjectiles do
+        releaseProjectile(playerProjectiles[i])
+    end
+    playerProjectiles = {}
+end
 
 function deepCopy(value)
     if type(value) ~= "table" then
@@ -2852,6 +2965,70 @@ function deepCopy(value)
         for k, v in pairs(value) do
             out[k] = deepCopy(v)
         end
+    end
+    return out
+end
+
+LEVEL_LOAD_MAP_BUFFER = LEVEL_LOAD_MAP_BUFFER or {}
+LEVEL_LOAD_SPRITE_BUFFER = LEVEL_LOAD_SPRITE_BUFFER or {}
+
+function cloneMapForLevelLoad(sourceMap)
+    local out = LEVEL_LOAD_MAP_BUFFER
+    local rows = sourceMap and #sourceMap or 0
+    for y = 1, rows do
+        local srcRow = sourceMap[y]
+        local dstRow = out[y]
+        if not dstRow then
+            dstRow = {}
+            out[y] = dstRow
+        end
+        local cols = srcRow and #srcRow or 0
+        for x = 1, cols do
+            dstRow[x] = srcRow[x]
+        end
+        for x = cols + 1, #dstRow do
+            dstRow[x] = nil
+        end
+    end
+    for y = rows + 1, #out do
+        out[y] = nil
+    end
+    return out
+end
+
+function copySpritePrototypeInto(dst, src)
+    for k, _ in pairs(dst) do
+        if src[k] == nil then
+            dst[k] = nil
+        end
+    end
+    for k, v in pairs(src) do
+        if type(v) == "table" then
+            dst[k] = deepCopy(v)
+        else
+            dst[k] = v
+        end
+    end
+end
+
+function cloneSpritesForLevelLoad(sourceSprites)
+    local out = LEVEL_LOAD_SPRITE_BUFFER
+    local count = sourceSprites and #sourceSprites or 0
+    for i = 1, count do
+        local src = sourceSprites[i]
+        if src then
+            local dst = out[i]
+            if not dst then
+                dst = {}
+                out[i] = dst
+            end
+            copySpritePrototypeInto(dst, src)
+        else
+            out[i] = nil
+        end
+    end
+    for i = count + 1, #out do
+        out[i] = nil
     end
     return out
 end
@@ -2944,7 +3121,7 @@ function loadLevel(levelId)
         enableBootLogs = false
         DEBUG_WALL_QUADS_LOG = false
     end
-    map = deepCopy(level.map)
+    map = cloneMapForLevelLoad(level.map)
     for my = 0, 15 do
         local row = map[my + 1]
         if row then
@@ -2955,7 +3132,7 @@ function loadLevel(levelId)
             end
         end
     end
-    sprites = deepCopy(level.sprites)
+    sprites = cloneSpritesForLevelLoad(level.sprites)
     local function isOpenFloor(mx, my)
         if mx < 1 or mx > 14 or my < 1 or my > 14 then return false end
         if map[my + 1][mx + 1] ~= 0 then return false end
@@ -3035,7 +3212,7 @@ function unloadLevelData()
     map = nil
     sprites = nil
     totalSoldiers = 0
-    playerProjectiles = {}
+    clearPlayerProjectilesActive()
 end
 
 function freeSpriteRef(sprite)
@@ -3913,8 +4090,8 @@ function initializeLevelState(levelId)
     masteryMenuSelection = 1
     masteryMenuMessage = ""
     masteryMenuMessageTimer = 0
-    bloodEffects = {}
-    playerProjectiles = {}
+    clearBloodEffectsActive()
+    clearPlayerProjectilesActive()
     projectileNextId = 1
     lastAttackWeaponClass = WEAPON_CLASS_MELEE
     levelBannerTimer = levelBannerMax
@@ -4264,21 +4441,25 @@ end
 
 -- Create blood burst effect at world position
 function createBloodEffect(worldX, worldY)
-    local effect = {
-        x = worldX,
-        y = worldY,
-        particles = {},
-        life = 30  -- frames
-    }
-    -- Create 12 blood particles radiating outward
-    for i = 1, 12 do
-        local angle = (i / 12) * 6.28318
+    local effect = acquireBloodEffect()
+    effect.x = worldX
+    effect.y = worldY
+    effect.life = 30  -- frames
+    local particles = effect.particles
+    -- Create blood particles radiating outward.
+    local particleCount = BLOOD_PARTICLE_COUNT or 12
+    for i = 1, particleCount do
+        local angle = (i / particleCount) * 6.28318
         local speed = 0.05 + (frameCount % 10) * 0.005
-        effect.particles[i] = {
-            dx = math.cos(angle) * speed,
-            dy = math.sin(angle) * speed,
-            ox = 0, oy = 0  -- offset from center
-        }
+        local p = particles[i]
+        if not p then
+            p = {dx = 0, dy = 0, ox = 0, oy = 0}
+            particles[i] = p
+        end
+        p.dx = math.cos(angle) * speed
+        p.dy = math.sin(angle) * speed
+        p.ox = 0
+        p.oy = 0
     end
     bloodEffects[#bloodEffects + 1] = effect
 end
@@ -4298,8 +4479,10 @@ function updateBloodEffects()
         if e.life <= 0 then
             -- PERFORMANCE: swap-and-pop for O(1) removal instead of O(n)
             local lastIdx = #bloodEffects
+            local deadEffect = bloodEffects[i]
             bloodEffects[i] = bloodEffects[lastIdx]
             bloodEffects[lastIdx] = nil
+            releaseBloodEffect(deadEffect)
             -- Don't increment i since we swapped in a new element to check
         else
             i = i + 1
@@ -5444,7 +5627,8 @@ function spawnPlayerProjectile(weaponClass, hitDamage, speedMult, rangeMult, pro
         playerProjectiles = {}
     end
     if #playerProjectiles >= (PROJECTILE_MAX_ACTIVE or 24) then
-        table.remove(playerProjectiles, 1)
+        local oldest = table.remove(playerProjectiles, 1)
+        releaseProjectile(oldest)
     end
 
     local dir = pdir % 64
@@ -5479,20 +5663,19 @@ function spawnPlayerProjectile(weaponClass, hitDamage, speedMult, rangeMult, pro
     if maxRange < 1.0 then maxRange = 1.0 end
     if maxRange > 12.0 then maxRange = 12.0 end
 
-    local projectile = {
-        id = projectileNextId or 1,
-        weaponClass = classValue,
-        x = spawnX,
-        y = spawnY,
-        startX = spawnX,
-        startY = spawnY,
-        dx = dx,
-        dy = dy,
-        speed = speed,
-        damage = damage,
-        maxRangeSq = maxRange * maxRange,
-        ttl = PROJECTILE_LIFETIME_TICKS or math.floor((SIM_TARGET_HZ or 24) * 2.5),
-    }
+    local projectile = acquireProjectile()
+    projectile.id = projectileNextId or 1
+    projectile.weaponClass = classValue
+    projectile.x = spawnX
+    projectile.y = spawnY
+    projectile.startX = spawnX
+    projectile.startY = spawnY
+    projectile.dx = dx
+    projectile.dy = dy
+    projectile.speed = speed
+    projectile.damage = damage
+    projectile.maxRangeSq = maxRange * maxRange
+    projectile.ttl = PROJECTILE_LIFETIME_TICKS or math.floor((SIM_TARGET_HZ or 24) * 2.5)
     projectileNextId = (projectileNextId or 1) + 1
     if projectileNextId > 1000000 then
         projectileNextId = 1
@@ -5628,8 +5811,10 @@ function updatePlayerProjectiles()
 
         if removeProjectile then
             local last = #playerProjectiles
+            local deadProjectile = playerProjectiles[i]
             playerProjectiles[i] = playerProjectiles[last]
             playerProjectiles[last] = nil
+            releaseProjectile(deadProjectile)
         else
             i = i + 1
         end

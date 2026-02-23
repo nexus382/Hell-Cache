@@ -461,6 +461,31 @@
           <li>Switched mip frame-group selection to a lookup table (<code>MIP_FRAME_GROUP_SIZE</code>) for cheaper tier quantization in the texture-column loop.</li>
         </ul>
       </div>
+      <div class="build">
+        <h3>Build 169</h3>
+        <ul>
+          <li>Implemented object pooling for blood burst effects: blood effect objects and particle sub-tables are now reused via acquire/release helpers instead of being newly allocated on each kill.</li>
+          <li>Implemented object pooling for player projectiles: projectile structs are recycled when despawned or evicted by max-active cap, reducing allocation churn during sustained ranged combat.</li>
+          <li>Level/unload reset paths now clear active blood/projectiles through pool-aware helpers so reset behavior is unchanged while runtime GC pressure is lower.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 170</h3>
+        <ul>
+          <li>Implemented the next Phase 1 load-path optimization by replacing generic recursive <code>deepCopy()</code> calls in <code>loadLevel</code> with specialized map/sprite clone helpers.</li>
+          <li>Added reusable level-load buffers (<code>LEVEL_LOAD_MAP_BUFFER</code>, <code>LEVEL_LOAD_SPRITE_BUFFER</code>) plus in-place sprite prototype copy logic to reduce level-transition allocation churn and copy overhead.</li>
+          <li>Load-time wall-variant and sprite filtering behavior remains unchanged; this is a data-copy path optimization for faster and smoother level transitions.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Summary of Last 10 Changes (Builds 161-170)</h3>
+        <ul>
+          <li>Stability and boot reliability were improved with parser-limit fixes and runtime safety cleanups, removing multiple pre-boot crash conditions.</li>
+          <li>Renderer performance work landed in sequence: fog LUT caching, fog-curtain span batching, per-frame hot-loop constant hoisting, and wall-column state caching.</li>
+          <li>Memory/GC pressure reductions were added in gameplay hot paths through menu/static allocation cleanup, blood/projectile object pooling, and level-load copy-path specialization.</li>
+          <li>Audio playback regressions were corrected so title/game sample SFX paths are active again while keeping current game behavior intact.</li>
+        </ul>
+      </div>
     </div>
   </div>
 </body>
