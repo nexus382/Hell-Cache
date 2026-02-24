@@ -986,7 +986,7 @@ LOW_RES_MODE = "quality"
 SHOW_MINIMAP = false
 RENDERER_MODE = "exp_hybrid" -- locked single renderer
 DEBUG_DISABLE_ENEMIES = false
-BUILD_COUNT = 183 -- Bump by +1 whenever we ship a new build/test iteration.
+BUILD_COUNT = 184 -- Bump by +1 whenever we ship a new build/test iteration.
 textureDebugFrame = -1
 textureDebugSamples = 0
 
@@ -9259,63 +9259,69 @@ function renderGameFrame()
             local page, startIdx, endIdx, selected = getInventoryUiPageBounds(totalRows, inventoryMenuSelection)
             inventoryMenuSelection = selected
             inventoryMenuPage = page
+            local paneTop = 56
+            local paneBottom = 206
+            local listHeaderY = paneTop + 2
+            local rowStartY = paneTop + 16
+            local tabTop = 21
+            local tabBottom = 37
 
             -- Full-screen inventory layout; keep all game HUD overlays hidden underneath.
             vmupro.graphics.drawFillRect(0, 0, 239, 239, COLOR_DARK_GRAY)
             drawRectOutline(0, 0, 239, 239, COLOR_LIGHT_GRAY)
             vmupro.graphics.drawFillRect(8, 16, 232, 232, COLOR_DARK_GRAY)
             drawUiPanel(8, 16, 232, 232, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
-            vmupro.graphics.drawFillRect(10, 20, 230, 34, COLOR_DARK_GRAY)
+            vmupro.graphics.drawFillRect(10, 20, 230, 50, COLOR_DARK_GRAY)
 
             setFontCached(vmupro.text.FONT_TINY_6x8)
             for i = 1, #INVENTORY_MENU_TABS do
-                local tx1 = 12 + ((i - 1) * 54)
-                local tx2 = tx1 + 50
+                local tx1 = 14 + ((i - 1) * 53)
+                local tx2 = tx1 + 48
                 local tabSelected = (i == inventoryMenuTab)
                 local tabFg = COLOR_LIGHT_GRAY
                 local tabLabel = INVENTORY_MENU_TABS[i]
                 if tabSelected then
-                    vmupro.graphics.drawFillRect(tx1, 20, tx2, 34, COLOR_MAROON)
+                    vmupro.graphics.drawFillRect(tx1, tabTop, tx2, tabBottom, COLOR_MAROON)
                     tabFg = COLOR_WHITE
                 end
                 local tabWidth = (tx2 - tx1) + 1
-                local tabTextWidth = string.len(tabLabel) * 6
-                local tabTextX = tx1 + math.floor((tabWidth - tabTextWidth) * 0.5)
+                local tabTextWidth = string.len(tabLabel) * 5
+                local tabTextX = tx1 + math.floor((tabWidth - tabTextWidth) * 0.5) + 1
                 if tabTextX < (tx1 + 2) then
                     tabTextX = tx1 + 2
                 end
-                drawMenuText(tabLabel, tabTextX, 23, tabFg)
+                drawMenuText(tabLabel, tabTextX, 25, tabFg)
             end
 
             local wtText = "WT " .. string.format("%.1f/%.0f", carryCur or 0, carryMax or 0)
             local wtTextX = 228 - (string.len(wtText) * 6)
             if wtTextX < 108 then wtTextX = 108 end
-            drawMenuText(heading, 12, 36, COLOR_WHITE)
-            drawMenuText(wtText, wtTextX, 36, COLOR_WHITE)
+            drawMenuText(heading, 12, 44, COLOR_WHITE)
+            drawMenuText(wtText, wtTextX, 44, COLOR_WHITE)
 
             -- List pane + detail pane.
-            vmupro.graphics.drawFillRect(12, 42, 146, 206, COLOR_DARK_GRAY)
-            vmupro.graphics.drawFillRect(150, 42, 228, 206, COLOR_DARK_GRAY)
-            drawUiPanel(12, 42, 146, 206, COLOR_DARK_GRAY, COLOR_GRAY)
-            drawUiPanel(150, 42, 228, 206, COLOR_DARK_GRAY, COLOR_GRAY)
+            vmupro.graphics.drawFillRect(12, paneTop, 146, paneBottom, COLOR_DARK_GRAY)
+            vmupro.graphics.drawFillRect(150, paneTop, 228, paneBottom, COLOR_DARK_GRAY)
+            drawUiPanel(12, paneTop, 146, paneBottom, COLOR_DARK_GRAY, COLOR_GRAY)
+            drawUiPanel(150, paneTop, 228, paneBottom, COLOR_DARK_GRAY, COLOR_GRAY)
 
-            drawMenuText("ITEMS", 16, 44, COLOR_WHITE)
-            drawMenuText("DETAIL", 154, 44, COLOR_WHITE)
+            drawMenuText("ITEMS", 16, listHeaderY, COLOR_WHITE)
+            drawMenuText("DETAIL", 154, listHeaderY, COLOR_WHITE)
 
             if totalRows <= 0 then
-                drawMenuText("NO ITEMS", 16, 58, COLOR_GRAY)
+                drawMenuText("NO ITEMS", 16, rowStartY, COLOR_GRAY)
                 if inventoryMenuTab == 4 then
-                    drawMenuText("TRADER UI", 154, 58, COLOR_LIGHT_GRAY)
-                    drawMenuText("PHASE B", 154, 70, COLOR_LIGHT_GRAY)
-                    drawMenuText("BUY/SELL", 154, 82, COLOR_LIGHT_GRAY)
-                    drawMenuText("NOT ACTIVE", 154, 94, COLOR_LIGHT_GRAY)
+                    drawMenuText("TRADER UI", 154, rowStartY, COLOR_LIGHT_GRAY)
+                    drawMenuText("PHASE B", 154, rowStartY + 12, COLOR_LIGHT_GRAY)
+                    drawMenuText("BUY/SELL", 154, rowStartY + 24, COLOR_LIGHT_GRAY)
+                    drawMenuText("NOT ACTIVE", 154, rowStartY + 36, COLOR_LIGHT_GRAY)
                 end
             else
                 local drawRow = 0
                 for idx = startIdx, endIdx do
                     drawRow = drawRow + 1
                     local row = rows[idx]
-                    local y = 58 + ((drawRow - 1) * 12)
+                    local y = rowStartY + ((drawRow - 1) * 12)
                     local selectedRow = (idx == inventoryMenuSelection)
                     local fg = COLOR_LIGHT_GRAY
                     if selectedRow then
@@ -9335,25 +9341,25 @@ function renderGameFrame()
                 local row = rows[inventoryMenuSelection]
                 if row then
                     local item = row.item
-                    drawMenuText(truncateUiLabel(tostring(row.label or "ITEM"), 12), 154, 58, COLOR_WHITE)
-                    drawMenuText(truncateUiLabel(tostring(row.detail or ""), 12), 154, 70, COLOR_LIGHT_GRAY)
+                    drawMenuText(truncateUiLabel(tostring(row.label or "ITEM"), 12), 154, rowStartY, COLOR_WHITE)
+                    drawMenuText(truncateUiLabel(tostring(row.detail or ""), 12), 154, rowStartY + 12, COLOR_LIGHT_GRAY)
 
                     if item then
                         local itemWeight = tonumber(item.weight) or 0
                         if itemWeight < 0 then itemWeight = 0 end
                         local itemValue = math.floor(tonumber(item.value) or 0)
                         local affinity = string.upper(tostring(item.class_affinity or "any"))
-                        drawMenuText("WT " .. string.format("%.1f", itemWeight), 154, 84, COLOR_LIGHT_GRAY)
-                        drawMenuText("VAL " .. tostring(itemValue), 154, 96, COLOR_LIGHT_GRAY)
-                        drawMenuText("AFF " .. truncateUiLabel(affinity, 8), 154, 108, COLOR_LIGHT_GRAY)
+                        drawMenuText("WT " .. string.format("%.1f", itemWeight), 154, rowStartY + 26, COLOR_LIGHT_GRAY)
+                        drawMenuText("VAL " .. tostring(itemValue), 154, rowStartY + 38, COLOR_LIGHT_GRAY)
+                        drawMenuText("AFF " .. truncateUiLabel(affinity, 8), 154, rowStartY + 50, COLOR_LIGHT_GRAY)
                         if item.weapon_class then
                             local wc = normalizeWeaponClass(item.weapon_class)
                             local wcLabel = WEAPON_CLASS_LABELS[wc] or tostring(wc)
-                            drawMenuText("CLS " .. wcLabel, 154, 120, COLOR_LIGHT_GRAY)
+                            drawMenuText("CLS " .. wcLabel, 154, rowStartY + 62, COLOR_LIGHT_GRAY)
                         end
                     else
-                        drawMenuText("READ-ONLY", 154, 84, COLOR_LIGHT_GRAY)
-                        drawMenuText("PHASE A", 154, 96, COLOR_LIGHT_GRAY)
+                        drawMenuText("READ-ONLY", 154, rowStartY + 26, COLOR_LIGHT_GRAY)
+                        drawMenuText("PHASE A", 154, rowStartY + 38, COLOR_LIGHT_GRAY)
                     end
                 end
             end
