@@ -874,13 +874,19 @@ RAY_PRESETS = {
     {label = "240x1", rays = 240, colW = 1},
 }
 RAY_PRESET_INDEX = 10
-DRAW_DIST_PRESETS = {3, 4, 5, 6, 8, 10, 12, 14, 16, 20, 24}
-DRAW_DIST_INDEX = 7
-MIPMAP_DIST_PRESETS = {1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24}
-MIPMAP1_DIST_INDEX = 6
-MIPMAP2_DIST_INDEX = 8
-MIPMAP3_DIST_INDEX = 11
-MIPMAP4_DIST_INDEX = 12
+DRAW_DIST_PRESETS = {
+    3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5,
+    12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
+}
+DRAW_DIST_INDEX = 27 -- default: 20
+MIPMAP_DIST_PRESETS = {
+    0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5,
+    12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
+}
+MIPMAP1_DIST_INDEX = 12 -- default: 5.5
+MIPMAP2_DIST_INDEX = 19 -- default: 9
+MIPMAP3_DIST_INDEX = 31 -- default: 18
+MIPMAP4_DIST_INDEX = 33 -- default: 20
 EXP_TEX_MAX_DIST = DRAW_DIST_PRESETS[DRAW_DIST_INDEX]
 EXP_VIEW_DIST = EXP_TEX_MAX_DIST
 WALL_MIPMAP_DIST1 = MIPMAP_DIST_PRESETS[MIPMAP1_DIST_INDEX]
@@ -898,6 +904,19 @@ DEBUG_WALL_QUADS_LOG = false
 wallQuadLogCount = 0
 spriteOrderCache = {}
 spriteOrderCacheFrame = -1000
+
+function spriteOrderCompareFarToNear(a, b)
+    return (a and a.dist or 0) > (b and b.dist or 0)
+end
+
+function clearSpriteOrderCache()
+    local n = #spriteOrderCache
+    for i = 1, n do
+        spriteOrderCache[i] = nil
+    end
+    spriteOrderCacheFrame = -999
+end
+
 PLAYER_RADIUS = 0.50
 -- Slightly slimmer than visual body width to reduce "invisible corner snag" feeling.
 PLAYER_COLLISION_RADIUS = 0.27
@@ -916,9 +935,8 @@ WALL_TEX_SEAM_OVERDRAW = true
 WALL_TEX_SEAM_PIXELS = 1
 DEBUG_DISABLE_PROPS = false
 FOG_DISTANCE_PRESETS = {
-    2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5,
-    7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5,
-    12.0, 13.0, 14.0, 15.0, 16.0, 18.0, 20.0, 24.0, 28.0
+    2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5,
+    12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28
 }
 -- Start and full-fog use the same preset list for predictable tuning.
 FOG_START_PRESETS = FOG_DISTANCE_PRESETS
@@ -927,9 +945,9 @@ FOG_END_PRESETS = FOG_DISTANCE_PRESETS
 FOG_CUTOFF_PRESETS = FOG_DISTANCE_PRESETS
 FOG_COLOR_PRESETS = {COLOR_DARK_GRAY, COLOR_GRAY, COLOR_LIGHT_GRAY, COLOR_WHITE, COLOR_BLACK, COLOR_MAROON}
 FOG_COLOR_LABELS = {"DARK", "GRAY", "LGRAY", "WHITE", "BLACK", "MAROON"}
-FOG_START_INDEX = 16
-FOG_END_INDEX = 23
-FOG_CUTOFF_INDEX = 17
+FOG_START_INDEX = 33 -- default: 24
+FOG_END_INDEX = 37 -- default: 28
+FOG_CUTOFF_INDEX = 37 -- default: 28
 FOG_COLOR_INDEX = 5
 FOG_START = FOG_START_PRESETS[FOG_START_INDEX]
 FOG_END = FOG_END_PRESETS[FOG_END_INDEX]
@@ -943,8 +961,11 @@ FOG_LUT_INV_STEP = 16.0
 FOG_LUT_DIST_MAX = 0.0
 FOG_LUT_LINEAR = {}
 FOG_LUT_QUANTIZED = {}
-FAR_TEX_OFF_PRESETS = {3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 20, 24, 999}
-FAR_TEX_OFF_INDEX = 8
+FAR_TEX_OFF_PRESETS = {
+    3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5,
+    12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 999
+}
+FAR_TEX_OFF_INDEX = 32 -- default: OFF
 FAR_TEX_OFF_DIST = FAR_TEX_OFF_PRESETS[FAR_TEX_OFF_INDEX]
 MIP_LOD_ENABLED = true
 WALL_PROJECTION_MODE = "adaptive" -- adaptive | stable
@@ -955,9 +976,200 @@ LOW_RES_MODE = "quality"
 SHOW_MINIMAP = false
 RENDERER_MODE = "exp_hybrid" -- locked single renderer
 DEBUG_DISABLE_ENEMIES = false
-BUILD_COUNT = 170 -- Bump by +1 whenever we ship a new build/test iteration.
+BUILD_COUNT = 179 -- Bump by +1 whenever we ship a new build/test iteration.
 textureDebugFrame = -1
 textureDebugSamples = 0
+
+RUN_MODE_STORY = 1
+RUN_MODE_WAVE = 2
+RUN_MODE_LABELS = {
+    [RUN_MODE_STORY] = "STORY",
+    [RUN_MODE_WAVE] = "WAVE",
+}
+run_mode = RUN_MODE_STORY
+run_reset_requested = true
+run_session_id = 0
+run_seed = 0
+run_level_ordinal = 0
+run_score_event_count = 0
+RUN_SCORE_PULSE_TICKS = 0
+RUN_SCORE_PULSE_MAX = 36
+RUN_SCORE_EVENT_POINTS = {
+    enemy_kill = 100,
+    health_pickup = 25,
+    level_clear = 300,
+    no_damage_clear = 200,
+}
+
+function markRunResetRequested()
+    run_reset_requested = true
+end
+
+function shouldStartNewRunForLevelLoad(levelId)
+    if run_reset_requested then
+        return true
+    end
+    local nextLevel = math.floor(tonumber(levelId) or 1)
+    if nextLevel < 1 then
+        nextLevel = 1
+    end
+    local activeLevel = math.floor(tonumber(currentLevel) or nextLevel)
+    if gameState == STATE_WIN and nextLevel == (activeLevel + 1) then
+        return false
+    end
+    return true
+end
+
+function computeRunSeed(levelId)
+    local level = math.floor(tonumber(levelId) or 1)
+    local frame = math.floor(tonumber(frameCount) or 0)
+    local tick = math.floor(tonumber(simTickCount) or 0)
+    local session = math.floor(tonumber(run_session_id) or 0)
+    local value = (level * 4099) + (frame * 131) + (tick * 17) + (session * 7919) + 97
+    value = value % 2147483647
+    if value < 1 then
+        value = value + 2147483646
+    end
+    return value
+end
+
+function ensureRunScoreState(levelId)
+    local level = math.floor(tonumber(levelId) or tonumber(currentLevel) or 1)
+    if level < 1 then level = 1 end
+    if type(score_state) ~= "table" then
+        if GameScoreModel and GameScoreModel.newRun then
+            score_state = GameScoreModel.newRun()
+        else
+            score_state = {
+                current = 0,
+                kills = 0,
+                levels_cleared = 0,
+                started_level = level,
+                ended_level = level,
+            }
+        end
+    end
+    score_state.current = math.floor(tonumber(score_state.current) or 0)
+    score_state.kills = math.floor(tonumber(score_state.kills) or 0)
+    score_state.levels_cleared = math.floor(tonumber(score_state.levels_cleared) or 0)
+    score_state.started_level = math.floor(tonumber(score_state.started_level) or level)
+    score_state.ended_level = math.floor(tonumber(score_state.ended_level) or level)
+    if score_state.started_level < 1 then score_state.started_level = level end
+    if score_state.ended_level < 1 then score_state.ended_level = level end
+    if score_state.no_damage_level == nil then
+        score_state.no_damage_level = true
+    end
+    return score_state
+end
+
+function addRunScorePoints(amount)
+    local delta = math.floor(tonumber(amount) or 0)
+    if delta <= 0 then
+        return 0
+    end
+    local run = ensureRunScoreState(currentLevel)
+    if GameScoreModel and GameScoreModel.addPoints then
+        GameScoreModel.addPoints(run, delta)
+    else
+        run.current = (run.current or 0) + delta
+    end
+    RUN_SCORE_PULSE_TICKS = RUN_SCORE_PULSE_MAX
+    return delta
+end
+
+function applyAchievementProgress(triggerName, progressValue)
+    if not GameAchievements then
+        return
+    end
+    if type(achievement_state) ~= "table" then
+        if newAchievementState then
+            achievement_state = newAchievementState()
+        else
+            achievement_state = {unlocked = {}, progress = {}}
+        end
+    end
+    if type(achievement_state.unlocked) ~= "table" then
+        achievement_state.unlocked = {}
+    end
+    if type(achievement_state.progress) ~= "table" then
+        achievement_state.progress = {}
+    end
+
+    local value = math.floor(tonumber(progressValue) or 0)
+    if value < 0 then value = 0 end
+
+    for _, def in pairs(GameAchievements) do
+        if def and def.trigger == triggerName and def.id then
+            local achievementId = def.id
+            local previous = math.floor(tonumber(achievement_state.progress[achievementId]) or 0)
+            if value > previous then
+                achievement_state.progress[achievementId] = value
+            end
+            if not achievement_state.unlocked[achievementId] then
+                local threshold = math.floor(tonumber(def.threshold) or 1)
+                if threshold < 1 then threshold = 1 end
+                if value >= threshold then
+                    local unlocked = false
+                    if markAchievementUnlocked then
+                        unlocked = markAchievementUnlocked(achievement_state, achievementId)
+                    else
+                        achievement_state.unlocked[achievementId] = true
+                        unlocked = true
+                    end
+                    if unlocked then
+                        local bonus = math.floor(tonumber(def.reward and def.reward.score_bonus) or 0)
+                        if bonus > 0 then
+                            addRunScorePoints(bonus)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+function dispatchRunScoreEvent(eventId, payload)
+    local eventName = tostring(eventId or "")
+    local data = payload or {}
+    local level = math.floor(tonumber(data.level_id) or tonumber(currentLevel) or 1)
+    if level < 1 then level = 1 end
+    local run = ensureRunScoreState(level)
+    run.ended_level = level
+
+    local points = math.floor(tonumber(data.points) or tonumber(RUN_SCORE_EVENT_POINTS[eventName]) or 0)
+    if points < 0 then points = 0 end
+
+    if eventName == "run_start" then
+        run.started_level = level
+        run.ended_level = level
+        run.kills = 0
+        run.levels_cleared = 0
+        run.no_damage_level = true
+    elseif eventName == "level_start" then
+        run.ended_level = level
+        run.no_damage_level = true
+    elseif eventName == "enemy_kill" then
+        run.kills = math.floor(tonumber(run.kills) or 0) + 1
+        applyAchievementProgress("kill_count", run.kills)
+    elseif eventName == "player_damaged" then
+        run.no_damage_level = false
+    elseif eventName == "level_clear" then
+        run.levels_cleared = math.floor(tonumber(run.levels_cleared) or 0) + 1
+        applyAchievementProgress("levels_cleared", run.levels_cleared)
+        if run.no_damage_level then
+            applyAchievementProgress("no_damage_level", 1)
+            points = points + math.floor(tonumber(RUN_SCORE_EVENT_POINTS.no_damage_clear) or 0)
+        else
+            applyAchievementProgress("no_damage_level", 0)
+        end
+        run.no_damage_level = false
+    end
+
+    if points > 0 then
+        addRunScorePoints(points)
+    end
+    run_score_event_count = (run_score_event_count or 0) + 1
+end
 
 function bootstrapExpansionDataLayer()
     if not ExpansionRuntimeState or not ExpansionRuntimeState.bootstrap then
@@ -980,20 +1192,34 @@ function bootstrapExpansionDataLayer()
 end
 
 function beginExpansionRun(levelId)
-    if not ExpansionRuntimeState or not ExpansionRuntimeState.beginRun then
-        return
+    local level = math.floor(tonumber(levelId) or tonumber(currentLevel) or 1)
+    if level < 1 then level = 1 end
+
+    local shouldStartNewRun = run_reset_requested or type(score_state) ~= "table"
+    if shouldStartNewRun and ExpansionRuntimeState and ExpansionRuntimeState.beginRun then
+        local state = ExpansionRuntimeState.beginRun(level, currentLevel)
+        if state then
+            player_build_state = state.player_build_state or player_build_state
+            playerBuildStateDirty = true
+            inventory_state = state.inventory_state or inventory_state
+            stash_state = state.stash_state or stash_state
+            achievement_state = state.achievement_state or achievement_state
+            high_score_state = state.high_score_state or high_score_state
+            score_state = state.score_state or score_state
+        end
     end
-    local state = ExpansionRuntimeState.beginRun(levelId, currentLevel)
-    if not state then
-        return
+
+    if shouldStartNewRun then
+        run_session_id = (run_session_id or 0) + 1
+        run_seed = computeRunSeed(level)
+        run_level_ordinal = 0
+        dispatchRunScoreEvent("run_start", {level_id = level, points = 0})
     end
-    player_build_state = state.player_build_state or player_build_state
-    playerBuildStateDirty = true
-    inventory_state = state.inventory_state or inventory_state
-    stash_state = state.stash_state or stash_state
-    achievement_state = state.achievement_state or achievement_state
-    high_score_state = state.high_score_state or high_score_state
-    score_state = state.score_state or score_state
+
+    run_level_ordinal = (run_level_ordinal or 0) + 1
+    dispatchRunScoreEvent("level_start", {level_id = level, points = 0})
+    run_reset_requested = false
+
     if ensurePlayerBuildState then
         ensurePlayerBuildState()
     end
@@ -1144,7 +1370,56 @@ function clampInt(v, minV, maxV)
     return v
 end
 
+function getDrawDistanceSystemCap()
+    local drawCap = (DRAW_DIST_PRESETS and DRAW_DIST_PRESETS[#DRAW_DIST_PRESETS]) or (EXP_TEX_MAX_DIST or 24.0)
+    local fogCap = (FOG_DISTANCE_PRESETS and FOG_DISTANCE_PRESETS[#FOG_DISTANCE_PRESETS]) or drawCap
+    local cap = drawCap
+    if fogCap < cap then
+        cap = fogCap
+    end
+    if cap < 0.5 then
+        cap = 0.5
+    end
+    return cap
+end
+
+function getMaxDrawDistancePresetIndex()
+    if not DRAW_DIST_PRESETS or #DRAW_DIST_PRESETS == 0 then
+        return 1
+    end
+    local cap = getDrawDistanceSystemCap()
+    local maxIdx = 1
+    for i = 1, #DRAW_DIST_PRESETS do
+        local dist = DRAW_DIST_PRESETS[i] or cap
+        if dist <= (cap + 0.0001) then
+            maxIdx = i
+        else
+            break
+        end
+    end
+    return maxIdx
+end
+
+function normalizeDrawDistanceSetting()
+    if not DRAW_DIST_PRESETS or #DRAW_DIST_PRESETS == 0 then
+        EXP_TEX_MAX_DIST = EXP_TEX_MAX_DIST or getDrawDistanceSystemCap()
+        return
+    end
+    local maxIdx = getMaxDrawDistancePresetIndex()
+    DRAW_DIST_INDEX = clampInt(DRAW_DIST_INDEX or maxIdx, 1, maxIdx)
+    local selected = DRAW_DIST_PRESETS[DRAW_DIST_INDEX] or DRAW_DIST_PRESETS[maxIdx] or getDrawDistanceSystemCap()
+    local cap = getDrawDistanceSystemCap()
+    if selected > cap then
+        selected = cap
+    end
+    if selected < 0.5 then
+        selected = 0.5
+    end
+    EXP_TEX_MAX_DIST = selected
+end
+
 function refreshExpViewDistance()
+    normalizeDrawDistanceSetting()
     local texDist = EXP_TEX_MAX_DIST or DRAW_DIST_PRESETS[DRAW_DIST_INDEX] or 8.0
     local viewDist = texDist
     if not DEBUG_DISABLE_FOG then
@@ -1239,41 +1514,161 @@ function normalizeFogRange()
     refreshExpViewDistance()
 end
 
-function normalizeMipmapRanges()
-    if not MIPMAP_DIST_PRESETS or #MIPMAP_DIST_PRESETS == 0 then return end
-    local n = #MIPMAP_DIST_PRESETS
-    if not MIPMAP1_DIST_INDEX then MIPMAP1_DIST_INDEX = 1 end
-    if not MIPMAP2_DIST_INDEX then MIPMAP2_DIST_INDEX = math.min(n, 2) end
-    if not MIPMAP3_DIST_INDEX then MIPMAP3_DIST_INDEX = math.min(n, 3) end
-    if not MIPMAP4_DIST_INDEX then MIPMAP4_DIST_INDEX = math.min(n, 4) end
+function getDistanceValueLabel(value)
+    local v = tonumber(value) or 0
+    if v <= 0 then
+        return "OFF"
+    end
+    local whole = math.floor(v + 0.0001)
+    if math.abs(v - whole) < 0.0001 then
+        return tostring(whole)
+    end
+    return string.format("%.1f", v)
+end
 
-    if n == 1 then
-        MIPMAP1_DIST_INDEX = 1
-        MIPMAP2_DIST_INDEX = 1
-        MIPMAP3_DIST_INDEX = 1
-        MIPMAP4_DIST_INDEX = 1
-    elseif n == 2 then
-        MIPMAP1_DIST_INDEX = clampInt(MIPMAP1_DIST_INDEX, 1, 1)
-        MIPMAP2_DIST_INDEX = clampInt(MIPMAP2_DIST_INDEX, 2, 2)
-        MIPMAP3_DIST_INDEX = clampInt(MIPMAP3_DIST_INDEX, 2, 2)
-        MIPMAP4_DIST_INDEX = clampInt(MIPMAP4_DIST_INDEX, 2, 2)
-    elseif n == 3 then
-        MIPMAP1_DIST_INDEX = clampInt(MIPMAP1_DIST_INDEX, 1, 1)
-        MIPMAP2_DIST_INDEX = clampInt(MIPMAP2_DIST_INDEX, 2, 2)
-        MIPMAP3_DIST_INDEX = clampInt(MIPMAP3_DIST_INDEX, 3, 3)
-        MIPMAP4_DIST_INDEX = clampInt(MIPMAP4_DIST_INDEX, 3, 3)
+function getMipmapMaxPresetIndexForDrawDist()
+    if not MIPMAP_DIST_PRESETS or #MIPMAP_DIST_PRESETS == 0 then
+        return 1
+    end
+    normalizeDrawDistanceSetting()
+    local drawDistCap = EXP_TEX_MAX_DIST or getDrawDistanceSystemCap()
+    local maxIdx = 1
+    for i = 1, #MIPMAP_DIST_PRESETS do
+        local dist = MIPMAP_DIST_PRESETS[i] or 0
+        if dist <= 0 or dist <= (drawDistCap + 0.0001) then
+            maxIdx = i
+        else
+            break
+        end
+    end
+    if maxIdx < 1 then maxIdx = 1 end
+    return maxIdx
+end
+
+function getMipmapLevelIndex(level)
+    if level == 1 then return MIPMAP1_DIST_INDEX end
+    if level == 2 then return MIPMAP2_DIST_INDEX end
+    if level == 3 then return MIPMAP3_DIST_INDEX end
+    if level == 4 then return MIPMAP4_DIST_INDEX end
+    return 1
+end
+
+function setMipmapLevelIndex(level, idx)
+    if level == 1 then
+        MIPMAP1_DIST_INDEX = idx
+    elseif level == 2 then
+        MIPMAP2_DIST_INDEX = idx
+    elseif level == 3 then
+        MIPMAP3_DIST_INDEX = idx
+    elseif level == 4 then
+        MIPMAP4_DIST_INDEX = idx
+    end
+end
+
+function getMipmapLevelBounds(level)
+    local maxIdx = getMipmapMaxPresetIndexForDrawDist()
+    local lower = 2
+    for i = level - 1, 1, -1 do
+        local prevIdx = getMipmapLevelIndex(i) or 1
+        if prevIdx > 1 then
+            lower = prevIdx + 1
+            break
+        end
+    end
+    local upper = maxIdx
+    for i = level + 1, 4 do
+        local nextIdx = getMipmapLevelIndex(i) or 1
+        if nextIdx > 1 then
+            upper = nextIdx - 1
+            break
+        end
+    end
+    if lower < 2 then lower = 2 end
+    if upper > maxIdx then upper = maxIdx end
+    return lower, upper
+end
+
+function stepMipmapLevelIndex(level, step)
+    if step == 0 then return end
+    normalizeMipmapRanges()
+    local cur = getMipmapLevelIndex(level) or 1
+    local lower, upper = getMipmapLevelBounds(level)
+    local nextIdx = cur
+
+    if step > 0 then
+        if cur <= 1 then
+            if lower <= upper and upper >= 2 then
+                nextIdx = lower
+            else
+                nextIdx = 1
+            end
+        else
+            if lower > upper or cur >= upper then
+                -- If this level cannot move farther because of next level/cap, roll to OFF.
+                nextIdx = 1
+            else
+                nextIdx = cur + 1
+                if nextIdx > upper then nextIdx = 1 end
+            end
+        end
     else
-        -- Keep strict ordering without pushing unrelated levels to max.
-        MIPMAP1_DIST_INDEX = clampInt(MIPMAP1_DIST_INDEX, 1, n - 3)
-        MIPMAP2_DIST_INDEX = clampInt(MIPMAP2_DIST_INDEX, MIPMAP1_DIST_INDEX + 1, n - 2)
-        MIPMAP3_DIST_INDEX = clampInt(MIPMAP3_DIST_INDEX, MIPMAP2_DIST_INDEX + 1, n - 1)
-        MIPMAP4_DIST_INDEX = clampInt(MIPMAP4_DIST_INDEX, MIPMAP3_DIST_INDEX + 1, n)
+        if cur <= 1 then
+            if lower <= upper and upper >= 2 then
+                nextIdx = upper
+            else
+                nextIdx = 1
+            end
+        else
+            if lower > upper or cur <= lower then
+                nextIdx = 1
+            else
+                nextIdx = cur - 1
+                if nextIdx < lower then nextIdx = 1 end
+            end
+        end
     end
 
-    WALL_MIPMAP_DIST1 = MIPMAP_DIST_PRESETS[MIPMAP1_DIST_INDEX]
-    WALL_MIPMAP_DIST2 = MIPMAP_DIST_PRESETS[MIPMAP2_DIST_INDEX]
-    WALL_MIPMAP_DIST3 = MIPMAP_DIST_PRESETS[MIPMAP3_DIST_INDEX]
-    WALL_MIPMAP_DIST4 = MIPMAP_DIST_PRESETS[MIPMAP4_DIST_INDEX]
+    setMipmapLevelIndex(level, nextIdx)
+    normalizeMipmapRanges()
+end
+
+function normalizeMipmapRanges()
+    if not MIPMAP_DIST_PRESETS or #MIPMAP_DIST_PRESETS == 0 then return end
+    local maxIdx = getMipmapMaxPresetIndexForDrawDist()
+    local idx1 = clampInt(MIPMAP1_DIST_INDEX or 1, 1, maxIdx)
+    local idx2 = clampInt(MIPMAP2_DIST_INDEX or 1, 1, maxIdx)
+    local idx3 = clampInt(MIPMAP3_DIST_INDEX or 1, 1, maxIdx)
+    local idx4 = clampInt(MIPMAP4_DIST_INDEX or 1, 1, maxIdx)
+
+    local indices = {idx1, idx2, idx3, idx4}
+    local prevActive = 1
+    for i = 1, 4 do
+        local cur = indices[i]
+        if cur > 1 then
+            if cur <= prevActive then
+                local nextValid = prevActive + 1
+                if nextValid <= maxIdx then
+                    cur = nextValid
+                else
+                    cur = 1
+                end
+                indices[i] = cur
+            end
+            if cur > 1 then
+                prevActive = cur
+            end
+        end
+    end
+
+    MIPMAP1_DIST_INDEX = indices[1]
+    MIPMAP2_DIST_INDEX = indices[2]
+    MIPMAP3_DIST_INDEX = indices[3]
+    MIPMAP4_DIST_INDEX = indices[4]
+
+    WALL_MIPMAP_DIST1 = (MIPMAP1_DIST_INDEX > 1) and (MIPMAP_DIST_PRESETS[MIPMAP1_DIST_INDEX] or 0) or 0
+    WALL_MIPMAP_DIST2 = (MIPMAP2_DIST_INDEX > 1) and (MIPMAP_DIST_PRESETS[MIPMAP2_DIST_INDEX] or 0) or 0
+    WALL_MIPMAP_DIST3 = (MIPMAP3_DIST_INDEX > 1) and (MIPMAP_DIST_PRESETS[MIPMAP3_DIST_INDEX] or 0) or 0
+    WALL_MIPMAP_DIST4 = (MIPMAP4_DIST_INDEX > 1) and (MIPMAP_DIST_PRESETS[MIPMAP4_DIST_INDEX] or 0) or 0
 end
 
 function normalizeFarTextureCutoff()
@@ -1324,7 +1719,7 @@ function applyPerfQualityPreset(newIndex)
         FOG_DITHER_SIZE_INDEX = nearestPresetIndex(FOG_DITHER_SIZE_PRESETS, 1)
     end
 
-    EXP_TEX_MAX_DIST = DRAW_DIST_PRESETS[DRAW_DIST_INDEX]
+    normalizeDrawDistanceSetting()
     if FOG_DITHER_SIZE_PRESETS and #FOG_DITHER_SIZE_PRESETS > 0 then
         FOG_DITHER_SIZE_INDEX = clampInt(FOG_DITHER_SIZE_INDEX or 1, 1, #FOG_DITHER_SIZE_PRESETS)
         FOG_DITHER_SIZE = FOG_DITHER_SIZE_PRESETS[FOG_DITHER_SIZE_INDEX]
@@ -1351,6 +1746,7 @@ function getEffectiveRayPresetIndex(baseIdx)
 end
 
 normalizeFogRange()
+normalizeDrawDistanceSetting()
 normalizeMipmapRanges()
 normalizeFarTextureCutoff()
 refreshExpViewDistance()
@@ -4030,6 +4426,7 @@ function updateTitleMusic()
 end
 
 function enterTitle()
+    markRunResetRequested()
     showMenu = false
     inOptionsMenu = false
     inGameDebugMenu = false
@@ -4103,7 +4500,6 @@ function startLevel(levelId)
     unloadLevelData()
     unloadLevelSprites()
     unloadWallTextures()
-    collectgarbage()
     stopTitleMusic()
     unloadMenuSprites()
     loadingLog("LOAD after unloadMenuSprites")
@@ -4130,6 +4526,7 @@ function restartLevel()
 end
 
 beginLoadLevel = function(levelId)
+    run_reset_requested = shouldStartNewRunForLevelLoad(levelId)
     pendingLevelStart = nil
     loadingTimer = 0
     loadingLogCount = 0
@@ -4385,6 +4782,7 @@ function updateSoldiers()
                         end
                         if damage > 0 then
                             playerHealth = playerHealth - damage
+                            dispatchRunScoreEvent("player_damaged", {level_id = currentLevel, points = 0})
                             recordDamageTaken(damage)
                             if playerHealth <= 0 then
                                 playerHealth = 0
@@ -4500,6 +4898,7 @@ function killSoldier(soldier)
     soldier.deathTick = 0
     soldiersKilled = soldiersKilled + 1
     awardPlayerXp(PLAYER_XP_PER_KILL or 0)
+    dispatchRunScoreEvent("enemy_kill", {level_id = currentLevel})
 
     -- Create blood effect
     createBloodEffect(soldier.x, soldier.y)
@@ -4515,6 +4914,7 @@ function killSoldier(soldier)
 
     -- Check win condition
     if soldiersKilled >= totalSoldiers then
+        dispatchRunScoreEvent("level_clear", {level_id = currentLevel})
         gameState = STATE_WIN
         winSelection = 1
         winCooldown = 30  -- Half second delay before accepting input
@@ -4545,6 +4945,7 @@ function checkHealthPickups()
                 -- Collect the vial
                 s.collected = true
                 playerHealth = MAX_HEALTH
+                dispatchRunScoreEvent("health_pickup", {level_id = currentLevel})
             end
         end
     end
@@ -4646,6 +5047,31 @@ function drawEnemiesRemainingUI()
     drawUiText("ENEMIES LEFT: " .. tostring(remaining), 104, 228, COLOR_WHITE, COLOR_BLACK)
 end
 
+function drawRunScoreUI()
+    if gameState ~= STATE_PLAYING and gameState ~= STATE_WIN then
+        return
+    end
+    local run = ensureRunScoreState(currentLevel)
+    local scoreValue = math.floor(tonumber(run.current) or 0)
+    local killValue = math.floor(tonumber(run.kills) or 0)
+    local clearValue = math.floor(tonumber(run.levels_cleared) or 0)
+
+    local scoreColor = COLOR_WHITE
+    if (RUN_SCORE_PULSE_TICKS or 0) > 0 then
+        if ((RUN_SCORE_PULSE_TICKS % 4) < 2) then
+            scoreColor = COLOR_YELLOW
+        end
+        RUN_SCORE_PULSE_TICKS = RUN_SCORE_PULSE_TICKS - 1
+        if RUN_SCORE_PULSE_TICKS < 0 then
+            RUN_SCORE_PULSE_TICKS = 0
+        end
+    end
+
+    setFontCached(vmupro.text.FONT_TINY_6x8)
+    drawUiText("SCORE " .. tostring(scoreValue), 126, 24, scoreColor, COLOR_BLACK)
+    drawUiText("K " .. tostring(killValue) .. "  C " .. tostring(clearValue), 126, 34, COLOR_WHITE, COLOR_BLACK)
+end
+
 local drawRectOutline
 
 drawUiText = function(text, x, y, textColor, bgColor)
@@ -4726,20 +5152,20 @@ function buildDebugMenuItems()
             rayPreset = (RAY_PRESETS[baseIdx] and RAY_PRESETS[baseIdx].label) or "?"
         end
         local raysText = "RAYS: " .. rayPreset
-        local drawDistText = "DRAW DIST: " .. tostring(EXP_TEX_MAX_DIST or "?")
+        local drawDistText = "DRAW DIST: " .. getDistanceValueLabel(EXP_TEX_MAX_DIST or 0)
         local farTexOffText
         if (FAR_TEX_OFF_DIST or 999) >= 900 then
             farTexOffText = "FAR TEX OFF: OFF"
         else
-            farTexOffText = "FAR TEX OFF: " .. tostring(FAR_TEX_OFF_DIST or "?")
+            farTexOffText = "FAR TEX OFF: " .. getDistanceValueLabel(FAR_TEX_OFF_DIST or 0)
         end
-        local mip1DistText = "MIP1 DIST: " .. tostring(WALL_MIPMAP_DIST1 or "?")
-        local mip2DistText = "MIP2 DIST: " .. tostring(WALL_MIPMAP_DIST2 or "?")
-        local mip3DistText = "MIP3 DIST: " .. tostring(WALL_MIPMAP_DIST3 or "?")
-        local mip4DistText = "MIP4 DIST: " .. tostring(WALL_MIPMAP_DIST4 or "?")
-        local fogStartText = "FOG START: " .. tostring(FOG_START or "?")
-        local fogEndText = "FOG FULL: " .. tostring(FOG_END or "?")
-        local fogCutText = "FOG CUT L: " .. tostring(FOG_TEX_CUTOFF or "?")
+        local mip1DistText = "MIP1 DIST: " .. getDistanceValueLabel(WALL_MIPMAP_DIST1 or 0)
+        local mip2DistText = "MIP2 DIST: " .. getDistanceValueLabel(WALL_MIPMAP_DIST2 or 0)
+        local mip3DistText = "MIP3 DIST: " .. getDistanceValueLabel(WALL_MIPMAP_DIST3 or 0)
+        local mip4DistText = "MIP4 DIST: " .. getDistanceValueLabel(WALL_MIPMAP_DIST4 or 0)
+        local fogStartText = "FOG START: " .. getDistanceValueLabel(FOG_START or 0)
+        local fogEndText = "FOG FULL: " .. getDistanceValueLabel(FOG_END or 0)
+        local fogCutText = "FOG CUT L: " .. getDistanceValueLabel(FOG_TEX_CUTOFF or 0)
         local fogColorLabel = (FOG_COLOR_LABELS and FOG_COLOR_LABELS[FOG_COLOR_INDEX or 1]) or tostring(FOG_COLOR_INDEX or 1)
         local fogColorText = "FOG COLOR: " .. tostring(fogColorLabel)
         local fogDitherText = "FOG DTHR: " .. tostring(FOG_DITHER_SIZE or 3)
@@ -4774,12 +5200,12 @@ function buildDebugMenuItems()
         local presetText = "P/Q PRESET: " .. presetLabel
         local wallResText = "WALL RES: " .. ((LOW_RES_MODE == "fast") and "FAST" or "QUALITY")
         local raysText = "RAYS: " .. rayLabel
-        local drawDistText = "DRAW DIST: " .. tostring(EXP_TEX_MAX_DIST or "?")
-        local farTexText = ((FAR_TEX_OFF_DIST or 999) >= 900) and "FAR TEX OFF: OFF" or ("FAR TEX OFF: " .. tostring(FAR_TEX_OFF_DIST or "?"))
+        local drawDistText = "DRAW DIST: " .. getDistanceValueLabel(EXP_TEX_MAX_DIST or 0)
+        local farTexText = ((FAR_TEX_OFF_DIST or 999) >= 900) and "FAR TEX OFF: OFF" or ("FAR TEX OFF: " .. getDistanceValueLabel(FAR_TEX_OFF_DIST or 0))
         local mipmapText = "MIPMAP: " .. (WALL_MIPMAP_ENABLED and "ON" or "OFF")
         local mipLodText = "MIP LOD: " .. (MIP_LOD_ENABLED and "ON" or "OFF")
-        local fogStartText = "FOG START: " .. tostring(FOG_START or "?")
-        local fogEndText = "FOG FULL: " .. tostring(FOG_END or "?")
+        local fogStartText = "FOG START: " .. getDistanceValueLabel(FOG_START or 0)
+        local fogEndText = "FOG FULL: " .. getDistanceValueLabel(FOG_END or 0)
         local fogDitherText = "FOG DTHR: " .. tostring(FOG_DITHER_SIZE or 3)
         local fpsTargetText = "FPS TARGET: " .. string.upper(FPS_TARGET_MODE)
         local perfMonText = "PERF MON: " .. (DEBUG_PERF_MONITOR and "ON" or "OFF")
@@ -4952,7 +5378,8 @@ function adjustDebugMenuSelection(sel, delta, wrap)
         elseif sel == 7 then
             if DRAW_DIST_PRESETS and #DRAW_DIST_PRESETS > 0 then
                 DRAW_DIST_INDEX = stepListIndex(DRAW_DIST_INDEX or 1, step, #DRAW_DIST_PRESETS, doWrap)
-                EXP_TEX_MAX_DIST = DRAW_DIST_PRESETS[DRAW_DIST_INDEX]
+                normalizeDrawDistanceSetting()
+                normalizeMipmapRanges()
                 refreshExpViewDistance()
             end
             return true
@@ -4964,39 +5391,22 @@ function adjustDebugMenuSelection(sel, delta, wrap)
             return true
         elseif sel == 9 then
             if MIPMAP_DIST_PRESETS and #MIPMAP_DIST_PRESETS > 0 then
-                normalizeMipmapRanges()
-                local max1 = math.max(1, (MIPMAP2_DIST_INDEX or 2) - 1)
-                MIPMAP1_DIST_INDEX = clampInt((MIPMAP1_DIST_INDEX or 1) + step, 1, max1)
-                normalizeMipmapRanges()
+                stepMipmapLevelIndex(1, step)
             end
             return true
         elseif sel == 10 then
             if MIPMAP_DIST_PRESETS and #MIPMAP_DIST_PRESETS > 0 then
-                normalizeMipmapRanges()
-                local n = #MIPMAP_DIST_PRESETS
-                local min2 = math.min(n, (MIPMAP1_DIST_INDEX or 1) + 1)
-                local max2 = math.max(min2, (MIPMAP3_DIST_INDEX or n) - 1)
-                MIPMAP2_DIST_INDEX = clampInt((MIPMAP2_DIST_INDEX or min2) + step, min2, max2)
-                normalizeMipmapRanges()
+                stepMipmapLevelIndex(2, step)
             end
             return true
         elseif sel == 11 then
             if MIPMAP_DIST_PRESETS and #MIPMAP_DIST_PRESETS > 0 then
-                normalizeMipmapRanges()
-                local n = #MIPMAP_DIST_PRESETS
-                local min3 = math.min(n, (MIPMAP2_DIST_INDEX or 1) + 1)
-                local max3 = math.max(min3, (MIPMAP4_DIST_INDEX or n) - 1)
-                MIPMAP3_DIST_INDEX = clampInt((MIPMAP3_DIST_INDEX or min3) + step, min3, max3)
-                normalizeMipmapRanges()
+                stepMipmapLevelIndex(3, step)
             end
             return true
         elseif sel == 12 then
             if MIPMAP_DIST_PRESETS and #MIPMAP_DIST_PRESETS > 0 then
-                normalizeMipmapRanges()
-                local n = #MIPMAP_DIST_PRESETS
-                local min4 = math.min(n, (MIPMAP3_DIST_INDEX or 1) + 1)
-                MIPMAP4_DIST_INDEX = clampInt((MIPMAP4_DIST_INDEX or min4) + step, min4, n)
-                normalizeMipmapRanges()
+                stepMipmapLevelIndex(4, step)
             end
             return true
         elseif sel == 13 then
@@ -5095,7 +5505,8 @@ function adjustDebugMenuSelection(sel, delta, wrap)
             markPerfQualityCustom()
             if DRAW_DIST_PRESETS and #DRAW_DIST_PRESETS > 0 then
                 DRAW_DIST_INDEX = stepListIndex(DRAW_DIST_INDEX or 1, step, #DRAW_DIST_PRESETS, doWrap)
-                EXP_TEX_MAX_DIST = DRAW_DIST_PRESETS[DRAW_DIST_INDEX]
+                normalizeDrawDistanceSetting()
+                normalizeMipmapRanges()
                 refreshExpViewDistance()
             end
             return true
@@ -5166,14 +5577,12 @@ function adjustDebugMenuSelection(sel, delta, wrap)
     elseif sel == 3 then
         -- ENEMIES label is inverse of DEBUG_DISABLE_ENEMIES.
         DEBUG_DISABLE_ENEMIES = (step < 0)
-        spriteOrderCache = {}
-        spriteOrderCacheFrame = -999
+        clearSpriteOrderCache()
         return true
     elseif sel == 4 then
         -- PROPS label is inverse of DEBUG_DISABLE_PROPS.
         DEBUG_DISABLE_PROPS = (step < 0)
-        spriteOrderCache = {}
-        spriteOrderCacheFrame = -999
+        clearSpriteOrderCache()
         return true
     elseif sel == 5 then
         DEBUG_SHOW_BLOCK = (step > 0)
@@ -6365,7 +6774,8 @@ EXP_MAX_STEPS = 32
 EXP_MAX_DIST = 80
 EXP_RADIUS = 20
 EXP_BUCKETS = 8
-EXP_TEX_MAX_DIST = EXP_TEX_MAX_DIST or DRAW_DIST_PRESETS[DRAW_DIST_INDEX]
+normalizeDrawDistanceSetting()
+normalizeMipmapRanges()
 EXP_VIEW_DIST = EXP_VIEW_DIST or EXP_TEX_MAX_DIST
 HYBRID_TEX_MAX_H = VIEWPORT_H
 USE_FIXED_RAYCAST = false
@@ -6588,8 +6998,9 @@ function renderWallsExperimentalHybrid()
     if rayTraceDist < 0.5 then rayTraceDist = 0.5 end
 
     local fovRad = renderCfg.fovSteps * (renderCfg.twoPi / 64)
+    local twoPi = (renderCfg and renderCfg.twoPi) or 6.28318
     local playerDir = pdir % 64
-    local playerAngle = playerDir * (renderCfg.twoPi / 64)
+    local playerAngle = playerDir * (twoPi / 64)
     local playerCos = math.cos(playerAngle)
     local playerSin = math.sin(playerAngle)
     local rayCols = 60
@@ -6620,12 +7031,12 @@ function renderWallsExperimentalHybrid()
     local stepSin1, stepSin2, stepSin3, stepSin4
     local rayCos = 0
     local raySin = 0
+    local baseAngle = playerAngle - (fovRad / 2)
     if useFixedRaycast then
         ensureExpTables()
         playerDirFix = (playerDir % 64) * (EXP_FIXED_DIR_SUBDIV or 32)
         rayOffsets = getExpRayOffsets(rayCols)
     else
-        local baseAngle = playerAngle - (fovRad / 2)
         rayStep = fovRad / rayCols
         stepCos1 = math.cos(rayStep)
         stepCos2 = math.cos(rayStep * 2)
@@ -6691,14 +7102,15 @@ function renderWallsExperimentalHybrid()
     end
 
     -- Mip thresholds are evaluated once per frame so each tier is independent and cheap in the hot ray loop.
-    -- Order is still strictly monotonic for deterministic tier transitions.
-    local mip1Thresh = WALL_MIPMAP_DIST1 or 4.0
-    local mip2Thresh = WALL_MIPMAP_DIST2 or (mip1Thresh + 2.0)
-    local mip3Thresh = WALL_MIPMAP_DIST3 or (mip2Thresh + 2.0)
-    local mip4Thresh = WALL_MIPMAP_DIST4 or (mip3Thresh + 2.0)
-    if mip2Thresh <= mip1Thresh then mip2Thresh = mip1Thresh + 0.1 end
-    if mip3Thresh <= mip2Thresh then mip3Thresh = mip2Thresh + 0.1 end
-    if mip4Thresh <= mip3Thresh then mip4Thresh = mip3Thresh + 0.1 end
+    -- A threshold <= 0 means that mip tier is disabled.
+    local mip1Thresh = WALL_MIPMAP_DIST1 or 0.0
+    local mip2Thresh = WALL_MIPMAP_DIST2 or 0.0
+    local mip3Thresh = WALL_MIPMAP_DIST3 or 0.0
+    local mip4Thresh = WALL_MIPMAP_DIST4 or 0.0
+    if mip1Thresh < 0 then mip1Thresh = 0 end
+    if mip2Thresh < 0 then mip2Thresh = 0 end
+    if mip3Thresh < 0 then mip3Thresh = 0 end
+    if mip4Thresh < 0 then mip4Thresh = 0 end
     local nearClipDist = getPlayerRenderNearClipDist()
     local fogCutDist = FOG_TEX_CUTOFF or FOG_END or texView
     local farTexOff = FAR_TEX_OFF_DIST or 999
@@ -6706,6 +7118,7 @@ function renderWallsExperimentalHybrid()
     local texMaxH = HYBRID_TEX_MAX_H or (VIEWPORT_H - 8)
     local fogCurtainStart = -1
     local fogCurtainEnd = -1
+    local fogCurtainDist = nil
 
     local x = 0
     while x < rayCols do
@@ -6714,6 +7127,7 @@ function renderWallsExperimentalHybrid()
         local castCos, castSin
         local dist, wtype, side, texCoord, rayHit
         local castT0
+        local rayCastMaxDist = rayTraceDist
         if canTime then
             castT0 = vmupro.system.getTimeUs()
         end
@@ -6722,11 +7136,11 @@ function renderWallsExperimentalHybrid()
             local rayDir = (playerDirFix + rayOff) % (EXP_FIXED_DIR_STEPS or 2048)
             castCos = rayDirCos[rayDir] or playerCos
             castSin = rayDirSin[rayDir] or playerSin
-            dist, wtype, side, texCoord, rayHit = expCastRayFixed(rayDir, rayTraceDist)
+            dist, wtype, side, texCoord, rayHit = expCastRayFixed(rayDir, rayCastMaxDist)
         else
             castCos = rayCos
             castSin = raySin
-            dist, wtype, side, texCoord, rayHit = castRay(castCos, castSin, rayTraceDist)
+            dist, wtype, side, texCoord, rayHit = castRay(castCos, castSin, rayCastMaxDist)
         end
         if canTime and castT0 then
             local castT1 = vmupro.system.getTimeUs()
@@ -6735,8 +7149,9 @@ function renderWallsExperimentalHybrid()
         local fixedDist = dist * (castCos * playerCos + castSin * playerSin)
         if fixedDist < nearClipDist then fixedDist = nearClipDist end
         if not rayHit then
-            fixedDist = fogView
-            if fixedDist < texView then fixedDist = texView end
+            -- Respect active draw-distance cap for no-hit rays; prevents endless far fog columns.
+            fixedDist = rayCastMaxDist
+            if fixedDist < nearClipDist then fixedDist = nearClipDist end
             if fixedDist > hybridViewDist then fixedDist = hybridViewDist end
         end
 
@@ -6745,13 +7160,13 @@ function renderWallsExperimentalHybrid()
             or (wallContactActive and fixedDist < nearStabilityDist)
         )
         if WALL_MIPMAP_ENABLED and MIP_LOD_ENABLED and not nearForce then
-            if fixedDist >= mip4Thresh then
+            if mip4Thresh > 0 and fixedDist >= mip4Thresh then
                 mipLevel = 4
-            elseif fixedDist >= mip3Thresh then
+            elseif mip3Thresh > 0 and fixedDist >= mip3Thresh then
                 mipLevel = 3
-            elseif fixedDist >= mip2Thresh then
+            elseif mip2Thresh > 0 and fixedDist >= mip2Thresh then
                 mipLevel = 2
-            elseif fixedDist >= mip1Thresh then
+            elseif mip1Thresh > 0 and fixedDist >= mip1Thresh then
                 mipLevel = 1
             end
         end
@@ -6787,9 +7202,10 @@ function renderWallsExperimentalHybrid()
 
             if rayHit and fixedDist <= hybridViewDist then
                 if fogCurtainStart >= 0 then
-                    drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogView, trackCounters, canTime)
+                    drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogCurtainDist or texView, trackCounters, canTime)
                     fogCurtainStart = -1
                     fogCurtainEnd = -1
+                    fogCurtainDist = nil
                 end
                 if trackCounters then
                     PERF_MONITOR_WALL_COLS_TOTAL = (PERF_MONITOR_WALL_COLS_TOTAL or 0) + spanW
@@ -6891,24 +7307,31 @@ function renderWallsExperimentalHybrid()
                 if fogCurtainStart < 0 then
                     fogCurtainStart = sx
                     fogCurtainEnd = ex
+                    fogCurtainDist = fixedDist
                 elseif sx <= (fogCurtainEnd + 1) then
                     if ex > fogCurtainEnd then
                         fogCurtainEnd = ex
                     end
+                    if (not fogCurtainDist) or (fixedDist < fogCurtainDist) then
+                        fogCurtainDist = fixedDist
+                    end
                 else
-                    drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogView, trackCounters, canTime)
+                    drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogCurtainDist or texView, trackCounters, canTime)
                     fogCurtainStart = sx
                     fogCurtainEnd = ex
+                    fogCurtainDist = fixedDist
                 end
             elseif fogCurtainStart >= 0 then
-                drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogView, trackCounters, canTime)
+                drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogCurtainDist or texView, trackCounters, canTime)
                 fogCurtainStart = -1
                 fogCurtainEnd = -1
+                fogCurtainDist = nil
             end
         elseif fogCurtainStart >= 0 then
-            drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogView, trackCounters, canTime)
+            drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogCurtainDist or texView, trackCounters, canTime)
             fogCurtainStart = -1
             fogCurtainEnd = -1
+            fogCurtainDist = nil
         end
 
         if not useFixedRaycast then
@@ -6932,7 +7355,7 @@ function renderWallsExperimentalHybrid()
         x = x + rayStride
     end
     if fogCurtainStart >= 0 then
-        drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogView, trackCounters, canTime)
+        drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogCurtainDist or texView, trackCounters, canTime)
     end
 end
 
@@ -7721,7 +8144,8 @@ function renderGameFrame()
 
     if not DEBUG_SKIP_SPRITES and not showMenu then
         if frameCount - spriteOrderCacheFrame >= 8 or #spriteOrderCache == 0 then
-            local spriteOrder = {}
+            local spriteOrder = spriteOrderCache
+            local prevCount = #spriteOrder
             local count = 0
             for i = 1, #sprites do
                 local s = sprites[i]
@@ -7743,15 +8167,25 @@ function renderGameFrame()
                     end
                     if distSq <= maxSq then
                         count = count + 1
-                        spriteOrder[count] = {idx = i, dist = distSq}
+                        local entry = spriteOrder[count]
+                        if entry then
+                            entry.idx = i
+                            entry.dist = distSq
+                        else
+                            spriteOrder[count] = {idx = i, dist = distSq}
+                        end
                     end
                 end
                 ::continue_sprite_build::
             end
-            if count > 1 then
-                table.sort(spriteOrder, function(a, b) return a.dist > b.dist end)
+            if prevCount > count then
+                for i = count + 1, prevCount do
+                    spriteOrder[i] = nil
+                end
             end
-            spriteOrderCache = spriteOrder
+            if count > 1 then
+                table.sort(spriteOrder, spriteOrderCompareFarToNear)
+            end
             spriteOrderCacheFrame = frameCount
         end
 
@@ -8176,6 +8610,7 @@ function renderGameFrame()
     drawHealthUI()
     if not showMenu then
         drawEnemiesRemainingUI()
+        drawRunScoreUI()
     end
 
     -- Draw current level indicator
@@ -8791,12 +9226,10 @@ function AppMain()
                                 showHealthPercent = not showHealthPercent  -- Toggle health %
                             elseif optionsSelection == 3 then
                                 DEBUG_DISABLE_ENEMIES = not DEBUG_DISABLE_ENEMIES
-                                spriteOrderCache = {}
-                                spriteOrderCacheFrame = -999
+                                clearSpriteOrderCache()
                             elseif optionsSelection == 4 then
                                 DEBUG_DISABLE_PROPS = not DEBUG_DISABLE_PROPS
-                                spriteOrderCache = {}
-                                spriteOrderCacheFrame = -999
+                                clearSpriteOrderCache()
                             elseif optionsSelection == 5 then
                                 DEBUG_DISABLE_WALL_TEXTURE = not DEBUG_DISABLE_WALL_TEXTURE
                                 if DEBUG_DISABLE_WALL_TEXTURE then

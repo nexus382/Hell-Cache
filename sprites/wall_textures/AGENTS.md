@@ -1,128 +1,100 @@
+# Wall Textures Directory
+
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-02-04 | Updated: 2026-02-04 -->
+<!-- Last Updated: 2026-02-23 -->
 
-# wall_textures
+## Overview
 
-## Purpose
-Processed wall texture files ready for use in the 3D raycaster engine. These textures are mapped onto wall surfaces during rendering.
+This directory contains wall and tile texture assets for dungeon rendering in the Inner Sanctum roguelike game. Textures are designed for seamless tiling and include multiple variants for visual variety.
 
-## For AI Agents
+## Directory Structure
 
-### Working In This Directory
-
-**These are production-ready game assets** - wall textures loaded and rendered by the raycaster engine.
-
-**Usage in Game**:
-Textures are loaded via VMU Pro SDK:
-```lua
--- Textures embedded in game package
-local texture = vmupro.sprite.new("sprites/wall_textures/stone_wall_1")
+```
+wall_textures/
+├── AGENTS.md                              # This file
+├── _protected_wall1_swap_20260211_143242/ # Backup directory (protected)
+├── wall-1-tile.png                        # Primary wall variant 1
+├── wall-1-tile-table-1-128.png            # Wall 1 optimized (128px)
+├── wall-2-tile.png                        # Primary wall variant 2
+├── wall-2-tile-table-1-128.png            # Wall 2 optimized (128px)
+├── wall-3-tile.png                        # Primary wall variant 3
+├── wall-3-tile-table-1-128.png            # Wall 3 optimized (128px)
+├── wall-4-tile.png                        # Primary wall variant 4
+├── wall-4-tile-table-1-128.png            # Wall 4 optimized (128px)
+├── Wall-Diamond-Tile.png                  # Diamond pattern wall
+├── Wall-Diamond-Tile-table-1-128.png      # Diamond optimized (128px)
+├── Wall-Window-Tile.png                   # Window wall variant
+├── Wall-Window-Tile-table-1-128.png       # Window optimized (128px)
+└── roof_dirt_splatter_64.png              # Roof dirt overlay (64px)
 ```
 
-**Raycaster Texture Mapping**:
-- Textures mapped based on wall type and orientation
-- Scaled based on ray distance (perspective correction)
-- Color may be adjusted for lighting/depth effects
+## Texture Files
 
-### Wall Texture Categories
+### Primary Wall Tiles
 
-**Stone Walls**:
-- Light stone (COLOR_STONE_L: 0x8C73)
-- Dark stone (COLOR_STONE_D: 0x4A52)
-- Used for: Standard dungeon walls
+| File | Description | Size |
+|------|-------------|------|
+| `wall-1-tile.png` | Primary wall tile variant 1 (default) | ~11KB |
+| `wall-2-tile.png` | Primary wall tile variant 2 | ~11KB |
+| `wall-3-tile.png` | Primary wall tile variant 3 | ~10KB |
+| `wall-4-tile.png` | Primary wall tile variant 4 | ~11KB |
 
-**Brick Walls**:
-- Light brick (COLOR_BRICK_L: 0x4062)
-- Dark brick (COLOR_BRICK_D: 0x0041)
-- Used for: Brick passages, fortified areas
+### Table-Optimized Wall Tiles (128px)
 
-**Moss Walls**:
-- Light moss (COLOR_MOSS_L: 0x4444)
-- Dark moss (COLOR_MOSS_D: 0x2222)
-- Used for: Aged, dungeon-like areas
+| File | Description | Size |
+|------|-------------|------|
+| `wall-1-tile-table-1-128.png` | Wall 1 optimized for table rendering | ~11KB |
+| `wall-2-tile-table-1-128.png` | Wall 2 optimized for table rendering | ~11KB |
+| `wall-3-tile-table-1-128.png` | Wall 3 optimized for table rendering | ~10KB |
+| `wall-4-tile-table-1-128.png` | Wall 4 optimized for table rendering | ~11KB |
 
-**Metal Walls**:
-- Light metal (COLOR_METAL_L: 0x1084)
-- Dark metal (COLOR_METAL_D: 0x0842)
-- Used for: Special chambers, armories
+### Specialty Wall Tiles
 
-**Wood Walls**:
-- Light wood (COLOR_WOOD_L: 0x4051)
-- Dark wood (COLOR_WOOD_D: 0x2028)
-- Used for: Doors, wooden structures, interior rooms
+| File | Description | Size |
+|------|-------------|------|
+| `Wall-Diamond-Tile.png` | Diamond-pattern wall tile for decorative areas | ~11KB |
+| `Wall-Window-Tile.png` | Wall tile with window opening | ~11KB |
+| `Wall-Diamond-Tile-table-1-128.png` | Diamond tile optimized (128px) | ~11KB |
+| `Wall-Window-Tile-table-1-128.png` | Window tile optimized (128px) | ~11KB |
 
-### Color Constants (RGB565)
+### Overlay Textures
 
-From `../../app.lua`:
-```lua
-COLOR_STONE_L = 0x8C73
-COLOR_STONE_D = 0x4A52
-COLOR_BRICK_L = 0x4062
-COLOR_BRICK_D = 0x0041
-COLOR_MOSS_L = 0x4444
-COLOR_MOSS_D = 0x2222
-COLOR_METAL_L = 0x1084
-COLOR_METAL_D = 0x0842
-COLOR_WOOD_L = 0x4051
-COLOR_WOOD_D = 0x2028
-```
+| File | Description | Size |
+|------|-------------|------|
+| `roof_dirt_splatter_64.png` | Dirt splatter overlay for roof surfaces (64px) | ~9KB |
 
-### Texture Mapping in Raycaster
+## Protected Backup Directory
 
-**Perpendicular Distance Correction**:
-```lua
--- Fix fisheye effect
-local perp_wall_dist = ray_dist * math.cos(ray_angle - player_angle)
-local wall_height = math.floor(screen_height / perp_wall_dist)
-```
+### `_protected_wall1_swap_20260211_143242/`
 
-**Texture Column Selection**:
-```lua
--- Determine which column of texture to draw
-local tex_x = math.floor(texture_width * wall_x) % texture_width
-```
+Protected backup directory created on 2026-02-11 at 14:32:42.
 
-**Drawing Textured Walls**:
-```lua
--- For each vertical strip
-vmupro.sprite.drawScaled(texture,
-    screen_x,
-    wall_top,
-    1,
-    wall_height,
-    0)
-```
+**Contents:**
+- `wall-1-tile.png` - Original wall-1-tile backup
+- `wall-1-tile-table-1-128.png` - Original wall-1-tile optimized backup
 
-### Common Patterns
+**Purpose:** This directory preserves the original wall-1 textures before modifications. Do not modify or delete without explicit authorization.
 
-**Wall Type Selection** (from map data):
-```lua
-if wall_type == 1 then
-    -- Stone wall
-    texture = stone_texture
-elseif wall_type == 2 then
-    -- Brick wall
-    texture = brick_texture
--- ... etc
-end
-```
+## Naming Conventions
 
-### Testing Requirements
+### Standard Format
+- Base texture: `{name}-tile.png`
+- Table-optimized: `{name}-tile-table-1-128.png`
 
-- Verify textures render without distortion
-- Check perspective correction at various angles
-- Confirm lighting effects look correct
-- Test all wall types in-game
-- Ensure no texture seams or artifacts
+### Special Variants
+- `Wall-{Pattern}-Tile.png` - Specialty pattern tiles (Diamond, Window)
+- `{feature}_{size}.png` - Overlay textures with size suffix
 
-## Dependencies
+## Usage Notes
 
-### Internal
-- `../../app.lua` - Raycaster engine using these textures
-- `../Walls.png` - Source textures spritesheet
-- `../_wall_textures/` - Raw extracted files (if processing)
+- All textures use PNG format with transparency support
+- Wall tiles are designed for seamless tiling in dungeon layouts
+- Table-optimized versions (128px) are pre-scaled for specific rendering contexts
+- The 4 primary wall variants provide visual variety while maintaining consistency
+- Overlay textures like `roof_dirt_splatter_64.png` are applied as alpha blending layers
 
-### External
-- VMU Pro SDK sprite system
+## Related Files
 
-<!-- MANUAL: Texture mapping notes can be added below -->
+- **Parent Documentation:** `/mnt/r/inner-santctum/sprites/AGENTS.md`
+- **Root Documentation:** `/mnt/r/inner-santctum/AGENTS.md`
+- **Game Engine:** Loads these textures for dungeon wall rendering

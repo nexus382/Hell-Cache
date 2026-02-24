@@ -1,145 +1,205 @@
-<!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-02-17 -->
+# VMU Pro SDK Examples - AGENTS.md
 
-# examples
+<!-- Parent: ../AGENTS.md -->
+
+**Generated:** 2026-02-23
+
+---
 
 ## Purpose
-Example applications demonstrating the VMU Pro Lua SDK features and best practices. These examples serve as reference implementations for developers learning to build applications for the VMU Pro platform.
 
-## Subdirectories
+This directory contains example applications demonstrating VMU Pro SDK usage patterns. These examples serve as templates and learning resources for developers building applications for the VMU Pro handheld platform.
 
-| Directory | Purpose |
-|-----------|---------|
-| `hello_world/` | Minimal "Hello World" application - basic text display, input handling, and application structure |
-| `nested_example/` | Comprehensive demonstration of module organization using `require()`, multi-file project structure with libraries/ and pages/ directories, and page navigation system |
+---
+
+## Example Projects
+
+### hello_world
+
+A minimal application demonstrating the fundamental structure of a VMU Pro Lua application.
+
+**Location:** `/mnt/r/inner-santctum/vmupro-sdk/examples/hello_world/`
+
+**Demonstrates:**
+- Basic application structure with `AppMain()` entry point
+- System logging via `vmupro.system.log()`
+- Graphics rendering with `vmupro.graphics.*`
+- Text rendering with multiple fonts via `vmupro.text.*`
+- Input handling via `vmupro.input.*`
+- Frame timing and uptime tracking
+- Application lifecycle (init, update, render loop)
+
+**Key Files:**
+| File | Purpose |
+|------|---------|
+| `app.lua` | Main application with AppMain() entry point |
+| `metadata.json` | Application metadata for packaging |
+| `icon.bmp` | 76x76 pixel application icon |
+| `pack.sh` / `pack.ps1` | Packaging scripts for Linux/Windows |
+| `send.sh` / `send.ps1` | Deployment scripts for Linux/Windows |
+
+---
+
+### nested_example
+
+A comprehensive SDK test suite demonstrating advanced project organization and complete API coverage.
+
+**Location:** `/mnt/r/inner-santctum/vmupro-sdk/examples/nested_example/`
+
+**Demonstrates:**
+- Modular project organization with folders
+- Page-based navigation system (39 test pages)
+- Custom library modules via `import`
+- Asset management (audio, images, MIDI)
+- Double buffering for smooth rendering
+- FPS tracking and frame timing
+
+**Project Structure:**
+```
+nested_example/
+├── app.lua              # Main entry with page router
+├── metadata.json        # Lists all resources
+├── icon.bmp             # Application icon
+├── libraries/           # Custom utility modules
+│   ├── maths.lua        # Math helpers (add, multiply, square)
+│   └── utils.lua        # Utils (clamp, lerp)
+├── pages/               # Test pages (page1.lua - page39.lua)
+└── assets/              # Media resources
+    ├── *.wav            # Audio samples
+    ├── *.mid            # MIDI files
+    └── *.png/*.bmp      # Images
+```
+
+**Test Pages Coverage:**
+| Pages | Category | Topics |
+|-------|----------|--------|
+| 1-4 | Basic Graphics | Lines, rectangles, circles, text rendering |
+| 5 | Colors | RGB565 color constants and swatches |
+| 6 | Input | Button states (pressed, held, released) |
+| 7-8 | Fonts | Font variants and text measurement |
+| 9 | Animation | Sprite animation and timing |
+| 10 | File I/O | File/folder operations, read/write |
+| 11-39 | Advanced | Audio, sprites, double buffering, synthesizer, sequences |
+
+**Key Files:**
+| File | Purpose |
+|------|---------|
+| `app.lua` | Main entry with page routing, FPS tracking, navigation |
+| `libraries/maths.lua` | Math utility functions |
+| `libraries/utils.lua` | General utility functions (clamp, lerp) |
+| `pages/page*.lua` | Individual test pages |
+| `metadata.json` | Declares libraries, pages, and assets as resources |
+
+---
 
 ## For AI Agents
 
-### Example Application Structure
+### Working With Examples
 
-**Standard Layout:**
-```
-example_app/
-├── app.lua           # Main entry point with AppMain() function
-├── metadata.json     # App metadata (name, author, version, entry point)
-├── icon.bmp         # 76x76 BMP application icon
-├── pack.sh          # Shell script to package application
-├── pack.ps1         # PowerShell script to package application
-├── send.sh          # Shell script to deploy to device
-├── send.ps1         # PowerShell script to deploy to device
-├── README.md        # Example-specific documentation
-├── libraries/       # Optional: reusable Lua modules
-│   ├── maths.lua
-│   └── utils.lua
-├── pages/          # Optional: page/screen modules
-│   ├── page1.lua
-│   └── page2.lua
-└── assets/         # Optional: sprites, sounds, etc.
-```
+**When creating new examples:**
+1. Follow the `hello_world` structure for simple apps
+2. Follow the `nested_example` structure for multi-module apps
+3. Always include `metadata.json` with correct resource declarations
+4. Include both `.sh` and `.ps1` scripts for cross-platform support
 
-### Key Concepts Demonstrated
+**Understanding the page pattern (nested_example):**
+```lua
+-- pages/pageN.lua
+PageN = {}
 
-**hello_world example:**
-- Basic app.lua structure with `AppMain()` function
-- Display clearing and text rendering
-- Button input handling (A, B, X, Y, D-pad, START, SELECT)
-- Application lifecycle (initialization, main loop, exit)
-- Frame rate control (~60 FPS target)
-- Packaging and deployment scripts
+function PageN.render(drawPageCounter)
+    -- Draw page content
+    drawPageCounter()  -- Call to show page number
+end
 
-**nested_example example:**
-- Module system using `require()`
-- Separating concerns into libraries and pages
-- Page navigation and state management
-- Asset management (sprites in assets/ directory)
-- Multi-file project organization
-- Advanced input handling patterns
-- Comprehensive test plan (TEST_PLAN.md)
+function PageN.update()
+    -- Optional: Handle per-frame logic
+end
 
-### Running Examples
+function PageN.enter()
+    -- Optional: Called when navigating to page
+end
 
-**1. Package the example:**
-```bash
-cd examples/hello_world
-./pack.sh    # Linux/macOS
-# or
-.\pack.ps1   # Windows PowerShell
+function PageN.exit()
+    -- Optional: Called when navigating away
+end
 ```
 
-**2. Deploy to VMU Pro:**
-```bash
-./send.sh    # Linux/macOS
-# or
-.\send.ps1   # Windows PowerShell
+**Navigation pattern:**
+- LEFT/RIGHT buttons: Previous/Next page
+- B button: Exit application
+- MODE + navigation: Required on some pages (e.g., button test)
+
+### Metadata Schema
+
+Both examples use the same metadata structure:
+
+```json
+{
+  "metadata_version": 1,
+  "app_name": "App Name",
+  "app_author": "Author Name",
+  "app_version": "1.0.0",
+  "app_entry_point": "app.lua",
+  "app_mode": 1,
+  "app_environment": "lua",
+  "icon_transparency": false,
+  "resources": ["app.lua", "libraries", "pages", "assets"]
+}
 ```
 
-**Or manually copy:**
-Copy the generated `.vmupack` file to the VMU Pro SD card `apps/` folder.
-
-### Learning Path
-
-1. **Start with hello_world** - Understand basic app structure
-2. **Study nested_example** - Learn module organization and patterns
-3. **Review SDK documentation** - See `../docs/` for API reference
-4. **Experiment** - Modify examples to test SDK features
-5. **Build your own** - Use examples as templates for new projects
+**Resource declaration rules:**
+- List all files/folders that should be packaged
+- Folders are included recursively
+- `hello_world` only needs `["app.lua"]` (minimal)
+- `nested_example` needs `["app.lua", "libraries", "pages", "assets"]` (modular)
 
 ### Common Patterns
 
-**Importing SDK APIs:**
+**Import statement:**
 ```lua
-import "api/system"
-import "api/display"
-import "api/input"
+import "api/system"    -- SDK API
+import "pages/page1"   -- Local module
 ```
 
-**Loading Custom Modules:**
-```lua
-local utils = require("libraries.utils")
-local maths = require("libraries.maths")
-```
-
-**Main Loop Pattern:**
+**AppMain entry point:**
 ```lua
 function AppMain()
-    vmupro.system.log(vmupro.system.LOG_INFO, "App", "Starting...")
-
-    local running = true
-    while running do
-        -- Input
-        vmupro.input.read()
-        if vmupro.input.pressed(vmupro.input.B) then
-            running = false
-        end
-
-        -- Update
-        update()
-
-        -- Render
-        vmupro.graphics.clear(vmupro.graphics.BLACK)
-        render()
-        vmupro.graphics.refresh()
-
-        -- Frame timing
-        vmupro.system.delayMs(16)
-    end
-
+    -- Initialize
+    -- Main loop: update() then render()
+    -- Return 0 for success
     return 0
 end
 ```
 
-### Testing Examples
+**Frame timing (60 FPS target):**
+```lua
+local target_frame_time_us = 16666  -- 16.666ms
+while app_running do
+    local frame_start = vmupro.system.getTimeUs()
+    update()
+    render()
+    local elapsed = vmupro.system.getTimeUs() - frame_start
+    if target_frame_time_us - elapsed > 0 then
+        vmupro.system.delayUs(target_frame_time_us - elapsed)
+    end
+end
+```
 
-Each example should:
-1. Package without errors
-2. Load on VMU Pro device
-3. Respond to button input
-4. Display correctly on 240x240 screen
-5. Exit cleanly (B button or START+SELECT)
+---
 
-### Additional Resources
+## Key Files
 
-- **SDK API Reference:** `../docs/api/`
-- **Getting Started Guide:** `../docs/getting-started.md`
-- **First App Tutorial:** `../docs/guides/first-app.md`
-- **Parent SDK:** `../AGENTS.md`
+| File | Purpose |
+|------|---------|
+| `.python-version` | Python version for tooling |
+| `hello_world/` | Minimal application template |
+| `nested_example/` | Comprehensive SDK test suite |
+
+---
+
+## See Also
+
+- `../AGENTS.md` - Parent SDK documentation
+- `../docs/guides/first-app.md` - First app tutorial
+- `../tools/packer/` - Packaging tools

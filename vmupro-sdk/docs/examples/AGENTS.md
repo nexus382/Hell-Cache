@@ -1,51 +1,181 @@
+# VMU Pro SDK Examples - AGENTS.md
+
 <!-- Parent: ../AGENTS.md -->
 
-# AGENTS.md - VMU Pro SDK Examples Documentation
+**Generated:** 2026-02-23
 
-Generated on: 2026-02-17
+---
 
 ## Purpose
 
-This directory contains example applications and demonstrations for the VMU Pro SDK. These examples serve as:
+This directory contains annotated sample applications that demonstrate VMU Pro Lua SDK patterns, best practices, and common development workflows. Each example is a self-contained tutorial with complete source code, explanations, and exercises.
 
-1. **Learning Resources**: Starting points for understanding VMU Pro SDK concepts
-2. **Code Templates**: Ready-to-use patterns for common application features
-3. **API Demonstrations**: Practical examples showing SDK usage
-4. **Testing Grounds**: Safe environments for experimenting with SDK features
+**Key Characteristics:**
+- **Format:** Markdown files with embedded Lua source code
+- **Audience:** Developers learning VMU Pro application development
+- **Coverage:** Progressive complexity from basic to advanced patterns
 
-## Key Files
+---
 
-| File | Purpose | Topics Covered | Complexity |
-|------|---------|----------------|------------|
-| **hello-world.md** | Basic application demonstrating VMU Pro structure and APIs | App structure, graphics, input handling, timing control | Beginner |
-| *More examples to be added* | | | |
+## Example Files
 
-## Getting Started
+| File | Example | Description | Complexity |
+|------|---------|-------------|------------|
+| `hello-world.md` | Hello World | Minimal application demonstrating display, input, and main loop | Beginner |
 
-Begin with the [Hello World example](./hello-world.md) to understand the fundamental structure of a VMU Pro application.
+---
 
-## Example Organization
+## Hello World Example
 
-Examples are organized by complexity level:
+The `hello-world.md` file demonstrates the fundamental structure of every VMU Pro application:
 
-- **Beginner**: Basic applications with simple graphics and input
-- **Intermediate**: More complex features and API combinations
-- **Advanced**: Full-featured applications showcasing best practices
+### Key Concepts Covered
 
-## Contributing Examples
+1. **Application Structure**
+   - `AppMain()` entry point
+   - Main application loop pattern
+   - Clean exit with return code
 
-To add a new example:
+2. **Graphics Rendering**
+   - Clearing the frame buffer
+   - Drawing text with colors
+   - Drawing primitives (rectangles)
+   - Refreshing the display
 
-1. Create a markdown file with clear documentation
-2. Include complete source code with explanations
-3. Provide build and deployment instructions
-4. Include exercises or variations for learning
-5. Follow the established documentation format
+3. **Input Handling**
+   - Reading input state
+   - Detecting button presses
+   - Exit conditions
 
-## Related Resources
+4. **Timing Control**
+   - Frame rate management with `delayMs()`
+   - Target ~60 FPS
 
-- [VMU Pro SDK API Documentation](../api/)
-- [Developer Guide](../getting-started.md)
-- [Graphics Programming Guide](../guides/graphics-guide.md)
-- [Audio Programming Guide](../guides/audio-guide.md)
-- [File Operations Guide](../guides/file-operations.md)
+### Source Files Included
+
+| File | Purpose |
+|------|---------|
+| `app.lua` | Main application source code |
+| `metadata.json` | Application manifest for packaging |
+
+### Building Commands
+
+```bash
+python tools/packer/packer.py --projectdir examples/hello_world --appname hello_world --meta metadata.json --icon icon.bmp
+```
+
+---
+
+## For AI Agents
+
+### Working With Examples
+
+1. **Each example is self-contained** - All source code and metadata is embedded in the markdown
+
+2. **Examples follow consistent patterns:**
+   - Source code sections with syntax highlighting
+   - Key concepts explanation
+   - Building and running instructions
+   - Variations and exercises for learning
+
+3. **Examples cross-reference other docs:**
+   - API reference files in `../api/`
+   - Guide files in `../guides/`
+
+### Creating New Examples
+
+When adding new example documentation:
+
+1. **Follow the hello-world.md structure:**
+   ```markdown
+   # Example Name
+
+   Brief description of what this demonstrates.
+
+   ## Source Code
+
+   ### app.lua
+   ```lua
+   -- Complete working source code
+   ```
+
+   ### metadata.json
+   ```json
+   // Application manifest
+   ```
+
+   ## Key Concepts Demonstrated
+
+   ### 1. Concept Name
+   Explanation with code snippets...
+
+   ## Building and Running
+   Step-by-step instructions...
+
+   ## Variations and Exercises
+   Learning extensions...
+
+   ## Next Steps
+   Links to related documentation...
+   ```
+
+2. **Include complete, runnable code** - No placeholders or pseudo-code
+
+3. **Explain the "why" not just the "what"** - Help developers understand patterns
+
+4. **Cross-reference API documentation** - Link to specific function docs
+
+### Example-to-API Mapping
+
+| Example Pattern | API Documentation |
+|-----------------|-------------------|
+| Graphics rendering | `../api/display.md` |
+| Input handling | `../api/input.md` |
+| Sprite usage | `../api/sprites.md` |
+| Audio playback | `../api/audio.md` |
+| File operations | `../api/file.md` |
+| System utilities | `../api/system.md` |
+
+---
+
+## Exercises and Learning Path
+
+Each example includes exercises for hands-on learning:
+
+### Hello World Exercises
+
+| Exercise | Concept | Difficulty |
+|----------|---------|------------|
+| Color Animation | Frame counters, conditional rendering | Beginner |
+| Interactive Text | Button response, state changes | Beginner |
+| Moving Text | Position updates, boundary checking | Beginner |
+
+---
+
+## Directory Structure
+
+```
+examples/
+|-- AGENTS.md           # This file
+|-- hello-world.md      # Hello World example (beginner)
+```
+
+---
+
+## Related Files
+
+| File | Relationship |
+|------|--------------|
+| `../AGENTS.md` | Parent documentation AGENTS.md |
+| `../guides/` | Step-by-step tutorials |
+| `../api/` | API function reference |
+| `../../examples/` | Working example applications (source code) |
+
+---
+
+## See Also
+
+- `../guides/first-app.md` - Detailed first application tutorial
+- `../api/display.md` - Graphics API reference
+- `../api/input.md` - Input API reference
+- `../tools/packer.md` - Application packaging tool

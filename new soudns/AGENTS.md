@@ -1,32 +1,67 @@
-# AGENTS.md - New Sounds Directory
-
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-02-17 -->
+<!-- Generated: 2026-02-23 -->
 
-## Purpose
-This directory contains new sound files for the Inner Sanctum game. The files include various sound effects for gameplay events, character actions, and audio assets at different sample rates (44.1kHz PCM and 4-bit ADPCM).
+# New Sounds Directory
 
-## Key Files
+Audio assets for the Inner Sanctum game, including music, sound effects, and game event audio.
 
-| Filename | Type | Size | Description |
-|----------|------|------|-------------|
-| Intro_45sec.wav | Audio | 992,398 bytes | 45-second introduction theme |
-| arg_death1.wav | Audio | 28,776 bytes | Character death sound effect |
-| game-complete.wav | Audio | 86,808 bytes | Game completion celebration |
-| grunt.wav | Audio | 9,370 bytes | Character grunt sound |
-| inner_sanctum_44k1_adpcm_stereo.wav | Audio | 202,822 bytes | Main theme in 44.1kHz ADPCM stereo |
-| sword_swing_connect.wav | Audio | 21,396 bytes | Sword impact sound effect |
-| sword_swoosh.wav | Audio | 9,942 bytes | Sword swing whoosh sound |
-| win_level.wav | Audio | 56,406 bytes | Level completion sound |
-| yah.wav | Audio | 10,320 bytes | Victory/excitement sound |
+## Directory Structure
+
+```
+new soudns/
+  AGENTS.md
+  Intro_45sec.wav                    # 992 KB - Main menu/intro music track
+  arg_death1.wav                     # 28 KB  - Enemy death sound effect
+  game-complete.wav                  # 86 KB  - Game completion victory fanfare
+  grunt.wav                          # 9 KB   - Player grunt/exertion sound
+  inner_sanctum_44k1_adpcm_stereo.wav # 202 KB - Main theme music (44.1kHz ADPCM stereo)
+  sword_swing_connect.wav            # 21 KB  - Sword hit impact sound
+  sword_swoosh.wav                   # 9 KB   - Sword swing whoosh sound
+  win_level.wav                      # 56 KB  - Level completion jingle
+  yah.wav                            # 10 KB  - Player battle cry/attack vocal
+```
 
 ## Sound Categories
 
-### Gameplay Sounds
-- **Combat**: sword_swing_connect.wav, sword_swoosh.wav
-- **Character**: arg_death1.wav, grunt.wav, yah.wav
-- **Progression**: win_level.wav, game-complete.wav
+### Music Tracks
+| File | Description | Size |
+|------|-------------|------|
+| `Intro_45sec.wav` | Extended intro/main menu music | ~992 KB |
+| `inner_sanctum_44k1_adpcm_stereo.wav` | Main theme, stereo ADPCM format | ~202 KB |
 
-### Audio Assets
-- **Music**: Intro_45sec.wav, inner_sanctum_44k1_adpcm_stereo.wav
-- **Quality**: Mix of PCM and ADPCM formats for different bitrate requirements
+### Combat Sound Effects
+| File | Description | Size |
+|------|-------------|------|
+| `sword_swing_connect.wav` | Sword hitting target | ~21 KB |
+| `sword_swoosh.wav` | Sword swing through air | ~9 KB |
+| `grunt.wav` | Player exertion sound | ~9 KB |
+| `yah.wav` | Player battle cry | ~10 KB |
+
+### Game State Audio
+| File | Description | Size |
+|------|-------------|------|
+| `win_level.wav` | Level completion sound | ~56 KB |
+| `game-complete.wav` | Full game victory | ~86 KB |
+| `arg_death1.wav` | Enemy death sound | ~28 KB |
+
+## Technical Notes
+
+- All files are in WAV format
+- Main theme uses ADPCM compression (44.1kHz stereo)
+- Sound effects are optimized for quick loading
+- Naming convention: lowercase with underscores
+
+## Usage
+
+These sounds are loaded by the game engine via the audio system. Reference them by filename in game code:
+
+```lua
+-- Example sound playback
+play_sound("sword_swing_connect.wav")
+play_music("inner_sanctum_44k1_adpcm_stereo.wav")
+```
+
+## Parent Reference
+
+This directory is a child of the main project:
+- See [../AGENTS.md](../AGENTS.md) for project-level documentation

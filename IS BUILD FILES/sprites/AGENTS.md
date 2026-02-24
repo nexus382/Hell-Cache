@@ -1,141 +1,77 @@
-<!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-02-04 | Updated: 2026-02-04 -->
+# Sprites Directory
 
-# sprites
+<!-- Parent: ../AGENTS.md -->
+<!-- Generated: 2026-02-23 -->
+
+Build output directory containing compiled sprite assets for Inner Sanctum game.
 
 ## Purpose
-Game sprite assets for the 3D dungeon raycaster including character sprites, wall textures, UI elements, and level-specific resources.
 
-## Key Files
+This directory stores the final, build-ready sprite assets used by the game runtime. These are processed/optimized versions of source artwork from the main `sprites/` directory.
 
-| File | Description |
-|------|-------------|
-| `SPRITE_GUYS.png` | Spritesheet containing multiple character sprites |
-| `FighterWeapons.png` | Weapon sprites for combat |
-| `Walls.png` | Wall texture spritesheet |
-| `potion.png` | Health potion UI sprite |
-| `title.png` | Title screen background image |
+## Directory Structure
 
-### Warrior Character Sprites
-
-| File | Description | State |
-|------|-------------|-------|
-| `warrior_front.png` | Front-facing idle sprite | ✅ Complete |
-| `warrior_back.png` | Back-facing idle sprite | ✅ Complete |
-| `warrior_left.png` | Left-facing idle sprite | ✅ Complete |
-| `warrior_right.png` | Right-facing idle sprite | ✅ Complete |
-| `warrior_walk1.png` | Left walk frame 1 | ✅ Complete |
-| `warrior_walk2.png` | Left walk frame 2 | ✅ Complete |
-| `warrior_walk3.png` | Left walk frame 3 | ✅ Complete |
-| `warrior_walk1_r.png` | Right walk frame 1 (flipped) | ✅ Complete |
-| `warrior_walk2_r.png` | Right walk frame 2 (flipped) | ✅ Complete |
-| `warrior_walk3_r.png` | Right walk frame 3 (flipped) | ✅ Complete |
-| `warrior_walk4.png` | Side walk frame 4 | ✅ Complete |
-| `warrior_walk5.png` | Side walk frame 5 | ✅ Complete |
-| `warrior_walk4_r.png` | Side walk frame 4 (flipped) | ✅ Complete |
-| `warrior_walk5_r.png` | Side walk frame 5 (flipped) | ✅ Complete |
-| `warrior_walk_side1.png` | Side walk alternate frame | ✅ Complete |
-| `warrior_stand1.png` | Standing idle frame 1 | ✅ Complete |
-| `warrior_stand2.png` | Standing idle frame 2 | ✅ Complete |
-
-### Knight Character Sprites
-
-| File | Description | State |
-|------|-------------|-------|
-| `knight_front.png` | Front-facing knight sprite | ⚠️ Not in use |
-| `knight_back.png` | Back-facing knight sprite | ⚠️ Not in use |
-| `knight_left.png` | Left-facing knight sprite | ⚠️ Not in use |
-| `knight_right.png` | Right-facing knight sprite | ⚠️ Not in use |
-
-**Note**: Knights are removed from the game (sprites not ready).
+```
+sprites/
+├── level1/          # Level 1 character sprites (warrior class)
+├── level2/          # Level 2 character sprites (warrior class)
+├── test/            # Test/legacy sprite assets
+├── wall_textures/   # Wall texture sprites for dungeon rendering
+└── title.png        # Title screen graphic
+```
 
 ## Subdirectories
 
-| Directory | Purpose |
-|-----------|---------|
-| `_rows/` | Individual rows extracted from spritesheets (see `_rows/AGENTS.md`) |
-| `_wall_textures/` | Raw wall texture extraction files (see `_wall_textures/AGENTS.md`) |
-| `level1/` | Level 1 specific character sprites (see `level1/AGENTS.md`) |
-| `level2/` | Level 2 specific character sprites (see `level2/AGENTS.md`) |
-| `wall_textures/` | Processed wall textures for in-game use (see `wall_textures/AGENTS.md`) |
+### level1/
 
-## For AI Agents
+Level 1 warrior character sprites with the following animation sets:
 
-### Working In This Directory
+| Category | Files | Purpose |
+|----------|-------|---------|
+| Idle | `warrior_front.png`, `warrior_back.png`, `warrior_left.png`, `warrior_right.png` | Directional idle poses |
+| Walk | `warrior_walk[1-3].png`, `warrior_walk[1-3]_[direction].png` | Walking animation (3 frames, 4 directions) |
+| Attack | `warrior_attack_[direction][1-2].png` | Attack animation (2 frames, 4 directions) |
+| Sword FX | `sword_attack[1-9].png` | Sword swing visual effects (9 frames) |
+| Death | `warrior_death[1-7].png` | Death animation (7 frames) |
+| Item | `potion.png` | Potion pickup sprite |
 
-**Sprite Specifications**:
-- All warrior sprites normalized to **~517px height** for consistent scaling
-- All knight sprites normalized to **~579px height**
-- Format: PNG with transparency
-- Color: RGB565 compatible (auto-converted by SDK)
+### level2/
 
-**Ground Positioning**:
-- Sprites positioned: `drawY = groundY - scaledHeight`
-- Feet should be on ground, not eye-level positioning
-- Consistent across all character sprites
+Level 2 warrior character sprites - identical structure to level1 with upgraded visuals.
 
-**Animation Handling**:
-- Check `animFrame ~= nil` (not `animFrame > 0` since frame 0 is valid)
-- Frame counting depends on animation speed
-- Use consistent frame timing for smooth animations
+### test/
 
-### Common Patterns
+Legacy test assets:
+- `mask_guy_idle_old.bmp` - Old test sprite (BMP format)
 
-**Loading Sprites**:
-```lua
-local warrior_front = vmupro.sprite.new("sprites/warrior_front")
--- SDK automatically adds .png extension
-```
+### wall_textures/
 
-**Drawing Sprites**:
-```lua
--- Ground-based positioning
-local scale = 0.5
-local sprite_height = 517
-local drawY = ground_y - (sprite_height * scale)
-vmupro.sprite.drawScaled(warrior_front, x, drawY, scale, scale, 0)
-```
+Dungeon wall texture set for raycasting renderer:
 
-**Animation State Check**:
-```lua
-if animFrame ~= nil then
-    -- Animation is active
-    current_frame = math.floor(frameCount / 4) % frame_count
-else
-    -- Use idle sprite
-end
-```
+| Texture | Files | Description |
+|---------|-------|-------------|
+| Brick | `brick.png`, `brick-table-1-128.png` | Brick wall texture |
+| Metal | `metal.png`, `metal-table-1-128.png` | Metal wall texture |
+| Moss | `moss.png`, `moss-table-1-128.png` | Moss-covered stone texture |
+| Stone | `stone.png`, `stone-table-1-128.png` | Stone wall texture |
+| Wood | `wood.png`, `wood-table-1-128.png` | Wooden wall texture |
 
-### Sprite Processing Pipeline
+The `*-table-1-128.png` variants are likely optimized/lookup-table versions for the raycasting engine.
 
-1. **Generate**: Use AI tools (see `../SPRITE_PIPELINE.md`) to create base sprites
-2. **Normalize**: Scale all sprites to consistent heights (warrior: 517px, knight: 579px)
-3. **Split**: Use `split_spritesheet.py` or `split_warrior_actions.py` for spritesheets
-4. **Organize**: Place in level-specific directories (`level1/`, `level2/`)
-5. **Test**: Load in-game and verify scaling/positioning
+## Root Files
 
-### Testing Requirements
+| File | Description |
+|------|-------------|
+| `title.png` | Game title screen graphic |
 
-- Verify all sprites have transparent backgrounds
-- Check sprite heights are normalized correctly
-- Test scaling at various distances
-- Verify no artifacts or anti-aliasing issues
-- Confirm all animation frames load correctly
+## File Format
 
-### Known Issues
+- Primary format: PNG (alpha channel support)
+- Legacy format: BMP (test directory only)
 
-- **Invisible Soldier Bug**: One soldier may appear invisible (likely walking sprite not loading)
-- **Knights**: Removed from game due to incomplete sprite set
+## Usage Notes
 
-## Dependencies
-
-### Internal
-- `../app.lua` - Main game code that loads and renders sprites
-- `../generate_sprites.py` - Sprite generation script
-- `../split_*.py` - Sprite processing scripts
-
-### External
-- VMU Pro SDK sprite system (`vmupro.sprite.*`)
-- PIL/Pillow (Python image processing)
-
-<!-- MANUAL: Sprite specifications and notes can be added below -->
+1. These are BUILD OUTPUT files - do not edit directly
+2. Source assets are located in `/mnt/r/inner-santctum/sprites/`
+3. Rebuild sprites from source after modifying original artwork
+4. Naming convention follows: `{character}_{action}{frame}_{direction}.png`

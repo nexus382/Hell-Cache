@@ -1,87 +1,163 @@
-<!-- Parent: ../AGENTS.md -->
-# VMU Pro SDK - API Type Definitions
+# VMU Pro SDK - API Stub Files
 
-**Generated:** 2026-02-17
+<!-- Parent: ../AGENTS.md -->
+
+This directory contains LUA type definition stub files for IDE support and documentation. These files provide autocomplete, type hints, and documentation for the VMU Pro SDK API in your editor.
+
+**Last Updated:** 2026-02-23
 
 ## Purpose
 
-This directory contains Lua type definition files (API stubs) that provide IDE support, autocomplete, and inline documentation for VMU Pro SDK developers. These files define the complete API surface available at runtime on VMU Pro firmware.
+- **IDE Support Only**: These stubs enable autocomplete and inline documentation in Lua-aware editors
+- **Not Included in Packages**: These files are NOT packaged into .vmupack files
+- **Runtime Implementations**: Actual function implementations are provided by VMU Pro firmware at runtime
 
-**Important Notes:**
-- These are **stub definitions only** - they provide IDE support during development
-- Actual function implementations are provided by VMU Pro firmware at runtime
-- Stub files are NOT included in the final .vmupack package
-- Use `import "api/module_name"` to access these definitions in your code
+## File Inventory
 
-## Directory Structure
+### Core Stubs
+
+| File | Namespace | Description |
+|------|-----------|-------------|
+| `__stubs.lua` | `vmupro` | Core stubs: `vmupro.apiVersion()`, `AppMain()` entry point |
+| `system.lua` | `vmupro.system` | System utilities: logging, timing, memory, brightness |
+| `utilities.lua` | `vmupro.system` | Additional utility functions (sleepMs, getTimeUs) |
+| `log.lua` | `vmupro.system` | Logging API with level constants |
+| `debug.lua` | `vmupro.debug` | Debug utilities (requires Developer Mode) |
+
+### Graphics and Display
+
+| File | Namespace | Description |
+|------|-----------|-------------|
+| `display.lua` | `vmupro.graphics` | Graphics primitives: clear, refresh, shapes, text, colors |
+| `doublebuffer.lua` | `vmupro.graphics` | Double buffer rendering system for smooth animation |
+| `text.lua` | `vmupro.text` | Font selection and text measurement |
+| `sprites.lua` | `vmupro.sprite` | Sprite loading, animation, collision detection, effects |
+
+### Input
+
+| File | Namespace | Description |
+|------|-----------|-------------|
+| `input.lua` | `vmupro.input` | Button handling: D-pad, face buttons, system buttons |
+
+### Audio System
+
+| File | Namespace | Description |
+|------|-----------|-------------|
+| `audio.lua` | `vmupro.audio`, `vmupro.sound` | Audio control, volume, listen mode, sample playback |
+| `synth.lua` | `vmupro.sound.synth` | Synthesizer creation and waveform generation |
+| `instrument.lua` | `vmupro.sound.instrument` | Voice mapping for MIDI note-to-sound assignment |
+| `sequence.lua` | `vmupro.sound.sequence` | MIDI file loading and playback |
+
+### File System
+
+| File | Namespace | Description |
+|------|-----------|-------------|
+| `file.lua` | `vmupro.file` | SD card file operations (restricted to /sdcard/) |
+
+### Documentation
+
+| File | Description |
+|------|-------------|
+| `README.md` | API usage guide and overview |
+| `mainpage.md` | Documentation landing page |
+
+## Namespace Summary
+
+All SDK functions are organized under the global `vmupro` table:
 
 ```
-vmupro-sdk/sdk/api/
-├── __stubs.lua           # Root stub definitions
-├── audio.lua             # Audio system API
-├── debug.lua             # Debug utilities API
-├── display.lua           # Display/graphics API
-├── doublebuffer.lua      # Double-buffering API
-├── file.lua              # File system operations API
-├── input.lua             # Input handling API
-├── instrument.lua        # Audio instrument API
-├── log.lua               # Logging API
-├── sequence.lua          # Audio sequence API
-├── sprites.lua           # Sprite rendering API
-├── synth.lua             # Sound synthesis API
-├── system.lua            # System utilities API
-├── text.lua              # Text rendering API
-└── utilities.lua         # Utility functions API
+vmupro
+  |-- apiVersion()           # SDK version string
+  |-- system                 # System utilities
+  |     |-- log()
+  |     |-- setLogLevel()
+  |     |-- sleep(), delayMs(), delayUs()
+  |     |-- getTimeUs()
+  |     |-- getGlobalBrightness(), setGlobalBrightness()
+  |     |-- getMemoryUsage(), getMemoryLimit(), getLargestFreeBlock()
+  |     |-- getLastBlittedFBSide()
+  |-- graphics               # Display and graphics
+  |     |-- clear(), refresh()
+  |     |-- drawText(), drawRect(), drawFillRect()
+  |     |-- drawLine(), drawCircle(), drawEllipse()
+  |     |-- drawPolygon(), floodFill()
+  |     |-- applyMosaicToScreen()
+  |     |-- startDoubleBufferRenderer(), stopDoubleBufferRenderer()
+  |     |-- pushDoubleBufferFrame()
+  |     |-- [Color constants]
+  |-- text                   # Font management
+  |     |-- setFont(), calcLength(), getFontInfo()
+  |     |-- [Font constants]
+  |-- input                  # Button input
+  |     |-- read(), pressed(), held(), released()
+  |     |-- [Button constants]
+  |-- sprite                 # Sprite system
+  |     |-- new(), newSheet(), draw(), drawScaled(), drawTinted()
+  |     |-- drawBlended(), drawBlurred(), drawMosaic()
+  |     |-- Animation functions
+  |     |-- Collision functions
+  |     |-- [Flip constants]
+  |-- audio                  # Audio control
+  |     |-- getGlobalVolume(), setGlobalVolume()
+  |     |-- startListenMode(), exitListenMode()
+  |-- sound                  # Sound system
+  |     |-- update()         # CRITICAL: call every frame
+  |     |-- synth            # Synthesizers
+  |     |-- sample           # Sample playback
+  |     |-- sequence         # MIDI playback
+  |     |-- instrument       # Voice mapping
+  |     |-- [Waveform constants]
+  |-- file                   # File system
+  |     |-- exists(), folderExists()
+  |     |-- read(), write()
+  |     |-- createFile(), createFolder()
+  |     |-- deleteFile(), deleteFolder()
+  |     |-- getSize()
+  |-- debug                  # Debug utilities
+        |-- backtrace()
 ```
 
-## Key Files
+## File Sizes
 
-| File | Purpose | Key Namespaces |
-|------|---------|----------------|
-| **`__stubs.lua`** | Root stub definitions and namespace initialization | `vmupro` |
-| **`audio.lua`** | Audio system control - volume, channels, playback | `vmupro.audio.*` |
-| **`debug.lua`** | Debug utilities for development | `vmupro.debug.*` |
-| **`display.lua`** | Display graphics primitives - clear, draw, refresh | `vmupro.graphics.*` |
-| **`doublebuffer.lua`** | Double-buffering for flicker-free rendering | `vmupro.doublebuffer.*` |
-| **`file.lua`** | File system read/write operations | `vmupro.file.*` |
-| **`input.lua`** | Button/joystick input polling | `vmupro.input.*` |
-| **`instrument.lua`** | Musical instrument definitions and control | `vmupro.instrument.*` |
-| **`log.lua`** | Logging system with severity levels | `vmupro.log.*` |
-| **`sequence.lua`** | Audio sequencing for music/sound effects | `vmupro.sequence.*` |
-| **`sprites.lua`** | Sprite rendering, collision, animation | `vmupro.sprites.*` |
-| **`synth.lua`** | Sound synthesis - waveforms, envelopes | `vmupro.synth.*` |
-| **`system.lua`** | System utilities - timing, logging, delays | `vmupro.system.*` |
-| **`text.lua`** | Text rendering and font management | `vmupro.text.*` |
-| **`utilities.lua`** | General utility functions | `vmupro.utils.*` |
+| File | Size | Function Count |
+|------|------|----------------|
+| `sprites.lua` | 65.6 KB | Largest - extensive sprite system |
+| `display.lua` | 11.3 KB | Graphics primitives |
+| `synth.lua` | 8.5 KB | Synthesizer functions |
+| `audio.lua` | 7.8 KB | Audio control |
+| `file.lua` | 5.3 KB | File system |
+| `sequence.lua` | 6.5 KB | MIDI playback |
+| `system.lua` | 5.8 KB | System utilities |
+| `input.lua` | 4.8 KB | Button handling |
+| `instrument.lua` | 2.3 KB | Voice mapping |
+| `doublebuffer.lua` | 2.3 KB | Double buffering |
+| `text.lua` | 2.9 KB | Font functions |
+| `utilities.lua` | 2.9 KB | Utility functions |
+| `debug.lua` | 0.9 KB | Debug functions |
+| `log.lua` | 1.4 KB | Logging |
+| `__stubs.lua` | 0.8 KB | Core stubs |
 
 ## Usage Pattern
 
 ```lua
--- Import API modules for type definitions and autocomplete
+-- Import API modules for IDE autocomplete support
 import "api/system"
 import "api/display"
 import "api/input"
+import "api/sprites"
+import "api/audio"
 
--- Use namespaced functions (implemented by firmware at runtime)
 function AppMain()
-    vmupro.system.log(vmupro.system.LOG_INFO, "App", "Hello World!")
-    vmupro.graphics.clear()
-    vmupro.graphics.drawText(0, 0, "Hello!")
+    -- IDE will now show autocomplete for all vmupro.* functions
+    vmupro.graphics.clear(vmupro.graphics.BLACK)
+    vmupro.graphics.drawText("Hello", 10, 10, vmupro.graphics.WHITE)
     vmupro.graphics.refresh()
+
     return 0
 end
 ```
 
-## Documentation References
-
-For detailed API documentation, see:
-- **Main SDK docs:** `/vmupro-sdk/docs/`
-- **Getting started:** `/vmupro-sdk/docs/getting-started.md`
-- **API reference:** `/vmupro-sdk/docs/api/` (individual module docs)
-- **Examples:** `/vmupro-sdk/examples/`
-
 ## Related Documentation
 
-- **SDK Overview:** `/vmupro-sdk/docs/lua-sdk-overview.md`
-- **Tools Guide:** `/vmupro-sdk/docs/tools/development.md`
-- **Package Tool:** `/vmupro-sdk/docs/tools/packer.md`
+- [../AGENTS.md](../AGENTS.md) - Full SDK API reference with all function signatures
+- [README.md](README.md) - API usage guide for developers

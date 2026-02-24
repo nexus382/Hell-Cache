@@ -1,291 +1,251 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-02-17 -->
+<!-- Generated: 2026-02-23 -->
 
-# data/
+# Data Layer
 
-## Purpose
-This directory contains the complete data layer for the game expansion, including all game data definitions such as classes, items, loot tables, achievements, scoring, trader tiers, persistence hooks, and runtime state management.
+Static game data definitions and state initialization helpers for the Inner Sanctum roguelike.
 
-## Key Files
+## Overview
 
-| File | Description |
-|------|-------------|
-| `classes.lua` | Playable class definitions (Warrior, Archer, Mage) with base stats, template stats, growth rates, and class retrieval |
-| `items.lua` | Complete item catalog including consumables (potions), weapons (melee, ranged, spells), and equipment with stat modifiers and values |
-| `runtime_state.lua` | Runtime state bootstrap, implementation queue tracking, and default state factories for builds, inventory, stash, scores, and achievements |
-| `achievements.lua` | Achievement registry with trigger conditions, thresholds, rewards, and state management helpers |
-| `loot_tables.lua` | Chest-centric drop tables with deterministic roll path (hash-based, no math.random) for VMU Pro safety |
-| `score_model.lua` | Run score tracking and top-10 high score management with entry creation, sorting, and initialization helpers |
-| `trader_tiers.lua` | Score-gated trader inventory tiers with tier selection logic |
-| `persistence.lua` | Save/load persistence hooks for high scores and achievements (stub-safe, ready for vmupro.file integration) |
+This directory contains the **data layer** - pure Lua modules that define game constants, lookup tables, and factory functions. These modules have minimal dependencies and are safe to load early in the boot sequence.
 
-## Data Structures
+## Files
 
-### Classes (`classes.lua`)
+### [achievements.lua](./achievements.lua)
 
-Each class contains:
-- `id` - Unique identifier (e.g., "warrior", "archer", "mage")
-- `name` - Display name
-- `base_hp` - Starting health points
-- `base_damage` - Starting damage
-- `base_speed` - Movement speed multiplier
-- `primary` - Attack type ("melee", "ranged", "magic")
-- `base_defense` - Damage reduction
-- `template_stats` - Eight stat categories (agility, power, defense, dodge, regen, crit, atk_speed, shield_bonus)
-- `growth` - Per-level stat increases (hp, damage, speed)
+Achievement registry and state management helpers.
 
-**Key Functions:**
-- `getGameClass(classId)` - Retrieve class data, defaults to Warrior
+| Export | Type | Description |
+|--------|------|-------------|
+| `GameAchievements` | table | Achievement definitions with triggers and rewards |
+| `newAchievementState()` | function | Factory for fresh achievement state |
+| `markAchievementUnlocked(state, id)` | function | Marks achievement as unlocked, returns true if newly unlocked |
 
-### Items (`items.lua`)
+**Achievement Triggers:**
+- `kill_count` - Total enemies killed
+- `levels_cleared` - Levels completed
+- `no_damage_level` - Flawless level completion
 
-Each item contains:
-- `id` - Unique identifier
-- `name` - Display name
-- `kind` - Item type ("consumable", "weapon", "equipment")
-- `class_affinity` - Class restriction ("warrior", "archer", "mage", "any")
-- `weight` - Inventory weight cost
-- `stack_max` - Maximum stack size
-- `value` - Gold value for trading
-- `effect` - For consumables (e.g., `{heal = 25}`)
-- `stats` - Six stat modifiers (stat_speed, stat_damage, stat_range, stat_agility, stat_power, stat_defense), each ranging from -10 to +10
+---
 
-**Stat Modifier Effects:**
-- `stat_speed` - Affects attack cycle time (positive = faster)
-- `stat_damage` - Damage output
-- `stat_range` - Attack range
-- `stat_agility` - Movement/dodging capability
-- `stat_power` - Ability effectiveness
-- `stat_defense` - Damage reduction
+### [classes.lua](./classes.lua)
 
-**Key Functions:**
-- `getGameItem(itemId)` - Retrieve item data
+Playable class definitions with base stats and growth curves.
 
-### Loot Tables (`loot_tables.lua`)
+| Export | Type | Description |
+|--------|------|-------------|
+| `GameClasses` | table | Class definitions (warrior, archer, mage) |
+| `GameClassOrder` | table | Ordered list of class IDs for UI |
+| `getGameClass(classId)` | function | Returns class data, defaults to warrior |
 
-Drop tables organized by tier:
-- `chest_tier_1` - Basic drops (potions, charm_guard)
-- `chest_tier_2` - Advanced drops (includes weapons)
-
-**Key Functions:**
-- `rollChestDrop(levelId, classId, seedValue)` - Deterministic loot roll using hash function (no math.random)
-- `getChestTierForLevel(levelId)` - Returns appropriate tier based on level
-
-**Deterministic Roll System:**
-- Uses `lootHash(seedA, seedB)` for reproducible results
-- Class bias applied: warrior=11, archer=17, mage=23
-- Safe for VMU Pro (avoids math.random crashes)
-
-### Achievements (`achievements.lua`)
-
-Each achievement contains:
-- `id` - Unique identifier
-- `name` - Display name
-- `trigger` - Event type ("kill_count", "levels_cleared", "no_damage_level")
-- `threshold` - Required value to unlock
-- `reward` - Bonus (e.g., `{score_bonus = 100}`)
-
-**Key Functions:**
-- `newAchievementState()` - Create fresh achievement state
-- `markAchievementUnlocked(state, achievementId)` - Mark as unlocked, returns true if newly unlocked
-
-### Score Model (`score_model.lua`)
-
-**Run State Structure:**
+**Class Structure:**
 ```lua
 {
-    current = 0,          -- Current score
-    kills = 0,            -- Enemy kills
-    levels_cleared = 0,   -- Levels completed
-    started_level = 1,    -- Starting level
-    ended_level = 1,      -- Final level reached
+    id = "warrior",
+    name = "Warrior",
+    base_hp = 120,
+    base_damage = 20,
+    base_speed = 1.0,
+    primary = "melee",        -- "melee" | "ranged" | "magic"
+    base_defense = 4.00,
+    template_stats = {...},   -- Base stat multipliers
+    growth = {hp = 8, damage = 2, speed = 0.0}  -- Per-level gains
+}
+```
+
+**Classes:**
+| Class | Primary | HP | Damage | Speed | Role |
+|-------|---------|----|----|-------|------|
+| Warrior | melee | 120 | 20 | 1.0 | Tank/DPS |
+| Archer | ranged | 90 | 14 | 1.15 | Fast DPS |
+| Mage | magic | 80 | 18 | 1.05 | Burst DPS |
+
+---
+
+### [items.lua](./items.lua)
+
+Complete item catalog for loot, trading, and inventory systems.
+
+| Export | Type | Description |
+|--------|------|-------------|
+| `GameItems` | table | Item definitions indexed by ID |
+| `getGameItem(itemId)` | function | Returns item data or nil |
+
+**Item Kinds:**
+- `consumable` - Potions with heal effects
+- `weapon` - Weapons with stat modifiers
+- `equipment` - Charms and accessories
+
+**Stat Modifiers** (range: -10 to +10):
+| Stat | Effect |
+|------|--------|
+| `stat_speed` | Attack cycle time (positive = faster) |
+| `stat_damage` | Damage output |
+| `stat_range` | Attack range |
+| `stat_agility` | Movement/dodging |
+| `stat_power` | Ability effectiveness |
+| `stat_defense` | Damage reduction |
+
+**Weapon Classes:**
+- `1` = Melee (Warrior)
+- `2` = Ranged (Archer)
+- `3` = Magic (Mage)
+
+**Item Categories:**
+- Consumables: `potion_small`, `potion_large`
+- Melee Weapons: `sword_iron`, `weapon_dagger`, `weapon_axe`, `weapon_spear`, `weapon_hammer`
+- Ranged Weapons: `bow_short`, `weapon_longbow`, `weapon_crossbow`
+- Magic Foci: `focus_ember`
+- Projectile Spells: `spell_fireball`, `spell_icebolt`, `spell_lightning`, etc.
+- Beam Spells: `spell_arcanebeam`, `spell_deathray`, `spell_frostbeam`, `spell_lifedrain`
+- AOE Spells: `spell_froznova`, `spell_chainlight`, `spell_meteor`, `spell_voidzone`
+- Utility Spells: `spell_teleport`, `spell_shield`, `spell_haste`, `spell_phaseshift`, `spell_manaflare`
+- Equipment: `charm_guard`
+
+---
+
+### [loot_tables.lua](./loot_tables.lua)
+
+Chest drop tables with deterministic rolling (VMU Pro safe - no `math.random`).
+
+| Export | Type | Description |
+|--------|------|-------------|
+| `GameLootTables` | table | Weighted drop tables per chest tier |
+| `rollChestDrop(levelId, classId, seedValue)` | function | Returns item ID from weighted roll |
+
+**Chest Tiers:**
+- `chest_tier_1` - Level 1 drops (basic potions, charm)
+- `chest_tier_2` - Level 2+ drops (weapons, better potions)
+
+**Deterministic Rolling:**
+Uses hash-based selection with class bias to ensure reproducible results without `math.random`.
+
+---
+
+### [persistence.lua](./persistence.lua)
+
+Save/load hook points (stub-safe for development).
+
+| Export | Type | Description |
+|--------|------|-------------|
+| `ExpansionPersistence.paths` | table | File paths for save data |
+| `loadHighScores(defaultValue)` | function | Load high scores (stub) |
+| `saveHighScores(scoreList)` | function | Save high scores (stub) |
+| `loadAchievementState(defaultValue)` | function | Load achievements (stub) |
+| `saveAchievementState(state)` | function | Save achievements (stub) |
+
+**Save Paths:**
+```lua
+{
+    high_scores = "save/high_scores.dat",
+    achievements = "save/achievements.dat",
+}
+```
+
+**Note:** Currently returns defaults/clone. Wire to VMU Pro file API when format is finalized.
+
+---
+
+### [runtime_state.lua](./runtime_state.lua)
+
+Runtime state bootstrap and per-run initialization.
+
+| Export | Type | Description |
+|--------|------|-------------|
+| `ExpansionRuntimeState.bootstrap()` | function | Create full initial game state |
+| `ExpansionRuntimeState.beginRun(levelId, fallbackLevel)` | function | Create fresh run state |
+| `ExpansionImplementationQueue` | table | Feature implementation order |
+
+**Bootstrap State Structure:**
+```lua
+{
+    player_build_state = {class_id, level, xp, stats, equipment, ...},
+    inventory_state = {max_weight, current_weight, items, quick_slots},
+    stash_state = {max_weight, current_weight, items},
+    achievement_state = {unlocked, progress},
+    high_score_state = {entries},
+    score_state = {current, kills, levels_cleared, ...},
+}
+```
+
+**Build State Stats:**
+- Primary: `vitality`, `strength`, `dexterity`, `intellect`
+- Weapon Mastery: `[1]=melee, [2]=ranged, [3]=magic`
+
+---
+
+### [score_model.lua](./score_model.lua)
+
+Run score tracking and high score list management.
+
+| Export | Type | Description |
+|--------|------|-------------|
+| `GameScoreModel.newRun()` | function | Create fresh run score state |
+| `GameScoreModel.addPoints(runState, amount)` | function | Add points, return new total |
+| `GameScoreModel.sanitizeInitials(initials)` | function | Clean input to 3 uppercase letters |
+| `GameScoreModel.createEntry(initials, score, level)` | function | Create high score entry |
+| `GameScoreModel.insertHighScore(list, entry, max)` | function | Insert and sort, keep top N |
+
+**Run State:**
+```lua
+{
+    current = 0,
+    kills = 0,
+    levels_cleared = 0,
+    started_level = 1,
+    ended_level = 1,
 }
 ```
 
 **High Score Entry:**
 ```lua
 {
-    initials = "AAA",     -- 3 uppercase letters
-    score = 1000,         -- Final score
-    level = 5,            -- Level reached
+    initials = "AAA",  -- 3 uppercase letters
+    score = 0,         -- Integer score
+    level = 1,         -- Level reached
 }
 ```
 
-**Key Functions:**
-- `GameScoreModel.newRun()` - Initialize new run state
-- `GameScoreModel.addPoints(runState, amount)` - Add points to run
-- `GameScoreModel.sanitizeInitials(initials)` - Ensure 3 uppercase letters
-- `GameScoreModel.createEntry(initials, score, levelReached)` - Create high score entry
-- `GameScoreModel.insertHighScore(list, entry, maxEntries)` - Insert and maintain top-10 (or custom limit)
+---
 
-### Trader Tiers (`trader_tiers.lua`)
+### [trader_tiers.lua](./trader_tiers.lua)
 
-Three score-gated tiers:
-- Tier 1 (0+ score): potions, charm_guard
-- Tier 2 (500+ score): adds basic weapons
-- Tier 3 (1500+ score): expanded inventory
+Score-gated trader inventory tiers.
 
-**Key Functions:**
-- `getTraderTierForScore(score)` - Returns appropriate tier based on current score
+| Export | Type | Description |
+|--------|------|-------------|
+| `GameTraderTiers` | table | Tier definitions with min_score and items |
+| `getTraderTierForScore(score)` | function | Returns highest qualifying tier |
 
-### Persistence (`persistence.lua`)
+**Tier Thresholds:**
+| Tier | Min Score | Items |
+|------|-----------|-------|
+| 1 | 0 | `potion_small`, `charm_guard` |
+| 2 | 500 | `potion_large`, `sword_iron`, `bow_short`, `focus_ember` |
+| 3 | 1500 | Tier 2 + `charm_guard` |
 
-**Save Paths:**
-- `save/high_scores.dat` - High score data
-- `save/achievements.dat` - Achievement progress
+---
 
-**Key Functions:**
-- `ExpansionPersistence.loadHighScores(defaultValue)` - Load high scores (currently stub)
-- `ExpansionPersistence.saveHighScores(scoreList)` - Save high scores (currently stub)
-- `ExpansionPersistence.loadAchievementState(defaultValue)` - Load achievements (returns cloned state)
-- `ExpansionPersistence.saveAchievementState(achievementState)` - Save achievements (currently stub)
-
-**Note:** Persistence hooks are stub-safe and ready for vmupro.file integration when format is finalized.
-
-### Runtime State (`runtime_state.lua`)
-
-**Implementation Queue:**
-Tracks expansion features in progress:
-- classes_combat_split
-- chest_drop_conversion
-- inventory_stash_weight
-- trader_economy_loop
-- high_score_death_flow_achievements_ui
-
-**Default State Factories:**
-- `makeDefaultBuildState()` - Player class, level, stats, equipment
-- `makeDefaultInventoryState()` - 30 weight capacity, 3 quick slots
-- `makeDefaultStashState()` - 120 weight capacity storage
-
-**Key Functions:**
-- `ExpansionRuntimeState.bootstrap()` - Initialize complete runtime state
-- `ExpansionRuntimeState.beginRun(levelId, fallbackLevel)` - Start new run with score tracking
-
-## For AI Agents
-
-### Editing Game Data
-
-**When Modifying Classes:**
-1. Maintain balance between classes (Warrior: tanky, Archer: fast/ranged, Mage: high damage/low hp)
-2. Growth rates should scale appropriately (e.g., Warrior gains more HP per level)
-3. Template stats should reflect class identity (agility for Archer, power for Mage)
-4. Keep `GameClassOrder` array synchronized with `GameClasses` keys
-
-**When Adding Items:**
-1. Follow item structure exactly (id, name, kind, class_affinity, weight, stack_max, value)
-2. Stat modifiers must be between -10 and +10
-3. Weapons require stats table, consumables require effect table
-4. Use appropriate class_affinity ("any" for universal items)
-5. Consider weight vs. value balance for economy
-
-**When Modifying Loot Tables:**
-1. Keep weights reasonable (total doesn't need to be 100, but ratios matter)
-2. Higher tiers should drop better items
-3. Maintain class variety (weapons for all classes)
-4. Use deterministic roll system - avoid math.random
-
-**When Adding Achievements:**
-1. Use clear, descriptive trigger names
-2. Thresholds should be challenging but achievable
-3. Provide meaningful score bonuses as rewards
-4. Document trigger conditions in comments
-
-**When Modifying Score System:**
-1. Keep high score limit at 10 for consistency
-2. Score sorting: primary by score DESC, secondary by level DESC
-3. Always sanitize initials (3 uppercase letters)
-4. Use math.max/math.floor for safety
-
-**When Adding Trader Tiers:**
-1. Maintain ascending min_score values
-2. Each tier should expand on previous (not replace)
-3. Include class variety in items
-4. Balance economy (item value vs. tier threshold)
-
-**When Implementing Persistence:**
-1. Use stub-safe pattern - return defaults if file load fails
-2. Clone tables before modifying (avoid reference sharing)
-3. Define clear file paths in `paths` table
-4. Format must be vmupro.file-compatible when implemented
-
-### VMU Pro SDK Constraints
-
-**Critical:**
-- **NO math.random()** - Use deterministic hash-based alternatives (see `loot_tables.lua`)
-- **NO math.atan2()** - Use safeAtan2() implementation
-- All persistence must use vmupro.file API when implemented
-- Keep data structures simple (flat tables preferred)
-- Avoid complex metatables or __index magic
-
-### Testing Changes
-
-**Balance Testing:**
-1. Test all three classes with new items/stats
-2. Verify loot distribution (run multiple seeds)
-3. Check achievement unlock conditions
-4. Validate score sorting and high score insertion
-5. Test trader tier progression
-
-**Integration Testing:**
-1. Ensure data changes don't break game systems
-2. Check that all `getGame*()` functions handle nil inputs
-3. Verify persistence state factories create valid defaults
-4. Test save/load flow when persistence is implemented
-
-### Dependencies
-
-**Internal Dependencies:**
-- Game code consumes these data tables via require() statements
-- Runtime state used by `app.lua` for initialization
-- Items/weapons referenced by inventory and combat systems
-- Score model used by UI and game over screens
-
-**External Dependencies:**
-- VMU Pro SDK (vmupro.file for persistence when implemented)
-- Lua standard library (math, table) - with safe alternatives
-
-### Data Flow
+## Dependencies
 
 ```
-┌─────────────────┐
-│   Boot/Init     │
-└────────┬────────┘
-         │
-         ├──> ExpansionRuntimeState.bootstrap()
-         │    ├──> makeDefaultBuildState()
-         │    ├──> makeDefaultInventoryState()
-         │    ├──> makeDefaultStashState()
-         │    └──> ExpansionPersistence.load*()
-         │
-         ├──> getGameClass(classId)
-         └──> getGameItem(itemId)
+runtime_state.lua
+    --> achievements.lua (newAchievementState)
+    --> score_model.lua (GameScoreModel.newRun)
+    --> persistence.lua (ExpansionPersistence)
 
-┌─────────────────┐
-│   Gameplay      │
-└────────┬────────┘
-         │
-         ├──> rollChestDrop(levelId, classId, seed)
-         ├──> GameScoreModel.addPoints(runState, amount)
-         ├──> markAchievementUnlocked(state, achievementId)
-         └──> getTraderTierForScore(score)
+loot_tables.lua --> items.lua (item IDs)
 
-┌─────────────────┐
-│   Save/Quit     │
-└────────┬────────┘
-         │
-         └──> ExpansionPersistence.save*()
+trader_tiers.lua --> items.lua (item IDs)
 ```
 
-## Design Notes
+## Design Principles
 
-**Deterministic Loot System:**
-The loot system uses hash-based deterministic rolls instead of math.random() to avoid VMU Pro SDK crashes. The `lootHash(seedA, seedB)` function provides reproducible results given the same inputs, with class bias adding variety without randomness.
+1. **Pure Data**: Modules define tables and simple functions - no side effects
+2. **Stub-Safe**: Persistence hooks return defaults when file API unavailable
+3. **Deterministic**: Loot rolling uses hash-based selection (no `math.random`)
+4. **Defaults Provided**: All getters return sensible fallbacks for nil input
 
-**Stat Modifier System:**
-All items use a consistent 6-stat system with -10 to +10 ranges. Positive values always improve the stat. This allows for balanced item progression and clear player understanding of item value.
+## Subdirectories
 
-**Stub-Safe Persistence:**
-Persistence hooks are designed to fail gracefully, returning defaults if save files are missing or corrupted. This allows game systems to be developed before persistence implementation is finalized.
-
-**Modular Data Design:**
-Each data file is independent and can be loaded separately. Helper functions provide safe access patterns with nil handling and sensible defaults.
+None.

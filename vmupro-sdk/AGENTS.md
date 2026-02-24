@@ -1,303 +1,243 @@
-<!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-02-17 -->
+# VMU Pro SDK - AGENTS.md
 
-# vmupro-sdk
+<!-- Parent: ../AGENTS.md -->
+
+**Generated:** 2026-02-23
+
+---
 
 ## Purpose
-VMU Pro Lua SDK - A comprehensive Lua-based software development kit for creating applications on the VMU Pro platform (a handheld virtual memory unit device with 240x240 display). Provides graphics, input, audio, file system, and utility APIs for embedded game development.
 
-## Version
-**Current Version:** 1.2.0 (see VERSION file)
+The VMU Pro SDK is a comprehensive LUA-based software development kit for creating applications on the VMU Pro handheld platform. It provides the official APIs, documentation, examples, and tooling needed to develop, package, and deploy Lua applications to VMU Pro devices.
+
+**Key Characteristics:**
+- **Platform:** VMU Pro handheld device (240x240 display, RGB565 color)
+- **Language:** Lua scripting environment
+- **API Coverage:** Graphics, input, audio, file system, and system utilities
+- **Tooling:** Python-based packaging and deployment tools
+
+**Current Version:** 1.2.0
+
+---
 
 ## Key Files
 
-| File | Description |
-|------|-------------|
-| `README.md` | Comprehensive SDK documentation with quick start, API reference, examples |
+| File | Purpose |
+|------|---------|
+| `README.md` | Main SDK documentation with quick start guide |
+| `LICENSE` | Copyright (c) 2025 8BitMods - All rights reserved |
 | `VERSION` | Current SDK version (1.2.0) |
-| `LICENSE` | Copyright (c) 2025 8BitMods. All rights reserved |
-| `.gitignore` | Git ignore patterns |
+| `.gitignore` | Git ignore patterns for SDK repository |
+
+---
 
 ## Subdirectories
 
 | Directory | Purpose |
 |-----------|---------|
-| `sdk/api/` | Lua API type definitions and stubs for IDE support (see below) |
-| `docs/` | Complete documentation - getting started guides, API reference, tutorials |
-| `examples/` | Example applications demonstrating SDK features |
-| `tools/packer/` | Python tools for packaging and deploying applications |
+| `sdk/` | Core SDK - Lua API definitions and type stubs for IDE support |
+| `docs/` | Documentation - API references, guides, and examples |
+| `examples/` | Sample applications demonstrating SDK usage |
+| `tools/` | Development tools - packer and deployment utilities |
 
-## SDK API Modules (`sdk/api/`)
-
-| File | Description |
-|------|-------------|
-| `__stubs.lua` | Auto-completion stubs for IDE support |
-| `system.lua` | System functions: logging (`vmupro.system.log`), timing (`vmupro.system.getTimeUs`, `vmupro.system.delayMs`), memory monitoring |
-| `display.lua` | Display functions: clear, drawText, drawLine, drawRect, drawCircle, refresh, color constants |
-| `doublebuffer.lua` | Double buffering for flicker-free rendering |
-| `text.lua` | Text and font functions: setFont, calcLength, font constants |
-| `input.lua` | Button input: read, pressed, held, released (A, B, X, Y, UP, DOWN, LEFT, RIGHT, START, SELECT) |
-| `audio.lua` | Audio functions: setGlobalVolume, getGlobalVolume, startListenMode, exitListenMode |
-| `synth.lua` | Synthesizer functions: new, setWaveType, setAttack, setDecay, setSustain, setRelease, setVolume, play, free |
-| `instrument.lua` | Instrument functions for audio sequencing |
-| `sequence.lua` | Audio sequencing functions |
-| `file.lua` | File system operations: readFileComplete, writeFileComplete, fileExists, listFiles, createDirectory (restricted to `/sdcard`) |
-| `sprites.lua` | Sprite functions: new, draw, drawScaled, setCollision, batch operations |
-| `debug.lua` | Debug utilities and helpers |
-| `utilities.lua` | Additional utility functions |
-| `log.lua` | Logging utilities |
-
-## Documentation (`docs/`)
-
-| File/Directory | Description |
-|----------------|-------------|
-| `SUMMARY.md` | Documentation table of contents |
-| `README.md` | Documentation introduction |
-| `getting-started.md` | Setup guide, prerequisites, first application tutorial |
-| `lua-sdk-overview.md` | Lua environment overview |
-| `api/display.md` | Display API reference |
-| `api/sprites.md` | Sprites API reference |
-| `api/doublebuffer.md` | Double buffer API reference |
-| `api/audio.md` | Audio API reference |
-| `api/synth.md` | Synth API reference |
-| `api/instrument.md` | Instrument API reference |
-| `api/sequence.md` | Sequence API reference |
-| `api/input.md` | Input API reference |
-| `api/file.md` | File system API reference |
-| `api/system.md` | System API reference |
-| `api/debug.md` | Debug API reference |
-| `guides/first-app.md` | First application tutorial |
-| `guides/graphics-guide.md` | Graphics programming guide |
-| `guides/audio-guide.md` | Audio programming guide |
-| `guides/file-operations.md` | File operations guide |
-
-## Examples (`examples/`)
-
-| Directory | Description |
-|-----------|-------------|
-| `hello_world/` | Minimal "Hello World" application |
-| `nested_example/` | Demonstrates module organization with `require()` and folder structures |
-
-## Tools (`tools/packer/`)
-
-| File | Description |
-|------|-------------|
-| `packer.py` | Main packaging tool - creates `.vmupack` files from projects |
-| `send.py` | Deployment tool - uploads applications to VMU Pro via USB/serial |
+---
 
 ## For AI Agents
 
-### Understanding the VMU Pro Platform
+### Working With This SDK
 
-**Hardware Constraints:**
-- Display: 240x240 pixels, RGB565 little-endian color format
-- Embedded environment with limited memory
-- Real-time requirements (target ~60 FPS with 16ms frame delay)
+1. **SDK APIs are in `sdk/api/`** - These are stub/type definition files for IDE autocomplete, not runtime code.
 
-**Lua Environment:**
-- Lua 5.4+ interpreter
-- Module system via `require()`
-- File access restricted to `/sdcard` directory
-- All API functions provided by VMU Pro firmware (not these stub files)
+2. **Documentation is in `docs/`** - Contains API references, getting started guides, and tool documentation.
 
-### Application Structure
+3. **Examples demonstrate patterns** - `examples/hello_world/` for basic usage, `examples/nested_example/` for module organization.
 
-**Standard Project Layout:**
-```
-my_app/
-├── app.lua           # Main entry point, must contain AppMain() function
-├── metadata.json     # App metadata (name, author, version, entry point, resources)
-├── icon.bmp         # 76x76 BMP application icon
-├── libraries/       # Optional: custom Lua modules
-│   └── utils.lua
-└── assets/          # Optional: sprites, sounds, etc.
-```
+4. **Tools are Python-based** - `tools/packer/packer.py` for packaging, `tools/packer/send.py` for deployment.
 
-**metadata.json Structure:**
-```json
-{
-  "metadata_version": 1,
-  "app_name": "App Name",
-  "app_author": "Author",
-  "app_version": "1.0.0",
-  "app_entry_point": "app.lua",
-  "app_mode": 1,
-  "app_environment": "lua",
-  "icon_transparency": false,
-  "resources": ["app.lua", "libraries", "assets"]
-}
-```
+### Core API Modules
 
-### Module System
+| Module | File | Description |
+|--------|------|-------------|
+| System | `sdk/api/system.lua` | Logging, timing, and system utilities |
+| Display | `sdk/api/display.lua` | Graphics rendering, text, shapes, colors |
+| DoubleBuffer | `sdk/api/doublebuffer.lua` | Double buffering for smooth rendering |
+| Input | `sdk/api/input.lua` | Button and control input handling |
+| Audio | `sdk/api/audio.lua` | Audio playback and control |
+| Synth | `sdk/api/synth.lua` | Synthesizer API for sound generation |
+| Instrument | `sdk/api/instrument.lua` | Musical instrument definitions |
+| Sequence | `sdk/api/sequence.lua` | Music sequence playback |
+| Sprites | `sdk/api/sprites.lua` | Sprite collision and batch operations |
+| File | `sdk/api/file.lua` | File system operations (restricted to `/sdcard`) |
+| Debug | `sdk/api/debug.lua` | Debugging utilities |
+| Text | `sdk/api/text.lua` | Text rendering utilities |
+| Utilities | `sdk/api/utilities.lua` | Additional utility functions |
 
-**Loading Modules:**
-```lua
--- Standard pattern
-local utils = require("libraries.utils")
-local helper = require("libraries.helper")
-```
+### API Namespace Pattern
 
-**Creating Modules:**
-```lua
--- libraries/utils.lua
-local utils = {}
+All VMU Pro APIs are accessed via the `vmupro.*` namespace:
 
-function utils.clamp(value, min, max)
-    return math.min(math.max(value, min), max)
-end
-
-return utils
-```
-
-### Common SDK Patterns
-
-**Main Application Loop:**
 ```lua
 import "api/system"
 import "api/display"
-import "api/input"
 
-local running = true
-
-function AppMain()
-    vmupro.system.log(vmupro.system.LOG_INFO, "App", "Starting...")
-
-    while running do
-        -- Input handling
-        vmupro.input.read()
-        if vmupro.input.pressed(vmupro.input.B) then
-            running = false
-        end
-
-        -- Update game state
-        update()
-
-        -- Render
-        vmupro.graphics.clear(vmupro.graphics.BLACK)
-        render()
-        vmupro.graphics.refresh()
-
-        -- Frame rate control (~60 FPS)
-        vmupro.system.delayMs(16)
-    end
-
-    return 0
-end
+vmupro.system.log(vmupro.system.LOG_INFO, "MyApp", "Hello!")
+vmupro.graphics.clear(vmupro.graphics.BLACK)
 ```
 
-**Color Constants (RGB565 Little-Endian):**
-```lua
-COLOR_BLACK = 0x0000
-COLOR_WHITE = 0xFFFF
-COLOR_RED = 0x00F8
-COLOR_GREEN = 0xE007
-COLOR_BLUE = 0x1F00
--- See display.lua for full list
-```
+### Common Tasks
 
-**Sprite Loading and Drawing:**
-```lua
--- Load sprite (assets/sprites/player.png must be in resources)
-local player_sprite = vmupro.sprite.new("assets/sprites/player")
+**Finding API documentation:**
+- API reference: `docs/api/` directory contains markdown docs for each module
+- Getting started: `docs/getting-started.md` and `docs/guides/first-app.md`
 
--- Draw at position
-vmupro.sprite.draw(player_sprite, x, y)
+**Understanding example patterns:**
+- `examples/hello_world/` - Minimal application structure
+- `examples/nested_example/` - Module organization with `require()`
 
--- Draw scaled
-vmupro.sprite.drawScaled(player_sprite, x, y, scale_x, scale_y)
-```
-
-**Synth-based Audio (recommended over sample-based):**
-```lua
-vmupro.audio.startListenMode()
-
-local synth = vmupro.sound.synth.new(vmupro.sound.kWaveNoise)
-vmupro.sound.synth.setAttack(synth, 0.01)
-vmupro.sound.synth.setDecay(synth, 0.1)
-vmupro.sound.synth.setSustain(synth, 0.2)
-vmupro.sound.synth.setRelease(synth, 0.1)
-vmupro.sound.synth.setVolume(synth, 0.5, 0.5)
-vmupro.sound.synth.play(synth)
-
--- Cleanup
-vmupro.sound.synth.free(synth)
-vmupro.audio.exitListenMode()
-```
-
-### Packaging Applications
-
-**Using packer.py:**
+**Packaging applications:**
 ```bash
 python tools/packer/packer.py \
-  --projectdir /path/to/project \
-  --appname output_name \
-  --meta metadata.json \
-  --sdkversion 1.2.0 \
-  --icon icon.bmp \
-  [--debug true]
+    --projectdir path/to/project \
+    --appname output_name \
+    --meta metadata.json \
+    --sdkversion 1.2.0 \
+    --icon icon.bmp
 ```
 
-Output: `output_name.vmupack` file
-
-**Deploying to VMU Pro:**
+**Deploying to device:**
 ```bash
 python tools/packer/send.py \
-  --func send \
-  --localfile app.vmupack \
-  --remotefile apps/app.vmupack \
-  --comport COM3  # Windows: COM3, macOS: /dev/tty.usbserial-xxx
+    --func send \
+    --localfile app.vmupack \
+    --remotefile apps/app.vmupack \
+    --comport COM3
 ```
 
-Or manually copy `.vmupack` to SD card `apps/` folder.
+### Application Structure Pattern
 
-### Best Practices
-
-1. **Error Handling**: Check return values from API functions
-2. **Resource Cleanup**: Free sprites and audio resources when done
-3. **Performance**: Use efficient algorithms, avoid excessive temporary objects in loops
-4. **Memory**: Monitor with `vmupro.system.getMemoryUsage()`
-5. **Module Design**: Create small, focused modules for reusability
-6. **Frame Rate**: Use `vmupro.system.delayMs(16)` for ~60 FPS
-
-### Debugging
-
-- Use `vmupro.system.log(vmupro.system.LOG_DEBUG, "tag", "message")` for runtime logging
-- Enable `--debug true` when packaging for debug files
-- Check VMU Pro device logs for runtime errors
-
-### Dependencies
-
-**External:**
-- Python 3.7+ (for packer/send tools)
-- PIL/Pillow (Python image library)
-- Lua 5.4+ (for local testing, optional)
-
-**Runtime:**
-- VMU Pro firmware provides all API implementations
-- Type stub files are for IDE support only, not included in `.vmupack`
-
-### Known Platform Issues (from parent project context)
-
-**Crash Bugs to Avoid:**
-- `math.atan2()` can crash - use safe alternatives or implement custom `safeAtan2()`
-- `math.random()` can crash - use deterministic alternatives for game logic
-- Sample-based audio can crash - prefer synth-based audio generation
-
-**Safe Atan2 Implementation:**
-```lua
-local function safeAtan2(y, x)
-    if x == 0 then
-        if y > 0 then return 1.5708
-        elseif y < 0 then return -1.5708
-        else return 0 end
-    end
-    local angle = math.atan(y / x)
-    if x < 0 then angle = angle + 3.14159 end
-    return angle
-end
+```
+my_app/
+├── app.lua           # Main entry point with AppMain() function
+├── metadata.json     # Application metadata and resource manifest
+├── icon.bmp          # 76x76 application icon
+└── libraries/        # Optional custom modules
+    └── utils.lua
 ```
 
-## Additional Resources
+### Metadata Schema
 
-- VMU Pro Developer Documentation: https://developer.vmu.pro/
-- See parent AGENTS.md (`../AGENTS.md`) for project context using this SDK
+| Field | Type | Description |
+|-------|------|-------------|
+| `metadata_version` | number | Always `1` |
+| `app_name` | string | Display name (1-255 chars) |
+| `app_author` | string | Author name (1-255 chars) |
+| `app_version` | string | Version in `x.y.z` format |
+| `app_entry_point` | string | Main LUA file (usually `app.lua`) |
+| `app_mode` | number | Always `1` for LUA applications |
+| `app_environment` | string | Always `"lua"` |
+| `icon_transparency` | boolean | Icon transparency support |
+| `resources` | array | List of files/folders to include in package |
+
+---
+
+## Documentation Structure
+
+### API Documentation (`docs/api/`)
+
+| File | Content |
+|------|---------|
+| `system.md` | System, logging, and timing APIs |
+| `display.md` | Graphics rendering and display management |
+| `doublebuffer.md` | Double buffering for flicker-free rendering |
+| `input.md` | Button and control input handling |
+| `audio.md` | Audio playback and control |
+| `synth.md` | Synthesizer sound generation |
+| `instrument.md` | Musical instrument definitions |
+| `sequence.md` | Music sequence playback |
+| `sprites.md` | Sprite collision and batch operations |
+| `file.md` | File system operations |
+| `debug.md` | Debugging utilities |
+
+### Guides (`docs/guides/`)
+
+| File | Content |
+|------|---------|
+| `first-app.md` | Creating your first VMU Pro application |
+| `graphics-guide.md` | Graphics programming guide |
+| `audio-guide.md` | Audio programming guide |
+| `file-operations.md` | File system usage patterns |
+
+### Tools Documentation (`docs/tools/`)
+
+| File | Content |
+|------|---------|
+| `packer.md` | Application packaging tool documentation |
+| `development.md` | Development workflow and tooling |
+
+---
+
+## Example Applications
+
+### hello_world
+
+Minimal application demonstrating:
+- Basic project structure
+- AppMain() entry point
+- System logging
+- Metadata configuration
+
+### nested_example
+
+Comprehensive example demonstrating:
+- Module organization with folders
+- Using `require()` for custom modules
+- Multiple pages/screens (38 page files)
+- Utility libraries (maths.lua, utils.lua)
+
+---
+
+## Dependencies
+
+### Build/Development
+- **Python 3.6+** - Required for packer and deployment tools
+- **Pillow (PIL)** - For icon processing: `pip install Pillow`
+
+### Runtime
+- **VMU Pro** handheld device or emulator
+- VMU Pro firmware with Lua environment support
+
+---
+
+## Architecture Overview
+
+```
++------------------+
+|   Application    |  <- Your Lua app (app.lua + modules)
++--------+---------+
+         |
+         v
++------------------+
+|   VMU Pro APIs   |  <- vmupro.* namespace
++--------+---------+
+         |
+    +----+----+
+    |         |
+    v         v
++------+  +--------+
+| SDK  |  | Firmware|
+| Stubs|  | Runtime |
++------+  +--------+
+```
+
+**Packaging Flow:**
+```
+Source Files -> packer.py -> .vmupack -> send.py -> VMU Pro Device
+```
+
+---
+
+## See Also
+
+- `../AGENTS.md` - Parent project (Inner Sanctum game)
+- `README.md` - Main SDK documentation
+- `docs/SUMMARY.md` - Documentation table of contents

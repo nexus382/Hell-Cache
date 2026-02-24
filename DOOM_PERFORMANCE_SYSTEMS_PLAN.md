@@ -1,7 +1,8 @@
 # Inner Sanctum: Doom-Level Performance Systems Plan
 
-> **Version**: 1.0
+> **Version**: 1.1
 > **Generated**: 2026-02-21
+> **Updated**: 2026-02-23 (Build 176 status sync)
 > **Target**: VMU Pro (240 MHz, 5 MB RAM)
 > **Codebase**: `/mnt/r/inner-santctum/app_full.lua`
 
@@ -38,6 +39,46 @@
 - **P1 Rendering**: 15-25% render speedup (2-3ms saved)
 - **P2 Memory**: Reduced GC pauses, smoother frametimes
 - **P3 Advanced**: Optional 60 FPS target achievable
+
+---
+
+## Implementation Status Update (As of Build 178)
+
+This section is the handoff snapshot for active development.
+
+- **Measured in-device result so far (user testing):** approximately **+1 to +4 FPS**, depending on scene complexity, view angle, and active debug/video settings.
+- This gain is from cumulative work; it is **not** a single-change delta.
+- Measurement is empirical gameplay testing, not a fixed-script benchmark run.
+
+### Completed Plan Items
+
+| Plan Item | Status | Build(s) | Notes |
+|-----------|--------|----------|-------|
+| P0-1: Move sqrt after culling | Implemented | 165 | Applied in AI update path using squared-distance first checks. |
+| P0-2: Cache atan2 result | Implemented | 165 | Direction angle reuse added in soldier update flow. |
+| P0-3: Dirty flag for build state | Implemented | 165 | Dirty-mark fast path wired into mutation points. |
+| P0-4: Move table literals out of loops | Implemented | 165 | Static title/game-over/pause menu literals moved out of hot render paths. |
+| P1-1: Fog LUT | Implemented | 166 | Fog factor lookup tables added and normalized with fog-range updates. |
+| P1-2: Span buffering for fog regions | Implemented | 167 | Contiguous no-hit fog columns batched into spans. |
+| P1-3: Column state caching | Implemented | 168 | Cached wall sheet metrics and hot-loop simplifications added. |
+| P2-1: Blood effect pooling | Implemented | 169 | Reuse pool added to reduce allocations/GC churn. |
+| P2-2: Projectile pooling | Implemented | 169 | Projectile objects recycled instead of allocate/free churn. |
+| L1-1: Replace deepCopy load path | Implemented | 170 | Specialized map/sprite clone buffers replaced heavy recursive copy path. |
+| P2-3: Sprite sort buffer reuse | Implemented | 177 | Sprite render-order cache now rebuilds in place with reusable entries and comparator to reduce per-refresh allocations. |
+| L1-3: Remove `collectgarbage()` from `startLevel` | Implemented | 178 | Forced full GC call removed from level-start path to reduce transition hitching. |
+
+### Attempted, Then Removed
+
+| Plan Item | Status | Build(s) | Notes |
+|-----------|--------|----------|-------|
+| P1-4: Precomputed visibility tables/caps | Attempted then removed | 171-176 | Initial VIS-cap system shipped (171-175) but was removed in 176 due poor quality/performance tradeoff in current implementation. |
+
+### Still Pending / Next Candidates
+
+| Plan Item | Status | Notes |
+|-----------|--------|-------|
+| P3-4: Table-driven state machine | Pending | Medium effort; maintainability + possible AI gain. |
+| A1-2/A1-3 animation/frame LUT refinements | Pending | Lower priority unless memory/perf pressure increases. |
 
 ---
 

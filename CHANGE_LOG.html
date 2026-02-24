@@ -96,6 +96,8 @@
       <a href="#b156-160">Builds 156-160</a>
       <a href="#b161-165">Builds 161-165</a>
       <a href="#b166-170">Builds 166-170</a>
+      <a href="#b171-175">Builds 171-175</a>
+      <a href="#b176-180">Builds 176-180</a>
     </div>
 
     <div class="panel" id="rules">
@@ -484,6 +486,90 @@
           <li>Renderer performance work landed in sequence: fog LUT caching, fog-curtain span batching, per-frame hot-loop constant hoisting, and wall-column state caching.</li>
           <li>Memory/GC pressure reductions were added in gameplay hot paths through menu/static allocation cleanup, blood/projectile object pooling, and level-load copy-path specialization.</li>
           <li>Audio playback regressions were corrected so title/game sample SFX paths are active again while keeping current game behavior intact.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="panel" id="b171-175">
+      <h2>Builds 171-175</h2>
+      <div class="build">
+        <h3>Build 171</h3>
+        <ul>
+          <li>Implemented the next renderer-phase step with a conservative precomputed visibility-distance cap table built per level map and reused during runtime raycasts.</li>
+          <li>Added map-level visibility cap generation helpers and lookup wiring so each ray can use a safe, margin-extended max-distance cap from the player’s current tile/direction bucket.</li>
+          <li>Integrated caps into both fixed and float raycast paths, plus reset/rebuild hooks on level load/unload, to reduce unnecessary far-ray stepping without changing wall/fog behavior.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 172</h3>
+        <ul>
+          <li>Rewired draw-distance settings to a shared normalization path (<code>normalizeDrawDistanceSetting</code>) so runtime menus and quality presets now clamp to the active visibility-cap system limits.</li>
+          <li>Updated mip-map range normalization to respect the currently effective draw-distance cap, preventing mip thresholds from drifting beyond reachable ray distance under the new renderer constraints.</li>
+          <li>Hooked draw-distance + mip re-normalization into both debug/perf menu handlers and startup init flow so settings stay coherent after any live tuning change.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 173</h3>
+        <ul>
+          <li>Fixed no-hit wall-loop behavior that was forcing fog-curtain distance to <code>FOG_END</code>, which made draw-distance changes appear ineffective in open-space rays.</li>
+          <li>No-hit rays now use the active ray cast cap (draw-distance constrained, including visibility-cap limits), so reducing draw distance immediately shortens far render reach.</li>
+          <li>Updated fog-curtain span batching to carry per-span capped distance instead of a global fog-full distance, preserving batching while restoring correct distance controls.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 174</h3>
+        <ul>
+          <li>Added corner-safe visibility behavior: capped rays that miss can now perform a conditional full-distance recast (tunable) to prevent visible black wedges when peeking around corners.</li>
+          <li>Added new live Video debug controls (placed between MIP and FOG): <code>VIS CAPS</code>, <code>VIS MARGIN</code>, <code>VIS RECAST</code>, and <code>VIS RCST MAX</code>.</li>
+          <li>Renderer now respects a runtime <code>VIS_CAP_ENABLED</code> toggle and uses the new recast threshold controls to balance quality vs FPS in real time without removing visibility-cap optimization entirely.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 175</h3>
+        <ul>
+          <li>Reworked VIS-cap hot path in <code>renderWallsExperimentalHybrid</code> to avoid per-ray function-call overhead by inlining cap-table lookup/clamp logic and precomputing the current-cell cap-table base index once per frame.</li>
+          <li>Added adaptive VIS auto-gating: if draw distance is low or probe caps indicate negligible gain, VIS is disabled for that frame to avoid paying overhead when it is unlikely to help.</li>
+          <li>Added VIS telemetry counters for benchmarking (<code>Q/C/R/H</code>, capped/uncapped averages, auto-disable flag) and surfaced them in PERF overlay/page so keep-vs-remove decisions can be data-driven.</li>
+          <li>Reduced fallback recast pressure by adding recast stride control (<code>VIS RCST STEP</code>) and wiring it into the Video debug settings alongside existing VIS controls.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="panel" id="b176-180">
+      <h2>Builds 176-180</h2>
+      <div class="build">
+        <h3>Build 176</h3>
+        <ul>
+          <li>Removed the VIS-cap system and all associated controls/telemetry from <code>app_full.lua</code> after in-game testing showed poor quality/performance tradeoff.</li>
+          <li>Re-aligned VIDEO debug menu selection indices with displayed rows after VIS option removal, fixing mis-mapped setting edits and restoring predictable tuning behavior.</li>
+          <li>Simplified draw-distance system cap logic to use draw/fog preset ceilings directly (no VIS dependency), keeping draw-distance and mip normalization stable.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 177</h3>
+        <ul>
+          <li>Implemented sprite-order buffer reuse in the world-sprite render path: cache rebuild now updates <code>spriteOrderCache</code> entries in place instead of allocating a fresh order table each refresh.</li>
+          <li>Added a reusable far-to-near sort comparator (<code>spriteOrderCompareFarToNear</code>) to avoid per-sort closure allocation in the sprite ordering hot path.</li>
+          <li>Centralized sprite-order invalidation via <code>clearSpriteOrderCache()</code> and switched enemy/prop debug toggles to use it, reducing avoidable table churn.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 178</h3>
+        <ul>
+          <li>Removed forced <code>collectgarbage()</code> from <code>startLevel()</code> to reduce level-load hitch spikes while preserving the unload/reload flow.</li>
+          <li>Reworked distance preset ladders for tuning granularity: under 12 now uses 0.5 steps, and 12+ uses 1.0 steps across draw distance, mip thresholds, fog distance controls, and far-texture cutoff presets.</li>
+          <li>Added per-tier mip disable support (<code>0/OFF</code>) with independent control for MIP1-MIP4, plus renderer-side OFF-aware threshold handling so disabled tiers are truly ignored at runtime.</li>
+          <li>Updated defaults to requested values: draw distance 20, far-texture cutoff OFF, MIP1=5.5, MIP2=9, MIP3=18, MIP4=20, fog start=24, fog full=28, fog cutoff=28.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 179</h3>
+        <ul>
+          <li>Started expansion Milestone M1 runtime plumbing: added run reset/continuation detection so next-level win transitions keep a run while title/restart/load starts a fresh run context.</li>
+          <li>Implemented deterministic score event bus in <code>app_full.lua</code> and hooked it into live gameplay events: enemy kill, health pickup, player damage intake, level start, and level clear.</li>
+          <li>Wired achievement trigger progress for <code>kill_count</code>, <code>levels_cleared</code>, and <code>no_damage_level</code> to the new event flow, including score-bonus payout when an achievement unlocks.</li>
+          <li>Added gameplay HUD score strip showing run score, kill count, and clears for in-device validation while we continue expansion phases.</li>
+          <li>Updated <code>GAME_EXPANSION_PLAN.html</code> Section 20 with a live implementation-status snapshot so external AI re-reviews can see completed vs pending expansion work.</li>
         </ul>
       </div>
     </div>

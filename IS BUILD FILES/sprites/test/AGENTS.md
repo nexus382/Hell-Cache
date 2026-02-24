@@ -1,71 +1,40 @@
-<!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-02-17 -->
+# Test Sprites Directory
 
-# test
+<!-- Parent: ../AGENTS.md -->
+<!-- Generated: 2026-02-23 -->
+
+Legacy test sprite assets for Inner Sanctum game development.
 
 ## Purpose
-Test sprites directory for experimental and legacy sprite assets. Contains prototype sprites and test files that are not actively used in the main game but preserved for reference and future development.
 
-## Key Files
+This directory contains archived test and legacy sprite files used during early development. These assets are retained for reference and backward compatibility but are not used in the active game.
 
-| File | Description |
-|------|-------------|
-| `mask_guy_idle_old.bmp` | Legacy idle sprite for testing character mask rendering (BMP format) |
+## Contents
 
-## Asset Details
+| File | Format | Dimensions | Description |
+|------|--------|------------|-------------|
+| `mask_guy_idle_old.bmp` | BMP (Windows 3.x) | 32x32, 16-bit | Legacy test character idle sprite |
+
+## File Details
 
 ### mask_guy_idle_old.bmp
-- **Format**: BMP (uncompressed bitmap)
-- **Status**: Legacy/Prototype
-- **Purpose**: Testing character mask rendering and sprite loading pipeline
-- **Note**: Old format sprite, likely superseded by PNG versions
 
-## For AI Agents
+- **Format**: PC bitmap, Windows 3.x format
+- **Dimensions**: 32x32 pixels
+- **Color Depth**: 16-bit
+- **File Size**: 2,104 bytes
+- **Purpose**: Early development test sprite for character idle animation
+- **Status**: Deprecated - retained for archival purposes
 
-### Working In This Directory
+## Notes
 
-**Legacy Considerations**:
-- BMP format is less efficient than PNG (no compression, larger file size)
-- Older sprite format may require different processing
-- Test/prototype assets not optimized for game performance
+1. All files in this directory use the legacy BMP format
+2. Active sprites use PNG format with alpha channel support
+3. Do not reference these files in production code
+4. These assets may be removed in future cleanup
 
-**Migration Notes**:
-- Consider converting BMP sprites to PNG for better performance
-- Test sprite compatibility with current rendering pipeline
-- Archive legacy assets if no longer needed
+## Related Directories
 
-### Common Patterns
-
-**Loading Legacy Sprites**:
-```lua
--- BMP sprites may need special handling
-local test_sprite = vmupro.sprite.new("sprites/test/mask_guy_idle_old")
--- SDK should handle BMP format but PNG is preferred
-```
-
-## Subdirectories
-
-None (this is a leaf directory for test assets)
-
-## Dependencies
-
-### Internal
-- `../app.lua` - Main game code (may reference test sprites during development)
-- `../generate_sprites.py` - Sprite generation tools for creating new test assets
-
-### External
-- VMU Pro SDK sprite system (`vmupro.sprite.*`) - Supports multiple image formats
-
-## Testing Requirements
-
-- Verify BMP sprites load correctly in the game engine
-- Test sprite scaling and positioning with legacy format
-- Check if alpha channel is supported in BMP sprites
-- Performance comparison with PNG sprites
-
-## Known Issues
-
-- **Format Inefficiency**: BMP files are larger than PNG equivalents
-- **Limited Features**: BMP format may not support advanced features like alpha transparency
-
-<!-- MANUAL: Test sprite documentation and development notes can be added below -->
+- `../level1/` - Active level 1 character sprites
+- `../level2/` - Active level 2 character sprites
+- `../wall_textures/` - Active wall texture sprites

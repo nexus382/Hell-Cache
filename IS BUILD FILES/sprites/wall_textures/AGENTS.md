@@ -1,128 +1,103 @@
+# Wall Textures Directory
+
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-02-04 | Updated: 2026-02-04 -->
 
-# wall_textures
+## Overview
 
-## Purpose
-Processed wall texture files ready for use in the 3D raycaster engine. These textures are mapped onto wall surfaces during rendering.
+This directory contains wall texture assets used for rendering wall surfaces in the game. Each texture type includes both a full-size version and a 128x128 tileable version for optimized rendering.
 
-## For AI Agents
+## Directory Structure
 
-### Working In This Directory
-
-**These are production-ready game assets** - wall textures loaded and rendered by the raycaster engine.
-
-**Usage in Game**:
-Textures are loaded via VMU Pro SDK:
-```lua
--- Textures embedded in game package
-local texture = vmupro.sprite.new("sprites/wall_textures/stone_wall_1")
+```
+wall_textures/
+  AGENTS.md
+  brick.png
+  brick-table-1-128.png
+  metal.png
+  metal-table-1-128.png
+  moss.png
+  moss-table-1-128.png
+  stone.png
+  stone-table-1-128.png
+  wood.png
+  wood-table-1-128.png
 ```
 
-**Raycaster Texture Mapping**:
-- Textures mapped based on wall type and orientation
-- Scaled based on ray distance (perspective correction)
-- Color may be adjusted for lighting/depth effects
+## Texture Assets
 
-### Wall Texture Categories
+### Brick Textures
 
-**Stone Walls**:
-- Light stone (COLOR_STONE_L: 0x8C73)
-- Dark stone (COLOR_STONE_D: 0x4A52)
-- Used for: Standard dungeon walls
+| File | Description |
+|------|-------------|
+| `brick.png` | Full-size brick wall texture |
+| `brick-table-1-128.png` | 128x128 tileable brick texture |
 
-**Brick Walls**:
-- Light brick (COLOR_BRICK_L: 0x4062)
-- Dark brick (COLOR_BRICK_D: 0x0041)
-- Used for: Brick passages, fortified areas
+Use for: Castle walls, dungeon interiors, industrial areas, aged structures.
 
-**Moss Walls**:
-- Light moss (COLOR_MOSS_L: 0x4444)
-- Dark moss (COLOR_MOSS_D: 0x2222)
-- Used for: Aged, dungeon-like areas
+---
 
-**Metal Walls**:
-- Light metal (COLOR_METAL_L: 0x1084)
-- Dark metal (COLOR_METAL_D: 0x0842)
-- Used for: Special chambers, armories
+### Metal Textures
 
-**Wood Walls**:
-- Light wood (COLOR_WOOD_L: 0x4051)
-- Dark wood (COLOR_WOOD_D: 0x2028)
-- Used for: Doors, wooden structures, interior rooms
+| File | Description |
+|------|-------------|
+| `metal.png` | Full-size metal wall texture |
+| `metal-table-1-128.png` | 128x128 tileable metal texture |
 
-### Color Constants (RGB565)
+Use for: Sci-fi environments, industrial facilities, mechanical rooms, armored walls.
 
-From `../../app.lua`:
-```lua
-COLOR_STONE_L = 0x8C73
-COLOR_STONE_D = 0x4A52
-COLOR_BRICK_L = 0x4062
-COLOR_BRICK_D = 0x0041
-COLOR_MOSS_L = 0x4444
-COLOR_MOSS_D = 0x2222
-COLOR_METAL_L = 0x1084
-COLOR_METAL_D = 0x0842
-COLOR_WOOD_L = 0x4051
-COLOR_WOOD_D = 0x2028
-```
+---
 
-### Texture Mapping in Raycaster
+### Moss Textures
 
-**Perpendicular Distance Correction**:
-```lua
--- Fix fisheye effect
-local perp_wall_dist = ray_dist * math.cos(ray_angle - player_angle)
-local wall_height = math.floor(screen_height / perp_wall_dist)
-```
+| File | Description |
+|------|-------------|
+| `moss.png` | Full-size moss-covered wall texture |
+| `moss-table-1-128.png` | 128x128 tileable moss texture |
 
-**Texture Column Selection**:
-```lua
--- Determine which column of texture to draw
-local tex_x = math.floor(texture_width * wall_x) % texture_width
-```
+Use for: Overgrown ruins, forest interiors, ancient structures, nature-reclaimed areas.
 
-**Drawing Textured Walls**:
-```lua
--- For each vertical strip
-vmupro.sprite.drawScaled(texture,
-    screen_x,
-    wall_top,
-    1,
-    wall_height,
-    0)
-```
+---
 
-### Common Patterns
+### Stone Textures
 
-**Wall Type Selection** (from map data):
-```lua
-if wall_type == 1 then
-    -- Stone wall
-    texture = stone_texture
-elseif wall_type == 2 then
-    -- Brick wall
-    texture = brick_texture
--- ... etc
-end
-```
+| File | Description |
+|------|-------------|
+| `stone.png` | Full-size stone wall texture |
+| `stone-table-1-128.png` | 128x128 tileable stone texture |
 
-### Testing Requirements
+Use for: Cave walls, castle interiors, medieval structures, natural formations.
 
-- Verify textures render without distortion
-- Check perspective correction at various angles
-- Confirm lighting effects look correct
-- Test all wall types in-game
-- Ensure no texture seams or artifacts
+---
 
-## Dependencies
+### Wood Textures
 
-### Internal
-- `../../app.lua` - Raycaster engine using these textures
-- `../Walls.png` - Source textures spritesheet
-- `../_wall_textures/` - Raw extracted files (if processing)
+| File | Description |
+|------|-------------|
+| `wood.png` | Full-size wood wall texture |
+| `wood-table-1-128.png` | 128x128 tileable wood texture |
 
-### External
-- VMU Pro SDK sprite system
+Use for: Cabin interiors, fences, wooden structures, rustic environments.
 
-<!-- MANUAL: Texture mapping notes can be added below -->
+---
+
+## Naming Convention
+
+| Pattern | Meaning |
+|---------|---------|
+| `{material}.png` | Full-size texture source |
+| `{material}-table-1-128.png` | Tileable 128x128 optimized version |
+
+## Usage Notes
+
+1. **Tileable versions** (`-table-1-128`) are optimized for repeated tiling without visible seams
+2. **Full-size versions** are source assets and may contain more detail
+3. All textures are designed to tile seamlessly in game rendering
+4. Choose texture based on environment theme and visual consistency
+
+## Related Directories
+
+- `../` - Parent sprites directory containing other sprite categories
+- `../../` - IS BUILD FILES root directory
+
+---
+*Generated: 2026-02-23*
