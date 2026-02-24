@@ -1,0 +1,67 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page6.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 6: Input - Button States
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page6 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 6: Input - Button States
+00007 [GPT-5-CODEX-MAX-REASONING] function Page6.render(drawPageCounter)
+00008 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00009 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00012 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00013 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Button States", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00016 [GPT-5-CODEX-MAX-REASONING] 
+00017 [GPT-5-CODEX-MAX-REASONING]     local y_pos = 40
+00018 [GPT-5-CODEX-MAX-REASONING] 
+00019 [GPT-5-CODEX-MAX-REASONING]     -- Helper function to show button state
+00020 [GPT-5-CODEX-MAX-REASONING]     local function showButtonState(name, button)
+00021 [GPT-5-CODEX-MAX-REASONING]         local is_pressed = vmupro.input.pressed(button)
+00022 [GPT-5-CODEX-MAX-REASONING]         local is_held = vmupro.input.held(button)
+00023 [GPT-5-CODEX-MAX-REASONING]         local is_released = vmupro.input.released(button)
+00024 [GPT-5-CODEX-MAX-REASONING] 
+00025 [GPT-5-CODEX-MAX-REASONING]         local state_text = ""
+00026 [GPT-5-CODEX-MAX-REASONING]         local state_color = vmupro.graphics.GREY
+00027 [GPT-5-CODEX-MAX-REASONING] 
+00028 [GPT-5-CODEX-MAX-REASONING]         if is_pressed then
+00029 [GPT-5-CODEX-MAX-REASONING]             state_text = "PRESSED"
+00030 [GPT-5-CODEX-MAX-REASONING]             state_color = vmupro.graphics.GREEN
+00031 [GPT-5-CODEX-MAX-REASONING]         elseif is_held then
+00032 [GPT-5-CODEX-MAX-REASONING]             state_text = "HELD   "
+00033 [GPT-5-CODEX-MAX-REASONING]             state_color = vmupro.graphics.YELLOW
+00034 [GPT-5-CODEX-MAX-REASONING]         elseif is_released then
+00035 [GPT-5-CODEX-MAX-REASONING]             state_text = "RELEASED"
+00036 [GPT-5-CODEX-MAX-REASONING]             state_color = vmupro.graphics.RED
+00037 [GPT-5-CODEX-MAX-REASONING]         else
+00038 [GPT-5-CODEX-MAX-REASONING]             state_text = "--------"
+00039 [GPT-5-CODEX-MAX-REASONING]             state_color = vmupro.graphics.GREY
+00040 [GPT-5-CODEX-MAX-REASONING]         end
+00041 [GPT-5-CODEX-MAX-REASONING] 
+00042 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(string.format("%5s: %s", name, state_text), 10, y_pos, state_color, vmupro.graphics.BLACK)
+00043 [GPT-5-CODEX-MAX-REASONING]         y_pos = y_pos + 14
+00044 [GPT-5-CODEX-MAX-REASONING]     end
+00045 [GPT-5-CODEX-MAX-REASONING] 
+00046 [GPT-5-CODEX-MAX-REASONING]     -- Test all buttons
+00047 [GPT-5-CODEX-MAX-REASONING]     showButtonState("UP", vmupro.input.UP)
+00048 [GPT-5-CODEX-MAX-REASONING]     showButtonState("DOWN", vmupro.input.DOWN)
+00049 [GPT-5-CODEX-MAX-REASONING]     showButtonState("LEFT", vmupro.input.LEFT)
+00050 [GPT-5-CODEX-MAX-REASONING]     showButtonState("RIGHT", vmupro.input.RIGHT)
+00051 [GPT-5-CODEX-MAX-REASONING]     showButtonState("A", vmupro.input.A)
+00052 [GPT-5-CODEX-MAX-REASONING]     showButtonState("B", vmupro.input.B)
+00053 [GPT-5-CODEX-MAX-REASONING]     showButtonState("POWER", vmupro.input.POWER)
+00054 [GPT-5-CODEX-MAX-REASONING]     showButtonState("MODE", vmupro.input.MODE)
+00055 [GPT-5-CODEX-MAX-REASONING]     showButtonState("FUNC", vmupro.input.FUNCTION)
+00056 [GPT-5-CODEX-MAX-REASONING] 
+00057 [GPT-5-CODEX-MAX-REASONING]     -- Special navigation hint for this page
+00058 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_TINY_6x8)
+00059 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Use MODE+LEFT/RIGHT, MODE+B", 10, 195, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00060 [GPT-5-CODEX-MAX-REASONING] 
+00061 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00062 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00063 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 210, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00064 [GPT-5-CODEX-MAX-REASONING] 
+00065 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00066 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00067 [GPT-5-CODEX-MAX-REASONING] end

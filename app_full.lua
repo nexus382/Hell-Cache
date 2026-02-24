@@ -63,15 +63,15 @@ DOUBLE_BUFFER_ON_LARGEST_BYTES = nil
 DOUBLE_BUFFER_PRESENT_ERROR_COUNT = 0
 DOUBLE_BUFFER_FORCED_TITLE_OFF = false
 
-local function getDoubleBufferPrefLabel()
+function getDoubleBufferPrefLabel()
     return DEBUG_DOUBLE_BUFFER and "ON" or "OFF"
 end
 
-local function getDoubleBufferActiveLabel()
+function getDoubleBufferActiveLabel()
     return DOUBLE_BUFFER_ACTIVE and "ON" or "OFF"
 end
 
-local function getDoubleBufferStatusLabel()
+function getDoubleBufferStatusLabel()
     local suffix = ""
     if DOUBLE_BUFFER_FORCED_TITLE_OFF then
         suffix = " T"
@@ -79,7 +79,7 @@ local function getDoubleBufferStatusLabel()
     return "P" .. getDoubleBufferPrefLabel() .. " A" .. getDoubleBufferActiveLabel() .. suffix
 end
 
-local function applyRuntimeLogLevel()
+function applyRuntimeLogLevel()
     if vmupro and vmupro.system and vmupro.system.setLogLevel then
         local level = vmupro.system.LOG_DEBUG
         if not enableBootLogs and not enablePerfLogs then
@@ -89,28 +89,28 @@ local function applyRuntimeLogLevel()
     end
 end
 
-local function logBoot(level, message)
+function logBoot(level, message)
     if not enableBootLogs then return end
     if vmupro and vmupro.system and vmupro.system.log then
         vmupro.system.log(level, "BOOT", message)
     end
 end
 
-local function logPerf(message)
+function logPerf(message)
     if not enablePerfLogs then return end
     if vmupro and vmupro.system and vmupro.system.log then
         vmupro.system.log(vmupro.system.LOG_INFO, "PERF", message)
     end
 end
 
-local function perfNowUs()
+function perfNowUs()
     if vmupro and vmupro.system and vmupro.system.getTimeUs then
         return vmupro.system.getTimeUs()
     end
     return nil
 end
 
-local function perfEma(prev, sample)
+function perfEma(prev, sample)
     if not sample or sample <= 0 then
         return prev or 0
     end
@@ -121,7 +121,7 @@ local function perfEma(prev, sample)
     return prev + (sample - prev) * alpha
 end
 
-local function perfMonitorBeginFrame()
+function perfMonitorBeginFrame()
     local sampleEvery = PERF_MONITOR_SAMPLE_EVERY or 12
     if sampleEvery < 1 then sampleEvery = 1 end
     PERF_MONITOR_ACTIVE_SAMPLE = (DEBUG_PERF_MONITOR == true) and ((frameCount % sampleEvery) == 0)
@@ -149,7 +149,7 @@ local function perfMonitorBeginFrame()
     PERF_MONITOR_RAY_START_SOLID = 0
 end
 
-local function perfMonitorSetRayInfo(baseIdx, effIdx, useFixed)
+function perfMonitorSetRayInfo(baseIdx, effIdx, useFixed)
     local baseLabel = "-"
     local effLabel = "-"
     if RAY_PRESETS and #RAY_PRESETS > 0 then
@@ -166,7 +166,7 @@ local function perfMonitorSetRayInfo(baseIdx, effIdx, useFixed)
     PERF_MONITOR_LAST_RAYCAST_MODE = useFixed and "FIXED" or "FLOAT"
 end
 
-local function perfMonitorEndFrame(frameUs, frameNowUs)
+function perfMonitorEndFrame(frameUs, frameNowUs)
     local frame = frameUs or 0
     if frame < 0 then frame = 0 end
     PERF_MONITOR_LAST_FRAME_US = frame
@@ -225,7 +225,7 @@ local function perfMonitorEndFrame(frameUs, frameNowUs)
     end
 end
 
-local function readMemoryStats()
+function readMemoryStats()
     local stats = {}
     if not vmupro or not vmupro.system then
         return stats
@@ -251,7 +251,7 @@ local function readMemoryStats()
     return stats
 end
 
-local function updateDoubleBufferDeltas()
+function updateDoubleBufferDeltas()
     if DOUBLE_BUFFER_ON_USAGE_BYTES and DOUBLE_BUFFER_OFF_USAGE_BYTES then
         DOUBLE_BUFFER_DELTA_USAGE_BYTES = DOUBLE_BUFFER_ON_USAGE_BYTES - DOUBLE_BUFFER_OFF_USAGE_BYTES
     else
@@ -264,7 +264,7 @@ local function updateDoubleBufferDeltas()
     end
 end
 
-local function applyDoubleBufferMode(enable)
+function applyDoubleBufferMode(enable)
     local wantEnable = enable == true
     if wantEnable then
         if DOUBLE_BUFFER_ACTIVE then return true end
@@ -319,7 +319,7 @@ local function applyDoubleBufferMode(enable)
     return true
 end
 
-local function syncDoubleBufferForState()
+function syncDoubleBufferForState()
     local wantActive = (DEBUG_DOUBLE_BUFFER == true)
     if gameState == STATE_TITLE then
         wantActive = false
@@ -332,7 +332,7 @@ local function syncDoubleBufferForState()
     end
 end
 
-local function presentFrame()
+function presentFrame()
     if DOUBLE_BUFFER_ACTIVE and vmupro and vmupro.graphics and vmupro.graphics.pushDoubleBufferFrame then
         local okPush, errPush = pcall(vmupro.graphics.pushDoubleBufferFrame)
         if okPush then
@@ -350,7 +350,7 @@ if enableBootLogs and vmupro and vmupro.system and vmupro.system.log then
     logBoot(vmupro.system.LOG_ERROR, "app.lua loaded")
 end
 
-local function tryImport(mod)
+function tryImport(mod)
     local ok, err = pcall(function() import(mod) end)
     if ok then
         logBoot(vmupro.system.LOG_ERROR, "import ok " .. mod)
@@ -383,7 +383,7 @@ function drawTitleScreen()
 end
 
 -- Safety Check Functions
-local function safeLog(level, message)
+function safeLog(level, message)
     if not enableBootLogs then return end
     if vmupro.system.log then
         local lvl = vmupro.system.LOG_INFO
@@ -400,7 +400,7 @@ local function safeLog(level, message)
     end
 end
 
-local function validateSprite(sprite, context)
+function validateSprite(sprite, context)
     if not sprite then
         safeLog("ERROR", "Sprite is nil in context: " .. (context or "unknown"))
         return false
@@ -417,7 +417,7 @@ local function validateSprite(sprite, context)
     return true
 end
 
-local function validateTextureDimensions(sprite, context)
+function validateTextureDimensions(sprite, context)
     if not validateSprite(sprite, context) then
         return false
     end
@@ -428,7 +428,7 @@ local function validateTextureDimensions(sprite, context)
     return true
 end
 
-local function safeDivide(value, divisor, context)
+function safeDivide(value, divisor, context)
     if divisor == 0 then
         safeLog("ERROR", "Division by zero in context: " .. (context or "unknown") ..
                " value=" .. tostring(value) .. " divisor=0")
@@ -437,7 +437,7 @@ local function safeDivide(value, divisor, context)
     return value / divisor
 end
 
-local function checkArrayBounds(array, index, context)
+function checkArrayBounds(array, index, context)
     if not array then
         safeLog("ERROR", "Array is nil in context: " .. (context or "unknown"))
         return false
@@ -451,7 +451,7 @@ local function checkArrayBounds(array, index, context)
     return true
 end
 
-local function safeScale(sprite, scaleX, scaleY, context)
+function safeScale(sprite, scaleX, scaleY, context)
     if not validateSprite(sprite, context) then
         return false
     end
@@ -469,7 +469,7 @@ end
 
 -- Cache font state to avoid redundant VMU API calls in hot UI paths.
 local lastFontId = nil
-local function setFontCached(fontId)
+function setFontCached(fontId)
     if lastFontId ~= fontId then
         vmupro.text.setFont(fontId)
         lastFontId = fontId
@@ -534,7 +534,7 @@ local BASE_MAP = {
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 }
 
-local function buildSingleRoomMap()
+function buildSingleRoomMap()
     local mapOut = {}
     for y = 0, 15 do
         local row = {}
@@ -729,23 +729,52 @@ turnStepAccumulator = 0.0
 -- Game state
 isAttacking = 0      -- Attack animation frames remaining
 attackTotalFrames = 0 -- Total frames for current attack animation
+bowChargeState = {
+    active = false,
+    ticks = 0,
+    stage = 1,
+    flashTicks = 0,
+    stageThresholds = nil,
+    damageMult = nil,
+    rangeMult = nil,
+    speedMult = nil,
+}
 isBlocking = false   -- Currently blocking
 blockStartFrame = -1000 -- Simulation tick when block was raised
 blockAnim = 0        -- Shield raise animation frame (0 = hidden)
 BLOCK_ANIM_FRAMES = 4
 lastBlockEvent = nil  -- {amount, pct, prime, frame}
+DMG_DEBUG_DURATION_TICKS = SIM_TARGET_HZ * 2
+damageDebugTakenValue = 0
+damageDebugDealtValue = 0
+damageDebugTakenUntilTick = 0
+damageDebugDealtUntilTick = 0
 showMenu = false     -- Menu visible
 menuSelection = 1    -- Current menu selection
 inOptionsMenu = false -- Currently in options submenu
 optionsSelection = 1  -- Current options selection
 inGameDebugMenu = false -- In-game options: debug submenu
 inSaveMenu = false    -- In-game save submenu
+inStatsMenu = false   -- In-game stat allocation submenu
+inMasteryMenu = false -- In-game weapon mastery submenu
 saveMenuSelection = 1
 saveMenuMessage = ""
 saveMenuMessageTimer = 0
+statsMenuSelection = 1
+statsMenuMessage = ""
+statsMenuMessageTimer = 0
+masteryMenuSelection = 1
+masteryMenuMessage = ""
+masteryMenuMessageTimer = 0
+
+-- Static menu labels to avoid per-frame table allocations.
+TITLE_MAIN_MENU_ITEMS = {"NEW GAME", "LOAD GAME", "OPTIONS", "EXIT"}
+GAME_OVER_MENU_ITEMS = {"RESTART", "MENU", "QUIT"}
+PAUSE_MENU_ITEMS = {"RESUME", "SAVE GAME", "STATS", "MASTERIES", "OPTIONS", "RESTART", "MENU", "QUIT"}
 
 -- Options settings
 soundEnabled = true   -- Sound on/off
+ENABLE_SAMPLE_AUDIO = true -- Re-enable sample audio for title/game SFX playback.
 bgmEnabled = true     -- In-game background music on/off
 bgmVolumeLevel = 3    -- 1-11
 gameBgmSample = nil
@@ -782,7 +811,9 @@ SOLDIER_SPEED_SCALE = 0.15625 -- Adjusted for 24Hz simulation (legacy 30fps tuni
 playerHealth = 100     -- Current health (0-100)
 MAX_HEALTH = 100
 DAMAGE_PER_HIT = 10
+playerRegenAccumulator = 0.0
 player_build_state = nil
+playerBuildStateDirty = true
 inventory_state = nil
 stash_state = nil
 achievement_state = nil
@@ -843,13 +874,19 @@ RAY_PRESETS = {
     {label = "240x1", rays = 240, colW = 1},
 }
 RAY_PRESET_INDEX = 10
-DRAW_DIST_PRESETS = {3, 4, 5, 6, 8, 10, 12, 14, 16, 20, 24}
-DRAW_DIST_INDEX = 7
-MIPMAP_DIST_PRESETS = {1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24}
-MIPMAP1_DIST_INDEX = 6
-MIPMAP2_DIST_INDEX = 8
-MIPMAP3_DIST_INDEX = 11
-MIPMAP4_DIST_INDEX = 12
+DRAW_DIST_PRESETS = {
+    3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5,
+    12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
+}
+DRAW_DIST_INDEX = 27 -- default: 20
+MIPMAP_DIST_PRESETS = {
+    0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5,
+    12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
+}
+MIPMAP1_DIST_INDEX = 12 -- default: 5.5
+MIPMAP2_DIST_INDEX = 19 -- default: 9
+MIPMAP3_DIST_INDEX = 31 -- default: 18
+MIPMAP4_DIST_INDEX = 33 -- default: 20
 EXP_TEX_MAX_DIST = DRAW_DIST_PRESETS[DRAW_DIST_INDEX]
 EXP_VIEW_DIST = EXP_TEX_MAX_DIST
 WALL_MIPMAP_DIST1 = MIPMAP_DIST_PRESETS[MIPMAP1_DIST_INDEX]
@@ -867,6 +904,19 @@ DEBUG_WALL_QUADS_LOG = false
 wallQuadLogCount = 0
 spriteOrderCache = {}
 spriteOrderCacheFrame = -1000
+
+function spriteOrderCompareFarToNear(a, b)
+    return (a and a.dist or 0) > (b and b.dist or 0)
+end
+
+function clearSpriteOrderCache()
+    local n = #spriteOrderCache
+    for i = 1, n do
+        spriteOrderCache[i] = nil
+    end
+    spriteOrderCacheFrame = -999
+end
+
 PLAYER_RADIUS = 0.50
 -- Slightly slimmer than visual body width to reduce "invisible corner snag" feeling.
 PLAYER_COLLISION_RADIUS = 0.27
@@ -885,9 +935,8 @@ WALL_TEX_SEAM_OVERDRAW = true
 WALL_TEX_SEAM_PIXELS = 1
 DEBUG_DISABLE_PROPS = false
 FOG_DISTANCE_PRESETS = {
-    2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5,
-    7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5,
-    12.0, 13.0, 14.0, 15.0, 16.0, 18.0, 20.0, 24.0, 28.0
+    2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5,
+    12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28
 }
 -- Start and full-fog use the same preset list for predictable tuning.
 FOG_START_PRESETS = FOG_DISTANCE_PRESETS
@@ -896,9 +945,9 @@ FOG_END_PRESETS = FOG_DISTANCE_PRESETS
 FOG_CUTOFF_PRESETS = FOG_DISTANCE_PRESETS
 FOG_COLOR_PRESETS = {COLOR_DARK_GRAY, COLOR_GRAY, COLOR_LIGHT_GRAY, COLOR_WHITE, COLOR_BLACK, COLOR_MAROON}
 FOG_COLOR_LABELS = {"DARK", "GRAY", "LGRAY", "WHITE", "BLACK", "MAROON"}
-FOG_START_INDEX = 16
-FOG_END_INDEX = 23
-FOG_CUTOFF_INDEX = 17
+FOG_START_INDEX = 33 -- default: 24
+FOG_END_INDEX = 37 -- default: 28
+FOG_CUTOFF_INDEX = 37 -- default: 28
 FOG_COLOR_INDEX = 5
 FOG_START = FOG_START_PRESETS[FOG_START_INDEX]
 FOG_END = FOG_END_PRESETS[FOG_END_INDEX]
@@ -907,8 +956,16 @@ FOG_COLOR = FOG_COLOR_PRESETS[FOG_COLOR_INDEX]
 FOG_DITHER_SIZE_PRESETS = {1, 2, 3, 4, 5, 6}
 FOG_DITHER_SIZE_INDEX = 1
 FOG_DITHER_SIZE = FOG_DITHER_SIZE_PRESETS[FOG_DITHER_SIZE_INDEX]
-FAR_TEX_OFF_PRESETS = {3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 20, 24, 999}
-FAR_TEX_OFF_INDEX = 8
+FOG_LUT_STEP = 0.0625
+FOG_LUT_INV_STEP = 16.0
+FOG_LUT_DIST_MAX = 0.0
+FOG_LUT_LINEAR = {}
+FOG_LUT_QUANTIZED = {}
+FAR_TEX_OFF_PRESETS = {
+    3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5,
+    12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 999
+}
+FAR_TEX_OFF_INDEX = 32 -- default: OFF
 FAR_TEX_OFF_DIST = FAR_TEX_OFF_PRESETS[FAR_TEX_OFF_INDEX]
 MIP_LOD_ENABLED = true
 WALL_PROJECTION_MODE = "adaptive" -- adaptive | stable
@@ -919,10 +976,202 @@ LOW_RES_MODE = "quality"
 SHOW_MINIMAP = false
 RENDERER_MODE = "exp_hybrid" -- locked single renderer
 DEBUG_DISABLE_ENEMIES = false
+BUILD_COUNT = 179 -- Bump by +1 whenever we ship a new build/test iteration.
 textureDebugFrame = -1
 textureDebugSamples = 0
 
-local function bootstrapExpansionDataLayer()
+RUN_MODE_STORY = 1
+RUN_MODE_WAVE = 2
+RUN_MODE_LABELS = {
+    [RUN_MODE_STORY] = "STORY",
+    [RUN_MODE_WAVE] = "WAVE",
+}
+run_mode = RUN_MODE_STORY
+run_reset_requested = true
+run_session_id = 0
+run_seed = 0
+run_level_ordinal = 0
+run_score_event_count = 0
+RUN_SCORE_PULSE_TICKS = 0
+RUN_SCORE_PULSE_MAX = 36
+RUN_SCORE_EVENT_POINTS = {
+    enemy_kill = 100,
+    health_pickup = 25,
+    level_clear = 300,
+    no_damage_clear = 200,
+}
+
+function markRunResetRequested()
+    run_reset_requested = true
+end
+
+function shouldStartNewRunForLevelLoad(levelId)
+    if run_reset_requested then
+        return true
+    end
+    local nextLevel = math.floor(tonumber(levelId) or 1)
+    if nextLevel < 1 then
+        nextLevel = 1
+    end
+    local activeLevel = math.floor(tonumber(currentLevel) or nextLevel)
+    if gameState == STATE_WIN and nextLevel == (activeLevel + 1) then
+        return false
+    end
+    return true
+end
+
+function computeRunSeed(levelId)
+    local level = math.floor(tonumber(levelId) or 1)
+    local frame = math.floor(tonumber(frameCount) or 0)
+    local tick = math.floor(tonumber(simTickCount) or 0)
+    local session = math.floor(tonumber(run_session_id) or 0)
+    local value = (level * 4099) + (frame * 131) + (tick * 17) + (session * 7919) + 97
+    value = value % 2147483647
+    if value < 1 then
+        value = value + 2147483646
+    end
+    return value
+end
+
+function ensureRunScoreState(levelId)
+    local level = math.floor(tonumber(levelId) or tonumber(currentLevel) or 1)
+    if level < 1 then level = 1 end
+    if type(score_state) ~= "table" then
+        if GameScoreModel and GameScoreModel.newRun then
+            score_state = GameScoreModel.newRun()
+        else
+            score_state = {
+                current = 0,
+                kills = 0,
+                levels_cleared = 0,
+                started_level = level,
+                ended_level = level,
+            }
+        end
+    end
+    score_state.current = math.floor(tonumber(score_state.current) or 0)
+    score_state.kills = math.floor(tonumber(score_state.kills) or 0)
+    score_state.levels_cleared = math.floor(tonumber(score_state.levels_cleared) or 0)
+    score_state.started_level = math.floor(tonumber(score_state.started_level) or level)
+    score_state.ended_level = math.floor(tonumber(score_state.ended_level) or level)
+    if score_state.started_level < 1 then score_state.started_level = level end
+    if score_state.ended_level < 1 then score_state.ended_level = level end
+    if score_state.no_damage_level == nil then
+        score_state.no_damage_level = true
+    end
+    return score_state
+end
+
+function addRunScorePoints(amount)
+    local delta = math.floor(tonumber(amount) or 0)
+    if delta <= 0 then
+        return 0
+    end
+    local run = ensureRunScoreState(currentLevel)
+    if GameScoreModel and GameScoreModel.addPoints then
+        GameScoreModel.addPoints(run, delta)
+    else
+        run.current = (run.current or 0) + delta
+    end
+    RUN_SCORE_PULSE_TICKS = RUN_SCORE_PULSE_MAX
+    return delta
+end
+
+function applyAchievementProgress(triggerName, progressValue)
+    if not GameAchievements then
+        return
+    end
+    if type(achievement_state) ~= "table" then
+        if newAchievementState then
+            achievement_state = newAchievementState()
+        else
+            achievement_state = {unlocked = {}, progress = {}}
+        end
+    end
+    if type(achievement_state.unlocked) ~= "table" then
+        achievement_state.unlocked = {}
+    end
+    if type(achievement_state.progress) ~= "table" then
+        achievement_state.progress = {}
+    end
+
+    local value = math.floor(tonumber(progressValue) or 0)
+    if value < 0 then value = 0 end
+
+    for _, def in pairs(GameAchievements) do
+        if def and def.trigger == triggerName and def.id then
+            local achievementId = def.id
+            local previous = math.floor(tonumber(achievement_state.progress[achievementId]) or 0)
+            if value > previous then
+                achievement_state.progress[achievementId] = value
+            end
+            if not achievement_state.unlocked[achievementId] then
+                local threshold = math.floor(tonumber(def.threshold) or 1)
+                if threshold < 1 then threshold = 1 end
+                if value >= threshold then
+                    local unlocked = false
+                    if markAchievementUnlocked then
+                        unlocked = markAchievementUnlocked(achievement_state, achievementId)
+                    else
+                        achievement_state.unlocked[achievementId] = true
+                        unlocked = true
+                    end
+                    if unlocked then
+                        local bonus = math.floor(tonumber(def.reward and def.reward.score_bonus) or 0)
+                        if bonus > 0 then
+                            addRunScorePoints(bonus)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+function dispatchRunScoreEvent(eventId, payload)
+    local eventName = tostring(eventId or "")
+    local data = payload or {}
+    local level = math.floor(tonumber(data.level_id) or tonumber(currentLevel) or 1)
+    if level < 1 then level = 1 end
+    local run = ensureRunScoreState(level)
+    run.ended_level = level
+
+    local points = math.floor(tonumber(data.points) or tonumber(RUN_SCORE_EVENT_POINTS[eventName]) or 0)
+    if points < 0 then points = 0 end
+
+    if eventName == "run_start" then
+        run.started_level = level
+        run.ended_level = level
+        run.kills = 0
+        run.levels_cleared = 0
+        run.no_damage_level = true
+    elseif eventName == "level_start" then
+        run.ended_level = level
+        run.no_damage_level = true
+    elseif eventName == "enemy_kill" then
+        run.kills = math.floor(tonumber(run.kills) or 0) + 1
+        applyAchievementProgress("kill_count", run.kills)
+    elseif eventName == "player_damaged" then
+        run.no_damage_level = false
+    elseif eventName == "level_clear" then
+        run.levels_cleared = math.floor(tonumber(run.levels_cleared) or 0) + 1
+        applyAchievementProgress("levels_cleared", run.levels_cleared)
+        if run.no_damage_level then
+            applyAchievementProgress("no_damage_level", 1)
+            points = points + math.floor(tonumber(RUN_SCORE_EVENT_POINTS.no_damage_clear) or 0)
+        else
+            applyAchievementProgress("no_damage_level", 0)
+        end
+        run.no_damage_level = false
+    end
+
+    if points > 0 then
+        addRunScorePoints(points)
+    end
+    run_score_event_count = (run_score_event_count or 0) + 1
+end
+
+function bootstrapExpansionDataLayer()
     if not ExpansionRuntimeState or not ExpansionRuntimeState.bootstrap then
         return
     end
@@ -931,36 +1180,58 @@ local function bootstrapExpansionDataLayer()
         return
     end
     player_build_state = state.player_build_state or player_build_state
+    playerBuildStateDirty = true
     inventory_state = state.inventory_state or inventory_state
     stash_state = state.stash_state or stash_state
     achievement_state = state.achievement_state or achievement_state
     high_score_state = state.high_score_state or high_score_state
     score_state = state.score_state or score_state
+    if ensurePlayerBuildState then
+        ensurePlayerBuildState()
+    end
 end
 
-local function beginExpansionRun(levelId)
-    if not ExpansionRuntimeState or not ExpansionRuntimeState.beginRun then
-        return
+function beginExpansionRun(levelId)
+    local level = math.floor(tonumber(levelId) or tonumber(currentLevel) or 1)
+    if level < 1 then level = 1 end
+
+    local shouldStartNewRun = run_reset_requested or type(score_state) ~= "table"
+    if shouldStartNewRun and ExpansionRuntimeState and ExpansionRuntimeState.beginRun then
+        local state = ExpansionRuntimeState.beginRun(level, currentLevel)
+        if state then
+            player_build_state = state.player_build_state or player_build_state
+            playerBuildStateDirty = true
+            inventory_state = state.inventory_state or inventory_state
+            stash_state = state.stash_state or stash_state
+            achievement_state = state.achievement_state or achievement_state
+            high_score_state = state.high_score_state or high_score_state
+            score_state = state.score_state or score_state
+        end
     end
-    local state = ExpansionRuntimeState.beginRun(levelId, currentLevel)
-    if not state then
-        return
+
+    if shouldStartNewRun then
+        run_session_id = (run_session_id or 0) + 1
+        run_seed = computeRunSeed(level)
+        run_level_ordinal = 0
+        dispatchRunScoreEvent("run_start", {level_id = level, points = 0})
     end
-    player_build_state = state.player_build_state or player_build_state
-    inventory_state = state.inventory_state or inventory_state
-    stash_state = state.stash_state or stash_state
-    achievement_state = state.achievement_state or achievement_state
-    high_score_state = state.high_score_state or high_score_state
-    score_state = state.score_state or score_state
+
+    run_level_ordinal = (run_level_ordinal or 0) + 1
+    dispatchRunScoreEvent("level_start", {level_id = level, points = 0})
+    run_reset_requested = false
+
+    if ensurePlayerBuildState then
+        ensurePlayerBuildState()
+    end
 end
-local function wallQuadLog(msg)
+function wallQuadLog(msg)
     if enableBootLogs and DEBUG_WALL_QUADS_LOG and wallQuadLogCount < 30 then
         print(msg)
         wallQuadLogCount = wallQuadLogCount + 1
     end
 end
 
-local function forceSpriteColorKey(sprite, label)
+function forceSpriteColorKey(sprite, label)
     if not sprite then
         return
     end
@@ -1007,7 +1278,7 @@ PERF_QUALITY_PRESETS = {"QUALITY", "BALANCED", "PERFORMANCE"}
 PERF_QUALITY_INDEX = 0
 UI_TEXT_SOLID_BG = COLOR_DARK_GRAY
 
-local function setAudioMixHz(hz)
+function setAudioMixHz(hz)
     local target = hz or 60
     local idx = 1
     local bestDelta = math.abs((AUDIO_MIX_HZ_PRESETS[1] or target) - target)
@@ -1023,12 +1294,12 @@ local function setAudioMixHz(hz)
     AUDIO_UPDATE_STEP_US = math.floor(1000000 / AUDIO_UPDATE_TARGET_HZ)
 end
 
-local function quitApp(reason)
+function quitApp(reason)
     logBoot(vmupro.system.LOG_ERROR, "APP EXIT: " .. tostring(reason))
     app_running = false
 end
 
-local function getDebugPageName(pageId)
+function getDebugPageName(pageId)
     if pageId == DEBUG_PAGE_VIDEO then
         return "VIDEO"
     elseif pageId == DEBUG_PAGE_PERF then
@@ -1037,7 +1308,7 @@ local function getDebugPageName(pageId)
     return "DEBUG"
 end
 
-local function stepDebugPage(delta)
+function stepDebugPage(delta)
     local pages = {DEBUG_PAGE_CORE, DEBUG_PAGE_VIDEO, DEBUG_PAGE_PERF}
     local current = 1
     for i = 1, #pages do
@@ -1053,7 +1324,7 @@ local function stepDebugPage(delta)
     titleDebugSelection = 1
 end
 
-local function lockRendererMode()
+function lockRendererMode()
     -- Single supported renderer path: EXP-H with proper column textures.
     if RENDERER_MODE ~= "exp_hybrid" then
         RENDERER_MODE = "exp_hybrid"
@@ -1063,7 +1334,7 @@ local function lockRendererMode()
     end
 end
 
-local function nearestPresetIndex(list, target)
+function nearestPresetIndex(list, target)
     if not list or #list == 0 then return 1 end
     local bestIdx = 1
     local bestDelta = math.abs((list[1] or target) - target)
@@ -1077,7 +1348,7 @@ local function nearestPresetIndex(list, target)
     return bestIdx
 end
 
-local function nearestRayPresetIndex(targetRays)
+function nearestRayPresetIndex(targetRays)
     if not RAY_PRESETS or #RAY_PRESETS == 0 then
         return 1
     end
@@ -1093,13 +1364,62 @@ local function nearestRayPresetIndex(targetRays)
     return bestIdx
 end
 
-local function clampInt(v, minV, maxV)
+function clampInt(v, minV, maxV)
     if v < minV then return minV end
     if v > maxV then return maxV end
     return v
 end
 
-local function refreshExpViewDistance()
+function getDrawDistanceSystemCap()
+    local drawCap = (DRAW_DIST_PRESETS and DRAW_DIST_PRESETS[#DRAW_DIST_PRESETS]) or (EXP_TEX_MAX_DIST or 24.0)
+    local fogCap = (FOG_DISTANCE_PRESETS and FOG_DISTANCE_PRESETS[#FOG_DISTANCE_PRESETS]) or drawCap
+    local cap = drawCap
+    if fogCap < cap then
+        cap = fogCap
+    end
+    if cap < 0.5 then
+        cap = 0.5
+    end
+    return cap
+end
+
+function getMaxDrawDistancePresetIndex()
+    if not DRAW_DIST_PRESETS or #DRAW_DIST_PRESETS == 0 then
+        return 1
+    end
+    local cap = getDrawDistanceSystemCap()
+    local maxIdx = 1
+    for i = 1, #DRAW_DIST_PRESETS do
+        local dist = DRAW_DIST_PRESETS[i] or cap
+        if dist <= (cap + 0.0001) then
+            maxIdx = i
+        else
+            break
+        end
+    end
+    return maxIdx
+end
+
+function normalizeDrawDistanceSetting()
+    if not DRAW_DIST_PRESETS or #DRAW_DIST_PRESETS == 0 then
+        EXP_TEX_MAX_DIST = EXP_TEX_MAX_DIST or getDrawDistanceSystemCap()
+        return
+    end
+    local maxIdx = getMaxDrawDistancePresetIndex()
+    DRAW_DIST_INDEX = clampInt(DRAW_DIST_INDEX or maxIdx, 1, maxIdx)
+    local selected = DRAW_DIST_PRESETS[DRAW_DIST_INDEX] or DRAW_DIST_PRESETS[maxIdx] or getDrawDistanceSystemCap()
+    local cap = getDrawDistanceSystemCap()
+    if selected > cap then
+        selected = cap
+    end
+    if selected < 0.5 then
+        selected = 0.5
+    end
+    EXP_TEX_MAX_DIST = selected
+end
+
+function refreshExpViewDistance()
+    normalizeDrawDistanceSetting()
     local texDist = EXP_TEX_MAX_DIST or DRAW_DIST_PRESETS[DRAW_DIST_INDEX] or 8.0
     local viewDist = texDist
     if not DEBUG_DISABLE_FOG then
@@ -1116,7 +1436,59 @@ local function refreshExpViewDistance()
     EXP_VIEW_DIST = viewDist
 end
 
-local function normalizeFogRange()
+function rebuildFogLUT()
+    local startDist = FOG_START or 0.0
+    local endDist = FOG_END or (startDist + 0.5)
+    if endDist <= startDist then
+        endDist = startDist + 0.5
+    end
+
+    local step = FOG_LUT_STEP or 0.0625
+    if step <= 0 then
+        step = 0.0625
+    end
+    local invStep = 1.0 / step
+    local span = endDist - startDist
+    if span < 0.5 then span = 0.5 end
+    local stepCount = math.max(1, math.floor((span / 0.5) + 0.5))
+    local maxDist = endDist + step
+    if maxDist < 0 then maxDist = 0 end
+    local maxIdx = math.floor((maxDist * invStep) + 0.5)
+
+    local linear = {}
+    local quantized = {}
+    for i = 0, maxIdx do
+        local dist = i * step
+        local raw = 0.0
+        if dist <= startDist then
+            raw = 0.0
+        elseif dist >= endDist then
+            raw = 1.0
+        else
+            raw = (dist - startDist) / (endDist - startDist)
+            if raw < 0 then raw = 0 end
+            if raw > 1 then raw = 1 end
+        end
+        linear[i + 1] = raw
+        if raw <= 0 then
+            quantized[i + 1] = 0.0
+        elseif raw >= 1 then
+            quantized[i + 1] = 1.0
+        else
+            local k = math.ceil(raw * stepCount)
+            if k < 0 then k = 0 end
+            if k > stepCount then k = stepCount end
+            quantized[i + 1] = k / (stepCount + 1)
+        end
+    end
+
+    FOG_LUT_INV_STEP = invStep
+    FOG_LUT_DIST_MAX = maxDist
+    FOG_LUT_LINEAR = linear
+    FOG_LUT_QUANTIZED = quantized
+end
+
+function normalizeFogRange()
     if not FOG_START_PRESETS or not FOG_END_PRESETS then return end
     if not FOG_START_INDEX then FOG_START_INDEX = 1 end
     if not FOG_END_INDEX then FOG_END_INDEX = 1 end
@@ -1138,47 +1510,168 @@ local function normalizeFogRange()
     if FOG_END <= FOG_START then
         FOG_END = FOG_START + 0.5
     end
+    rebuildFogLUT()
     refreshExpViewDistance()
 end
 
-local function normalizeMipmapRanges()
-    if not MIPMAP_DIST_PRESETS or #MIPMAP_DIST_PRESETS == 0 then return end
-    local n = #MIPMAP_DIST_PRESETS
-    if not MIPMAP1_DIST_INDEX then MIPMAP1_DIST_INDEX = 1 end
-    if not MIPMAP2_DIST_INDEX then MIPMAP2_DIST_INDEX = math.min(n, 2) end
-    if not MIPMAP3_DIST_INDEX then MIPMAP3_DIST_INDEX = math.min(n, 3) end
-    if not MIPMAP4_DIST_INDEX then MIPMAP4_DIST_INDEX = math.min(n, 4) end
-
-    if n == 1 then
-        MIPMAP1_DIST_INDEX = 1
-        MIPMAP2_DIST_INDEX = 1
-        MIPMAP3_DIST_INDEX = 1
-        MIPMAP4_DIST_INDEX = 1
-    elseif n == 2 then
-        MIPMAP1_DIST_INDEX = clampInt(MIPMAP1_DIST_INDEX, 1, 1)
-        MIPMAP2_DIST_INDEX = clampInt(MIPMAP2_DIST_INDEX, 2, 2)
-        MIPMAP3_DIST_INDEX = clampInt(MIPMAP3_DIST_INDEX, 2, 2)
-        MIPMAP4_DIST_INDEX = clampInt(MIPMAP4_DIST_INDEX, 2, 2)
-    elseif n == 3 then
-        MIPMAP1_DIST_INDEX = clampInt(MIPMAP1_DIST_INDEX, 1, 1)
-        MIPMAP2_DIST_INDEX = clampInt(MIPMAP2_DIST_INDEX, 2, 2)
-        MIPMAP3_DIST_INDEX = clampInt(MIPMAP3_DIST_INDEX, 3, 3)
-        MIPMAP4_DIST_INDEX = clampInt(MIPMAP4_DIST_INDEX, 3, 3)
-    else
-        -- Keep strict ordering without pushing unrelated levels to max.
-        MIPMAP1_DIST_INDEX = clampInt(MIPMAP1_DIST_INDEX, 1, n - 3)
-        MIPMAP2_DIST_INDEX = clampInt(MIPMAP2_DIST_INDEX, MIPMAP1_DIST_INDEX + 1, n - 2)
-        MIPMAP3_DIST_INDEX = clampInt(MIPMAP3_DIST_INDEX, MIPMAP2_DIST_INDEX + 1, n - 1)
-        MIPMAP4_DIST_INDEX = clampInt(MIPMAP4_DIST_INDEX, MIPMAP3_DIST_INDEX + 1, n)
+function getDistanceValueLabel(value)
+    local v = tonumber(value) or 0
+    if v <= 0 then
+        return "OFF"
     end
-
-    WALL_MIPMAP_DIST1 = MIPMAP_DIST_PRESETS[MIPMAP1_DIST_INDEX]
-    WALL_MIPMAP_DIST2 = MIPMAP_DIST_PRESETS[MIPMAP2_DIST_INDEX]
-    WALL_MIPMAP_DIST3 = MIPMAP_DIST_PRESETS[MIPMAP3_DIST_INDEX]
-    WALL_MIPMAP_DIST4 = MIPMAP_DIST_PRESETS[MIPMAP4_DIST_INDEX]
+    local whole = math.floor(v + 0.0001)
+    if math.abs(v - whole) < 0.0001 then
+        return tostring(whole)
+    end
+    return string.format("%.1f", v)
 end
 
-local function normalizeFarTextureCutoff()
+function getMipmapMaxPresetIndexForDrawDist()
+    if not MIPMAP_DIST_PRESETS or #MIPMAP_DIST_PRESETS == 0 then
+        return 1
+    end
+    normalizeDrawDistanceSetting()
+    local drawDistCap = EXP_TEX_MAX_DIST or getDrawDistanceSystemCap()
+    local maxIdx = 1
+    for i = 1, #MIPMAP_DIST_PRESETS do
+        local dist = MIPMAP_DIST_PRESETS[i] or 0
+        if dist <= 0 or dist <= (drawDistCap + 0.0001) then
+            maxIdx = i
+        else
+            break
+        end
+    end
+    if maxIdx < 1 then maxIdx = 1 end
+    return maxIdx
+end
+
+function getMipmapLevelIndex(level)
+    if level == 1 then return MIPMAP1_DIST_INDEX end
+    if level == 2 then return MIPMAP2_DIST_INDEX end
+    if level == 3 then return MIPMAP3_DIST_INDEX end
+    if level == 4 then return MIPMAP4_DIST_INDEX end
+    return 1
+end
+
+function setMipmapLevelIndex(level, idx)
+    if level == 1 then
+        MIPMAP1_DIST_INDEX = idx
+    elseif level == 2 then
+        MIPMAP2_DIST_INDEX = idx
+    elseif level == 3 then
+        MIPMAP3_DIST_INDEX = idx
+    elseif level == 4 then
+        MIPMAP4_DIST_INDEX = idx
+    end
+end
+
+function getMipmapLevelBounds(level)
+    local maxIdx = getMipmapMaxPresetIndexForDrawDist()
+    local lower = 2
+    for i = level - 1, 1, -1 do
+        local prevIdx = getMipmapLevelIndex(i) or 1
+        if prevIdx > 1 then
+            lower = prevIdx + 1
+            break
+        end
+    end
+    local upper = maxIdx
+    for i = level + 1, 4 do
+        local nextIdx = getMipmapLevelIndex(i) or 1
+        if nextIdx > 1 then
+            upper = nextIdx - 1
+            break
+        end
+    end
+    if lower < 2 then lower = 2 end
+    if upper > maxIdx then upper = maxIdx end
+    return lower, upper
+end
+
+function stepMipmapLevelIndex(level, step)
+    if step == 0 then return end
+    normalizeMipmapRanges()
+    local cur = getMipmapLevelIndex(level) or 1
+    local lower, upper = getMipmapLevelBounds(level)
+    local nextIdx = cur
+
+    if step > 0 then
+        if cur <= 1 then
+            if lower <= upper and upper >= 2 then
+                nextIdx = lower
+            else
+                nextIdx = 1
+            end
+        else
+            if lower > upper or cur >= upper then
+                -- If this level cannot move farther because of next level/cap, roll to OFF.
+                nextIdx = 1
+            else
+                nextIdx = cur + 1
+                if nextIdx > upper then nextIdx = 1 end
+            end
+        end
+    else
+        if cur <= 1 then
+            if lower <= upper and upper >= 2 then
+                nextIdx = upper
+            else
+                nextIdx = 1
+            end
+        else
+            if lower > upper or cur <= lower then
+                nextIdx = 1
+            else
+                nextIdx = cur - 1
+                if nextIdx < lower then nextIdx = 1 end
+            end
+        end
+    end
+
+    setMipmapLevelIndex(level, nextIdx)
+    normalizeMipmapRanges()
+end
+
+function normalizeMipmapRanges()
+    if not MIPMAP_DIST_PRESETS or #MIPMAP_DIST_PRESETS == 0 then return end
+    local maxIdx = getMipmapMaxPresetIndexForDrawDist()
+    local idx1 = clampInt(MIPMAP1_DIST_INDEX or 1, 1, maxIdx)
+    local idx2 = clampInt(MIPMAP2_DIST_INDEX or 1, 1, maxIdx)
+    local idx3 = clampInt(MIPMAP3_DIST_INDEX or 1, 1, maxIdx)
+    local idx4 = clampInt(MIPMAP4_DIST_INDEX or 1, 1, maxIdx)
+
+    local indices = {idx1, idx2, idx3, idx4}
+    local prevActive = 1
+    for i = 1, 4 do
+        local cur = indices[i]
+        if cur > 1 then
+            if cur <= prevActive then
+                local nextValid = prevActive + 1
+                if nextValid <= maxIdx then
+                    cur = nextValid
+                else
+                    cur = 1
+                end
+                indices[i] = cur
+            end
+            if cur > 1 then
+                prevActive = cur
+            end
+        end
+    end
+
+    MIPMAP1_DIST_INDEX = indices[1]
+    MIPMAP2_DIST_INDEX = indices[2]
+    MIPMAP3_DIST_INDEX = indices[3]
+    MIPMAP4_DIST_INDEX = indices[4]
+
+    WALL_MIPMAP_DIST1 = (MIPMAP1_DIST_INDEX > 1) and (MIPMAP_DIST_PRESETS[MIPMAP1_DIST_INDEX] or 0) or 0
+    WALL_MIPMAP_DIST2 = (MIPMAP2_DIST_INDEX > 1) and (MIPMAP_DIST_PRESETS[MIPMAP2_DIST_INDEX] or 0) or 0
+    WALL_MIPMAP_DIST3 = (MIPMAP3_DIST_INDEX > 1) and (MIPMAP_DIST_PRESETS[MIPMAP3_DIST_INDEX] or 0) or 0
+    WALL_MIPMAP_DIST4 = (MIPMAP4_DIST_INDEX > 1) and (MIPMAP_DIST_PRESETS[MIPMAP4_DIST_INDEX] or 0) or 0
+end
+
+function normalizeFarTextureCutoff()
     if not FAR_TEX_OFF_PRESETS or #FAR_TEX_OFF_PRESETS == 0 then
         FAR_TEX_OFF_INDEX = 1
         FAR_TEX_OFF_DIST = 999
@@ -1188,11 +1681,11 @@ local function normalizeFarTextureCutoff()
     FAR_TEX_OFF_DIST = FAR_TEX_OFF_PRESETS[FAR_TEX_OFF_INDEX]
 end
 
-local function markPerfQualityCustom()
+function markPerfQualityCustom()
     PERF_QUALITY_INDEX = 0
 end
 
-local function applyPerfQualityPreset(newIndex)
+function applyPerfQualityPreset(newIndex)
     if not PERF_QUALITY_PRESETS or #PERF_QUALITY_PRESETS == 0 then
         return
     end
@@ -1226,7 +1719,7 @@ local function applyPerfQualityPreset(newIndex)
         FOG_DITHER_SIZE_INDEX = nearestPresetIndex(FOG_DITHER_SIZE_PRESETS, 1)
     end
 
-    EXP_TEX_MAX_DIST = DRAW_DIST_PRESETS[DRAW_DIST_INDEX]
+    normalizeDrawDistanceSetting()
     if FOG_DITHER_SIZE_PRESETS and #FOG_DITHER_SIZE_PRESETS > 0 then
         FOG_DITHER_SIZE_INDEX = clampInt(FOG_DITHER_SIZE_INDEX or 1, 1, #FOG_DITHER_SIZE_PRESETS)
         FOG_DITHER_SIZE = FOG_DITHER_SIZE_PRESETS[FOG_DITHER_SIZE_INDEX]
@@ -1236,7 +1729,7 @@ local function applyPerfQualityPreset(newIndex)
     refreshExpViewDistance()
 end
 
-local function getBaseEffectiveRayPresetIndex(baseIdx)
+function getBaseEffectiveRayPresetIndex(baseIdx)
     local n = (RAY_PRESETS and #RAY_PRESETS) or 0
     if n <= 0 then return 1 end
     local idx = clampInt(baseIdx or (RAY_PRESET_INDEX or 1), 1, n)
@@ -1248,17 +1741,18 @@ local function getBaseEffectiveRayPresetIndex(baseIdx)
     return idx
 end
 
-local function getEffectiveRayPresetIndex(baseIdx)
+function getEffectiveRayPresetIndex(baseIdx)
     return getBaseEffectiveRayPresetIndex(baseIdx)
 end
 
 normalizeFogRange()
+normalizeDrawDistanceSetting()
 normalizeMipmapRanges()
 normalizeFarTextureCutoff()
 refreshExpViewDistance()
 bootstrapExpansionDataLayer()
 
-local function isExpRenderer()
+function isExpRenderer()
     return true
 end
 gameOverSelection = 1  -- 1 = Restart, 2 = Menu, 3 = Quit
@@ -1272,7 +1766,7 @@ loadingTimer = 0
 loadingMax = 45
 pendingLevelStart = nil
 loadingLogCount = 0
-local function loadingLog(msg)
+function loadingLog(msg)
     if not enableBootLogs then return end
     if loadingLogCount < 20 then
         print(msg)
@@ -1304,20 +1798,80 @@ ENEMY_RENDER_DIST_SQ = ENEMY_RENDER_DIST * ENEMY_RENDER_DIST
 PROP_RENDER_DIST_SQ = PROP_RENDER_DIST * PROP_RENDER_DIST
 ITEM_RENDER_DIST_SQ = ITEM_RENDER_DIST * ITEM_RENDER_DIST
 
-local function isEnemyType(t)
+function isEnemyType(t)
     return t == 5 or t == 6
 end
 
-local function isPropType(t)
+function isPropType(t)
     return (t and t >= 1 and t <= 4) or t == 7
 end
 
 -- Enemy health system
 ENEMY_MAX_HP = 100
 PLAYER_DAMAGE = 20
+PLAYER_DEFENSE = 0
+PLAYER_SHIELD_BONUS_PERCENT = 0
+PLAYER_DODGE_PERCENT = 0
+PLAYER_CRIT_PERCENT = 0
+PLAYER_CRIT_MULT = 1.5
+PLAYER_ATTACK_SPEED_SCALE = 1.0
+PLAYER_ATTACK_MIN_FRAMES = 5
+PLAYER_ATTACK_MAX_FRAMES = 18
+PLAYER_MOVE_SPEED_SCALE = 1.0
+PLAYER_REGEN_PER_SEC = 0.0
 PLAYER_ATTACK_RANGE = 1.0  -- Distance player can hit enemy
+PROJECTILE_SPEED_RANGED = 10.0     -- Units/sec
+PROJECTILE_SPEED_MAGIC = 8.5       -- Units/sec
+PROJECTILE_LIFETIME_TICKS = math.floor((SIM_TARGET_HZ or 24) * 2.5)
+PROJECTILE_STEP = 0.12
+PROJECTILE_HIT_RADIUS = 0.30
+PROJECTILE_WALL_RADIUS = 0.05
+PROJECTILE_MAX_ACTIVE = 24
+PROJECTILE_MAX_RANGE_RANGED = 4.0
+PROJECTILE_MAX_RANGE_MAGIC = 5.0
+
+-- Bow charge tiers are data-driven for easy expansion.
+-- Add entries to these arrays to extend beyond 3 tiers.
+BOW_CHARGE_STAGE_HOLD_TICKS = {0, 10, 22}
+BOW_CHARGE_STAGE_DAMAGE_MULT = {0.85, 1.10, 1.35}
+BOW_CHARGE_STAGE_RANGE_MULT = {0.75, 1.00, 1.20}
+BOW_CHARGE_STAGE_SPEED_MULT = {0.95, 1.00, 1.10}
+BOW_CHARGE_INITIAL_IDLE_TICKS = 2
+BOW_CHARGE_STAGE_FLASH_TICKS = 3
 soldiersKilled = 0
 local totalSoldiers = 5
+PLAYER_LEVEL_MAX = 50
+PLAYER_XP_BASE = 100
+PLAYER_XP_STEP = 45
+PLAYER_XP_QUAD = 6
+PLAYER_XP_PER_KILL = 40
+PLAYER_STAT_POINTS_PER_LEVEL = 2
+BUILD_STAT_MAX = 99
+VITALITY_HP_BONUS = 10
+STRENGTH_DAMAGE_BONUS = 2
+DEXTERITY_DODGE_BONUS = 1.0
+DEXTERITY_AGILITY_BONUS = 0.5
+INTELLECT_POWER_BONUS = 1.0
+INTELLECT_CRIT_BONUS = 0.5
+PLAYER_MASTERY_POINTS_PER_LEVEL = 1
+WEAPON_MASTERY_CAP = 10
+WEAPON_BASELINE_POINTS = 5
+WEAPON_DAMAGE_PER_POINT = 0.025
+WEAPON_SPEED_PER_POINT = 0.02
+
+WEAPON_CLASS_MELEE = 1
+WEAPON_CLASS_RANGED = 2
+WEAPON_CLASS_MAGIC = 3
+WEAPON_CLASS_LABELS = {
+    [WEAPON_CLASS_MELEE] = "MELEE",
+    [WEAPON_CLASS_RANGED] = "RANGED",
+    [WEAPON_CLASS_MAGIC] = "MAGIC",
+}
+WEAPON_CLASS_PRIMARY_TEXT_TO_VALUE = {
+    melee = WEAPON_CLASS_MELEE,
+    ranged = WEAPON_CLASS_RANGED,
+    magic = WEAPON_CLASS_MAGIC,
+}
 
 SAVE_SLOT_COUNT = 3
 SAVE_FILE_PATH = "/sdcard/inner_sanctum/saves.dat"
@@ -1422,19 +1976,368 @@ function sanitizeClassId(classId)
     return CLASS_FALLBACK_ORDER[1] or "warrior"
 end
 
-function getCurrentClassId()
-    if player_build_state and player_build_state.class_id then
-        return sanitizeClassId(player_build_state.class_id)
+function markPlayerBuildStateDirty()
+    playerBuildStateDirty = true
+end
+
+function ensurePlayerBuildState()
+    if not player_build_state then
+        player_build_state = {}
+        playerBuildStateDirty = true
+    elseif not playerBuildStateDirty then
+        return player_build_state
     end
-    return sanitizeClassId(nil)
+
+    if not player_build_state.class_id or player_build_state.class_id == "" then
+        player_build_state.class_id = sanitizeClassId(nil)
+    else
+        player_build_state.class_id = sanitizeClassId(player_build_state.class_id)
+    end
+
+    local level = math.floor(tonumber(player_build_state.level) or 1)
+    if level < 1 then level = 1 end
+    if level > (PLAYER_LEVEL_MAX or 50) then level = (PLAYER_LEVEL_MAX or 50) end
+    player_build_state.level = level
+
+    local xp = math.floor(tonumber(player_build_state.xp) or 0)
+    if xp < 0 then xp = 0 end
+    player_build_state.xp = xp
+
+    local statPoints = math.floor(tonumber(player_build_state.stat_points) or 0)
+    if statPoints < 0 then statPoints = 0 end
+    player_build_state.stat_points = statPoints
+
+    local masteryPoints = math.floor(tonumber(player_build_state.weapon_mastery_points) or 0)
+    if masteryPoints < 0 then masteryPoints = 0 end
+    player_build_state.weapon_mastery_points = masteryPoints
+
+    if type(player_build_state.stats) ~= "table" then
+        player_build_state.stats = {}
+    end
+    local statKeys = {"vitality", "strength", "dexterity", "intellect"}
+    for i = 1, #statKeys do
+        local key = statKeys[i]
+        local value = math.floor(tonumber(player_build_state.stats[key]) or 0)
+        if value < 0 then value = 0 end
+        if value > (BUILD_STAT_MAX or 99) then value = (BUILD_STAT_MAX or 99) end
+        player_build_state.stats[key] = value
+    end
+
+    if type(player_build_state.weapon_mastery) ~= "table" then
+        player_build_state.weapon_mastery = {}
+    end
+    local mastery = player_build_state.weapon_mastery
+    -- Backward-compatible migration if older sessions used string keys.
+    if mastery[WEAPON_CLASS_MELEE] == nil and mastery["melee"] ~= nil then
+        mastery[WEAPON_CLASS_MELEE] = mastery["melee"]
+    end
+    if mastery[WEAPON_CLASS_RANGED] == nil and mastery["ranged"] ~= nil then
+        mastery[WEAPON_CLASS_RANGED] = mastery["ranged"]
+    end
+    if mastery[WEAPON_CLASS_MAGIC] == nil and mastery["magic"] ~= nil then
+        mastery[WEAPON_CLASS_MAGIC] = mastery["magic"]
+    end
+
+    local masteryKeys = {WEAPON_CLASS_MELEE, WEAPON_CLASS_RANGED, WEAPON_CLASS_MAGIC}
+    for i = 1, #masteryKeys do
+        local key = masteryKeys[i]
+        local value = math.floor(tonumber(mastery[key]) or 0)
+        if value < 0 then value = 0 end
+        if value > (WEAPON_MASTERY_CAP or 10) then value = (WEAPON_MASTERY_CAP or 10) end
+        mastery[key] = value
+    end
+
+    if type(player_build_state.equipment) ~= "table" then
+        player_build_state.equipment = {}
+    end
+    if player_build_state.equipment.weapon == "" then player_build_state.equipment.weapon = nil end
+    if player_build_state.equipment.armor == "" then player_build_state.equipment.armor = nil end
+    if player_build_state.equipment.special_1 == "" then player_build_state.equipment.special_1 = nil end
+    if player_build_state.equipment.special_2 == "" then player_build_state.equipment.special_2 = nil end
+
+    playerBuildStateDirty = false
+    return player_build_state
+end
+
+function getBuildStatValue(statKey)
+    local state = ensurePlayerBuildState()
+    if not state.stats then
+        return 0
+    end
+    local value = math.floor(tonumber(state.stats[statKey]) or 0)
+    if value < 0 then value = 0 end
+    return value
+end
+
+function getXpRequiredForLevel(level)
+    local lvl = math.floor(tonumber(level) or 1)
+    if lvl < 1 then lvl = 1 end
+    local idx = lvl - 1
+    return (PLAYER_XP_BASE or 100) + (idx * (PLAYER_XP_STEP or 45)) + (idx * idx * (PLAYER_XP_QUAD or 6))
+end
+
+function getPlayerLevel()
+    local state = ensurePlayerBuildState()
+    return math.floor(tonumber(state.level) or 1)
+end
+
+function getPlayerXp()
+    local state = ensurePlayerBuildState()
+    return math.floor(tonumber(state.xp) or 0)
+end
+
+function getPlayerXpForNextLevel()
+    local level = getPlayerLevel()
+    if level >= (PLAYER_LEVEL_MAX or 50) then
+        return 0
+    end
+    return getXpRequiredForLevel(level)
+end
+
+function normalizeWeaponClass(value)
+    if value == WEAPON_CLASS_MELEE then return WEAPON_CLASS_MELEE end
+    if value == WEAPON_CLASS_RANGED then return WEAPON_CLASS_RANGED end
+    if value == WEAPON_CLASS_MAGIC then return WEAPON_CLASS_MAGIC end
+    local text = tostring(value or "")
+    local mapped = WEAPON_CLASS_PRIMARY_TEXT_TO_VALUE[text]
+    if mapped then
+        return mapped
+    end
+    return WEAPON_CLASS_MELEE
+end
+
+function getWeaponMasteryLevel(weaponClass)
+    local state = ensurePlayerBuildState()
+    local key = normalizeWeaponClass(weaponClass)
+    local mastery = state.weapon_mastery or {}
+    local value = math.floor(tonumber(mastery[key]) or 0)
+    if value < 0 then value = 0 end
+    if value > (WEAPON_MASTERY_CAP or 10) then value = (WEAPON_MASTERY_CAP or 10) end
+    return value
+end
+
+function getWeaponBasePointsForClass(classId, weaponClass)
+    local classDef = getClassDefById(classId)
+    local primary = normalizeWeaponClass(classDef and classDef.primary)
+    local target = normalizeWeaponClass(weaponClass)
+    if primary == target then
+        -- Bonus points for the class's "native" weapon class.
+        -- These points are free and do NOT consume the 0..10 player mastery cap.
+        return WEAPON_BASELINE_POINTS or 5
+    end
+    return 0
+end
+
+function computeWeaponProficiencyMultipliers(classId, weaponClass)
+    -- All classes start at 100% effectiveness for all weapon classes.
+    -- The class's primary weapon class gets +WEAPON_BASELINE_POINTS "bonus points" on top.
+    local bonusPoints = getWeaponBasePointsForClass(classId, weaponClass)
+    local masteryPoints = getWeaponMasteryLevel(weaponClass)
+    local effective = bonusPoints + masteryPoints
+    local damageMult = 1.0 + (effective * (WEAPON_DAMAGE_PER_POINT or 0.025))
+    local speedMult = 1.0 + (effective * (WEAPON_SPEED_PER_POINT or 0.02))
+    if damageMult < 1.00 then damageMult = 1.00 end
+    if damageMult > 1.50 then damageMult = 1.50 end
+    if speedMult < 1.00 then speedMult = 1.00 end
+    if speedMult > 1.40 then speedMult = 1.40 end
+    return damageMult, speedMult, effective
+end
+
+function getEquippedWeaponId()
+    local state = ensurePlayerBuildState()
+    local eq = state and state.equipment
+    if type(eq) ~= "table" then
+        return nil
+    end
+    local id = eq.weapon
+    if id == "" then id = nil end
+    return id
+end
+
+function getWeaponClassForItem(itemId)
+    if not itemId or itemId == "" then
+        return WEAPON_CLASS_MELEE
+    end
+    if not getGameItem then
+        return WEAPON_CLASS_MELEE
+    end
+    local item = getGameItem(itemId)
+    if not item then
+        return WEAPON_CLASS_MELEE
+    end
+    return normalizeWeaponClass(item.weapon_class)
+end
+
+function getEquippedWeaponClass()
+    local weaponId = getEquippedWeaponId()
+    if weaponId and weaponId ~= "" then
+        return getWeaponClassForItem(weaponId)
+    end
+    local classDef = getClassDefById(getCurrentClassId())
+    return normalizeWeaponClass(classDef and classDef.primary)
+end
+
+function getSignedEquippedWeaponStat(statKey)
+    local weaponId = getEquippedWeaponId()
+    if not weaponId or weaponId == "" then
+        return 0
+    end
+    if not getGameItem then
+        return 0
+    end
+    local item = getGameItem(weaponId)
+    local stats = item and item.stats
+    local value = tonumber(stats and stats[statKey]) or 0
+    if value < -10 then value = -10 end
+    if value > 10 then value = 10 end
+    return value
+end
+
+function getBowChargeTierCount()
+    local n = #BOW_CHARGE_STAGE_HOLD_TICKS
+    if n < 1 then n = 1 end
+    return n
+end
+
+function resetBowChargeState()
+    bowChargeState.active = false
+    bowChargeState.ticks = 0
+    bowChargeState.stage = 1
+    bowChargeState.flashTicks = 0
+    bowChargeState.stageThresholds = nil
+    bowChargeState.damageMult = nil
+    bowChargeState.rangeMult = nil
+    bowChargeState.speedMult = nil
+end
+
+function beginBowCharge(profSpeedMult)
+    local tierCount = getBowChargeTierCount()
+    local speedStat = getSignedEquippedWeaponStat("stat_speed")
+    local damageStat = getSignedEquippedWeaponStat("stat_damage")
+    local rangeStat = getSignedEquippedWeaponStat("stat_range")
+
+    local profSpeed = tonumber(profSpeedMult) or 1.0
+    if profSpeed < 0.20 then profSpeed = 0.20 end
+    if profSpeed > 3.00 then profSpeed = 3.00 end
+
+    local holdScale = (1.0 / profSpeed) * (1.0 - (speedStat * 0.03))
+    if holdScale < 0.55 then holdScale = 0.55 end
+    if holdScale > 1.60 then holdScale = 1.60 end
+
+    local itemDamageMult = 1.0 + (damageStat * 0.035)
+    local itemRangeMult = 1.0 + (rangeStat * 0.05)
+    local itemSpeedMult = 1.0 + (speedStat * 0.02)
+    if itemDamageMult < 0.65 then itemDamageMult = 0.65 end
+    if itemDamageMult > 1.45 then itemDamageMult = 1.45 end
+    if itemRangeMult < 0.60 then itemRangeMult = 0.60 end
+    if itemRangeMult > 1.60 then itemRangeMult = 1.60 end
+    if itemSpeedMult < 0.70 then itemSpeedMult = 0.70 end
+    if itemSpeedMult > 1.40 then itemSpeedMult = 1.40 end
+
+    local thresholds = {}
+    local dmg = {}
+    local rng = {}
+    local spd = {}
+    local lastThreshold = 0
+    for i = 1, tierCount do
+        local baseTicks = tonumber(BOW_CHARGE_STAGE_HOLD_TICKS[i]) or 0
+        local scaledTicks = math.floor((baseTicks * holdScale) + 0.5)
+        if i == 1 then
+            scaledTicks = 0
+        elseif scaledTicks <= lastThreshold then
+            scaledTicks = lastThreshold + 1
+        end
+        thresholds[i] = scaledTicks
+        lastThreshold = scaledTicks
+
+        dmg[i] = (tonumber(BOW_CHARGE_STAGE_DAMAGE_MULT[i]) or 1.0) * itemDamageMult
+        rng[i] = (tonumber(BOW_CHARGE_STAGE_RANGE_MULT[i]) or 1.0) * itemRangeMult
+        spd[i] = (tonumber(BOW_CHARGE_STAGE_SPEED_MULT[i]) or 1.0) * itemSpeedMult
+    end
+
+    bowChargeState.active = true
+    bowChargeState.ticks = 0
+    bowChargeState.stage = 1
+    bowChargeState.flashTicks = 0
+    bowChargeState.stageThresholds = thresholds
+    bowChargeState.damageMult = dmg
+    bowChargeState.rangeMult = rng
+    bowChargeState.speedMult = spd
+end
+
+function updateBowChargeTick()
+    if not bowChargeState.active then
+        return
+    end
+    bowChargeState.ticks = (bowChargeState.ticks or 0) + 1
+    if (bowChargeState.flashTicks or 0) > 0 then
+        bowChargeState.flashTicks = bowChargeState.flashTicks - 1
+    end
+
+    local stage = bowChargeState.stage or 1
+    local thresholds = bowChargeState.stageThresholds
+    if type(thresholds) == "table" then
+        local tierCount = #thresholds
+        while stage < tierCount and (bowChargeState.ticks >= (thresholds[stage + 1] or 99999)) do
+            stage = stage + 1
+            bowChargeState.flashTicks = BOW_CHARGE_STAGE_FLASH_TICKS or 3
+        end
+    end
+    bowChargeState.stage = stage
+end
+
+function getBowChargeCurrentStage()
+    local stage = math.floor(tonumber(bowChargeState.stage) or 1)
+    local tierCount = getBowChargeTierCount()
+    if stage < 1 then stage = 1 end
+    if stage > tierCount then stage = tierCount end
+    return stage
+end
+
+function isBowChargeDrawnVisual()
+    if not bowChargeState.active then
+        return false
+    end
+    if (bowChargeState.ticks or 0) <= (BOW_CHARGE_INITIAL_IDLE_TICKS or 2) then
+        return false
+    end
+    if (bowChargeState.flashTicks or 0) > 0 then
+        return false
+    end
+    return true
+end
+
+function allocateWeaponMastery(weaponClass)
+    local state = ensurePlayerBuildState()
+    local key = normalizeWeaponClass(weaponClass)
+    local current = getWeaponMasteryLevel(key)
+    if current >= (WEAPON_MASTERY_CAP or 10) then
+        return false, "MASTERY MAXED"
+    end
+    local points = math.floor(tonumber(state.weapon_mastery_points) or 0)
+    if points <= 0 then
+        return false, "NO MASTERY PTS"
+    end
+    state.weapon_mastery_points = points - 1
+    state.weapon_mastery[key] = current + 1
+    markPlayerBuildStateDirty()
+    refreshClassGameplayStats(false)
+    return true, nil
+end
+
+function getCurrentClassId()
+    local state = ensurePlayerBuildState()
+    return sanitizeClassId(state.class_id)
 end
 
 function setCurrentClassId(classId)
+    local state = ensurePlayerBuildState()
     local normalized = sanitizeClassId(classId)
-    if not player_build_state then
-        player_build_state = {}
+    state.class_id = normalized
+    markPlayerBuildStateDirty()
+    if refreshClassGameplayStats then
+        refreshClassGameplayStats(false)
     end
-    player_build_state.class_id = normalized
     return normalized
 end
 
@@ -1491,6 +2394,180 @@ function getClassIdForSelection(index)
     return order[idx], idx, count
 end
 
+function refreshClassGameplayStats(resetHealthToMax)
+    local state = ensurePlayerBuildState()
+    local classId = getCurrentClassId()
+    local classDef = getClassDefById(classId)
+    local template = getClassTemplateStats(classId, classDef)
+    local growth = classDef and classDef.growth or nil
+
+    local classHp = tonumber(classDef and classDef.base_hp) or 100
+    local classDamage = tonumber(classDef and classDef.base_damage) or 20
+    local classBaseSpeed = tonumber(classDef and classDef.base_speed) or 1.0
+    local growthHp = tonumber(growth and growth.hp) or 0
+    local growthDamage = tonumber(growth and growth.damage) or 0
+    local growthSpeed = tonumber(growth and growth.speed) or 0
+    local classPower = tonumber(template and template.power) or 0
+    local classDefense = tonumber(template and template.defense) or 0
+    local classShieldBonus = tonumber(template and template.shield_bonus) or 0
+    local classDodge = tonumber(template and template.dodge) or 0
+    local classCrit = tonumber(template and template.crit) or 0
+    local classAtkSpeed = tonumber(template and template.atk_speed) or 4.0
+    local classAgility = tonumber(template and template.agility) or 0
+    local classRegen = tonumber(template and template.regen) or 0
+    local level = math.floor(tonumber(state.level) or 1)
+    local statVitality = getBuildStatValue("vitality")
+    local statStrength = getBuildStatValue("strength")
+    local statDexterity = getBuildStatValue("dexterity")
+    local statIntellect = getBuildStatValue("intellect")
+
+    if level < 1 then level = 1 end
+    if level > (PLAYER_LEVEL_MAX or 50) then level = (PLAYER_LEVEL_MAX or 50) end
+    local levelOffset = level - 1
+
+    classHp = classHp + (growthHp * levelOffset) + (statVitality * (VITALITY_HP_BONUS or 10))
+    classDamage = classDamage + (growthDamage * levelOffset) + (statStrength * (STRENGTH_DAMAGE_BONUS or 2))
+    classPower = classPower + (statIntellect * (INTELLECT_POWER_BONUS or 1.0))
+    classDefense = classDefense + (statVitality * 0.15)
+    classShieldBonus = classShieldBonus + (statVitality * 0.1)
+    classDodge = classDodge + (statDexterity * (DEXTERITY_DODGE_BONUS or 1.0))
+    classCrit = classCrit + (statIntellect * (INTELLECT_CRIT_BONUS or 0.5))
+    classAtkSpeed = classAtkSpeed + (growthSpeed * levelOffset * 4.0)
+    classAgility = classAgility + (statDexterity * (DEXTERITY_AGILITY_BONUS or 0.5))
+    classRegen = classRegen + (statVitality * 0.03)
+
+    local moveBaseScale = classBaseSpeed + (growthSpeed * levelOffset)
+    if moveBaseScale < 0.6 then moveBaseScale = 0.6 end
+    if moveBaseScale > 2.0 then moveBaseScale = 2.0 end
+
+    if classHp < 1 then classHp = 1 end
+    if classDamage < 1 then classDamage = 1 end
+    if classPower < -95 then classPower = -95 end
+    if classPower > 500 then classPower = 500 end
+    if classDefense < 0 then classDefense = 0 end
+    if classShieldBonus < 0 then classShieldBonus = 0 end
+    if classShieldBonus > 80 then classShieldBonus = 80 end
+    if classDodge < 0 then classDodge = 0 end
+    if classDodge > 100 then classDodge = 100 end
+    if classCrit < 0 then classCrit = 0 end
+    if classCrit > 100 then classCrit = 100 end
+    if classAtkSpeed < 1.0 then classAtkSpeed = 1.0 end
+    if classAtkSpeed > 12.0 then classAtkSpeed = 12.0 end
+    if classAgility < -50 then classAgility = -50 end
+    if classAgility > 100 then classAgility = 100 end
+    if classRegen < 0 then classRegen = 0 end
+    if classRegen > 20 then classRegen = 20 end
+
+    MAX_HEALTH = math.floor(classHp + 0.5)
+    PLAYER_DAMAGE = math.floor((classDamage * (1.0 + (classPower / 100.0))) + 0.5)
+    if PLAYER_DAMAGE < 1 then PLAYER_DAMAGE = 1 end
+    PLAYER_DEFENSE = math.floor(classDefense + 0.5)
+    PLAYER_SHIELD_BONUS_PERCENT = classShieldBonus
+    PLAYER_DODGE_PERCENT = classDodge
+    PLAYER_CRIT_PERCENT = classCrit
+    PLAYER_ATTACK_SPEED_SCALE = 4.0 / classAtkSpeed
+    PLAYER_MOVE_SPEED_SCALE = moveBaseScale * (1.0 + (classAgility / 100.0))
+    PLAYER_REGEN_PER_SEC = classRegen * 0.1
+    if PLAYER_MOVE_SPEED_SCALE < 0.70 then PLAYER_MOVE_SPEED_SCALE = 0.70 end
+    if PLAYER_MOVE_SPEED_SCALE > 2.00 then PLAYER_MOVE_SPEED_SCALE = 2.00 end
+    if PLAYER_ATTACK_SPEED_SCALE < 0.5 then PLAYER_ATTACK_SPEED_SCALE = 0.5 end
+    if PLAYER_ATTACK_SPEED_SCALE > 2.5 then PLAYER_ATTACK_SPEED_SCALE = 2.5 end
+
+    if resetHealthToMax then
+        playerHealth = MAX_HEALTH
+    elseif playerHealth and playerHealth > MAX_HEALTH then
+        playerHealth = MAX_HEALTH
+    end
+    playerRegenAccumulator = 0.0
+end
+
+function awardPlayerXp(amount)
+    local state = ensurePlayerBuildState()
+    local gain = math.floor(tonumber(amount) or 0)
+    if gain <= 0 then
+        return 0
+    end
+
+    local maxLevel = PLAYER_LEVEL_MAX or 50
+    if state.level >= maxLevel then
+        state.level = maxLevel
+        state.xp = 0
+        markPlayerBuildStateDirty()
+        return 0
+    end
+
+    state.xp = state.xp + gain
+    markPlayerBuildStateDirty()
+    local levelUps = 0
+    while state.level < maxLevel do
+        local need = getXpRequiredForLevel(state.level)
+        if state.xp < need then
+            break
+        end
+        state.xp = state.xp - need
+        state.level = state.level + 1
+        state.stat_points = state.stat_points + (PLAYER_STAT_POINTS_PER_LEVEL or 2)
+        state.weapon_mastery_points = (state.weapon_mastery_points or 0) + (PLAYER_MASTERY_POINTS_PER_LEVEL or 1)
+        levelUps = levelUps + 1
+    end
+
+    if state.level >= maxLevel then
+        state.level = maxLevel
+        state.xp = 0
+        markPlayerBuildStateDirty()
+    end
+
+    if levelUps > 0 then
+        refreshClassGameplayStats(false)
+        if playerHealth and playerHealth > MAX_HEALTH then
+            playerHealth = MAX_HEALTH
+        end
+        statsMenuMessage = "LEVEL UP! +" .. tostring(levelUps * (PLAYER_STAT_POINTS_PER_LEVEL or 2)) .. " PTS"
+        statsMenuMessageTimer = math.floor((SIM_TARGET_HZ or 24) * 2)
+    end
+    return levelUps
+end
+
+function allocatePlayerStat(statKey)
+    local key = tostring(statKey or "")
+    local valid = (key == "vitality" or key == "strength" or key == "dexterity" or key == "intellect")
+    if not valid then
+        return false, "INVALID STAT"
+    end
+    local state = ensurePlayerBuildState()
+    if state.stat_points <= 0 then
+        return false, "NO STAT POINTS"
+    end
+    local current = getBuildStatValue(key)
+    if current >= (BUILD_STAT_MAX or 99) then
+        return false, "STAT MAXED"
+    end
+    state.stats[key] = current + 1
+    state.stat_points = state.stat_points - 1
+    markPlayerBuildStateDirty()
+    refreshClassGameplayStats(false)
+    if playerHealth and playerHealth > MAX_HEALTH then
+        playerHealth = MAX_HEALTH
+    end
+    return true, nil
+end
+
+refreshClassGameplayStats(false)
+
+function deterministicPercentRoll(percent, salt)
+    local p = tonumber(percent) or 0
+    if p <= 0 then
+        return false
+    end
+    if p >= 100 then
+        return true
+    end
+    local s = tonumber(salt) or 0
+    local seed = (((frameCount or 0) * 73) + ((simTickCount or 0) * 131) + ((pdir or 0) * 17) + (s * 197)) % 10000
+    local threshold = math.floor((p * 100) + 0.5)
+    return seed < threshold
+end
+
 function toNumber(value, fallback)
     local n = tonumber(value)
     if n == nil then
@@ -1532,6 +2609,7 @@ function sanitizeSaveToken(value)
 end
 
 function makeEmptySaveSlot(slotIndex)
+    local state = ensurePlayerBuildState()
     return {
         slot = slotIndex or 1,
         used = false,
@@ -1545,6 +2623,17 @@ function makeEmptySaveSlot(slotIndex)
         total_soldiers = 0,
         enemy_state = "",
         potion_state = "",
+        player_level = math.floor(tonumber(state.level) or 1),
+        player_xp = math.floor(tonumber(state.xp) or 0),
+        player_stat_points = math.floor(tonumber(state.stat_points) or 0),
+        weapon_mastery_points = math.floor(tonumber(state.weapon_mastery_points) or 0),
+        mastery_melee = getWeaponMasteryLevel(WEAPON_CLASS_MELEE),
+        mastery_ranged = getWeaponMasteryLevel(WEAPON_CLASS_RANGED),
+        mastery_magic = getWeaponMasteryLevel(WEAPON_CLASS_MAGIC),
+        stat_vitality = getBuildStatValue("vitality"),
+        stat_strength = getBuildStatValue("strength"),
+        stat_dexterity = getBuildStatValue("dexterity"),
+        stat_intellect = getBuildStatValue("intellect"),
     }
 end
 
@@ -1563,6 +2652,17 @@ function copySaveSlot(slot)
         total_soldiers = src.total_soldiers,
         enemy_state = src.enemy_state,
         potion_state = src.potion_state,
+        player_level = src.player_level,
+        player_xp = src.player_xp,
+        player_stat_points = src.player_stat_points,
+        weapon_mastery_points = src.weapon_mastery_points,
+        mastery_melee = src.mastery_melee,
+        mastery_ranged = src.mastery_ranged,
+        mastery_magic = src.mastery_magic,
+        stat_vitality = src.stat_vitality,
+        stat_strength = src.stat_strength,
+        stat_dexterity = src.stat_dexterity,
+        stat_intellect = src.stat_intellect,
     }
 end
 
@@ -1592,6 +2692,36 @@ function normalizeSaveSlots()
             if slot.total_soldiers < 0 then slot.total_soldiers = 0 end
             slot.enemy_state = tostring(slot.enemy_state or "")
             slot.potion_state = tostring(slot.potion_state or "")
+            slot.player_level = math.floor(toNumber(slot.player_level, 1))
+            if slot.player_level < 1 then slot.player_level = 1 end
+            if slot.player_level > (PLAYER_LEVEL_MAX or 50) then slot.player_level = (PLAYER_LEVEL_MAX or 50) end
+            slot.player_xp = math.floor(toNumber(slot.player_xp, 0))
+            if slot.player_xp < 0 then slot.player_xp = 0 end
+            slot.player_stat_points = math.floor(toNumber(slot.player_stat_points, 0))
+            if slot.player_stat_points < 0 then slot.player_stat_points = 0 end
+            slot.weapon_mastery_points = math.floor(toNumber(slot.weapon_mastery_points, 0))
+            if slot.weapon_mastery_points < 0 then slot.weapon_mastery_points = 0 end
+            slot.mastery_melee = math.floor(toNumber(slot.mastery_melee, 0))
+            slot.mastery_ranged = math.floor(toNumber(slot.mastery_ranged, 0))
+            slot.mastery_magic = math.floor(toNumber(slot.mastery_magic, 0))
+            if slot.mastery_melee < 0 then slot.mastery_melee = 0 end
+            if slot.mastery_ranged < 0 then slot.mastery_ranged = 0 end
+            if slot.mastery_magic < 0 then slot.mastery_magic = 0 end
+            if slot.mastery_melee > (WEAPON_MASTERY_CAP or 10) then slot.mastery_melee = (WEAPON_MASTERY_CAP or 10) end
+            if slot.mastery_ranged > (WEAPON_MASTERY_CAP or 10) then slot.mastery_ranged = (WEAPON_MASTERY_CAP or 10) end
+            if slot.mastery_magic > (WEAPON_MASTERY_CAP or 10) then slot.mastery_magic = (WEAPON_MASTERY_CAP or 10) end
+            slot.stat_vitality = math.floor(toNumber(slot.stat_vitality, 0))
+            slot.stat_strength = math.floor(toNumber(slot.stat_strength, 0))
+            slot.stat_dexterity = math.floor(toNumber(slot.stat_dexterity, 0))
+            slot.stat_intellect = math.floor(toNumber(slot.stat_intellect, 0))
+            if slot.stat_vitality < 0 then slot.stat_vitality = 0 end
+            if slot.stat_strength < 0 then slot.stat_strength = 0 end
+            if slot.stat_dexterity < 0 then slot.stat_dexterity = 0 end
+            if slot.stat_intellect < 0 then slot.stat_intellect = 0 end
+            if slot.stat_vitality > (BUILD_STAT_MAX or 99) then slot.stat_vitality = (BUILD_STAT_MAX or 99) end
+            if slot.stat_strength > (BUILD_STAT_MAX or 99) then slot.stat_strength = (BUILD_STAT_MAX or 99) end
+            if slot.stat_dexterity > (BUILD_STAT_MAX or 99) then slot.stat_dexterity = (BUILD_STAT_MAX or 99) end
+            if slot.stat_intellect > (BUILD_STAT_MAX or 99) then slot.stat_intellect = (BUILD_STAT_MAX or 99) end
         end
         saveSlots[i] = slot
     end
@@ -1615,6 +2745,17 @@ function serializeSaveSlots()
             tostring(math.floor(toNumber(slot.total_soldiers, 0))),
             sanitizeSaveToken(slot.enemy_state or ""),
             sanitizeSaveToken(slot.potion_state or ""),
+            tostring(math.floor(toNumber(slot.player_level, 1))),
+            tostring(math.floor(toNumber(slot.player_xp, 0))),
+            tostring(math.floor(toNumber(slot.player_stat_points, 0))),
+            tostring(math.floor(toNumber(slot.weapon_mastery_points, 0))),
+            tostring(math.floor(toNumber(slot.mastery_melee, 0))),
+            tostring(math.floor(toNumber(slot.mastery_ranged, 0))),
+            tostring(math.floor(toNumber(slot.mastery_magic, 0))),
+            tostring(math.floor(toNumber(slot.stat_vitality, 0))),
+            tostring(math.floor(toNumber(slot.stat_strength, 0))),
+            tostring(math.floor(toNumber(slot.stat_dexterity, 0))),
+            tostring(math.floor(toNumber(slot.stat_intellect, 0))),
         }, "|")
     end
     return table.concat(lines, "\n")
@@ -1645,6 +2786,33 @@ function deserializeSaveSlots(payload)
         if #parts >= 12 then
             local slotIndex = math.floor(toNumber(parts[1], 0))
             if slotIndex >= 1 and slotIndex <= SAVE_SLOT_COUNT then
+                local defaultState = ensurePlayerBuildState()
+                -- Schema notes:
+                -- Old (Build <= 144): 19 fields (no weapon mastery data).
+                -- New (Build >= 145): 23 fields (adds mastery currency + 3 mastery levels before stats).
+                local weaponMasteryPoints = 0
+                local masteryMelee = 0
+                local masteryRanged = 0
+                local masteryMagic = 0
+                local statVitality = math.floor(toNumber((defaultState.stats and defaultState.stats.vitality) or 0, 0))
+                local statStrength = math.floor(toNumber((defaultState.stats and defaultState.stats.strength) or 0, 0))
+                local statDexterity = math.floor(toNumber((defaultState.stats and defaultState.stats.dexterity) or 0, 0))
+                local statIntellect = math.floor(toNumber((defaultState.stats and defaultState.stats.intellect) or 0, 0))
+                if #parts >= 23 then
+                    weaponMasteryPoints = math.floor(toNumber(parts[16], weaponMasteryPoints))
+                    masteryMelee = math.floor(toNumber(parts[17], masteryMelee))
+                    masteryRanged = math.floor(toNumber(parts[18], masteryRanged))
+                    masteryMagic = math.floor(toNumber(parts[19], masteryMagic))
+                    statVitality = math.floor(toNumber(parts[20], statVitality))
+                    statStrength = math.floor(toNumber(parts[21], statStrength))
+                    statDexterity = math.floor(toNumber(parts[22], statDexterity))
+                    statIntellect = math.floor(toNumber(parts[23], statIntellect))
+                elseif #parts >= 19 then
+                    statVitality = math.floor(toNumber(parts[16], statVitality))
+                    statStrength = math.floor(toNumber(parts[17], statStrength))
+                    statDexterity = math.floor(toNumber(parts[18], statDexterity))
+                    statIntellect = math.floor(toNumber(parts[19], statIntellect))
+                end
                 saveSlots[slotIndex] = {
                     slot = slotIndex,
                     used = (toNumber(parts[2], 0) ~= 0),
@@ -1658,6 +2826,17 @@ function deserializeSaveSlots(payload)
                     total_soldiers = math.floor(toNumber(parts[10], 0)),
                     enemy_state = parts[11] or "",
                     potion_state = parts[12] or "",
+                    player_level = math.floor(toNumber(parts[13], defaultState.level or 1)),
+                    player_xp = math.floor(toNumber(parts[14], defaultState.xp or 0)),
+                    player_stat_points = math.floor(toNumber(parts[15], defaultState.stat_points or 0)),
+                    weapon_mastery_points = weaponMasteryPoints,
+                    mastery_melee = masteryMelee,
+                    mastery_ranged = masteryRanged,
+                    mastery_magic = masteryMagic,
+                    stat_vitality = statVitality,
+                    stat_strength = statStrength,
+                    stat_dexterity = statDexterity,
+                    stat_intellect = statIntellect,
                 }
             end
         end
@@ -1724,7 +2903,8 @@ function getSaveSlotSummary(slotIndex)
     end
     local levelLabel = getLevelLabel(slot.level_id or 1)
     local classLabel = string.upper(getClassName(slot.class_id))
-    return "SLOT " .. tostring(idx), "LEVEL " .. tostring(levelLabel) .. "  " .. classLabel
+    local playerLevel = math.floor(toNumber(slot.player_level, 1))
+    return "SLOT " .. tostring(idx), "LEVEL " .. tostring(levelLabel) .. "  " .. classLabel .. "  LV " .. tostring(playerLevel)
 end
 
 function countEnemiesInSprites()
@@ -1848,6 +3028,7 @@ function applyPotionStateSnapshot(snapshot)
 end
 
 function captureCurrentSaveSlot(slotIndex)
+    local build = ensurePlayerBuildState()
     local slot = makeEmptySaveSlot(slotIndex)
     slot.used = true
     slot.level_id = currentLevel or 1
@@ -1872,6 +3053,17 @@ function captureCurrentSaveSlot(slotIndex)
     if trackedKilled < 0 then trackedKilled = 0 end
     if trackedKilled > slot.total_soldiers then trackedKilled = slot.total_soldiers end
     slot.soldiers_killed = trackedKilled
+    slot.player_level = math.floor(tonumber(build.level) or 1)
+    slot.player_xp = math.floor(tonumber(build.xp) or 0)
+    slot.player_stat_points = math.floor(tonumber(build.stat_points) or 0)
+    slot.weapon_mastery_points = math.floor(toNumber(build.weapon_mastery_points, 0))
+    slot.mastery_melee = getWeaponMasteryLevel(WEAPON_CLASS_MELEE)
+    slot.mastery_ranged = getWeaponMasteryLevel(WEAPON_CLASS_RANGED)
+    slot.mastery_magic = getWeaponMasteryLevel(WEAPON_CLASS_MAGIC)
+    slot.stat_vitality = getBuildStatValue("vitality")
+    slot.stat_strength = getBuildStatValue("strength")
+    slot.stat_dexterity = getBuildStatValue("dexterity")
+    slot.stat_intellect = getBuildStatValue("intellect")
     return slot
 end
 
@@ -1905,6 +3097,42 @@ function loadGameFromSlot(slotIndex)
     end
 
     beginLoadLevel(levelId)
+
+    local build = ensurePlayerBuildState()
+    build.level = math.floor(toNumber(slot.player_level, 1))
+    if build.level < 1 then build.level = 1 end
+    if build.level > (PLAYER_LEVEL_MAX or 50) then build.level = (PLAYER_LEVEL_MAX or 50) end
+    build.xp = math.floor(toNumber(slot.player_xp, 0))
+    if build.xp < 0 then build.xp = 0 end
+    build.stat_points = math.floor(toNumber(slot.player_stat_points, 0))
+    if build.stat_points < 0 then build.stat_points = 0 end
+    build.weapon_mastery_points = math.floor(toNumber(slot.weapon_mastery_points, build.weapon_mastery_points or 0))
+    if build.weapon_mastery_points < 0 then build.weapon_mastery_points = 0 end
+    if not build.weapon_mastery then build.weapon_mastery = {} end
+    build.weapon_mastery[WEAPON_CLASS_MELEE] = math.floor(toNumber(slot.mastery_melee, build.weapon_mastery[WEAPON_CLASS_MELEE] or 0))
+    build.weapon_mastery[WEAPON_CLASS_RANGED] = math.floor(toNumber(slot.mastery_ranged, build.weapon_mastery[WEAPON_CLASS_RANGED] or 0))
+    build.weapon_mastery[WEAPON_CLASS_MAGIC] = math.floor(toNumber(slot.mastery_magic, build.weapon_mastery[WEAPON_CLASS_MAGIC] or 0))
+    if build.weapon_mastery[WEAPON_CLASS_MELEE] < 0 then build.weapon_mastery[WEAPON_CLASS_MELEE] = 0 end
+    if build.weapon_mastery[WEAPON_CLASS_RANGED] < 0 then build.weapon_mastery[WEAPON_CLASS_RANGED] = 0 end
+    if build.weapon_mastery[WEAPON_CLASS_MAGIC] < 0 then build.weapon_mastery[WEAPON_CLASS_MAGIC] = 0 end
+    local masteryCap = (WEAPON_MASTERY_CAP or 10)
+    if build.weapon_mastery[WEAPON_CLASS_MELEE] > masteryCap then build.weapon_mastery[WEAPON_CLASS_MELEE] = masteryCap end
+    if build.weapon_mastery[WEAPON_CLASS_RANGED] > masteryCap then build.weapon_mastery[WEAPON_CLASS_RANGED] = masteryCap end
+    if build.weapon_mastery[WEAPON_CLASS_MAGIC] > masteryCap then build.weapon_mastery[WEAPON_CLASS_MAGIC] = masteryCap end
+    build.stats.vitality = math.floor(toNumber(slot.stat_vitality, 0))
+    build.stats.strength = math.floor(toNumber(slot.stat_strength, 0))
+    build.stats.dexterity = math.floor(toNumber(slot.stat_dexterity, 0))
+    build.stats.intellect = math.floor(toNumber(slot.stat_intellect, 0))
+    if build.stats.vitality < 0 then build.stats.vitality = 0 end
+    if build.stats.strength < 0 then build.stats.strength = 0 end
+    if build.stats.dexterity < 0 then build.stats.dexterity = 0 end
+    if build.stats.intellect < 0 then build.stats.intellect = 0 end
+    if build.stats.vitality > (BUILD_STAT_MAX or 99) then build.stats.vitality = (BUILD_STAT_MAX or 99) end
+    if build.stats.strength > (BUILD_STAT_MAX or 99) then build.stats.strength = (BUILD_STAT_MAX or 99) end
+    if build.stats.dexterity > (BUILD_STAT_MAX or 99) then build.stats.dexterity = (BUILD_STAT_MAX or 99) end
+    if build.stats.intellect > (BUILD_STAT_MAX or 99) then build.stats.intellect = (BUILD_STAT_MAX or 99) end
+    markPlayerBuildStateDirty()
+
     setCurrentClassId(slot.class_id)
 
     px = toNumber(slot.player_x, px or 2.5)
@@ -1929,9 +3157,17 @@ function loadGameFromSlot(slotIndex)
     showMenu = false
     inOptionsMenu = false
     inSaveMenu = false
+    inStatsMenu = false
+    inMasteryMenu = false
     saveMenuSelection = 1
     saveMenuMessage = ""
     saveMenuMessageTimer = 0
+    statsMenuSelection = 1
+    statsMenuMessage = ""
+    statsMenuMessageTimer = 0
+    masteryMenuSelection = 1
+    masteryMenuMessage = ""
+    masteryMenuMessageTimer = 0
 
     if totalSoldiers > 0 and soldiersKilled >= totalSoldiers then
         gameState = STATE_WIN
@@ -1949,6 +3185,8 @@ titleClassSelection = getClassSelectionIndexForId(getCurrentClassId())
 
 -- Blood particle effects
 local bloodEffects = {}  -- {x, y, particles={{dx, dy, life}...}}
+BLOOD_PARTICLE_COUNT = BLOOD_PARTICLE_COUNT or 12
+BLOOD_EFFECT_POOL_FREE = BLOOD_EFFECT_POOL_FREE or {}
 
 -- Load warrior sprites for 4 directions
 local warriorFront = nil
@@ -1978,14 +3216,133 @@ local warriorAttackFront = {}
 local warriorAttackBack = {}
 local warriorAttackLeft = {}
 local warriorAttackRight = {}
+local bowAttack = {}
+local staffCast = {}
+local projectileArrowSprite = nil
+local projectileMagicSprite = nil
+local projectileImpactSprite = nil
 
 -- Load knight sprites for 4 directions
 local knightFront = nil
 local knightBack = nil
 local knightLeft = nil
 local knightRight = nil
+local playerProjectiles = {}
+PROJECTILE_POOL_FREE = PROJECTILE_POOL_FREE or {}
+local projectileNextId = 1
+local lastAttackWeaponClass = WEAPON_CLASS_MELEE
 
-local function deepCopy(value)
+function makePooledBloodEffect()
+    local effect = {x = 0, y = 0, life = 0, particles = {}}
+    local particles = effect.particles
+    for i = 1, (BLOOD_PARTICLE_COUNT or 12) do
+        particles[i] = {dx = 0, dy = 0, ox = 0, oy = 0}
+    end
+    return effect
+end
+
+function acquireBloodEffect()
+    local freePool = BLOOD_EFFECT_POOL_FREE
+    local n = #freePool
+    if n > 0 then
+        local effect = freePool[n]
+        freePool[n] = nil
+        return effect
+    end
+    return makePooledBloodEffect()
+end
+
+function releaseBloodEffect(effect)
+    if not effect then
+        return
+    end
+    effect.life = 0
+    effect.x = 0
+    effect.y = 0
+    local particles = effect.particles
+    if particles then
+        for i = 1, #particles do
+            local p = particles[i]
+            if p then
+                p.dx = 0
+                p.dy = 0
+                p.ox = 0
+                p.oy = 0
+            end
+        end
+    end
+    local freePool = BLOOD_EFFECT_POOL_FREE
+    freePool[#freePool + 1] = effect
+end
+
+function clearBloodEffectsActive()
+    if not bloodEffects then
+        bloodEffects = {}
+        return
+    end
+    for i = 1, #bloodEffects do
+        releaseBloodEffect(bloodEffects[i])
+    end
+    bloodEffects = {}
+end
+
+function makePooledProjectile()
+    return {
+        id = 0,
+        weaponClass = WEAPON_CLASS_RANGED,
+        x = 0, y = 0,
+        startX = 0, startY = 0,
+        dx = 0, dy = 0,
+        speed = 0,
+        damage = 1,
+        maxRangeSq = 0,
+        ttl = 0,
+    }
+end
+
+function acquireProjectile()
+    local freePool = PROJECTILE_POOL_FREE
+    local n = #freePool
+    if n > 0 then
+        local projectile = freePool[n]
+        freePool[n] = nil
+        return projectile
+    end
+    return makePooledProjectile()
+end
+
+function releaseProjectile(projectile)
+    if not projectile then
+        return
+    end
+    projectile.id = 0
+    projectile.weaponClass = WEAPON_CLASS_RANGED
+    projectile.x = 0
+    projectile.y = 0
+    projectile.startX = 0
+    projectile.startY = 0
+    projectile.dx = 0
+    projectile.dy = 0
+    projectile.speed = 0
+    projectile.damage = 1
+    projectile.maxRangeSq = 0
+    projectile.ttl = 0
+    local freePool = PROJECTILE_POOL_FREE
+    freePool[#freePool + 1] = projectile
+end
+
+function clearPlayerProjectilesActive()
+    if not playerProjectiles then
+        playerProjectiles = {}
+        return
+    end
+    for i = 1, #playerProjectiles do
+        releaseProjectile(playerProjectiles[i])
+    end
+    playerProjectiles = {}
+end
+
+function deepCopy(value)
     if type(value) ~= "table" then
         return value
     end
@@ -2008,7 +3365,71 @@ local function deepCopy(value)
     return out
 end
 
-local function countEnemies(spriteList)
+LEVEL_LOAD_MAP_BUFFER = LEVEL_LOAD_MAP_BUFFER or {}
+LEVEL_LOAD_SPRITE_BUFFER = LEVEL_LOAD_SPRITE_BUFFER or {}
+
+function cloneMapForLevelLoad(sourceMap)
+    local out = LEVEL_LOAD_MAP_BUFFER
+    local rows = sourceMap and #sourceMap or 0
+    for y = 1, rows do
+        local srcRow = sourceMap[y]
+        local dstRow = out[y]
+        if not dstRow then
+            dstRow = {}
+            out[y] = dstRow
+        end
+        local cols = srcRow and #srcRow or 0
+        for x = 1, cols do
+            dstRow[x] = srcRow[x]
+        end
+        for x = cols + 1, #dstRow do
+            dstRow[x] = nil
+        end
+    end
+    for y = rows + 1, #out do
+        out[y] = nil
+    end
+    return out
+end
+
+function copySpritePrototypeInto(dst, src)
+    for k, _ in pairs(dst) do
+        if src[k] == nil then
+            dst[k] = nil
+        end
+    end
+    for k, v in pairs(src) do
+        if type(v) == "table" then
+            dst[k] = deepCopy(v)
+        else
+            dst[k] = v
+        end
+    end
+end
+
+function cloneSpritesForLevelLoad(sourceSprites)
+    local out = LEVEL_LOAD_SPRITE_BUFFER
+    local count = sourceSprites and #sourceSprites or 0
+    for i = 1, count do
+        local src = sourceSprites[i]
+        if src then
+            local dst = out[i]
+            if not dst then
+                dst = {}
+                out[i] = dst
+            end
+            copySpritePrototypeInto(dst, src)
+        else
+            out[i] = nil
+        end
+    end
+    for i = count + 1, #out do
+        out[i] = nil
+    end
+    return out
+end
+
+function countEnemies(spriteList)
     local count = 0
     for i = 1, #spriteList do
         local s = spriteList[i]
@@ -2019,7 +3440,7 @@ local function countEnemies(spriteList)
     return count
 end
 
-local function countAdjacentOpenTiles(sourceMap, mx, my)
+function countAdjacentOpenTiles(sourceMap, mx, my)
     local function tileAt(tx, ty)
         if tx < 0 or tx > 15 or ty < 0 or ty > 15 then
             return 1
@@ -2036,19 +3457,32 @@ local function countAdjacentOpenTiles(sourceMap, mx, my)
     return openCount
 end
 
-local function wallVariantHash(mx, my, levelId, salt)
+function wallVariantHash(mx, my, levelId, salt)
     local v = (((mx + 1) * 1973) + ((my + 1) * 9277) + ((levelId or 1) * 2663) + ((salt or 0) * 811)) % 104729
     v = ((v * 131) + 907) % 104729
     return v
 end
 
-local function chooseWallVariant(mx, my, levelId, sourceMap)
+function chooseWallVariant(mx, my, levelId, sourceMap)
     -- Deterministic wall variety (no math.random crash risk).
     local openCount = countAdjacentOpenTiles(sourceMap, mx, my)
     local isDeadEndCap = (openCount == 1)
 
-    -- Keep decorative types 5/6 rare so they don't feel deceptive in navigation.
-    local accentRatePerThousand = isDeadEndCap and 55 or 12 -- 5.5% dead-ends, 1.2% elsewhere
+    -- Increase decorative accent frequency:
+    -- 1) Diamond + window overall spawn chance is doubled.
+    -- 2) Dead-end bonus factor is also doubled.
+    local baseAccentPerThousand = 12
+    local accentRateScale = 2.0
+    local deadEndBonusFactor = (55.0 / 12.0) * 2.0
+    local accentRatePerThousand = baseAccentPerThousand * accentRateScale
+    if isDeadEndCap then
+        accentRatePerThousand = accentRatePerThousand * deadEndBonusFactor
+    end
+    accentRatePerThousand = math.floor(accentRatePerThousand + 0.5)
+    if accentRatePerThousand > 1000 then
+        accentRatePerThousand = 1000
+    end
+
     local accentRoll = wallVariantHash(mx, my, levelId, 1) % 1000
     if accentRoll < accentRatePerThousand then
         local accentPick = wallVariantHash(mx, my, levelId, 2) % 100
@@ -2066,7 +3500,7 @@ local function chooseWallVariant(mx, my, levelId, sourceMap)
     return 4
 end
 
-local function loadLevel(levelId)
+function loadLevel(levelId)
     local level = LEVELS[levelId]
     if not level then return end
     currentLevel = levelId
@@ -2083,7 +3517,7 @@ local function loadLevel(levelId)
         enableBootLogs = false
         DEBUG_WALL_QUADS_LOG = false
     end
-    map = deepCopy(level.map)
+    map = cloneMapForLevelLoad(level.map)
     for my = 0, 15 do
         local row = map[my + 1]
         if row then
@@ -2094,7 +3528,7 @@ local function loadLevel(levelId)
             end
         end
     end
-    sprites = deepCopy(level.sprites)
+    sprites = cloneSpritesForLevelLoad(level.sprites)
     local function isOpenFloor(mx, my)
         if mx < 1 or mx > 14 or my < 1 or my > 14 then return false end
         if map[my + 1][mx + 1] ~= 0 then return false end
@@ -2170,19 +3604,20 @@ local function loadLevel(levelId)
     lastSafeWallY = py
 end
 
-local function unloadLevelData()
+function unloadLevelData()
     map = nil
     sprites = nil
     totalSoldiers = 0
+    clearPlayerProjectilesActive()
 end
 
-local function freeSpriteRef(sprite)
+function freeSpriteRef(sprite)
     if sprite then
         vmupro.sprite.free(sprite)
     end
 end
 
-local function unloadMenuSprites()
+function unloadMenuSprites()
     freeSpriteRef(titleSprite)
     titleSprite = nil
     if classPortraitSprites then
@@ -2195,7 +3630,7 @@ local function unloadMenuSprites()
     classPortraitSprite = nil
 end
 
-local function unloadLevelSprites()
+function unloadLevelSprites()
     freeSpriteRef(warriorFront); warriorFront = nil
     freeSpriteRef(warriorBack); warriorBack = nil
     freeSpriteRef(warriorLeft); warriorLeft = nil
@@ -2240,6 +3675,17 @@ local function unloadLevelSprites()
     warriorAttackBack = {}
     warriorAttackLeft = {}
     warriorAttackRight = {}
+    for i = 1, #bowAttack do
+        freeSpriteRef(bowAttack[i])
+    end
+    bowAttack = {}
+    for i = 1, #staffCast do
+        freeSpriteRef(staffCast[i])
+    end
+    staffCast = {}
+    freeSpriteRef(projectileArrowSprite); projectileArrowSprite = nil
+    freeSpriteRef(projectileMagicSprite); projectileMagicSprite = nil
+    freeSpriteRef(projectileImpactSprite); projectileImpactSprite = nil
     freeSpriteRef(knightFront); knightFront = nil
     freeSpriteRef(knightBack); knightBack = nil
     freeSpriteRef(knightLeft); knightLeft = nil
@@ -2261,7 +3707,7 @@ local function unloadLevelSprites()
     wallTextureLoadAttempted = false
 end
 
-local function loadMenuSprites()
+function loadMenuSprites()
     if not titleSprite then
         titleSprite = vmupro.sprite.new("sprites/title")
         if not validateSprite(titleSprite, "loadMenuSprites") then
@@ -2297,7 +3743,7 @@ local textureMetadata = {}
 local loadTextureWithValidation
 local logTextureMemoryUsage
 
-local function loadTextureSheetWithValidation(path, textureName)
+function loadTextureSheetWithValidation(path, textureName)
     local success, sheet = pcall(function()
         return vmupro.sprite.newSheet(path)
     end)
@@ -2352,7 +3798,7 @@ local function loadTextureSheetWithValidation(path, textureName)
     return sheet
 end
 
-local function getWall1VariantConfig()
+function getWall1VariantConfig()
     local variants = WALL1_FORMAT_VARIANTS or {}
     local n = #variants
     if n <= 0 then
@@ -2362,18 +3808,18 @@ local function getWall1VariantConfig()
     return variants[WALL1_FORMAT_INDEX] or variants[1]
 end
 
-local function getWallKeyModeLabel()
+function getWallKeyModeLabel()
     return WALL_FORCE_COLORKEY_OVERRIDE and "FORCED" or "RAW"
 end
 
-local function getWallProjectionModeLabel()
+function getWallProjectionModeLabel()
     if WALL_PROJECTION_MODE == "stable" then
         return "STABLE"
     end
     return "ADAPTIVE"
 end
 
-local function forceWallTextureColorKeys()
+function forceWallTextureColorKeys()
     if not WALL_FORCE_COLORKEY_OVERRIDE then
         return
     end
@@ -2445,10 +3891,19 @@ function unloadWallTextures()
     wallTextureLoadAttempted = false
 end
 
-local function loadLevelSprites(levelId)
+function loadLevelSprites(levelId)
     local level = LEVELS[levelId]
     local assets = level and level.assets or {}
     local base = (level and level.assetBase) or "sprites/"
+    local globalBase = "sprites/"
+
+    local function tryLoadSprite(pathNoExt, context)
+        local ok, spr = pcall(vmupro.sprite.new, pathNoExt)
+        if ok and validateSprite(spr, context) then
+            return spr
+        end
+        return nil
+    end
 
     if assets.warrior then
         warriorFront = vmupro.sprite.new(base .. "warrior_front")
@@ -2550,6 +4005,44 @@ local function loadLevelSprites(levelId)
         potionSprite = vmupro.sprite.new(base .. "potion")
         if not validateSprite(potionSprite, "potionSprite") then potionSprite = nil end
     end
+
+    -- Optional player-weapon overlays for ranged/magic placeholders.
+    -- These are global (not per-level) assets, so also try `sprites/` even when a level uses `sprites/levelX/`.
+    bowAttack = {}
+    -- Deterministic placeholder loading: use provided assets first, then level fallback.
+    bowAttack[1] = tryLoadSprite(globalBase .. "bow_idle", "bow_idle_global")
+        or tryLoadSprite(base .. "bow_idle", "bow_idle_level")
+    bowAttack[2] = tryLoadSprite(globalBase .. "bow_drawn", "bow_drawn_global")
+        or tryLoadSprite(base .. "bow_drawn", "bow_drawn_level")
+
+    staffCast = {}
+    local sprStaffSingle = tryLoadSprite(globalBase .. "STAFF", "STAFF_global")
+        or tryLoadSprite(base .. "STAFF", "STAFF_level")
+        or tryLoadSprite(globalBase .. "staff", "staff_global")
+        or tryLoadSprite(base .. "staff", "staff_level")
+    if sprStaffSingle then
+        staffCast[1] = sprStaffSingle
+        staffCast[2] = sprStaffSingle
+    end
+
+    -- Arrow path is fixed to custom placeholder first.
+    projectileArrowSprite = tryLoadSprite(globalBase .. "arrow", "arrow_global")
+        or tryLoadSprite(base .. "arrow", "arrow_level")
+
+    projectileMagicSprite = tryLoadSprite(globalBase .. "projectile_magic", "projectile_magic_global")
+        or tryLoadSprite(base .. "projectile_magic", "projectile_magic_level")
+
+    projectileImpactSprite = tryLoadSprite(globalBase .. "projectile_impact", "projectile_impact_global")
+        or tryLoadSprite(base .. "projectile_impact", "projectile_impact_level")
+    if not projectileMagicSprite then
+        projectileMagicSprite =
+            tryLoadSprite(globalBase .. "explosion", "explosion_global")
+            or tryLoadSprite(base .. "explosion", "explosion")
+    end
+    if not projectileImpactSprite and projectileMagicSprite then
+        projectileImpactSprite = projectileMagicSprite
+    end
+
     if DEBUG_DISABLE_WALL_TEXTURE then
         unloadWallTextures()
     else
@@ -2647,7 +4140,7 @@ logTextureMemoryUsage = function()
     }
 end
 
-local function unloadLevelAudio()
+function unloadLevelAudio()
     if not audioInitialized then return end
     if gruntSample then
         vmupro.sound.sample.stop(gruntSample)
@@ -2686,7 +4179,11 @@ local function unloadLevelAudio()
     end
 end
 
-local function loadLevelAudio()
+function loadLevelAudio()
+    if not ENABLE_SAMPLE_AUDIO then
+        audioInitialized = false
+        return
+    end
     if audioInitialized then return end
     if not audioSystemActive then
         vmupro.audio.startListenMode()
@@ -2745,7 +4242,7 @@ local function loadLevelAudio()
     audioInitialized = true
 end
 
-local function stopGameplaySamples()
+function stopGameplaySamples()
     if gruntSample then vmupro.sound.sample.stop(gruntSample) end
     if swordHitSample then vmupro.sound.sample.stop(swordHitSample) end
     if swordMissSample then vmupro.sound.sample.stop(swordMissSample) end
@@ -2754,7 +4251,10 @@ local function stopGameplaySamples()
     if argDeathSample then vmupro.sound.sample.stop(argDeathSample) end
 end
 
-local function loadTitleMusic()
+function loadTitleMusic()
+    if not ENABLE_SAMPLE_AUDIO then
+        return
+    end
     if titleSample and titleOverlaySample then return end
     if not audioSystemActive then
         vmupro.audio.startListenMode()
@@ -2790,7 +4290,7 @@ local function loadTitleMusic()
     end
 end
 
-local function isSamplePlayingSafe(sample, context)
+function isSamplePlayingSafe(sample, context)
     if not sample then return false end
     local ok, playing = pcall(vmupro.sound.sample.isPlaying, sample)
     if not ok then
@@ -2802,7 +4302,7 @@ local function isSamplePlayingSafe(sample, context)
     return playing == true
 end
 
-local function playTitleVoice()
+function playTitleVoice()
     if not titleOverlaySample then return false end
     vmupro.sound.sample.setVolume(titleOverlaySample, TITLE_VOICE_VOLUME, TITLE_VOICE_VOLUME)
     local ok, err = pcall(vmupro.sound.sample.play, titleOverlaySample, TITLE_VOICE_REPEAT_COUNT)
@@ -2817,7 +4317,7 @@ local function playTitleVoice()
     return ok
 end
 
-local function playTitleMusic(reason)
+function playTitleMusic(reason)
     if not titleSample then return false end
     vmupro.sound.sample.setVolume(titleSample, TITLE_MUSIC_VOLUME, TITLE_MUSIC_VOLUME)
     local ok, err = pcall(vmupro.sound.sample.play, titleSample, TITLE_MUSIC_REPEAT_COUNT)
@@ -2835,7 +4335,7 @@ local function playTitleMusic(reason)
     return ok
 end
 
-local function stopTitleMusic()
+function stopTitleMusic()
     if titleSample then
         vmupro.sound.sample.stop(titleSample)
         vmupro.sound.sample.free(titleSample)
@@ -2857,8 +4357,15 @@ local function stopTitleMusic()
     end
 end
 
-local function startTitleMusic()
-    if not soundEnabled then return end
+function startTitleMusic()
+    if not soundEnabled or not ENABLE_SAMPLE_AUDIO then
+        titleMusicState = "stopped"
+        titleMusicTimer = 0
+        titleMusicStartUs = 0
+        titleVoiceStarted = false
+        titleMusicStarted = false
+        return
+    end
     loadTitleMusic()
     titleMusicTimer = 0
     titleMusicStartUs = 0
@@ -2877,8 +4384,8 @@ local function startTitleMusic()
     end
 end
 
-local function updateTitleMusic()
-    if not soundEnabled then
+function updateTitleMusic()
+    if not soundEnabled or not ENABLE_SAMPLE_AUDIO then
         if titleMusicState ~= "stopped" then
             stopTitleMusic()
         end
@@ -2918,14 +4425,24 @@ local function updateTitleMusic()
     titleMusicState = "stopped"
 end
 
-local function enterTitle()
+function enterTitle()
+    markRunResetRequested()
     showMenu = false
     inOptionsMenu = false
     inGameDebugMenu = false
     inSaveMenu = false
+    inStatsMenu = false
+    inMasteryMenu = false
+    resetBowChargeState()
     saveMenuSelection = 1
     saveMenuMessage = ""
     saveMenuMessageTimer = 0
+    statsMenuSelection = 1
+    statsMenuMessage = ""
+    statsMenuMessageTimer = 0
+    masteryMenuSelection = 1
+    masteryMenuMessage = ""
+    masteryMenuMessageTimer = 0
     gameState = STATE_TITLE
     titleSelection = 1
     titleInClassSelect = false
@@ -2945,50 +4462,71 @@ local function enterTitle()
     startTitleMusic()
 end
 
-local function initializeLevelState(levelId)
+function initializeLevelState(levelId)
+    ensurePlayerBuildState()
     loadLevel(levelId)
-    playerHealth = MAX_HEALTH
+    refreshClassGameplayStats(true)
     beginExpansionRun(levelId)
     soldiersKilled = 0
     isAttacking = 0
+    resetBowChargeState()
     isBlocking = false
     blockAnim = 0
     showMenu = false
     inOptionsMenu = false
     inGameDebugMenu = false
     inSaveMenu = false
+    inStatsMenu = false
+    inMasteryMenu = false
     saveMenuSelection = 1
     saveMenuMessage = ""
     saveMenuMessageTimer = 0
-    bloodEffects = {}
+    statsMenuSelection = 1
+    statsMenuMessage = ""
+    statsMenuMessageTimer = 0
+    masteryMenuSelection = 1
+    masteryMenuMessage = ""
+    masteryMenuMessageTimer = 0
+    clearBloodEffectsActive()
+    clearPlayerProjectilesActive()
+    projectileNextId = 1
+    lastAttackWeaponClass = WEAPON_CLASS_MELEE
     levelBannerTimer = levelBannerMax
 end
 
-local function startLevel(levelId)
+function startLevel(levelId)
     loadingLog("LOAD startLevel begin " .. tostring(levelId))
     -- Ensure we free previous level assets to avoid sprite slot exhaustion
     unloadLevelData()
     unloadLevelSprites()
     unloadWallTextures()
-    collectgarbage()
     stopTitleMusic()
     unloadMenuSprites()
     loadingLog("LOAD after unloadMenuSprites")
-    loadLevelSprites(levelId)
-    loadingLog("LOAD after loadLevelSprites")
-    loadLevelAudio()
-    loadingLog("LOAD after loadLevelAudio")
+    local okSprites, errSprites = pcall(loadLevelSprites, levelId)
+    if not okSprites then
+        safeLog("ERROR", "startLevel loadLevelSprites failed: " .. tostring(errSprites))
+    else
+        loadingLog("LOAD after loadLevelSprites")
+    end
+    local okAudio, errAudio = pcall(loadLevelAudio)
+    if not okAudio then
+        safeLog("ERROR", "startLevel loadLevelAudio failed: " .. tostring(errAudio))
+    else
+        loadingLog("LOAD after loadLevelAudio")
+    end
     initializeLevelState(levelId)
     loadingLog("LOAD after initializeLevelState")
     gameState = STATE_PLAYING
     loadingLog("LOAD startLevel done")
 end
 
-local function restartLevel()
+function restartLevel()
     startLevel(currentLevel)
 end
 
 beginLoadLevel = function(levelId)
+    run_reset_requested = shouldStartNewRunForLevelLoad(levelId)
     pendingLevelStart = nil
     loadingTimer = 0
     loadingLogCount = 0
@@ -2999,7 +4537,7 @@ beginLoadLevel = function(levelId)
 end
 
 -- Check if a position is walkable (no wall)
-local function isWalkable(x, y)
+function isWalkable(x, y)
     local r = (PLAYER_RADIUS or 0.25) * 0.85
     local x1, x2 = x - r, x + r
     local y1, y2 = y - r, y + r
@@ -3014,7 +4552,7 @@ end
 
 
 -- Safe atan2 implementation
-local function safeAtan2(y, x)
+function safeAtan2(y, x)
     if x == 0 then
         if y > 0 then return 1.5708
         elseif y < 0 then return -1.5708
@@ -3025,14 +4563,34 @@ local function safeAtan2(y, x)
     return angle
 end
 
+function recordDamageTaken(amount)
+    local value = math.floor(tonumber(amount) or 0)
+    if value <= 0 then
+        return
+    end
+    damageDebugTakenValue = value
+    damageDebugTakenUntilTick = (simTickCount or 0) + (DMG_DEBUG_DURATION_TICKS or 48)
+end
+
+function recordDamageDealt(amount)
+    local value = math.floor(tonumber(amount) or 0)
+    if value <= 0 then
+        return
+    end
+    damageDebugDealtValue = value
+    damageDebugDealtUntilTick = (simTickCount or 0) + (DMG_DEBUG_DURATION_TICKS or 48)
+end
+
 -- Soldier AI: patrol, chase, and attack
-local function updateSoldiers()
+function updateSoldiers()
     if DEBUG_DISABLE_ENEMIES then
         return
     end
     if not sprites or #sprites == 0 then
         return
     end
+    local attackRangeSq = ATTACK_RANGE * ATTACK_RANGE
+    local detectionRangeSq = DETECTION_RANGE * DETECTION_RANGE
     for i = 1, #sprites do
         local s = sprites[i]
         if s and s.t == 5 and s.speed then  -- Warriors with movement data
@@ -3058,17 +4616,28 @@ local function updateSoldiers()
             if distSq > SOLDIER_ACTIVE_DIST_SQ and (simTickCount % 8) ~= 0 then
                 goto continue
             end
-            local distToPlayer = math.sqrt(distSq)
-            if distToPlayer < 0.001 then
-                distToPlayer = 0.001
+            local inAttackRange = distSq < attackRangeSq
+            local inDetectionRange = distSq < detectionRangeSq
+            local distToPlayer = 0
+            if inDetectionRange and not inAttackRange then
+                distToPlayer = math.sqrt(distSq)
+                if distToPlayer < 0.001 then
+                    distToPlayer = 0.001
+                end
+            end
+            local dirToPlayer = nil
+            if DEBUG_DISABLE_ENEMY_AGGRO or inDetectionRange then
+                dirToPlayer = math.floor((safeAtan2(dy, dx) * 64) / 6.28318) % 64
             end
 
             if DEBUG_DISABLE_ENEMY_AGGRO then
-                distToPlayer = 999  -- Force patrol state
+                -- Force patrol state without burning chase/attack path work.
+                inAttackRange = false
+                inDetectionRange = false
                 s.attackCooldown = 0
-                -- Face the player for consistent side-view testing
-                local angleToPlayer = safeAtan2(dy, dx)
-                s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
+                if dirToPlayer then
+                    s.dir = dirToPlayer
+                end
             end
 
             if DEBUG_WALK_IN_PLACE then
@@ -3088,13 +4657,14 @@ local function updateSoldiers()
             end
 
             -- State machine
-            if distToPlayer < ATTACK_RANGE then
+            if inAttackRange then
                 -- Close enough to attack
                 s.state = "attack"
 
                 -- Face the player
-                local angleToPlayer = safeAtan2(dy, dx)
-                s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
+                if dirToPlayer then
+                    s.dir = dirToPlayer
+                end
 
                 -- Attack if cooldown is ready
                 if s.attackCooldown <= 0 then
@@ -3114,7 +4684,7 @@ local function updateSoldiers()
 
                 end
 
-            elseif distToPlayer < DETECTION_RANGE then
+            elseif inDetectionRange then
                 -- Player detected - chase!
                 if s.state ~= "chase" and not s.aggroed then
                     s.aggroed = true
@@ -3138,8 +4708,9 @@ local function updateSoldiers()
                     s.y = newY
 
                     -- Update facing direction towards player
-                    local angleToPlayer = safeAtan2(dy, dx)
-                    s.dir = math.floor(angleToPlayer * 64 / 6.28318) % 64
+                    if dirToPlayer then
+                        s.dir = dirToPlayer
+                    end
 
                     -- Update animation frame
                     s.anim = ((s.anim or 0) + 1) % 20
@@ -3183,10 +4754,18 @@ local function updateSoldiers()
                 s.attackAnim = s.attackAnim - 1
                 if s.attackAnim == 3 then
                     s.attackFrame = 2
-                    if not s.attackDidHit and distToPlayer <= ATTACK_RANGE then
-                        local damage = DAMAGE_PER_HIT
+                    if not s.attackDidHit and inAttackRange then
+                        local rawDamage = DAMAGE_PER_HIT
+                        local damage = rawDamage - (PLAYER_DEFENSE or 0)
+                        if damage < 1 then
+                            damage = 1
+                        end
+                        local dodgeSalt = (i * 173) + math.floor((s.x or 0) * 100) + math.floor((s.y or 0) * 100) + (s.attackStartTick or 0)
+                        if deterministicPercentRoll(PLAYER_DODGE_PERCENT or 0, dodgeSalt) then
+                            damage = 0
+                        end
                         local primeBlock = false
-                        if isBlocking and blockAnim > 0 then
+                        if damage > 0 and isBlocking and blockAnim > 0 then
                             -- Prime block: raised at/after enemy attack start and before hit connect.
                             if blockStartFrame
                                 and blockStartFrame >= (s.attackStartTick or -1000)
@@ -3194,11 +4773,17 @@ local function updateSoldiers()
                                 primeBlock = true
                                 damage = 0
                             else
-                                damage = math.floor(DAMAGE_PER_HIT * 0.5 + 0.5)
+                                local blockReduction = 0.5 + ((PLAYER_SHIELD_BONUS_PERCENT or 0) / 100.0)
+                                if blockReduction > 0.9 then blockReduction = 0.9 end
+                                if blockReduction < 0 then blockReduction = 0 end
+                                damage = math.floor(damage * (1.0 - blockReduction) + 0.5)
+                                if damage < 0 then damage = 0 end
                             end
                         end
                         if damage > 0 then
                             playerHealth = playerHealth - damage
+                            dispatchRunScoreEvent("player_damaged", {level_id = currentLevel, points = 0})
+                            recordDamageTaken(damage)
                             if playerHealth <= 0 then
                                 playerHealth = 0
                                 gameState = STATE_GAME_OVER
@@ -3206,9 +4791,14 @@ local function updateSoldiers()
                             end
                         end
                         if isBlocking and blockAnim > 0 then
-                            local pct = primeBlock and 1.0 or 0.5
+                            local pct = 0.0
+                            if rawDamage > 0 then
+                                pct = (rawDamage - damage) / rawDamage
+                                if pct < 0 then pct = 0 end
+                                if pct > 1 then pct = 1 end
+                            end
                             lastBlockEvent = {
-                                amount = DAMAGE_PER_HIT - damage,
+                                amount = rawDamage - damage,
                                 pct = pct,
                                 prime = primeBlock,
                                 frame = frameCount
@@ -3225,7 +4815,7 @@ local function updateSoldiers()
     end
 end
 
-local function updateDeathAnimations()
+function updateDeathAnimations()
     if not sprites or #sprites == 0 then return end
     for i = 1, #sprites do
         local s = sprites[i]
@@ -3248,42 +4838,49 @@ local function updateDeathAnimations()
 end
 
 -- Create blood burst effect at world position
-local function createBloodEffect(worldX, worldY)
-    local effect = {
-        x = worldX,
-        y = worldY,
-        particles = {},
-        life = 30  -- frames
-    }
-    -- Create 12 blood particles radiating outward
-    for i = 1, 12 do
-        local angle = (i / 12) * 6.28318
+function createBloodEffect(worldX, worldY)
+    local effect = acquireBloodEffect()
+    effect.x = worldX
+    effect.y = worldY
+    effect.life = 30  -- frames
+    local particles = effect.particles
+    -- Create blood particles radiating outward.
+    local particleCount = BLOOD_PARTICLE_COUNT or 12
+    for i = 1, particleCount do
+        local angle = (i / particleCount) * 6.28318
         local speed = 0.05 + (frameCount % 10) * 0.005
-        table.insert(effect.particles, {
-            dx = math.cos(angle) * speed,
-            dy = math.sin(angle) * speed,
-            ox = 0, oy = 0  -- offset from center
-        })
+        local p = particles[i]
+        if not p then
+            p = {dx = 0, dy = 0, ox = 0, oy = 0}
+            particles[i] = p
+        end
+        p.dx = math.cos(angle) * speed
+        p.dy = math.sin(angle) * speed
+        p.ox = 0
+        p.oy = 0
     end
-    table.insert(bloodEffects, effect)
+    bloodEffects[#bloodEffects + 1] = effect
 end
 
 -- Update blood effects
-local function updateBloodEffects()
+function updateBloodEffects()
     local i = 1
     while i <= #bloodEffects do
         local e = bloodEffects[i]
         e.life = e.life - 1
         -- Move particles outward
-        for _, p in ipairs(e.particles) do
+        for j = 1, #e.particles do
+            local p = e.particles[j]
             p.ox = p.ox + p.dx
             p.oy = p.oy + p.dy
         end
         if e.life <= 0 then
             -- PERFORMANCE: swap-and-pop for O(1) removal instead of O(n)
             local lastIdx = #bloodEffects
+            local deadEffect = bloodEffects[i]
             bloodEffects[i] = bloodEffects[lastIdx]
             bloodEffects[lastIdx] = nil
+            releaseBloodEffect(deadEffect)
             -- Don't increment i since we swapped in a new element to check
         else
             i = i + 1
@@ -3292,7 +4889,7 @@ local function updateBloodEffects()
 end
 
 -- Kill a soldier and create death effects
-local function killSoldier(soldier)
+function killSoldier(soldier)
     soldier.alive = false
     soldier.hp = 0
     soldier.dying = true
@@ -3300,6 +4897,8 @@ local function killSoldier(soldier)
     soldier.deathFrame = 1
     soldier.deathTick = 0
     soldiersKilled = soldiersKilled + 1
+    awardPlayerXp(PLAYER_XP_PER_KILL or 0)
+    dispatchRunScoreEvent("enemy_kill", {level_id = currentLevel})
 
     -- Create blood effect
     createBloodEffect(soldier.x, soldier.y)
@@ -3315,6 +4914,7 @@ local function killSoldier(soldier)
 
     -- Check win condition
     if soldiersKilled >= totalSoldiers then
+        dispatchRunScoreEvent("level_clear", {level_id = currentLevel})
         gameState = STATE_WIN
         winSelection = 1
         winCooldown = 30  -- Half second delay before accepting input
@@ -3328,7 +4928,7 @@ local function killSoldier(soldier)
 end
 
 -- Check for health vial pickups
-local function checkHealthPickups()
+function checkHealthPickups()
     if DEBUG_DISABLE_PROPS then
         return
     end
@@ -3345,6 +4945,7 @@ local function checkHealthPickups()
                 -- Collect the vial
                 s.collected = true
                 playerHealth = MAX_HEALTH
+                dispatchRunScoreEvent("health_pickup", {level_id = currentLevel})
             end
         end
     end
@@ -3354,7 +4955,7 @@ local drawUiText
 local drawUiPanel
 
 -- Draw win screen
-local function drawWinScreen()
+function drawWinScreen()
     -- Darken background (larger)
     drawUiPanel(20, 40, 220, 200, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
 
@@ -3393,7 +4994,7 @@ local function drawWinScreen()
 end
 
 -- Draw health UI (potion with red liquid)
-local function drawHealthUI()
+function drawHealthUI()
     -- Position in lower right corner
     local potionX = 175
     local potionY = 175
@@ -3439,11 +5040,36 @@ local function drawHealthUI()
     end
 end
 
-local function drawEnemiesRemainingUI()
+function drawEnemiesRemainingUI()
     local remaining = (totalSoldiers or 0) - (soldiersKilled or 0)
     if remaining < 0 then remaining = 0 end
     setFontCached(vmupro.text.FONT_SMALL)
     drawUiText("ENEMIES LEFT: " .. tostring(remaining), 104, 228, COLOR_WHITE, COLOR_BLACK)
+end
+
+function drawRunScoreUI()
+    if gameState ~= STATE_PLAYING and gameState ~= STATE_WIN then
+        return
+    end
+    local run = ensureRunScoreState(currentLevel)
+    local scoreValue = math.floor(tonumber(run.current) or 0)
+    local killValue = math.floor(tonumber(run.kills) or 0)
+    local clearValue = math.floor(tonumber(run.levels_cleared) or 0)
+
+    local scoreColor = COLOR_WHITE
+    if (RUN_SCORE_PULSE_TICKS or 0) > 0 then
+        if ((RUN_SCORE_PULSE_TICKS % 4) < 2) then
+            scoreColor = COLOR_YELLOW
+        end
+        RUN_SCORE_PULSE_TICKS = RUN_SCORE_PULSE_TICKS - 1
+        if RUN_SCORE_PULSE_TICKS < 0 then
+            RUN_SCORE_PULSE_TICKS = 0
+        end
+    end
+
+    setFontCached(vmupro.text.FONT_TINY_6x8)
+    drawUiText("SCORE " .. tostring(scoreValue), 126, 24, scoreColor, COLOR_BLACK)
+    drawUiText("K " .. tostring(killValue) .. "  C " .. tostring(clearValue), 126, 34, COLOR_WHITE, COLOR_BLACK)
 end
 
 local drawRectOutline
@@ -3458,7 +5084,7 @@ drawUiText = function(text, x, y, textColor, bgColor)
     vmupro.graphics.drawText(text, x, y, fg, bg)
 end
 
-local function drawMenuText(text, x, y, textColor)
+function drawMenuText(text, x, y, textColor)
     local fg = textColor or COLOR_WHITE
     vmupro.graphics.drawTextTransparent(text, x, y, fg)
 end
@@ -3468,7 +5094,7 @@ drawUiPanel = function(x1, y1, x2, y2, fillColor, borderColor)
     drawRectOutline(x1, y1, x2, y2, borderColor or COLOR_GRAY)
 end
 
-local function drawPerfMonitorOverlay()
+function drawPerfMonitorOverlay()
     if not DEBUG_PERF_MONITOR then return end
     local frameMs = (PERF_MONITOR_EMA_FRAME_US or 0) / 1000.0
     local rayMs = (PERF_MONITOR_EMA_RAYCAST_US or 0) / 1000.0
@@ -3511,7 +5137,7 @@ local function drawPerfMonitorOverlay()
     drawMenuText(string.format("SC R%.2f P%.2f Z%.2f", renderMs, presentMs, sleepMs), baseX, baseY + (rowStep * 7), COLOR_WHITE)
 end
 
-local function buildDebugMenuItems()
+function buildDebugMenuItems()
     local pageName = getDebugPageName(titleDebugPage)
     local pageText = "PAGE: " .. pageName
 
@@ -3526,20 +5152,20 @@ local function buildDebugMenuItems()
             rayPreset = (RAY_PRESETS[baseIdx] and RAY_PRESETS[baseIdx].label) or "?"
         end
         local raysText = "RAYS: " .. rayPreset
-        local drawDistText = "DRAW DIST: " .. tostring(EXP_TEX_MAX_DIST or "?")
+        local drawDistText = "DRAW DIST: " .. getDistanceValueLabel(EXP_TEX_MAX_DIST or 0)
         local farTexOffText
         if (FAR_TEX_OFF_DIST or 999) >= 900 then
             farTexOffText = "FAR TEX OFF: OFF"
         else
-            farTexOffText = "FAR TEX OFF: " .. tostring(FAR_TEX_OFF_DIST or "?")
+            farTexOffText = "FAR TEX OFF: " .. getDistanceValueLabel(FAR_TEX_OFF_DIST or 0)
         end
-        local mip1DistText = "MIP1 DIST: " .. tostring(WALL_MIPMAP_DIST1 or "?")
-        local mip2DistText = "MIP2 DIST: " .. tostring(WALL_MIPMAP_DIST2 or "?")
-        local mip3DistText = "MIP3 DIST: " .. tostring(WALL_MIPMAP_DIST3 or "?")
-        local mip4DistText = "MIP4 DIST: " .. tostring(WALL_MIPMAP_DIST4 or "?")
-        local fogStartText = "FOG START: " .. tostring(FOG_START or "?")
-        local fogEndText = "FOG FULL: " .. tostring(FOG_END or "?")
-        local fogCutText = "FOG CUT L: " .. tostring(FOG_TEX_CUTOFF or "?")
+        local mip1DistText = "MIP1 DIST: " .. getDistanceValueLabel(WALL_MIPMAP_DIST1 or 0)
+        local mip2DistText = "MIP2 DIST: " .. getDistanceValueLabel(WALL_MIPMAP_DIST2 or 0)
+        local mip3DistText = "MIP3 DIST: " .. getDistanceValueLabel(WALL_MIPMAP_DIST3 or 0)
+        local mip4DistText = "MIP4 DIST: " .. getDistanceValueLabel(WALL_MIPMAP_DIST4 or 0)
+        local fogStartText = "FOG START: " .. getDistanceValueLabel(FOG_START or 0)
+        local fogEndText = "FOG FULL: " .. getDistanceValueLabel(FOG_END or 0)
+        local fogCutText = "FOG CUT L: " .. getDistanceValueLabel(FOG_TEX_CUTOFF or 0)
         local fogColorLabel = (FOG_COLOR_LABELS and FOG_COLOR_LABELS[FOG_COLOR_INDEX or 1]) or tostring(FOG_COLOR_INDEX or 1)
         local fogColorText = "FOG COLOR: " .. tostring(fogColorLabel)
         local fogDitherText = "FOG DTHR: " .. tostring(FOG_DITHER_SIZE or 3)
@@ -3574,12 +5200,12 @@ local function buildDebugMenuItems()
         local presetText = "P/Q PRESET: " .. presetLabel
         local wallResText = "WALL RES: " .. ((LOW_RES_MODE == "fast") and "FAST" or "QUALITY")
         local raysText = "RAYS: " .. rayLabel
-        local drawDistText = "DRAW DIST: " .. tostring(EXP_TEX_MAX_DIST or "?")
-        local farTexText = ((FAR_TEX_OFF_DIST or 999) >= 900) and "FAR TEX OFF: OFF" or ("FAR TEX OFF: " .. tostring(FAR_TEX_OFF_DIST or "?"))
+        local drawDistText = "DRAW DIST: " .. getDistanceValueLabel(EXP_TEX_MAX_DIST or 0)
+        local farTexText = ((FAR_TEX_OFF_DIST or 999) >= 900) and "FAR TEX OFF: OFF" or ("FAR TEX OFF: " .. getDistanceValueLabel(FAR_TEX_OFF_DIST or 0))
         local mipmapText = "MIPMAP: " .. (WALL_MIPMAP_ENABLED and "ON" or "OFF")
         local mipLodText = "MIP LOD: " .. (MIP_LOD_ENABLED and "ON" or "OFF")
-        local fogStartText = "FOG START: " .. tostring(FOG_START or "?")
-        local fogEndText = "FOG FULL: " .. tostring(FOG_END or "?")
+        local fogStartText = "FOG START: " .. getDistanceValueLabel(FOG_START or 0)
+        local fogEndText = "FOG FULL: " .. getDistanceValueLabel(FOG_END or 0)
         local fogDitherText = "FOG DTHR: " .. tostring(FOG_DITHER_SIZE or 3)
         local fpsTargetText = "FPS TARGET: " .. string.upper(FPS_TARGET_MODE)
         local perfMonText = "PERF MON: " .. (DEBUG_PERF_MONITOR and "ON" or "OFF")
@@ -3608,7 +5234,7 @@ local function buildDebugMenuItems()
 end
 
 -- Keep in sync with buildDebugMenuItems() to avoid per-frame table builds in input handlers.
-local function getDebugMenuItemCount()
+function getDebugMenuItemCount()
     if titleDebugPage == DEBUG_PAGE_VIDEO then
         return 24
     end
@@ -3618,7 +5244,7 @@ local function getDebugMenuItemCount()
     return 12
 end
 
-local function stepListIndex(idx, delta, count, wrap)
+function stepListIndex(idx, delta, count, wrap)
     local n = count or 0
     if n <= 0 then return 1 end
     local cur = idx or 1
@@ -3637,7 +5263,7 @@ local debugAdjustHoldDir = 0
 local debugAdjustHoldFrames = 0
 local DEBUG_ADJUST_REPEAT_FRAMES = 6
 
-local function getDebugAdjustDelta()
+function getDebugAdjustDelta()
     if vmupro.input.pressed(vmupro.input.LEFT) then
         debugAdjustHoldDir = -1
         debugAdjustHoldFrames = 0
@@ -3677,7 +5303,7 @@ local function getDebugAdjustDelta()
     return 0
 end
 
-local function stepFpsTarget(delta, wrap)
+function stepFpsTarget(delta, wrap)
     local modes = {"uncapped", "60", "45", "30", "24"}
     local cur = 1
     for i = 1, #modes do
@@ -3690,7 +5316,7 @@ local function stepFpsTarget(delta, wrap)
     FPS_TARGET_MODE = modes[nextIdx]
 end
 
-local function stepAudioMixTarget(delta, wrap)
+function stepAudioMixTarget(delta, wrap)
     if not AUDIO_MIX_HZ_PRESETS or #AUDIO_MIX_HZ_PRESETS == 0 then
         return
     end
@@ -3698,7 +5324,7 @@ local function stepAudioMixTarget(delta, wrap)
     setAudioMixHz(AUDIO_MIX_HZ_PRESETS[AUDIO_MIX_HZ_INDEX])
 end
 
-local function stepWall1FormatVariant(delta, wrap)
+function stepWall1FormatVariant(delta, wrap)
     if not WALL1_FORMAT_VARIANTS or #WALL1_FORMAT_VARIANTS == 0 then
         return
     end
@@ -3709,7 +5335,7 @@ local function stepWall1FormatVariant(delta, wrap)
     end
 end
 
-local function adjustDebugMenuSelection(sel, delta, wrap)
+function adjustDebugMenuSelection(sel, delta, wrap)
     local step = delta or 0
     if step == 0 then return false end
     local doWrap = (wrap == true)
@@ -3752,7 +5378,8 @@ local function adjustDebugMenuSelection(sel, delta, wrap)
         elseif sel == 7 then
             if DRAW_DIST_PRESETS and #DRAW_DIST_PRESETS > 0 then
                 DRAW_DIST_INDEX = stepListIndex(DRAW_DIST_INDEX or 1, step, #DRAW_DIST_PRESETS, doWrap)
-                EXP_TEX_MAX_DIST = DRAW_DIST_PRESETS[DRAW_DIST_INDEX]
+                normalizeDrawDistanceSetting()
+                normalizeMipmapRanges()
                 refreshExpViewDistance()
             end
             return true
@@ -3764,39 +5391,22 @@ local function adjustDebugMenuSelection(sel, delta, wrap)
             return true
         elseif sel == 9 then
             if MIPMAP_DIST_PRESETS and #MIPMAP_DIST_PRESETS > 0 then
-                normalizeMipmapRanges()
-                local max1 = math.max(1, (MIPMAP2_DIST_INDEX or 2) - 1)
-                MIPMAP1_DIST_INDEX = clampInt((MIPMAP1_DIST_INDEX or 1) + step, 1, max1)
-                normalizeMipmapRanges()
+                stepMipmapLevelIndex(1, step)
             end
             return true
         elseif sel == 10 then
             if MIPMAP_DIST_PRESETS and #MIPMAP_DIST_PRESETS > 0 then
-                normalizeMipmapRanges()
-                local n = #MIPMAP_DIST_PRESETS
-                local min2 = math.min(n, (MIPMAP1_DIST_INDEX or 1) + 1)
-                local max2 = math.max(min2, (MIPMAP3_DIST_INDEX or n) - 1)
-                MIPMAP2_DIST_INDEX = clampInt((MIPMAP2_DIST_INDEX or min2) + step, min2, max2)
-                normalizeMipmapRanges()
+                stepMipmapLevelIndex(2, step)
             end
             return true
         elseif sel == 11 then
             if MIPMAP_DIST_PRESETS and #MIPMAP_DIST_PRESETS > 0 then
-                normalizeMipmapRanges()
-                local n = #MIPMAP_DIST_PRESETS
-                local min3 = math.min(n, (MIPMAP2_DIST_INDEX or 1) + 1)
-                local max3 = math.max(min3, (MIPMAP4_DIST_INDEX or n) - 1)
-                MIPMAP3_DIST_INDEX = clampInt((MIPMAP3_DIST_INDEX or min3) + step, min3, max3)
-                normalizeMipmapRanges()
+                stepMipmapLevelIndex(3, step)
             end
             return true
         elseif sel == 12 then
             if MIPMAP_DIST_PRESETS and #MIPMAP_DIST_PRESETS > 0 then
-                normalizeMipmapRanges()
-                local n = #MIPMAP_DIST_PRESETS
-                local min4 = math.min(n, (MIPMAP3_DIST_INDEX or 1) + 1)
-                MIPMAP4_DIST_INDEX = clampInt((MIPMAP4_DIST_INDEX or min4) + step, min4, n)
-                normalizeMipmapRanges()
+                stepMipmapLevelIndex(4, step)
             end
             return true
         elseif sel == 13 then
@@ -3895,7 +5505,8 @@ local function adjustDebugMenuSelection(sel, delta, wrap)
             markPerfQualityCustom()
             if DRAW_DIST_PRESETS and #DRAW_DIST_PRESETS > 0 then
                 DRAW_DIST_INDEX = stepListIndex(DRAW_DIST_INDEX or 1, step, #DRAW_DIST_PRESETS, doWrap)
-                EXP_TEX_MAX_DIST = DRAW_DIST_PRESETS[DRAW_DIST_INDEX]
+                normalizeDrawDistanceSetting()
+                normalizeMipmapRanges()
                 refreshExpViewDistance()
             end
             return true
@@ -3966,14 +5577,12 @@ local function adjustDebugMenuSelection(sel, delta, wrap)
     elseif sel == 3 then
         -- ENEMIES label is inverse of DEBUG_DISABLE_ENEMIES.
         DEBUG_DISABLE_ENEMIES = (step < 0)
-        spriteOrderCache = {}
-        spriteOrderCacheFrame = -999
+        clearSpriteOrderCache()
         return true
     elseif sel == 4 then
         -- PROPS label is inverse of DEBUG_DISABLE_PROPS.
         DEBUG_DISABLE_PROPS = (step < 0)
-        spriteOrderCache = {}
-        spriteOrderCacheFrame = -999
+        clearSpriteOrderCache()
         return true
     elseif sel == 5 then
         DEBUG_SHOW_BLOCK = (step > 0)
@@ -4003,7 +5612,7 @@ local function adjustDebugMenuSelection(sel, delta, wrap)
     return false
 end
 
-local function applyDebugMenuSelection(sel)
+function applyDebugMenuSelection(sel)
     return sel == getDebugMenuItemCount()
 end
 
@@ -4015,7 +5624,7 @@ drawRectOutline = function(x1, y1, x2, y2, color)
 end
 
 -- Draw title screen
-local function drawTitleScreenImpl()
+function drawTitleScreenImpl()
     logBoot(vmupro.system.LOG_ERROR, "C drawTitleScreen")
     -- Draw title background image
     if titleSprite then
@@ -4052,13 +5661,18 @@ local function drawTitleScreenImpl()
         end
         if classPortrait and classPortrait.width and classPortrait.height then
             local desiredHeight = 187 -- 15% larger than previous 163px target
-            local scale = safeDivide(desiredHeight, classPortrait.height, "titleClassPortraitSingle")
-            local scaledW = classPortrait.width * scale
-            local scaledH = classPortrait.height * scale
+            local scaleY = safeDivide(desiredHeight, classPortrait.height, "titleClassPortraitSingle")
+            local scaleX = scaleY
+            if classId == "archer" then
+                scaleY = scaleY * 1.10 -- Increase Archer height by 10%
+                scaleX = scaleX * 0.92 -- Reduce Archer width by an additional 3% (total 8%)
+            end
+            local scaledW = classPortrait.width * scaleX
+            local scaledH = classPortrait.height * scaleY
             local drawX = 178 - math.floor(scaledW / 2)
             local drawY = 224 - math.floor(scaledH)
             if drawY < 40 then drawY = 40 end
-            vmupro.sprite.drawScaled(classPortrait, drawX, drawY, scale, scale, vmupro.sprite.kImageUnflipped)
+            vmupro.sprite.drawScaled(classPortrait, drawX, drawY, scaleX, scaleY, vmupro.sprite.kImageUnflipped)
         end
 
         local stats = getClassTemplateStats(classId, classDef)
@@ -4071,15 +5685,19 @@ local function drawTitleScreenImpl()
         local statAtkSpd = toNumber(stats.atk_speed, 0.0)
         local statShield = toNumber(stats.shield_bonus, 0.0)
         local statStartY = 62
-        local statStepY = 13 -- 8px font height + 5px spacing
+        local statStepY = 14 -- Extra spacing so rows do not visually touch
 
+        -- Styled header: larger font, faux-bold pass, and underline
+        setFontCached(vmupro.text.FONT_SMALL)
+        drawMenuText("[STATS]", 30, 45, COLOR_BLACK)
+        drawMenuText("[STATS]", 31, 45, COLOR_BLACK)
+        vmupro.graphics.drawFillRect(30, 59, 90, 60, COLOR_BLACK)
         setFontCached(vmupro.text.FONT_TINY_6x8)
-        drawMenuText("STATS", 42, 46, COLOR_BLACK)
         drawMenuText("AGILITY", 12, statStartY + (statStepY * 0), COLOR_BLACK)
         drawMenuText(string.format("%.2f", statAgi), 76, statStartY + (statStepY * 0), COLOR_BLACK)
         drawMenuText("POWER", 12, statStartY + (statStepY * 1), COLOR_BLACK)
         drawMenuText(string.format("%.2f", statPow), 76, statStartY + (statStepY * 1), COLOR_BLACK)
-        drawMenuText("DEFENSE", 12, statStartY + (statStepY * 2), COLOR_BLACK)
+        drawMenuText("DEF", 12, statStartY + (statStepY * 2), COLOR_BLACK)
         drawMenuText(string.format("%.2f", statDef), 76, statStartY + (statStepY * 2), COLOR_BLACK)
         drawMenuText("DODGE", 12, statStartY + (statStepY * 3), COLOR_BLACK)
         drawMenuText(string.format("%.2f", statDod), 76, statStartY + (statStepY * 3), COLOR_BLACK)
@@ -4087,7 +5705,7 @@ local function drawTitleScreenImpl()
         drawMenuText(string.format("%.2f", statReg), 76, statStartY + (statStepY * 4), COLOR_BLACK)
         drawMenuText("CRIT", 12, statStartY + (statStepY * 5), COLOR_BLACK)
         drawMenuText(string.format("%.2f", statCrit), 76, statStartY + (statStepY * 5), COLOR_BLACK)
-        drawMenuText("ATK SPD", 12, statStartY + (statStepY * 6), COLOR_BLACK)
+        drawMenuText("ATK SP", 12, statStartY + (statStepY * 6), COLOR_BLACK)
         drawMenuText(string.format("%.2f", statAtkSpd), 76, statStartY + (statStepY * 6), COLOR_BLACK)
         drawMenuText("SHIELD", 12, statStartY + (statStepY * 7), COLOR_BLACK)
         drawMenuText(string.format("%.2f", statShield), 76, statStartY + (statStepY * 7), COLOR_BLACK)
@@ -4178,8 +5796,8 @@ local function drawTitleScreenImpl()
         -- Compact menu box for 4 items
         drawUiPanel(52, 132, 188, 232, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
         setFontCached(vmupro.text.FONT_SMALL)
-        local items = {"NEW GAME", "LOAD GAME", "OPTIONS", "EXIT"}
-        for i, item in ipairs(items) do
+        for i = 1, #TITLE_MAIN_MENU_ITEMS do
+            local item = TITLE_MAIN_MENU_ITEMS[i]
             local y = 142 + (i - 1) * 22
             local textColor = COLOR_GRAY
             if i == titleSelection then
@@ -4189,6 +5807,8 @@ local function drawTitleScreenImpl()
             setFontCached(vmupro.text.FONT_SMALL)
             drawMenuText(item, 72, y + 3, textColor)
         end
+        setFontCached(vmupro.text.FONT_TINY_6x8)
+        drawMenuText("BUILD " .. tostring(BUILD_COUNT or 0), 8, 232, COLOR_WHITE)
     end
 end
 
@@ -4196,7 +5816,7 @@ drawTitleScreen = drawTitleScreenImpl
 logBoot(vmupro.system.LOG_ERROR, "drawTitleScreen bound to impl")
 
 -- Draw game over screen
-local function drawGameOver()
+function drawGameOver()
     -- Darken background
     drawUiPanel(40, 70, 200, 195, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
 
@@ -4206,8 +5826,8 @@ local function drawGameOver()
     drawMenuText("GAME OVER", 76, 85, COLOR_WHITE)
 
     -- Menu items
-    local items = {"RESTART", "MENU", "QUIT"}
-    for i, item in ipairs(items) do
+    for i = 1, #GAME_OVER_MENU_ITEMS do
+        local item = GAME_OVER_MENU_ITEMS[i]
         local y = 110 + (i - 1) * 18
         local textColor = COLOR_GRAY
         if i == gameOverSelection then
@@ -4220,7 +5840,7 @@ local function drawGameOver()
 end
 
 -- Reset game state for restart
-local function resetGame()
+function resetGame()
     restartLevel()
 end
 
@@ -4249,7 +5869,7 @@ function collidesWithSprite(nx, ny, playerRadius)
     return false
 end
 
-local function getWallColor(wtype, side)
+function getWallColor(wtype, side)
     if wtype == 1 then
         if side == 1 then return COLOR_STONE_D else return COLOR_STONE_L end
     elseif wtype == 2 then
@@ -4267,13 +5887,13 @@ local function getWallColor(wtype, side)
     end
 end
 
-local function getPlayerCollisionRadius()
+function getPlayerCollisionRadius()
     local r = PLAYER_COLLISION_RADIUS or 0.27
     if r < 0.1 then r = 0.1 end
     return r
 end
 
-local function isWalkableWithRadius(x, y, radius)
+function isWalkableWithRadius(x, y, radius)
     local r = radius
     if not r or r <= 0 then
         r = getPlayerCollisionRadius()
@@ -4326,7 +5946,7 @@ local function isWalkableWithRadius(x, y, radius)
     return true
 end
 
-local function updatePlayerSafetyAnchor()
+function updatePlayerSafetyAnchor()
     local radius = getPlayerCollisionRadius()
     if isWalkableWithRadius(px, py, radius) then
         lastSafeWallX = px
@@ -4341,7 +5961,7 @@ local RECOVER_DIRS = {
     { 0.7071,  0.7071}, { 0.7071, -0.7071}, {-0.7071,  0.7071}, {-0.7071, -0.7071},
 }
 
-local function recoverPlayerFromWallPenetration()
+function recoverPlayerFromWallPenetration()
     local radius = getPlayerCollisionRadius()
     if isWalkableWithRadius(px, py, radius) then
         lastSafeWallX = px
@@ -4408,7 +6028,258 @@ function canMove(x, y, radius)
     return true
 end
 
-local function movePlayerStrict(deltaX, deltaY)
+function spawnPlayerProjectile(weaponClass, hitDamage, speedMult, rangeMult, projectileSpeedMult)
+    if not map then
+        return false
+    end
+    if not playerProjectiles then
+        playerProjectiles = {}
+    end
+    if #playerProjectiles >= (PROJECTILE_MAX_ACTIVE or 24) then
+        local oldest = table.remove(playerProjectiles, 1)
+        releaseProjectile(oldest)
+    end
+
+    local dir = pdir % 64
+    local dx = cosTable[dir] or 0
+    local dy = sinTable[dir] or 0
+    local spawnDist = 0.32
+    local spawnX = px + (dx * spawnDist)
+    local spawnY = py + (dy * spawnDist)
+    local wallRadius = PROJECTILE_WALL_RADIUS or 0.05
+    if not isWalkableWithRadius(spawnX, spawnY, wallRadius) then
+        spawnX = px
+        spawnY = py
+    end
+
+    local classValue = normalizeWeaponClass(weaponClass)
+    local baseSpeed = PROJECTILE_SPEED_RANGED or 10.0
+    if classValue == WEAPON_CLASS_MAGIC then
+        baseSpeed = PROJECTILE_SPEED_MAGIC or 8.5
+    end
+    local speed = baseSpeed * (tonumber(speedMult) or 1.0) * (tonumber(projectileSpeedMult) or 1.0)
+    if speed < 3.0 then speed = 3.0 end
+    if speed > 20.0 then speed = 20.0 end
+
+    local damage = math.floor(tonumber(hitDamage) or 1)
+    if damage < 1 then damage = 1 end
+
+    local baseRange = PROJECTILE_MAX_RANGE_RANGED or 4.0
+    if classValue == WEAPON_CLASS_MAGIC then
+        baseRange = PROJECTILE_MAX_RANGE_MAGIC or 5.0
+    end
+    local maxRange = baseRange * (tonumber(rangeMult) or 1.0)
+    if maxRange < 1.0 then maxRange = 1.0 end
+    if maxRange > 12.0 then maxRange = 12.0 end
+
+    local projectile = acquireProjectile()
+    projectile.id = projectileNextId or 1
+    projectile.weaponClass = classValue
+    projectile.x = spawnX
+    projectile.y = spawnY
+    projectile.startX = spawnX
+    projectile.startY = spawnY
+    projectile.dx = dx
+    projectile.dy = dy
+    projectile.speed = speed
+    projectile.damage = damage
+    projectile.maxRangeSq = maxRange * maxRange
+    projectile.ttl = PROJECTILE_LIFETIME_TICKS or math.floor((SIM_TARGET_HZ or 24) * 2.5)
+    projectileNextId = (projectileNextId or 1) + 1
+    if projectileNextId > 1000000 then
+        projectileNextId = 1
+    end
+    playerProjectiles[#playerProjectiles + 1] = projectile
+    return true
+end
+
+function releaseBowChargeShot(profDamageMult, profSpeedMult)
+    if not bowChargeState.active or isAttacking > 0 then
+        return false
+    end
+    local stage = getBowChargeCurrentStage()
+    local dmgStageMult = tonumber(bowChargeState.damageMult and bowChargeState.damageMult[stage]) or 1.0
+    local rangeStageMult = tonumber(bowChargeState.rangeMult and bowChargeState.rangeMult[stage]) or 1.0
+    local speedStageMult = tonumber(bowChargeState.speedMult and bowChargeState.speedMult[stage]) or 1.0
+    local profDamage = tonumber(profDamageMult) or 1.0
+    local profSpeed = tonumber(profSpeedMult) or 1.0
+    if profDamage < 1.0 then profDamage = 1.0 end
+    if profSpeed < 0.01 then profSpeed = 1.0 end
+
+    local hitDamage = math.floor(((PLAYER_DAMAGE or 0) * profDamage * dmgStageMult) + 0.5)
+    if hitDamage < 1 then hitDamage = 1 end
+
+    local attackFrames = #bowAttack
+    local baseAttackFrames = (attackFrames > 0) and 7 or 8
+    local attackScale = (PLAYER_ATTACK_SPEED_SCALE or 1.0) / profSpeed
+    attackScale = attackScale * (0.94 + ((stage - 1) * 0.08))
+    local scaledAttackFrames = math.floor((baseAttackFrames * attackScale) + 0.5)
+    if scaledAttackFrames < (PLAYER_ATTACK_MIN_FRAMES or 5) then
+        scaledAttackFrames = (PLAYER_ATTACK_MIN_FRAMES or 5)
+    end
+    if scaledAttackFrames > (PLAYER_ATTACK_MAX_FRAMES or 18) then
+        scaledAttackFrames = (PLAYER_ATTACK_MAX_FRAMES or 18)
+    end
+
+    attackTotalFrames = scaledAttackFrames
+    isAttacking = attackTotalFrames
+    lastAttackWeaponClass = WEAPON_CLASS_RANGED
+
+    spawnPlayerProjectile(WEAPON_CLASS_RANGED, hitDamage, profSpeed, rangeStageMult, speedStageMult)
+    resetBowChargeState()
+    return true
+end
+
+function tryHitEnemyWithProjectile(projectile, hitX, hitY)
+    if not sprites or #sprites == 0 then
+        return false
+    end
+    local hitRadius = PROJECTILE_HIT_RADIUS or 0.30
+    local hitRadiusSq = hitRadius * hitRadius
+    for i = 1, #sprites do
+        local s = sprites[i]
+        if s and s.t == 5 and s.alive then
+            local dx = hitX - s.x
+            local dy = hitY - s.y
+            local distSq = dx * dx + dy * dy
+            if distSq <= hitRadiusSq then
+                local hitDamage = math.floor(tonumber(projectile and projectile.damage) or 1)
+                if hitDamage < 1 then hitDamage = 1 end
+                local critSalt = ((projectile and projectile.id) or 0) * 131 + (i * 199) + (simTickCount or 0)
+                if deterministicPercentRoll(PLAYER_CRIT_PERCENT or 0, critSalt) then
+                    hitDamage = math.floor((hitDamage * (PLAYER_CRIT_MULT or 1.5)) + 0.5)
+                end
+                if hitDamage < 1 then hitDamage = 1 end
+                s.hp = (s.hp or ENEMY_MAX_HP) - hitDamage
+                recordDamageDealt(hitDamage)
+                if s.hp <= 0 then
+                    killSoldier(s)
+                end
+                return true
+            end
+        end
+    end
+    return false
+end
+
+function updatePlayerProjectiles()
+    if not playerProjectiles or #playerProjectiles == 0 then
+        return
+    end
+    local simHz = SIM_TARGET_HZ or 24
+    if simHz < 1 then simHz = 24 end
+    local wallRadius = PROJECTILE_WALL_RADIUS or 0.05
+    local subStep = PROJECTILE_STEP or 0.12
+    if subStep < 0.02 then subStep = 0.02 end
+    if subStep > 0.25 then subStep = 0.25 end
+
+    local i = 1
+    while i <= #playerProjectiles do
+        local p = playerProjectiles[i]
+        local removeProjectile = false
+        if not p then
+            removeProjectile = true
+        else
+            local speed = tonumber(p.speed) or (PROJECTILE_SPEED_RANGED or 10.0)
+            if speed < 0.1 then speed = 0.1 end
+            local moveDist = speed / simHz
+            local remaining = moveDist
+            while remaining > 0 and not removeProjectile do
+                local step = subStep
+                if step > remaining then
+                    step = remaining
+                end
+                local nextX = p.x + ((p.dx or 0) * step)
+                local nextY = p.y + ((p.dy or 0) * step)
+                if not isWalkableWithRadius(nextX, nextY, wallRadius) then
+                    removeProjectile = true
+                    break
+                end
+                p.x = nextX
+                p.y = nextY
+                if not DEBUG_DISABLE_ENEMIES and tryHitEnemyWithProjectile(p, nextX, nextY) then
+                    removeProjectile = true
+                    break
+                end
+                local maxRangeSq = tonumber(p.maxRangeSq) or 0
+                if maxRangeSq > 0 then
+                    local dxTravel = (p.x or 0) - (p.startX or p.x or 0)
+                    local dyTravel = (p.y or 0) - (p.startY or p.y or 0)
+                    if (dxTravel * dxTravel + dyTravel * dyTravel) >= maxRangeSq then
+                        removeProjectile = true
+                        break
+                    end
+                end
+                remaining = remaining - step
+            end
+            p.ttl = (p.ttl or 0) - 1
+            if p.ttl <= 0 then
+                removeProjectile = true
+            end
+        end
+
+        if removeProjectile then
+            local last = #playerProjectiles
+            local deadProjectile = playerProjectiles[i]
+            playerProjectiles[i] = playerProjectiles[last]
+            playerProjectiles[last] = nil
+            releaseProjectile(deadProjectile)
+        else
+            i = i + 1
+        end
+    end
+end
+
+function drawPlayerProjectiles()
+    if not playerProjectiles or #playerProjectiles == 0 then
+        return
+    end
+    local dir = pdir % 64
+    local cosDir = cosTable[dir] or 1
+    local sinDir = sinTable[dir] or 0
+    for i = 1, #playerProjectiles do
+        local p = playerProjectiles[i]
+        if p then
+            local sdx = (p.x or 0) - px
+            local sdy = (p.y or 0) - py
+            local relX = (sdx * sinDir) - (sdy * cosDir)
+            local relY = (sdx * cosDir) + (sdy * sinDir)
+            if relY > 0.05 then
+                local sx = math.floor(120 + ((relX / relY) * 120))
+                if sx >= -12 and sx <= 252 then
+                    local cx = sx
+                    if cx < 0 then cx = 0 end
+                    if cx > 239 then cx = 239 end
+                    local wallDist = expDepthBuf and expDepthBuf[cx] or nil
+                    if (not wallDist) or (relY <= (wallDist + 0.03)) then
+                        local size = math.floor((VIEWPORT_H * 0.18) / relY)
+                        if size < 2 then size = 2 end
+                        if size > 20 then size = 20 end
+                        local drawY = HORIZON - math.floor(size / 2)
+                        local spriteRef = projectileArrowSprite
+                        local color = COLOR_YELLOW
+                        if p.weaponClass == WEAPON_CLASS_MAGIC then
+                            spriteRef = projectileMagicSprite
+                            color = COLOR_LIGHT_BLUE
+                        end
+                        if spriteRef and spriteRef.width and spriteRef.height and spriteRef.height > 0 then
+                            local scale = size / spriteRef.height
+                            if scale < 0.1 then scale = 0.1 end
+                            local drawX = sx - math.floor((spriteRef.width * scale) / 2)
+                            local topY = drawY - math.floor((spriteRef.height * scale) / 2)
+                            vmupro.sprite.drawScaled(spriteRef, drawX, topY, scale, scale, vmupro.sprite.kImageUnflipped)
+                        else
+                            local half = math.max(1, math.floor(size / 3))
+                            vmupro.graphics.drawFillRect(sx - half, drawY - half, sx + half, drawY + half, color)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+function movePlayerStrict(deltaX, deltaY)
     recoverPlayerFromWallPenetration()
     local maxDelta = math.max(math.abs(deltaX or 0), math.abs(deltaY or 0))
     if maxDelta <= 0 then
@@ -4502,19 +6373,32 @@ local function movePlayerStrict(deltaX, deltaY)
     updatePlayerSafetyAnchor()
 end
 
-local function movePlayerWithSlide(deltaX, deltaY)
+function movePlayerWithSlide(deltaX, deltaY)
     movePlayerStrict(deltaX, deltaY)
 end
 
-local function getPlayerRenderNearClipDist()
+function getPlayerRenderNearClipDist()
     local nearClip = PLAYER_RENDER_NEAR_CLIP_DIST or 0.38
     if nearClip < 0.20 then nearClip = 0.20 end
     return nearClip
 end
 
-local function getFogFactor(dist)
+function getFogFactor(dist)
     if DEBUG_DISABLE_FOG then
         return 0.0
+    end
+    local lookup = FOG_LUT_LINEAR
+    local invStep = FOG_LUT_INV_STEP or 0.0
+    if lookup and #lookup > 0 and invStep > 0 then
+        local idx = math.floor(((dist or 0.0) * invStep) + 0.5)
+        if idx < 0 then
+            return 0.0
+        end
+        local v = lookup[idx + 1]
+        if v ~= nil then
+            return v
+        end
+        return 1.0
     end
     local startDist = FOG_START or 0.0
     local endDist = FOG_END or (startDist + 1.0)
@@ -4526,9 +6410,22 @@ local function getFogFactor(dist)
     return (dist - startDist) / (endDist - startDist)
 end
 
-local function getFogQuantizedFactor(dist)
+function getFogQuantizedFactor(dist)
     if DEBUG_DISABLE_FOG then
         return 0.0
+    end
+    local lookup = FOG_LUT_QUANTIZED
+    local invStep = FOG_LUT_INV_STEP or 0.0
+    if lookup and #lookup > 0 and invStep > 0 then
+        local idx = math.floor(((dist or 0.0) * invStep) + 0.5)
+        if idx < 0 then
+            return 0.0
+        end
+        local v = lookup[idx + 1]
+        if v ~= nil then
+            return v
+        end
+        return 1.0
     end
     local startDist = FOG_START or 0.0
     local endDist = FOG_END or (startDist + 0.5)
@@ -4554,7 +6451,7 @@ local function getFogQuantizedFactor(dist)
     return k / (stepCount + 1)
 end
 
-local function fogBlend(color, dist)
+function fogBlend(color, dist)
     local t = getFogQuantizedFactor(dist)
     if t <= 0 then return color end
     if t >= 1 then return FOG_COLOR end
@@ -4570,7 +6467,7 @@ local function fogBlend(color, dist)
     return (nb << 11) | (ng << 5) | nr
 end
 
-local function getFogAccentColor(baseColor)
+function getFogAccentColor(baseColor)
     local c = baseColor or COLOR_GRAY
     if c == COLOR_WHITE then return COLOR_LIGHT_GRAY end
     if c == COLOR_LIGHT_GRAY then return COLOR_WHITE end
@@ -4591,7 +6488,7 @@ local FOG_HATCH_PROFILES = {
     [6] = {band_h = 6, fill_gate = 3, diag_a_step = 15, diag_b_step = 20, cross_enable_threshold = 7},
 }
 
-local function drawFogOverlayArea(x1, y1, x2, y2, fogAlpha)
+function drawFogOverlayArea(x1, y1, x2, y2, fogAlpha)
     if fogAlpha <= 0 then
         return
     end
@@ -4659,7 +6556,7 @@ local function drawFogOverlayArea(x1, y1, x2, y2, fogAlpha)
     end
 end
 
-local function drawFogCurtainColumn(sx, ex, dist)
+function drawFogCurtainColumn(sx, ex, dist)
     if DEBUG_DISABLE_FOG then
         return
     end
@@ -4678,7 +6575,24 @@ local function drawFogCurtainColumn(sx, ex, dist)
     vmupro.graphics.drawFillRect(sx, y1, ex, y2, FOG_COLOR or COLOR_GRAY)
 end
 
-local function getWallSheetForType(wtype)
+function drawBufferedFogCurtainSpan(spanStart, spanEnd, dist, trackCounters, canTime)
+    if spanStart < 0 or spanEnd < spanStart then
+        return
+    end
+    local spanW = (spanEnd - spanStart) + 1
+    if trackCounters then
+        PERF_MONITOR_FOG_COLS = (PERF_MONITOR_FOG_COLS or 0) + spanW
+    end
+    local fogT0
+    if canTime then fogT0 = vmupro.system.getTimeUs() end
+    drawFogCurtainColumn(spanStart, spanEnd, dist)
+    if canTime and fogT0 then
+        local fogT1 = vmupro.system.getTimeUs()
+        PERF_MONITOR_SAMPLE_FOG_US = (PERF_MONITOR_SAMPLE_FOG_US or 0) + (fogT1 - fogT0)
+    end
+end
+
+function getWallSheetForType(wtype)
     if wtype == 1 then return wallSheetStone end
     if wtype == 2 then return wallSheetBrick end
     if wtype == 3 then return wallSheetMoss end
@@ -4688,7 +6602,38 @@ local function getWallSheetForType(wtype)
     return wallSheetStone
 end
 
-local function drawWallTextureColumn(wtype, side, texCoord, sx, y1, y2, colW, distToWall, mipLevel)
+wallSheetMetricCache = wallSheetMetricCache or {}
+MIP_FRAME_GROUP_SIZE = MIP_FRAME_GROUP_SIZE or {[0] = 1, [1] = 1, [2] = 3, [3] = 4, [4] = 6}
+
+function getWallSheetMetricsCached(wtype)
+    local sheet = getWallSheetForType(wtype)
+    if not sheet then
+        return nil, 0, 0, 0
+    end
+    local cache = wallSheetMetricCache[wtype]
+    if cache and cache.sheet == sheet then
+        return sheet, cache.frameW or 0, cache.frameH or 0, cache.frameCount or 0
+    end
+
+    local frameW = sheet.frameWidth or 0
+    local frameH = sheet.frameHeight or 0
+    local frameCount = sheet.frameCount or 0
+    if frameW <= 0 or frameH <= 0 or frameCount <= 0 then
+        return nil, 0, 0, 0
+    end
+
+    if not cache then
+        cache = {}
+        wallSheetMetricCache[wtype] = cache
+    end
+    cache.sheet = sheet
+    cache.frameW = frameW
+    cache.frameH = frameH
+    cache.frameCount = frameCount
+    return sheet, frameW, frameH, frameCount
+end
+
+function drawWallTextureColumn(wtype, side, texCoord, sx, y1, y2, colW, distToWall, mipLevel, fogAlphaCached, trackCountersOpt, canTimeOpt)
     local wallH = y2 - y1
     if wallH <= 0 then return false end
 
@@ -4710,13 +6655,7 @@ local function drawWallTextureColumn(wtype, side, texCoord, sx, y1, y2, colW, di
     end
 
     -- Sheet-column path: sample from 1x128 frame columns.
-    local sheet = getWallSheetForType(wtype)
-    if not sheet or not sheet.frameWidth or not sheet.frameHeight or not sheet.frameCount then
-        return false
-    end
-    local frameW = sheet.frameWidth or 0
-    local frameH = sheet.frameHeight or 0
-    local frameCount = sheet.frameCount or 0
+    local sheet, frameW, frameH, frameCount = getWallSheetMetricsCached(wtype)
     if frameW <= 0 or frameH <= 0 or frameCount <= 0 then
         return false
     end
@@ -4738,14 +6677,7 @@ local function drawWallTextureColumn(wtype, side, texCoord, sx, y1, y2, colW, di
     -- MIP1 uses stride-only LOD (no texel quantization) to avoid near-distance angle shimmer.
     local mip = mipLevel or 0
     if mip > 1 then
-        local groupSize = 1
-        if mip >= 4 then
-            groupSize = 6
-        elseif mip == 3 then
-            groupSize = 4
-        elseif mip == 2 then
-            groupSize = 3
-        end
+        local groupSize = MIP_FRAME_GROUP_SIZE[mip] or 6
         if groupSize > 1 and frameCount > groupSize then
             frameIndex = (math.floor((frameIndex - 1) / groupSize) * groupSize) + 1
             if frameIndex ~= frameIndex or frameIndex == math.huge or frameIndex == -math.huge then
@@ -4777,9 +6709,15 @@ local function drawWallTextureColumn(wtype, side, texCoord, sx, y1, y2, colW, di
     if scaleX <= 0 or scaleY <= 0 or scaleY ~= scaleY or scaleY == math.huge or scaleY == -math.huge then
         return false
     end
-    local perfSample = (DEBUG_PERF_MONITOR == true) and (PERF_MONITOR_ACTIVE_SAMPLE == true)
-    local trackCounters = (DEBUG_PERF_MONITOR == true)
-    local canTime = perfSample and vmupro and vmupro.system and vmupro.system.getTimeUs
+    local trackCounters = trackCountersOpt
+    if trackCounters == nil then
+        trackCounters = (DEBUG_PERF_MONITOR == true)
+    end
+    local canTime = canTimeOpt
+    if canTime == nil then
+        local perfSample = (DEBUG_PERF_MONITOR == true) and (PERF_MONITOR_ACTIVE_SAMPLE == true)
+        canTime = perfSample and vmupro and vmupro.system and vmupro.system.getTimeUs
+    end
     local t0
     if canTime then
         t0 = vmupro.system.getTimeUs()
@@ -4795,7 +6733,10 @@ local function drawWallTextureColumn(wtype, side, texCoord, sx, y1, y2, colW, di
         if x2 > 239 then x2 = 239 end
         if y1 < 0 then y1 = 0 end
         if y2 > 239 then y2 = 239 end
-        local fogAlpha = getFogQuantizedFactor(distToWall)
+        local fogAlpha = fogAlphaCached
+        if fogAlpha == nil then
+            fogAlpha = getFogQuantizedFactor(distToWall)
+        end
         if fogAlpha > 0 then
             if trackCounters then
                 PERF_MONITOR_FOG_COLS = (PERF_MONITOR_FOG_COLS or 0) + drawWidth
@@ -4833,7 +6774,8 @@ EXP_MAX_STEPS = 32
 EXP_MAX_DIST = 80
 EXP_RADIUS = 20
 EXP_BUCKETS = 8
-EXP_TEX_MAX_DIST = EXP_TEX_MAX_DIST or DRAW_DIST_PRESETS[DRAW_DIST_INDEX]
+normalizeDrawDistanceSetting()
+normalizeMipmapRanges()
 EXP_VIEW_DIST = EXP_VIEW_DIST or EXP_TEX_MAX_DIST
 HYBRID_TEX_MAX_H = VIEWPORT_H
 USE_FIXED_RAYCAST = false
@@ -4843,7 +6785,7 @@ expHeightLut = expHeightLut or {}
 expScaleYLut = expScaleYLut or {}
 expHeightLutReady = expHeightLutReady or false
 
-local function ensureExpTables()
+function ensureExpTables()
     if expTablesReady then return end
     local dirSteps = EXP_FIXED_DIR_STEPS or 2048
     local twoPi = (renderCfg and renderCfg.twoPi) or 6.28318
@@ -4871,7 +6813,7 @@ local function ensureExpTables()
     expTablesReady = true
 end
 
-local function ensureExpHeightLut()
+function ensureExpHeightLut()
     if expHeightLutReady then return end
     local wallScale = VIEWPORT_H - 20
     local size = EXP_DIST_LUT_SIZE or 256
@@ -4887,7 +6829,7 @@ local function ensureExpHeightLut()
     expHeightLutReady = true
 end
 
-local function getExpRayOffsets(rayCols)
+function getExpRayOffsets(rayCols)
     local key = tostring(rayCols)
     local cached = expRayOffsets[key]
     if cached then return cached end
@@ -4912,7 +6854,7 @@ local function getExpRayOffsets(rayCols)
     return offsets
 end
 
-local function getStartSolidRayFallback(pxVal, pyVal, mapX, mapY, startTile)
+function getStartSolidRayFallback(pxVal, pyVal, mapX, mapY, startTile)
     local fx = pxVal - mapX
     local fy = pyVal - mapY
     if fx < 0 then fx = 0 elseif fx > 0.999 then fx = 0.999 end
@@ -4948,7 +6890,7 @@ local function getStartSolidRayFallback(pxVal, pyVal, mapX, mapY, startTile)
     return getPlayerRenderNearClipDist(), startTile, side, texCoord, true
 end
 
-local function expCastRayFixed(rayDir, maxDist)
+function expCastRayFixed(rayDir, maxDist)
     ensureExpTables()
     local posXFix = math.floor(px * EXP_FIX_TILE)
     local posYFix = math.floor(py * EXP_FIX_TILE)
@@ -5045,7 +6987,7 @@ local function expCastRayFixed(rayDir, maxDist)
 end
 
 local expDepthBuf = {}
-local function renderWallsExperimentalHybrid()
+function renderWallsExperimentalHybrid()
     -- Stability-first EXP-H: use one raycast projection model at all distances.
     -- This prevents wall seams/shape shifts when draw distance changes.
     local hybridViewDist = EXP_VIEW_DIST or (EXP_TEX_MAX_DIST or 8.0)
@@ -5056,8 +6998,9 @@ local function renderWallsExperimentalHybrid()
     if rayTraceDist < 0.5 then rayTraceDist = 0.5 end
 
     local fovRad = renderCfg.fovSteps * (renderCfg.twoPi / 64)
+    local twoPi = (renderCfg and renderCfg.twoPi) or 6.28318
     local playerDir = pdir % 64
-    local playerAngle = playerDir * (renderCfg.twoPi / 64)
+    local playerAngle = playerDir * (twoPi / 64)
     local playerCos = math.cos(playerAngle)
     local playerSin = math.sin(playerAngle)
     local rayCols = 60
@@ -5088,12 +7031,12 @@ local function renderWallsExperimentalHybrid()
     local stepSin1, stepSin2, stepSin3, stepSin4
     local rayCos = 0
     local raySin = 0
+    local baseAngle = playerAngle - (fovRad / 2)
     if useFixedRaycast then
         ensureExpTables()
         playerDirFix = (playerDir % 64) * (EXP_FIXED_DIR_SUBDIV or 32)
         rayOffsets = getExpRayOffsets(rayCols)
     else
-        local baseAngle = playerAngle - (fovRad / 2)
         rayStep = fovRad / rayCols
         stepCos1 = math.cos(rayStep)
         stepCos2 = math.cos(rayStep * 2)
@@ -5159,14 +7102,23 @@ local function renderWallsExperimentalHybrid()
     end
 
     -- Mip thresholds are evaluated once per frame so each tier is independent and cheap in the hot ray loop.
-    -- Order is still strictly monotonic for deterministic tier transitions.
-    local mip1Thresh = WALL_MIPMAP_DIST1 or 4.0
-    local mip2Thresh = WALL_MIPMAP_DIST2 or (mip1Thresh + 2.0)
-    local mip3Thresh = WALL_MIPMAP_DIST3 or (mip2Thresh + 2.0)
-    local mip4Thresh = WALL_MIPMAP_DIST4 or (mip3Thresh + 2.0)
-    if mip2Thresh <= mip1Thresh then mip2Thresh = mip1Thresh + 0.1 end
-    if mip3Thresh <= mip2Thresh then mip3Thresh = mip2Thresh + 0.1 end
-    if mip4Thresh <= mip3Thresh then mip4Thresh = mip3Thresh + 0.1 end
+    -- A threshold <= 0 means that mip tier is disabled.
+    local mip1Thresh = WALL_MIPMAP_DIST1 or 0.0
+    local mip2Thresh = WALL_MIPMAP_DIST2 or 0.0
+    local mip3Thresh = WALL_MIPMAP_DIST3 or 0.0
+    local mip4Thresh = WALL_MIPMAP_DIST4 or 0.0
+    if mip1Thresh < 0 then mip1Thresh = 0 end
+    if mip2Thresh < 0 then mip2Thresh = 0 end
+    if mip3Thresh < 0 then mip3Thresh = 0 end
+    if mip4Thresh < 0 then mip4Thresh = 0 end
+    local nearClipDist = getPlayerRenderNearClipDist()
+    local fogCutDist = FOG_TEX_CUTOFF or FOG_END or texView
+    local farTexOff = FAR_TEX_OFF_DIST or 999
+    local farTexByDistEnabled = (farTexOff < 900)
+    local texMaxH = HYBRID_TEX_MAX_H or (VIEWPORT_H - 8)
+    local fogCurtainStart = -1
+    local fogCurtainEnd = -1
+    local fogCurtainDist = nil
 
     local x = 0
     while x < rayCols do
@@ -5175,6 +7127,7 @@ local function renderWallsExperimentalHybrid()
         local castCos, castSin
         local dist, wtype, side, texCoord, rayHit
         local castT0
+        local rayCastMaxDist = rayTraceDist
         if canTime then
             castT0 = vmupro.system.getTimeUs()
         end
@@ -5183,22 +7136,22 @@ local function renderWallsExperimentalHybrid()
             local rayDir = (playerDirFix + rayOff) % (EXP_FIXED_DIR_STEPS or 2048)
             castCos = rayDirCos[rayDir] or playerCos
             castSin = rayDirSin[rayDir] or playerSin
-            dist, wtype, side, texCoord, rayHit = expCastRayFixed(rayDir, rayTraceDist)
+            dist, wtype, side, texCoord, rayHit = expCastRayFixed(rayDir, rayCastMaxDist)
         else
             castCos = rayCos
             castSin = raySin
-            dist, wtype, side, texCoord, rayHit = castRay(castCos, castSin, rayTraceDist)
+            dist, wtype, side, texCoord, rayHit = castRay(castCos, castSin, rayCastMaxDist)
         end
         if canTime and castT0 then
             local castT1 = vmupro.system.getTimeUs()
             PERF_MONITOR_SAMPLE_RAYCAST_US = (PERF_MONITOR_SAMPLE_RAYCAST_US or 0) + (castT1 - castT0)
         end
         local fixedDist = dist * (castCos * playerCos + castSin * playerSin)
-        local nearClipDist = getPlayerRenderNearClipDist()
         if fixedDist < nearClipDist then fixedDist = nearClipDist end
         if not rayHit then
-            fixedDist = fogView
-            if fixedDist < texView then fixedDist = texView end
+            -- Respect active draw-distance cap for no-hit rays; prevents endless far fog columns.
+            fixedDist = rayCastMaxDist
+            if fixedDist < nearClipDist then fixedDist = nearClipDist end
             if fixedDist > hybridViewDist then fixedDist = hybridViewDist end
         end
 
@@ -5207,13 +7160,13 @@ local function renderWallsExperimentalHybrid()
             or (wallContactActive and fixedDist < nearStabilityDist)
         )
         if WALL_MIPMAP_ENABLED and MIP_LOD_ENABLED and not nearForce then
-            if fixedDist >= mip4Thresh then
+            if mip4Thresh > 0 and fixedDist >= mip4Thresh then
                 mipLevel = 4
-            elseif fixedDist >= mip3Thresh then
+            elseif mip3Thresh > 0 and fixedDist >= mip3Thresh then
                 mipLevel = 3
-            elseif fixedDist >= mip2Thresh then
+            elseif mip2Thresh > 0 and fixedDist >= mip2Thresh then
                 mipLevel = 2
-            elseif fixedDist >= mip1Thresh then
+            elseif mip1Thresh > 0 and fixedDist >= mip1Thresh then
                 mipLevel = 1
             end
         end
@@ -5248,6 +7201,12 @@ local function renderWallsExperimentalHybrid()
             local spanW = (ex - sx) + 1
 
             if rayHit and fixedDist <= hybridViewDist then
+                if fogCurtainStart >= 0 then
+                    drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogCurtainDist or texView, trackCounters, canTime)
+                    fogCurtainStart = -1
+                    fogCurtainEnd = -1
+                    fogCurtainDist = nil
+                end
                 if trackCounters then
                     PERF_MONITOR_WALL_COLS_TOTAL = (PERF_MONITOR_WALL_COLS_TOTAL or 0) + spanW
                     if mipLevel <= 0 then
@@ -5274,14 +7233,12 @@ local function renderWallsExperimentalHybrid()
                 if not DEBUG_DISABLE_FOG then
                     fogAlpha = getFogQuantizedFactor(fixedDist)
                 end
-                local fogCut = FOG_TEX_CUTOFF or FOG_END or texView
-                local farWall = (fixedDist > texView) or (fixedDist >= fogCut) or (fogAlpha >= 1.0)
-                local farTexOff = FAR_TEX_OFF_DIST or 999
-                local forceNoTexByDist = (farTexOff < 900) and (fixedDist >= farTexOff)
+                local farWall = (fixedDist > texView) or (fixedDist >= fogCutDist) or (fogAlpha >= 1.0)
+                local forceNoTexByDist = farTexByDistEnabled and (fixedDist >= farTexOff)
 
                 local wantTex = (WALL_TEXTURE_MODE == "proper"
                     and not DEBUG_DISABLE_WALL_TEXTURE
-                    and (nearForce or (not farWall and h < (HYBRID_TEX_MAX_H or (VIEWPORT_H - 8))))
+                    and (nearForce or (not farWall and h < texMaxH))
                     and not forceNoTexByDist)
                 if not wantTex then
                     local baseColor = getWallColor(wtype, side)
@@ -5315,7 +7272,7 @@ local function renderWallsExperimentalHybrid()
                     end
                     if useTex < 0.001 then useTex = 0.001 end
                     if useTex > 0.998 then useTex = 0.998 end
-                    local drewTex = drawWallTextureColumn(wtype, side, useTex, sx, y1, y2, drawColW, fixedDist, mipLevel)
+                    local drewTex = drawWallTextureColumn(wtype, side, useTex, sx, y1, y2, drawColW, fixedDist, mipLevel, fogAlpha, trackCounters, canTime)
                     if not drewTex then
                         if trackCounters then
                             PERF_MONITOR_WALL_COLS_FALLBACK = (PERF_MONITOR_WALL_COLS_FALLBACK or 0) + spanW
@@ -5346,19 +7303,35 @@ local function renderWallsExperimentalHybrid()
                     end
                 end
             elseif not rayHit and not DEBUG_DISABLE_FOG then
-                -- Draw a fog curtain when no wall was traced inside draw distance.
-                -- This keeps fog coverage independent from draw-distance cutoff.
-                if trackCounters then
-                    PERF_MONITOR_FOG_COLS = (PERF_MONITOR_FOG_COLS or 0) + spanW
+                -- Batch contiguous no-hit columns into one fog-curtain draw call.
+                if fogCurtainStart < 0 then
+                    fogCurtainStart = sx
+                    fogCurtainEnd = ex
+                    fogCurtainDist = fixedDist
+                elseif sx <= (fogCurtainEnd + 1) then
+                    if ex > fogCurtainEnd then
+                        fogCurtainEnd = ex
+                    end
+                    if (not fogCurtainDist) or (fixedDist < fogCurtainDist) then
+                        fogCurtainDist = fixedDist
+                    end
+                else
+                    drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogCurtainDist or texView, trackCounters, canTime)
+                    fogCurtainStart = sx
+                    fogCurtainEnd = ex
+                    fogCurtainDist = fixedDist
                 end
-                local fogT0
-                if canTime then fogT0 = vmupro.system.getTimeUs() end
-                drawFogCurtainColumn(sx, ex, fogView)
-                if canTime and fogT0 then
-                    local fogT1 = vmupro.system.getTimeUs()
-                    PERF_MONITOR_SAMPLE_FOG_US = (PERF_MONITOR_SAMPLE_FOG_US or 0) + (fogT1 - fogT0)
-                end
+            elseif fogCurtainStart >= 0 then
+                drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogCurtainDist or texView, trackCounters, canTime)
+                fogCurtainStart = -1
+                fogCurtainEnd = -1
+                fogCurtainDist = nil
             end
+        elseif fogCurtainStart >= 0 then
+            drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogCurtainDist or texView, trackCounters, canTime)
+            fogCurtainStart = -1
+            fogCurtainEnd = -1
+            fogCurtainDist = nil
         end
 
         if not useFixedRaycast then
@@ -5380,6 +7353,9 @@ local function renderWallsExperimentalHybrid()
             rayCos, raySin = newCos, newSin
         end
         x = x + rayStride
+    end
+    if fogCurtainStart >= 0 then
+        drawBufferedFogCurtainSpan(fogCurtainStart, fogCurtainEnd, fogCurtainDist or texView, trackCounters, canTime)
     end
 end
 
@@ -5481,7 +7457,7 @@ function castRay(dx, dy, maxDist)
     return perpWallDist, wtype, side, texCoord, true
 end
 
-local function isVisible(tx, ty, cache)
+function isVisible(tx, ty, cache)
     local expRenderer = isExpRenderer()
     local useCache = cache and (not expRenderer)
     if useCache then
@@ -5578,7 +7554,7 @@ local function isVisible(tx, ty, cache)
     return true
 end
 
-local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData)
+function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData)
     if dist < 0.3 then return end
     local size = math.floor(100 / dist)
     if size < 6 then return end
@@ -6006,7 +7982,7 @@ local function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData
     end
 end
 
-local function drawRoofBackdrop()
+function drawRoofBackdrop()
     local roofBottom = HORIZON - 1
     if roofBottom < 0 then
         return
@@ -6103,7 +8079,53 @@ local function drawRoofBackdrop()
     vmupro.graphics.drawLine(0, roofBottom, 239, roofBottom, COLOR_BLACK)
 end
 
-local function renderGameFrame()
+function drawBowChargeOverlay()
+    if not bowChargeState.active then
+        return
+    end
+    local idleSprite = bowAttack and bowAttack[1] or nil
+    local drawnSprite = bowAttack and bowAttack[2] or nil
+    if not drawnSprite then
+        drawnSprite = idleSprite
+    end
+
+    local showDrawn = isBowChargeDrawnVisual()
+    local sprite = showDrawn and drawnSprite or idleSprite
+    if sprite and sprite.height and sprite.height > 0 then
+        local drawX = 128
+        local drawY = 240 - sprite.height + 18
+        vmupro.sprite.draw(sprite, drawX, drawY, vmupro.sprite.kImageUnflipped)
+    else
+        local bowX = 182
+        local bowTop = 108
+        local bowBottom = 220
+        local pull = showDrawn and 12 or 2
+        vmupro.graphics.drawLine(bowX, bowTop, bowX + 7, bowTop + 24, COLOR_BROWN)
+        vmupro.graphics.drawLine(bowX + 7, bowTop + 24, bowX + 7, bowBottom - 24, COLOR_BROWN)
+        vmupro.graphics.drawLine(bowX + 7, bowBottom - 24, bowX, bowBottom, COLOR_BROWN)
+        vmupro.graphics.drawLine(bowX + pull, bowTop + 6, bowX + pull, bowBottom - 6, COLOR_LIGHT_GRAY)
+        vmupro.graphics.drawFillRect(bowX - 30 - pull, 168, bowX + 3, 171, COLOR_LIGHT_GRAY)
+        vmupro.graphics.drawFillRect(bowX - 34 - pull, 167, bowX - 30 - pull, 172, COLOR_YELLOW)
+    end
+
+    local stage = getBowChargeCurrentStage()
+    local tiers = getBowChargeTierCount()
+    local boxW = 6
+    local gap = 3
+    local barW = (tiers * boxW) + ((tiers - 1) * gap)
+    local x0 = 236 - barW
+    local y0 = 210
+    for i = 1, tiers do
+        local color = COLOR_DARK_GRAY
+        if i <= stage then
+            color = COLOR_YELLOW
+        end
+        local x = x0 + ((i - 1) * (boxW + gap))
+        vmupro.graphics.drawFillRect(x, y0, x + boxW, y0 + 6, color)
+    end
+end
+
+function renderGameFrame()
     recoverPlayerFromWallPenetration()
     -- Keep world rendering live while menu is open for real-time tuning.
     local freezeMenuView = false
@@ -6122,7 +8144,8 @@ local function renderGameFrame()
 
     if not DEBUG_SKIP_SPRITES and not showMenu then
         if frameCount - spriteOrderCacheFrame >= 8 or #spriteOrderCache == 0 then
-            local spriteOrder = {}
+            local spriteOrder = spriteOrderCache
+            local prevCount = #spriteOrder
             local count = 0
             for i = 1, #sprites do
                 local s = sprites[i]
@@ -6144,15 +8167,25 @@ local function renderGameFrame()
                     end
                     if distSq <= maxSq then
                         count = count + 1
-                        spriteOrder[count] = {idx = i, dist = distSq}
+                        local entry = spriteOrder[count]
+                        if entry then
+                            entry.idx = i
+                            entry.dist = distSq
+                        else
+                            spriteOrder[count] = {idx = i, dist = distSq}
+                        end
                     end
                 end
                 ::continue_sprite_build::
             end
-            if count > 1 then
-                table.sort(spriteOrder, function(a, b) return a.dist > b.dist end)
+            if prevCount > count then
+                for i = count + 1, prevCount do
+                    spriteOrder[i] = nil
+                end
             end
-            spriteOrderCache = spriteOrder
+            if count > 1 then
+                table.sort(spriteOrder, spriteOrderCompareFarToNear)
+            end
             spriteOrderCacheFrame = frameCount
         end
 
@@ -6242,6 +8275,8 @@ local function renderGameFrame()
             end
         end
 
+        drawPlayerProjectiles()
+
         if SHOW_MINIMAP and not showMenu then
         for my = 0, 15 do
             for mx = 0, 15 do
@@ -6256,31 +8291,76 @@ local function renderGameFrame()
         vmupro.graphics.drawLine(ppx, ppy, ppx + math.floor(cosTable[pdir % 64] * 4), ppy + math.floor(sinTable[pdir % 64] * 4), COLOR_YELLOW)
         end
 
-        -- Draw attack sword swing (always, even if effects are disabled)
+        if bowChargeState.active and not showMenu then
+            drawBowChargeOverlay()
+        end
+
+        -- Draw first-person attack overlay (melee/ranged/magic).
         if isAttacking > 0 and not showMenu then
-        if #swordAttack > 0 then
-            local total = (attackTotalFrames > 0) and attackTotalFrames or (#swordAttack * 2)
-            local frameHold = math.max(1, math.floor(total / #swordAttack))
+        local weaponClass = normalizeWeaponClass(lastAttackWeaponClass)
+        local attackFrames = swordAttack
+        local drawXOffset = 140
+        local drawYOffset = 30
+        if weaponClass == WEAPON_CLASS_RANGED then
+            attackFrames = bowAttack
+            drawXOffset = 128
+            drawYOffset = 18
+        elseif weaponClass == WEAPON_CLASS_MAGIC then
+            attackFrames = staffCast
+            drawXOffset = 122
+            drawYOffset = 14
+        end
+
+        if attackFrames and #attackFrames > 0 then
+            local total = (attackTotalFrames > 0) and attackTotalFrames or (#attackFrames * 2)
+            local frameHold = math.max(1, math.floor(total / #attackFrames))
             local frameIndex = math.floor((total - isAttacking) / frameHold) + 1
             if frameIndex < 1 then frameIndex = 1 end
-            if frameIndex > #swordAttack then frameIndex = #swordAttack end
-            local sprite = swordAttack[frameIndex]
+            if frameIndex > #attackFrames then frameIndex = #attackFrames end
+            local sprite = attackFrames[frameIndex]
             if sprite then
-                local drawX = 140
-                local drawY = 240 - sprite.height + 30
+                local drawX = drawXOffset
+                local drawY = 240 - sprite.height + drawYOffset
                 vmupro.sprite.draw(sprite, drawX, drawY, vmupro.sprite.kImageUnflipped)
             end
         else
-            local swingAngle = (10 - isAttacking) * 9  -- 0 to 90 degrees
-            local swordLen = 80
-            local swordX = 180 + math.floor(math.sin(swingAngle * 0.0174) * 40)
-            local swordY = 180 - math.floor(math.cos(swingAngle * 0.0174) * 60)
-            -- Sword blade
-            vmupro.graphics.drawFillRect(swordX - 4, swordY - swordLen, swordX + 4, swordY, COLOR_LIGHT_GRAY)
-            vmupro.graphics.drawFillRect(swordX - 2, swordY - swordLen - 10, swordX + 2, swordY - swordLen, COLOR_LIGHT_GRAY)
-            -- Sword hilt
-            vmupro.graphics.drawFillRect(swordX - 12, swordY - 4, swordX + 12, swordY + 4, COLOR_BROWN)
-            vmupro.graphics.drawFillRect(swordX - 6, swordY, swordX + 6, swordY + 20, COLOR_DARK_BROWN)
+            local total = attackTotalFrames
+            if total <= 0 then total = 10 end
+            local progress = (total - isAttacking) / total
+            if progress < 0 then progress = 0 end
+            if progress > 1 then progress = 1 end
+
+            if weaponClass == WEAPON_CLASS_RANGED then
+                local bowX = 182
+                local bowTop = 108
+                local bowBottom = 220
+                local pull = math.floor(progress * 14)
+                vmupro.graphics.drawLine(bowX, bowTop, bowX + 7, bowTop + 24, COLOR_BROWN)
+                vmupro.graphics.drawLine(bowX + 7, bowTop + 24, bowX + 7, bowBottom - 24, COLOR_BROWN)
+                vmupro.graphics.drawLine(bowX + 7, bowBottom - 24, bowX, bowBottom, COLOR_BROWN)
+                vmupro.graphics.drawLine(bowX + pull, bowTop + 6, bowX + pull, bowBottom - 6, COLOR_LIGHT_GRAY)
+                vmupro.graphics.drawFillRect(bowX - 30 - pull, 168, bowX + 3, 171, COLOR_LIGHT_GRAY)
+                vmupro.graphics.drawFillRect(bowX - 34 - pull, 167, bowX - 30 - pull, 172, COLOR_YELLOW)
+            elseif weaponClass == WEAPON_CLASS_MAGIC then
+                local staffX = 176
+                local staffTop = 118
+                vmupro.graphics.drawFillRect(staffX - 3, staffTop, staffX + 3, 228, COLOR_BROWN)
+                vmupro.graphics.drawFillRect(staffX - 7, staffTop - 8, staffX + 7, staffTop + 2, COLOR_DARK_BROWN)
+                local orbR = 5 + math.floor(progress * 5)
+                local orbPulse = ((simTickCount or 0) % 4)
+                vmupro.graphics.drawFillRect(staffX - orbR, staffTop - 9 - orbPulse, staffX + orbR, staffTop + 1 - orbPulse, COLOR_LIGHT_BLUE)
+            else
+                local swingAngle = (10 - isAttacking) * 9  -- 0 to 90 degrees
+                local swordLen = 80
+                local swordX = 180 + math.floor(math.sin(swingAngle * 0.0174) * 40)
+                local swordY = 180 - math.floor(math.cos(swingAngle * 0.0174) * 60)
+                -- Sword blade
+                vmupro.graphics.drawFillRect(swordX - 4, swordY - swordLen, swordX + 4, swordY, COLOR_LIGHT_GRAY)
+                vmupro.graphics.drawFillRect(swordX - 2, swordY - swordLen - 10, swordX + 2, swordY - swordLen, COLOR_LIGHT_GRAY)
+                -- Sword hilt
+                vmupro.graphics.drawFillRect(swordX - 12, swordY - 4, swordX + 12, swordY + 4, COLOR_BROWN)
+                vmupro.graphics.drawFillRect(swordX - 6, swordY, swordX + 6, swordY + 20, COLOR_DARK_BROWN)
+            end
         end
         end
 
@@ -6349,7 +8429,8 @@ local function renderGameFrame()
                 local renderText = "RENDER: EXP-H LOCK"
                 local debugText = "DEBUG"
                 local optItems = {soundText, healthText, enemiesText, propsText, texturesText, fpsText, resText, minimapText, renderText, debugText, "BACK"}
-                for i, item in ipairs(optItems) do
+                for i = 1, #optItems do
+                    local item = optItems[i]
                     local y = 70 + (i - 1) * 15
                     local textColor = COLOR_LIGHT_GRAY
                     local label = "  " .. item
@@ -6385,6 +8466,122 @@ local function renderGameFrame()
             else
                 drawMenuText("A/MODE SAVE  B BACK", 48, 224, COLOR_WHITE)
             end
+        elseif inStatsMenu then
+            local state = ensurePlayerBuildState()
+            local level = getPlayerLevel()
+            local xp = getPlayerXp()
+            local xpNeed = getPlayerXpForNextLevel()
+            local freePoints = math.floor(toNumber(state.stat_points, 0))
+            local xpLine = "XP MAX"
+            if xpNeed > 0 then
+                xpLine = "XP " .. tostring(xp) .. "/" .. tostring(xpNeed)
+            end
+
+            drawUiPanel(24, 28, 216, 234, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
+            drawUiPanel(32, 36, 208, 58, COLOR_MAROON, COLOR_WHITE)
+            setFontCached(vmupro.text.FONT_SMALL)
+	            drawMenuText("PLAYER STATS", 56, 41, COLOR_WHITE)
+	
+	            setFontCached(vmupro.text.FONT_TINY_6x8)
+	            drawMenuText("LV " .. tostring(level) .. "   " .. xpLine, 36, 62, COLOR_WHITE)
+	            drawMenuText("UNSPENT: " .. tostring(freePoints), 36, 78, COLOR_WHITE)
+	
+	            local rows = {
+	                {"VITALITY", getBuildStatValue("vitality"), "HP+" .. tostring(VITALITY_HP_BONUS)},
+	                {"STRENGTH", getBuildStatValue("strength"), "DMG+" .. tostring(STRENGTH_DAMAGE_BONUS)},
+	                {"DEXTERITY", getBuildStatValue("dexterity"), "SPD/DODGE"},
+	                {"INTELLECT", getBuildStatValue("intellect"), "POW/CRIT"},
+	                {"BACK", -1, ""},
+	            }
+	
+	            for i = 1, #rows do
+	                local y = 96 + (i - 1) * 24
+	                local selected = (i == statsMenuSelection)
+	                local fg = COLOR_LIGHT_GRAY
+	                if selected then
+	                    drawUiPanel(32, y - 2, 208, y + 16, COLOR_MAROON, COLOR_WHITE)
+	                    fg = COLOR_WHITE
+	                end
+	                local label = rows[i][1]
+	                setFontCached(vmupro.text.FONT_SMALL)
+	                drawMenuText(label, 40, y, fg)
+	                if i <= 4 then
+	                    local value = rows[i][2]
+	                    drawMenuText(tostring(value), 156, y, fg)
+	                end
+	            end
+	
+	            setFontCached(vmupro.text.FONT_TINY_6x8)
+	            if statsMenuSelection >= 1 and statsMenuSelection <= 4 then
+	                local effectLine = rows[statsMenuSelection][3] or ""
+	                if effectLine ~= "" then
+	                    drawMenuText("EFFECT: " .. effectLine, 36, 210, COLOR_WHITE)
+	                end
+	            end
+	            if statsMenuMessage and statsMenuMessage ~= "" and statsMenuMessageTimer > 0 then
+	                drawMenuText(statsMenuMessage, 36, 224, COLOR_WHITE)
+	            else
+	                drawMenuText("A/MODE SPEND  B BACK", 36, 224, COLOR_WHITE)
+            end
+        elseif inMasteryMenu then
+            local state = ensurePlayerBuildState()
+            local classId = getCurrentClassId()
+            local freePoints = math.floor(toNumber(state.weapon_mastery_points, 0))
+
+            drawUiPanel(24, 28, 216, 234, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
+            drawUiPanel(32, 36, 208, 58, COLOR_MAROON, COLOR_WHITE)
+            setFontCached(vmupro.text.FONT_SMALL)
+	            drawMenuText("MASTERIES", 74, 41, COLOR_WHITE)
+	
+	            setFontCached(vmupro.text.FONT_TINY_6x8)
+	            drawMenuText("PTS: " .. tostring(freePoints), 36, 62, COLOR_WHITE)
+	            drawMenuText("BONUS: " .. tostring(WEAPON_BASELINE_POINTS or 5) .. "  CAP: " .. tostring(WEAPON_MASTERY_CAP or 10), 36, 78, COLOR_WHITE)
+	
+	            local rows = {
+	                {WEAPON_CLASS_MELEE, "MELEE"},
+	                {WEAPON_CLASS_RANGED, "RANGED"},
+	                {WEAPON_CLASS_MAGIC, "MAGIC"},
+	                {nil, "BACK"},
+	            }
+	
+	            for i = 1, #rows do
+	                local y = 96 + (i - 1) * 24
+	                local selected = (i == masteryMenuSelection)
+	                local fg = COLOR_LIGHT_GRAY
+	                if selected then
+	                    drawUiPanel(32, y - 2, 208, y + 16, COLOR_MAROON, COLOR_WHITE)
+	                    fg = COLOR_WHITE
+	                end
+	
+	                local weaponClass = rows[i][1]
+	                local label = rows[i][2]
+	                local rowText = label
+	                if weaponClass ~= nil then
+	                    local basePts = getWeaponBasePointsForClass(classId, weaponClass)
+	                    local masteryLvl = getWeaponMasteryLevel(weaponClass)
+	                    local dmgMult, spdMult, effectivePts = computeWeaponProficiencyMultipliers(classId, weaponClass)
+	                    local dmgPct = math.floor((dmgMult * 100.0) + 0.5)
+	                    local spdPct = math.floor((spdMult * 100.0) + 0.5)
+	                    rowText = string.format("%s LV%d/%d E%d D%d S%d B%d",
+	                        label,
+	                        masteryLvl,
+	                        (WEAPON_MASTERY_CAP or 10),
+	                        effectivePts,
+	                        dmgPct,
+	                        spdPct,
+	                        basePts
+	                    )
+	                end
+	                setFontCached(vmupro.text.FONT_TINY_6x8)
+	                drawMenuText(rowText, 40, y, fg)
+	            end
+
+            setFontCached(vmupro.text.FONT_TINY_6x8)
+            if masteryMenuMessage and masteryMenuMessage ~= "" and masteryMenuMessageTimer > 0 then
+                drawMenuText(masteryMenuMessage, 36, 224, COLOR_WHITE)
+            else
+                drawMenuText("A/MODE SPEND  B BACK", 36, 224, COLOR_WHITE)
+            end
         else
             -- Main pause menu
             drawUiPanel(50, 60, 190, 225, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
@@ -6394,8 +8591,8 @@ local function renderGameFrame()
             setFontCached(vmupro.text.FONT_SMALL)
             drawMenuText("PAUSED", 88, 75, COLOR_WHITE)
             -- Menu items
-            local items = {"RESUME", "SAVE GAME", "OPTIONS", "RESTART", "MENU", "QUIT"}
-            for i, item in ipairs(items) do
+            for i = 1, #PAUSE_MENU_ITEMS do
+                local item = PAUSE_MENU_ITEMS[i]
                 local y = 95 + (i - 1) * 20
                 local textColor = COLOR_LIGHT_GRAY
                 local label = "  " .. item
@@ -6413,11 +8610,13 @@ local function renderGameFrame()
     drawHealthUI()
     if not showMenu then
         drawEnemiesRemainingUI()
+        drawRunScoreUI()
     end
 
     -- Draw current level indicator
                 setFontCached(vmupro.text.FONT_SMALL)
                 drawUiText(getLevelLabel(currentLevel), 6, 228, COLOR_WHITE, COLOR_BLACK)
+                drawUiText("LV " .. tostring(getPlayerLevel()), 186, 228, COLOR_WHITE, COLOR_BLACK)
                 if showFpsOverlay and lastFps and lastFps > 0 then
                     local fpsText = string.format("FPS %.1f", lastFps)
                     drawUiText(fpsText, 6, 214, COLOR_WHITE, COLOR_BLACK)
@@ -6429,6 +8628,21 @@ local function renderGameFrame()
                     local pct = math.floor((lastBlockEvent.pct or 0) * 100 + 0.5)
                     local msg = "BLOCK " .. tostring(pct) .. "% (-" .. tostring(lastBlockEvent.amount or 0) .. ")"
                     drawUiText(msg, 6, 202, COLOR_WHITE, COLOR_BLACK)
+                end
+                if gameState == STATE_PLAYING then
+                    setFontCached(vmupro.text.FONT_TINY_6x8)
+                    if (simTickCount or 0) < (damageDebugTakenUntilTick or 0) then
+                        drawUiText("DMG TAKEN: " .. tostring(damageDebugTakenValue or 0), 6, 4, COLOR_WHITE, COLOR_BLACK)
+                    end
+                    if (simTickCount or 0) < (damageDebugDealtUntilTick or 0) then
+                        drawUiText("DMG DEALT: " .. tostring(damageDebugDealtValue or 0), 6, 14, COLOR_WHITE, COLOR_BLACK)
+                    end
+                    if statsMenuMessage and statsMenuMessage ~= "" and statsMenuMessageTimer and statsMenuMessageTimer > 0 then
+                        drawUiText(statsMenuMessage, 58, 24, COLOR_WHITE, COLOR_BLACK)
+                    end
+                    if masteryMenuMessage and masteryMenuMessage ~= "" and masteryMenuMessageTimer and masteryMenuMessageTimer > 0 then
+                        drawUiText(masteryMenuMessage, 58, 34, COLOR_WHITE, COLOR_BLACK)
+                    end
                 end
 
     if levelBannerTimer > 0 then
@@ -6454,7 +8668,7 @@ local function renderGameFrame()
     end
 end
 
-local function consumeAudioSteps(elapsedUs, audioAccumulatorUs)
+function consumeAudioSteps(elapsedUs, audioAccumulatorUs)
     if not audioSystemActive or not soundEnabled then
         return 0.0, 0
     end
@@ -6483,10 +8697,16 @@ local function consumeAudioSteps(elapsedUs, audioAccumulatorUs)
     return acc, steps
 end
 
-local function runSimulationStep()
+function runSimulationStep()
     simTickCount = simTickCount + 1
     if saveMenuMessageTimer and saveMenuMessageTimer > 0 then
         saveMenuMessageTimer = saveMenuMessageTimer - 1
+    end
+    if statsMenuMessageTimer and statsMenuMessageTimer > 0 then
+        statsMenuMessageTimer = statsMenuMessageTimer - 1
+    end
+    if masteryMenuMessageTimer and masteryMenuMessageTimer > 0 then
+        masteryMenuMessageTimer = masteryMenuMessageTimer - 1
     end
 
     if gameState == STATE_PLAYING and not showMenu then
@@ -6496,12 +8716,27 @@ local function runSimulationStep()
         if isAttacking > 0 then
             isAttacking = isAttacking - 1
         end
+        updatePlayerProjectiles()
         updateSoldiers()
         updateDeathAnimations()
         if not DEBUG_DISABLE_EFFECTS then
             updateBloodEffects()
         end
         checkHealthPickups()
+        if playerHealth and MAX_HEALTH and playerHealth > 0 and playerHealth < MAX_HEALTH then
+            local regenPerSec = PLAYER_REGEN_PER_SEC or 0.0
+            if regenPerSec > 0 then
+                playerRegenAccumulator = (playerRegenAccumulator or 0.0) + (regenPerSec / SIM_TARGET_HZ)
+                while playerRegenAccumulator >= 1.0 and playerHealth < MAX_HEALTH do
+                    playerHealth = playerHealth + 1
+                    playerRegenAccumulator = playerRegenAccumulator - 1.0
+                end
+                if playerHealth >= MAX_HEALTH then
+                    playerHealth = MAX_HEALTH
+                    playerRegenAccumulator = 0.0
+                end
+            end
+        end
     elseif gameState == STATE_LOADING then
         loadingTimer = loadingTimer - 1
         if loadingTimer <= 0 then
@@ -6522,7 +8757,7 @@ local function runSimulationStep()
     end
 end
 
-local function consumeSimulationSteps(elapsedUs, simAccumulatorUs)
+function consumeSimulationSteps(elapsedUs, simAccumulatorUs)
     if gameState ~= STATE_PLAYING and gameState ~= STATE_LOADING and gameState ~= STATE_WIN then
         return 0.0, 0
     end
@@ -6991,12 +9226,10 @@ function AppMain()
                                 showHealthPercent = not showHealthPercent  -- Toggle health %
                             elseif optionsSelection == 3 then
                                 DEBUG_DISABLE_ENEMIES = not DEBUG_DISABLE_ENEMIES
-                                spriteOrderCache = {}
-                                spriteOrderCacheFrame = -999
+                                clearSpriteOrderCache()
                             elseif optionsSelection == 4 then
                                 DEBUG_DISABLE_PROPS = not DEBUG_DISABLE_PROPS
-                                spriteOrderCache = {}
-                                spriteOrderCacheFrame = -999
+                                clearSpriteOrderCache()
                             elseif optionsSelection == 5 then
                                 DEBUG_DISABLE_WALL_TEXTURE = not DEBUG_DISABLE_WALL_TEXTURE
                                 if DEBUG_DISABLE_WALL_TEXTURE then
@@ -7051,15 +9284,77 @@ function AppMain()
                         saveMenuMessage = ""
                         saveMenuMessageTimer = 0
                     end
+                elseif inStatsMenu then
+                    if vmupro.input.pressed(vmupro.input.UP) then
+                        statsMenuSelection = statsMenuSelection - 1
+                        if statsMenuSelection < 1 then statsMenuSelection = 5 end
+                    end
+                    if vmupro.input.pressed(vmupro.input.DOWN) then
+                        statsMenuSelection = statsMenuSelection + 1
+                        if statsMenuSelection > 5 then statsMenuSelection = 1 end
+                    end
+                    if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
+                        if statsMenuSelection >= 1 and statsMenuSelection <= 4 then
+                            local statKey = nil
+                            if statsMenuSelection == 1 then statKey = "vitality" end
+                            if statsMenuSelection == 2 then statKey = "strength" end
+                            if statsMenuSelection == 3 then statKey = "dexterity" end
+                            if statsMenuSelection == 4 then statKey = "intellect" end
+                            local okAllocate, errAllocate = allocatePlayerStat(statKey)
+                            if okAllocate then
+                                statsMenuMessage = "ALLOCATED " .. string.upper(statKey)
+                            else
+                                statsMenuMessage = errAllocate or "ALLOC FAILED"
+                            end
+                            statsMenuMessageTimer = math.floor((SIM_TARGET_HZ or 24) * 2)
+                        else
+                            inStatsMenu = false
+                        end
+                    end
+                    if vmupro.input.pressed(vmupro.input.POWER) or vmupro.input.pressed(vmupro.input.B) then
+                        inStatsMenu = false
+                        statsMenuMessage = ""
+                        statsMenuMessageTimer = 0
+                    end
+                elseif inMasteryMenu then
+                    if vmupro.input.pressed(vmupro.input.UP) then
+                        masteryMenuSelection = masteryMenuSelection - 1
+                        if masteryMenuSelection < 1 then masteryMenuSelection = 4 end
+                    end
+                    if vmupro.input.pressed(vmupro.input.DOWN) then
+                        masteryMenuSelection = masteryMenuSelection + 1
+                        if masteryMenuSelection > 4 then masteryMenuSelection = 1 end
+                    end
+                    if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
+                        if masteryMenuSelection >= 1 and masteryMenuSelection <= 3 then
+                            local weaponClass = WEAPON_CLASS_MELEE
+                            if masteryMenuSelection == 2 then weaponClass = WEAPON_CLASS_RANGED end
+                            if masteryMenuSelection == 3 then weaponClass = WEAPON_CLASS_MAGIC end
+                            local okAllocate, errAllocate = allocateWeaponMastery(weaponClass)
+                            if okAllocate then
+                                masteryMenuMessage = "ALLOCATED " .. (WEAPON_CLASS_LABELS[weaponClass] or "MASTERY")
+                            else
+                                masteryMenuMessage = errAllocate or "ALLOC FAILED"
+                            end
+                            masteryMenuMessageTimer = math.floor((SIM_TARGET_HZ or 24) * 2)
+                        else
+                            inMasteryMenu = false
+                        end
+                    end
+                    if vmupro.input.pressed(vmupro.input.POWER) or vmupro.input.pressed(vmupro.input.B) then
+                        inMasteryMenu = false
+                        masteryMenuMessage = ""
+                        masteryMenuMessageTimer = 0
+                    end
                 else
                     -- Main pause menu
                     if vmupro.input.pressed(vmupro.input.UP) then
                         menuSelection = menuSelection - 1
-                        if menuSelection < 1 then menuSelection = 6 end
+                        if menuSelection < 1 then menuSelection = 8 end
                     end
                     if vmupro.input.pressed(vmupro.input.DOWN) then
                         menuSelection = menuSelection + 1
-                        if menuSelection > 6 then menuSelection = 1 end
+                        if menuSelection > 8 then menuSelection = 1 end
                     end
                     if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
                         if menuSelection == 1 then
@@ -7070,21 +9365,31 @@ function AppMain()
                             saveMenuMessage = ""
                             saveMenuMessageTimer = 0
                         elseif menuSelection == 3 then
+                            inStatsMenu = true
+                            statsMenuSelection = 1
+                            statsMenuMessage = ""
+                            statsMenuMessageTimer = 0
+                        elseif menuSelection == 4 then
+                            inMasteryMenu = true
+                            masteryMenuSelection = 1
+                            masteryMenuMessage = ""
+                            masteryMenuMessageTimer = 0
+                        elseif menuSelection == 5 then
                             inOptionsMenu = true  -- Enter options
                             optionsSelection = 1
                             inGameDebugMenu = false
-                        elseif menuSelection == 4 then
+                        elseif menuSelection == 6 then
                             -- Reset position and health
                             px, py, pdir = 2.5, 2.5, 0
                             lastSafeWallX = px
                             lastSafeWallY = py
                             playerHealth = MAX_HEALTH
                             showMenu = false
-                        elseif menuSelection == 5 then
+                        elseif menuSelection == 7 then
                             -- Return to title menu
                             showMenu = false
                             enterTitle()
-                        elseif menuSelection == 6 then
+                        elseif menuSelection == 8 then
                             quitApp("game over quit")  -- Quit
                         end
                     end
@@ -7096,8 +9401,9 @@ function AppMain()
                 -- Normal gameplay controls
                 local controlSteps = simStepsThisFrame or 0
                 if controlSteps > 0 then
-                    local moveStep = PLAYER_MOVE_SPEED_PER_SEC / SIM_TARGET_HZ
-                    local strafeStep = PLAYER_STRAFE_SPEED_PER_SEC / SIM_TARGET_HZ
+                    local moveScale = PLAYER_MOVE_SPEED_SCALE or 1.0
+                    local moveStep = (PLAYER_MOVE_SPEED_PER_SEC * moveScale) / SIM_TARGET_HZ
+                    local strafeStep = (PLAYER_STRAFE_SPEED_PER_SEC * moveScale) / SIM_TARGET_HZ
                     local turnPerStep = PLAYER_TURN_STEPS_PER_SEC / SIM_TARGET_HZ
                     local heldLeft = vmupro.input.held(vmupro.input.LEFT)
                     local heldRight = vmupro.input.held(vmupro.input.RIGHT)
@@ -7145,46 +9451,106 @@ function AppMain()
                         local wasBlocking = isBlocking
 
                         if modeHeld then
-                            if simStep == 1 and pressedUp and isAttacking == 0 then
-                                local attackFrames = #swordAttack
-                                attackTotalFrames = 9
-                                if attackFrames == 0 then
-                                    attackTotalFrames = 10
+                            local classId = getCurrentClassId()
+                            local weaponClass = getEquippedWeaponClass()
+                            local dmgMult, spdMult = computeWeaponProficiencyMultipliers(classId, weaponClass)
+                            if not dmgMult or dmgMult < 1.0 then dmgMult = 1.0 end
+                            if not spdMult or spdMult < 0.01 then spdMult = 1.0 end
+
+                            if weaponClass == WEAPON_CLASS_RANGED then
+                                lastAttackWeaponClass = WEAPON_CLASS_RANGED
+                                if heldUp and isAttacking == 0 then
+                                    if not bowChargeState.active then
+                                        beginBowCharge(spdMult)
+                                    end
+                                    updateBowChargeTick()
+                                elseif bowChargeState.active and isAttacking == 0 then
+                                    releaseBowChargeShot(dmgMult, spdMult)
                                 end
+                            elseif simStep == 1 and pressedUp and isAttacking == 0 then
+                                if bowChargeState.active then
+                                    resetBowChargeState()
+                                end
+                                lastAttackWeaponClass = weaponClass
+                                local baseHitDamage = math.floor(((PLAYER_DAMAGE or 0) * dmgMult) + 0.5)
+                                if baseHitDamage < 1 then baseHitDamage = 1 end
+
+                                local attackFrames = #swordAttack
+                                if weaponClass == WEAPON_CLASS_MAGIC then
+                                    attackFrames = #staffCast
+                                end
+                                local baseAttackFrames = 9
+                                if attackFrames == 0 then
+                                    baseAttackFrames = 10
+                                end
+                                local attackScale = PLAYER_ATTACK_SPEED_SCALE or 1.0
+                                -- Attack speed multiplier means "faster", but our attackScale is "frames per attack".
+                                attackScale = attackScale / spdMult
+                                local scaledAttackFrames = math.floor((baseAttackFrames * attackScale) + 0.5)
+                                if scaledAttackFrames < (PLAYER_ATTACK_MIN_FRAMES or 5) then
+                                    scaledAttackFrames = (PLAYER_ATTACK_MIN_FRAMES or 5)
+                                end
+                                if scaledAttackFrames > (PLAYER_ATTACK_MAX_FRAMES or 18) then
+                                    scaledAttackFrames = (PLAYER_ATTACK_MAX_FRAMES or 18)
+                                end
+                                attackTotalFrames = scaledAttackFrames
                                 isAttacking = attackTotalFrames
 
-                                local hitSomething = false
-                                for i = 1, #sprites do
-                                    local s = sprites[i]
-                                    if s.t == 5 and s.alive then
-                                        local sdxHit = s.x - px
-                                        local sdyHit = s.y - py
-                                        local distSq = sdxHit * sdxHit + sdyHit * sdyHit
-                                        if distSq < attackRangeSq then
-                                            s.hp = s.hp - PLAYER_DAMAGE
-                                            if not hitSomething then
-                                                hitSomething = true
-                                                if soundEnabled and swordHitSample then
-                                                    vmupro.sound.sample.stop(swordHitSample)
-                                                    vmupro.sound.sample.play(swordHitSample)
-                                                    if enableBootLogs then safeLog("INFO", "Play sample: sword_swing_connect") end
+                                if weaponClass == WEAPON_CLASS_MELEE then
+                                    local hitSomething = false
+                                    for i = 1, #sprites do
+                                        local s = sprites[i]
+                                        if s.t == 5 and s.alive then
+                                            local sdxHit = s.x - px
+                                            local sdyHit = s.y - py
+                                            local distSq = sdxHit * sdxHit + sdyHit * sdyHit
+                                            if distSq < attackRangeSq then
+                                                local hitDamage = baseHitDamage
+                                                local critSalt = (i * 199) + (simTickCount or 0) + math.floor((s.x or 0) * 100) + math.floor((s.y or 0) * 100)
+                                                if deterministicPercentRoll(PLAYER_CRIT_PERCENT or 0, critSalt) then
+                                                    hitDamage = math.floor((hitDamage * (PLAYER_CRIT_MULT or 1.5)) + 0.5)
                                                 end
-                                            end
-                                            if s.hp <= 0 then
-                                                killSoldier(s)
+                                                s.hp = s.hp - hitDamage
+                                                recordDamageDealt(hitDamage)
+                                                if not hitSomething then
+                                                    hitSomething = true
+                                                    if soundEnabled and swordHitSample then
+                                                        vmupro.sound.sample.stop(swordHitSample)
+                                                        vmupro.sound.sample.play(swordHitSample)
+                                                        if enableBootLogs then safeLog("INFO", "Play sample: sword_swing_connect") end
+                                                    end
+                                                end
+                                                if s.hp <= 0 then
+                                                    killSoldier(s)
+                                                end
                                             end
                                         end
                                     end
+                                    if soundEnabled and (not hitSomething) and swordMissSample then
+                                        vmupro.sound.sample.stop(swordMissSample)
+                                        vmupro.sound.sample.play(swordMissSample)
+                                        if enableBootLogs then safeLog("INFO", "Play sample: sword_miss") end
+                                    end
+                                else
+                                    spawnPlayerProjectile(weaponClass, baseHitDamage, spdMult)
                                 end
-                                if soundEnabled and (not hitSomething) and swordMissSample then
-                                    vmupro.sound.sample.stop(swordMissSample)
-                                    vmupro.sound.sample.play(swordMissSample)
-                                    if enableBootLogs then safeLog("INFO", "Play sample: sword_miss") end
-                                end
+                            elseif bowChargeState.active then
+                                resetBowChargeState()
                             end
 
                             isBlocking = heldDown
                         else
+                            if bowChargeState.active and isAttacking == 0 then
+                                local classId = getCurrentClassId()
+                                local weaponClass = getEquippedWeaponClass()
+                                if weaponClass == WEAPON_CLASS_RANGED then
+                                    local dmgMult, spdMult = computeWeaponProficiencyMultipliers(classId, weaponClass)
+                                    releaseBowChargeShot(dmgMult, spdMult)
+                                else
+                                    resetBowChargeState()
+                                end
+                            end
+
                             isBlocking = false
 
                             if heldUp then
@@ -7219,14 +9585,25 @@ function AppMain()
                         end
 
                         if simStep == 1 and pressedPower then
+                            if bowChargeState.active then
+                                resetBowChargeState()
+                            end
                             showMenu = true
                             menuSelection = 1
                             inOptionsMenu = false
                             inGameDebugMenu = false
                             inSaveMenu = false
+                            inStatsMenu = false
+                            inMasteryMenu = false
                             saveMenuSelection = 1
                             saveMenuMessage = ""
                             saveMenuMessageTimer = 0
+                            statsMenuSelection = 1
+                            statsMenuMessage = ""
+                            statsMenuMessageTimer = 0
+                            masteryMenuSelection = 1
+                            masteryMenuMessage = ""
+                            masteryMenuMessageTimer = 0
                             break
                         end
                     end

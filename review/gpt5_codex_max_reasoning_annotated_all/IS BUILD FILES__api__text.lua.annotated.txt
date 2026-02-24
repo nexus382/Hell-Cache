@@ -1,0 +1,59 @@
+00001 [GPT-5-CODEX-MAX-REASONING] --- @file text.lua
+00002 [GPT-5-CODEX-MAX-REASONING] --- @brief VMU Pro LUA SDK - Text and Font Functions
+00003 [GPT-5-CODEX-MAX-REASONING] --- @author 8BitMods
+00004 [GPT-5-CODEX-MAX-REASONING] --- @version 1.0.0
+00005 [GPT-5-CODEX-MAX-REASONING] --- @date 2025-09-29
+00006 [GPT-5-CODEX-MAX-REASONING] --- @copyright Copyright (c) 2025 8BitMods. All rights reserved.
+00007 [GPT-5-CODEX-MAX-REASONING] ---
+00008 [GPT-5-CODEX-MAX-REASONING] --- Text rendering and font utilities for VMU Pro LUA applications.
+00009 [GPT-5-CODEX-MAX-REASONING] --- Functions are available under the vmupro.text namespace.
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING] -- Ensure vmupro namespace exists
+00012 [GPT-5-CODEX-MAX-REASONING] vmupro = vmupro or {}
+00013 [GPT-5-CODEX-MAX-REASONING] vmupro.text = vmupro.text or {}
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING] --- @brief Set the current font for text rendering
+00016 [GPT-5-CODEX-MAX-REASONING] --- @param font_id number Font ID from vmupro.text font constants
+00017 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.text.setFont(vmupro.text.FONT_SMALL) -- Set small font
+00018 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.text.setFont(vmupro.text.FONT_DEFAULT) -- Set default font
+00019 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00020 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00021 [GPT-5-CODEX-MAX-REASONING] function vmupro.text.setFont(font_id) end
+00022 [GPT-5-CODEX-MAX-REASONING] 
+00023 [GPT-5-CODEX-MAX-REASONING] --- @brief Calculate the pixel width of text with current font
+00024 [GPT-5-CODEX-MAX-REASONING] --- @param text string Text to measure
+00025 [GPT-5-CODEX-MAX-REASONING] --- @return number Width in pixels
+00026 [GPT-5-CODEX-MAX-REASONING] --- @usage local width = vmupro.text.calcLength("Hello World")
+00027 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00028 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00029 [GPT-5-CODEX-MAX-REASONING] function vmupro.text.calcLength(text) end
+00030 [GPT-5-CODEX-MAX-REASONING] 
+00031 [GPT-5-CODEX-MAX-REASONING] --- @brief Get information about the current font
+00032 [GPT-5-CODEX-MAX-REASONING] --- @return table Font information (implementation-specific)
+00033 [GPT-5-CODEX-MAX-REASONING] --- @usage local font_info = vmupro.text.getFontInfo()
+00034 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00035 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00036 [GPT-5-CODEX-MAX-REASONING] function vmupro.text.getFontInfo() end
+00037 [GPT-5-CODEX-MAX-REASONING] 
+00038 [GPT-5-CODEX-MAX-REASONING] -- Font ID constants (matching firmware LuaSdkBindings.cpp)
+00039 [GPT-5-CODEX-MAX-REASONING] vmupro.text.FONT_TINY_6x8 = 0           --- Smallest font (6×8px)
+00040 [GPT-5-CODEX-MAX-REASONING] vmupro.text.FONT_MONO_7x13 = 1          --- Tiny monospace (7×13px)
+00041 [GPT-5-CODEX-MAX-REASONING] 
+00042 [GPT-5-CODEX-MAX-REASONING] vmupro.text.FONT_QUANTICO_15x16 = 2     --- UI font medium (15×16px)
+00043 [GPT-5-CODEX-MAX-REASONING] vmupro.text.FONT_QUANTICO_18x20 = 3     --- UI font medium (18×20px)
+00044 [GPT-5-CODEX-MAX-REASONING] vmupro.text.FONT_QUANTICO_19x21 = 4     --- UI font medium (19×21px)
+00045 [GPT-5-CODEX-MAX-REASONING] vmupro.text.FONT_QUANTICO_25x29 = 5     --- UI font large (25×29px)
+00046 [GPT-5-CODEX-MAX-REASONING] vmupro.text.FONT_QUANTICO_29x33 = 6     --- UI font extra large (29×33px)
+00047 [GPT-5-CODEX-MAX-REASONING] vmupro.text.FONT_QUANTICO_32x37 = 7     --- UI font largest (32×37px)
+00048 [GPT-5-CODEX-MAX-REASONING] 
+00049 [GPT-5-CODEX-MAX-REASONING] vmupro.text.FONT_GABARITO_18x18 = 8     --- Gabarito medium (18×18px)
+00050 [GPT-5-CODEX-MAX-REASONING] vmupro.text.FONT_GABARITO_22x24 = 9     --- Gabarito large (22×24px)
+00051 [GPT-5-CODEX-MAX-REASONING] 
+00052 [GPT-5-CODEX-MAX-REASONING] vmupro.text.FONT_OPEN_SANS_15x18 = 10   --- Open Sans medium (15×18px)
+00053 [GPT-5-CODEX-MAX-REASONING] vmupro.text.FONT_OPEN_SANS_21x24 = 11   --- Open Sans large (21×24px)
+00054 [GPT-5-CODEX-MAX-REASONING] 
+00055 [GPT-5-CODEX-MAX-REASONING] -- Font convenience aliases
+00056 [GPT-5-CODEX-MAX-REASONING] vmupro.text.FONT_SMALL = 1              --- Small font alias (MONO_7x13)
+00057 [GPT-5-CODEX-MAX-REASONING] vmupro.text.FONT_MEDIUM = 10            --- Medium font alias (OPEN_SANS_15x18)
+00058 [GPT-5-CODEX-MAX-REASONING] vmupro.text.FONT_LARGE = 5              --- Large font alias (QUANTICO_25x29)
+00059 [GPT-5-CODEX-MAX-REASONING] vmupro.text.FONT_DEFAULT = 10           --- Default font alias (MEDIUM)

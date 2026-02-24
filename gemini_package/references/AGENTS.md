@@ -1,100 +1,142 @@
-<!-- Parent: ../../AGENTS.md -->
-<!-- Generated: 2026-02-04 | Updated: 2026-02-04 -->
+<!-- Parent: ../AGENTS.md -->
+<!-- Generated: 2026-02-23 -->
 
-# references
+# Reference Images - Sprite Generation Style Guides
 
-## Purpose
-Reference images used for AI-based sprite generation. These images provide the visual style guide for maintaining consistency across generated sprites.
+## Overview
 
-## For AI Agents
+This directory contains reference sprite images used as style guides for AI-assisted sprite generation with Google Gemini. These images establish the visual style, color palette, and character design that new sprites should match.
 
-### Working In This Directory
+## Image Inventory
 
-**Reference images serve as style guides** when generating new sprites with AI tools (Gemini, DALL-E, etc.).
+### Directional Sprites (Static Poses)
 
-**Typical Reference Images**:
-- `warrior_front.png` - Primary style reference for all warrior sprites
-- Shows armor style, color palette, proportions, and rendering quality
-- Used as input to AI generation prompts
+| File | Description | Purpose |
+|------|-------------|---------|
+| `warrior_front.png` | Warrior facing camera (front view) | Style reference for front-facing attack, hurt, and death animations |
+| `warrior_back.png` | Warrior facing away (back view) | Style reference for back-facing animations |
+| `warrior_left.png` | Warrior facing left (profile) | Style reference for left-facing animations |
+| `warrior_right.png` | Warrior facing right (profile) | Style reference for right-facing animations |
 
-### Using Reference Images
+### Walking Animation Frames
 
-**When generating new sprites**:
+| File | Description | Animation Phase |
+|------|-------------|-----------------|
+| `warrior_walk1.png` | Side-profile walking frame | First stride phase (swing phase, foot off ground) |
+| `warrior_walk2.png` | Side-profile walking frame | Second stride phase (push-off, forward leg planted) |
 
-1. **Select appropriate reference**:
-   - Use `warrior_front.png` for character consistency
-   - Reference shows: Red/crimson armor, medieval style, ~517px height
+## Character Design Specifications
 
-2. **Craft prompt with reference**:
-   ```
-   Create a pixel art sprite matching the reference image.
+### Visual Identity
 
-   CHARACTER DETAILS:
-   - Same style as reference image
-   - Red/crimson plate armor
-   - Medieval fantasy soldier
-   - Proportions: approximately 517 pixels tall
+**The Warrior:**
+- Medieval fantasy soldier in mixed plate and scale armor
+- Male character with brown hair
+- Muscular, slightly exaggerated proportions
+- Clean digital art with moderate stylization
 
-   POSE: [Describe desired pose]
-   DIRECTION: [Front/Back/Left/Right]
+### Armor Details
 
-   TECHNICAL REQUIREMENTS:
-   - PNG with transparent background
-   - Clean edges, no anti-aliasing
-   - Consistent lighting (top-left)
-   - Match reference style exactly
+| Component | Material | Color |
+|-----------|----------|-------|
+| Pauldrons (shoulders) | Metal plate | Silver-gray with gold trim |
+| Chest/Cuirass | Scale/leather | Deep red-brown with quilted texture |
+| Bracers (forearms) | Leather | Red-brown with darker trim |
+| Belt | Leather | Dark brown with silver buckle |
+| Tassets (thigh guards) | Segmented plate | Red-brown |
+| Greaves/Boots | Leather | Dark brown |
 
-   [Attach reference image]
-   ```
+### Weapon
 
-3. **Post-process output**:
-   - Use `../../tools/fix_sprites.py` to clean up
-   - Verify against reference for consistency
-   - Normalize to correct height if needed
+- Single-handed longsword
+- Straight silver-gray blade
+- Simple crossguard and brown hilt wrap
+- Held in right hand, blade angled downward at rest
 
-### Reference Image Standards
+### Color Palette
 
-**Quality Criteria**:
-- High visual clarity
-- Consistent art style
-- Proper proportions
-- Good contrast
-- Clean transparency
+| Color | Hex (approximate) | Usage |
+|-------|-------------------|-------|
+| Red-brown | #8B4513 | Primary armor (leather/scale) |
+| Silver-gray | #A0A0A0 | Metal armor plates, sword blade |
+| Gold/Yellow | #DAA520 | Armor trim, decorative accents |
+| Dark brown | #3D2314 | Belt, boots, weapon hilt |
+| Tan | #D2B48C | Skin tone |
 
-**What to Capture**:
-- Character design and armor style
-- Color palette (reds, grays, metallic tones)
-- Line quality and edge rendering
-- Shading style (top-left lighting)
-- Overall proportions
+## Art Style Guidelines
 
-### Common Patterns
+### Pixel Art Characteristics
 
-**Style Consistency Checklist**:
-- [ ] Armor color matches reference (red/crimson)
-- [ ] Proportions are similar (~517px height)
-- [ ] Lighting direction matches (top-left)
-- [ ] Line quality is consistent
-- [ ] Background is fully transparent
-- [ ] No anti-aliasing artifacts
+- Classic 16-bit/32-bit RPG aesthetic
+- Distinct, visible pixels with blocky appearance
+- Solid color blocks with minimal gradients
+- Sharp, well-defined edges and outlines
+- Limited color palette per sprite
+- Minimal anti-aliasing
 
-### Testing Requirements
+### Technical Requirements Met by References
 
-After generating sprites using references:
-- Side-by-side comparison with reference
-- Check color palette matches
-- Verify proportions are consistent
-- Test in-game alongside existing sprites
-- Ensure animation frames blend smoothly
+- [x] Transparent PNG background (white indicates alpha)
+- [x] No ground shadows
+- [x] Light source from upper-left
+- [x] Full body visible (feet to head)
+- [x] Clear silhouette for game readability
+- [x] Consistent proportions across all views
 
-## Dependencies
+## Usage with Gemini
 
-### Internal
-- `../../SPRITE_PIPELINE.md` - Sprite generation documentation
-- `../../sprites/` - Input and output directory
-- `../../tools/` - Post-processing tools
+### Uploading References
 
-### External
-- AI image generation tools (Gemini, DALL-E, etc.)
+When generating new sprites with Gemini:
 
-<!-- MANUAL: Reference usage notes can be added below -->
+1. Upload 2-3 reference images that best match the target pose/direction
+2. For attack animations: Use `warrior_front.png` or `warrior_back.png` + directional sprite
+3. For walking animations: Use both `warrior_walk1.png` and `warrior_walk2.png` as style guides
+4. Always specify the character design details from this document in your prompt
+
+### Example Prompt Pattern
+
+```
+Using the attached reference images as style guides, generate a [animation type]
+sprite of a medieval warrior with:
+- Deep red-brown scale armor with gold trim
+- Silver-gray metal pauldrons and bracers
+- Single-handed longsword in right hand
+- 16-bit pixel art style with visible pixels
+- Transparent background
+- [specific pose/action description]
+```
+
+## Animation Reference
+
+### Walk Cycle (2-Frame)
+
+The walking animation uses a 2-frame cycle:
+
+```
+Frame 1 (walk1): Left leg forward, right leg lifted (swing phase)
+Frame 2 (walk2): Right leg pushes back, left leg planted (push-off phase)
+```
+
+For 3-frame walking animations (W01-W06), an intermediate frame should be generated between these two poses.
+
+### Directional Consistency
+
+When generating directional sprites:
+- **Front**: Facing camera, three-quarter view acceptable
+- **Back**: Facing away, same posture as front
+- **Left**: Full profile, facing screen-left
+- **Right**: Full profile, facing screen-right (mirror of left)
+
+## Related Files
+
+- Master prompts: `../GEMINI_MASTER_INSTRUCTIONS.md`
+- Quick start guide: `../QUICK_START.md`
+- Parent documentation: `../AGENTS.md`
+
+## Notes for AI Generation
+
+1. **Consistency is critical**: All generated sprites must match the armor style, colors, and proportions shown in these references
+2. **Pose variations**: The static directional sprites show a ready/idle pose; generated animations should start from this baseline
+3. **Weapon position**: The sword rests against the right thigh in idle poses but should move naturally during attack animations
+4. **Armor asymmetry**: The pauldrons and armor details should remain consistent across all frames

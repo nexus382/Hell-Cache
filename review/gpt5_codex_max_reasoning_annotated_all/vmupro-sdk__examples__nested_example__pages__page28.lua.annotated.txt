@@ -1,0 +1,186 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page28.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 28: Collision Detection API (setCollisionRect, getCollisionRect, clearCollisionRect, getCollideBounds)
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page28 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- Sprite handles
+00010 [GPT-5-CODEX-MAX-REASONING] local player_handle = nil
+00011 [GPT-5-CODEX-MAX-REASONING] local enemy_handle = nil
+00012 [GPT-5-CODEX-MAX-REASONING] local sprites_loaded = false
+00013 [GPT-5-CODEX-MAX-REASONING] local load_error = false
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING] -- Sprite positions
+00016 [GPT-5-CODEX-MAX-REASONING] local player_x = 50
+00017 [GPT-5-CODEX-MAX-REASONING] local player_y = 100
+00018 [GPT-5-CODEX-MAX-REASONING] local enemy_x = 150
+00019 [GPT-5-CODEX-MAX-REASONING] local enemy_y = 100
+00020 [GPT-5-CODEX-MAX-REASONING] 
+00021 [GPT-5-CODEX-MAX-REASONING] -- Movement speed and direction
+00022 [GPT-5-CODEX-MAX-REASONING] local move_speed = 1
+00023 [GPT-5-CODEX-MAX-REASONING] local move_direction = 1  -- 1 = right, -1 = left
+00024 [GPT-5-CODEX-MAX-REASONING] 
+00025 [GPT-5-CODEX-MAX-REASONING] -- Collision state
+00026 [GPT-5-CODEX-MAX-REASONING] local is_colliding = false
+00027 [GPT-5-CODEX-MAX-REASONING] 
+00028 [GPT-5-CODEX-MAX-REASONING] --- @brief Load sprites and set up collision rects
+00029 [GPT-5-CODEX-MAX-REASONING] local function loadSprites()
+00030 [GPT-5-CODEX-MAX-REASONING]     if sprites_loaded or load_error then
+00031 [GPT-5-CODEX-MAX-REASONING]         return
+00032 [GPT-5-CODEX-MAX-REASONING]     end
+00033 [GPT-5-CODEX-MAX-REASONING] 
+00034 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites (using single-frame from spritesheet)
+00035 [GPT-5-CODEX-MAX-REASONING]     player_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00036 [GPT-5-CODEX-MAX-REASONING]     enemy_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00037 [GPT-5-CODEX-MAX-REASONING] 
+00038 [GPT-5-CODEX-MAX-REASONING]     if not player_handle or not enemy_handle then
+00039 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page28", "Failed to load sprites")
+00040 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00041 [GPT-5-CODEX-MAX-REASONING]         return
+00042 [GPT-5-CODEX-MAX-REASONING]     end
+00043 [GPT-5-CODEX-MAX-REASONING] 
+00044 [GPT-5-CODEX-MAX-REASONING]     -- Set current frame to first frame for both
+00045 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(player_handle, 0)
+00046 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(enemy_handle, 0)
+00047 [GPT-5-CODEX-MAX-REASONING] 
+00048 [GPT-5-CODEX-MAX-REASONING]     -- Set collision rects (smaller than 32x32 sprite for tighter collision)
+00049 [GPT-5-CODEX-MAX-REASONING]     -- Player: 20x28 collision rect with offset (6, 2)
+00050 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollisionRect(player_handle, 6, 2, 20, 28)
+00051 [GPT-5-CODEX-MAX-REASONING] 
+00052 [GPT-5-CODEX-MAX-REASONING]     -- Enemy: 20x28 collision rect with offset (6, 2)
+00053 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollisionRect(enemy_handle, 6, 2, 20, 28)
+00054 [GPT-5-CODEX-MAX-REASONING] 
+00055 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = true
+00056 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page28", "Sprites loaded with collision rects")
+00057 [GPT-5-CODEX-MAX-REASONING] end
+00058 [GPT-5-CODEX-MAX-REASONING] 
+00059 [GPT-5-CODEX-MAX-REASONING] --- @brief Check collision between two sprites using AABB
+00060 [GPT-5-CODEX-MAX-REASONING] local function checkCollision(sprite1, sprite2)
+00061 [GPT-5-CODEX-MAX-REASONING]     local bx1, by1, bw1, bh1 = vmupro.sprite.getCollideBounds(sprite1)
+00062 [GPT-5-CODEX-MAX-REASONING]     local bx2, by2, bw2, bh2 = vmupro.sprite.getCollideBounds(sprite2)
+00063 [GPT-5-CODEX-MAX-REASONING] 
+00064 [GPT-5-CODEX-MAX-REASONING]     if not bx1 or not bx2 then
+00065 [GPT-5-CODEX-MAX-REASONING]         return false
+00066 [GPT-5-CODEX-MAX-REASONING]     end
+00067 [GPT-5-CODEX-MAX-REASONING] 
+00068 [GPT-5-CODEX-MAX-REASONING]     -- AABB collision detection
+00069 [GPT-5-CODEX-MAX-REASONING]     return bx1 < bx2 + bw2 and
+00070 [GPT-5-CODEX-MAX-REASONING]            bx1 + bw1 > bx2 and
+00071 [GPT-5-CODEX-MAX-REASONING]            by1 < by2 + bh2 and
+00072 [GPT-5-CODEX-MAX-REASONING]            by1 + bh1 > by2
+00073 [GPT-5-CODEX-MAX-REASONING] end
+00074 [GPT-5-CODEX-MAX-REASONING] 
+00075 [GPT-5-CODEX-MAX-REASONING] --- @brief Update logic - automatic movement and collision detection
+00076 [GPT-5-CODEX-MAX-REASONING] function Page28.update()
+00077 [GPT-5-CODEX-MAX-REASONING]     if not sprites_loaded then
+00078 [GPT-5-CODEX-MAX-REASONING]         return
+00079 [GPT-5-CODEX-MAX-REASONING]     end
+00080 [GPT-5-CODEX-MAX-REASONING] 
+00081 [GPT-5-CODEX-MAX-REASONING]     -- Auto-move player horizontally back and forth
+00082 [GPT-5-CODEX-MAX-REASONING]     player_x = player_x + (move_speed * move_direction)
+00083 [GPT-5-CODEX-MAX-REASONING] 
+00084 [GPT-5-CODEX-MAX-REASONING]     -- Reverse direction at screen bounds
+00085 [GPT-5-CODEX-MAX-REASONING]     if player_x <= 0 then
+00086 [GPT-5-CODEX-MAX-REASONING]         player_x = 0
+00087 [GPT-5-CODEX-MAX-REASONING]         move_direction = 1
+00088 [GPT-5-CODEX-MAX-REASONING]     elseif player_x >= 240 - 32 then
+00089 [GPT-5-CODEX-MAX-REASONING]         player_x = 240 - 32
+00090 [GPT-5-CODEX-MAX-REASONING]         move_direction = -1
+00091 [GPT-5-CODEX-MAX-REASONING]     end
+00092 [GPT-5-CODEX-MAX-REASONING] 
+00093 [GPT-5-CODEX-MAX-REASONING]     -- Update sprite positions
+00094 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(player_handle, player_x, player_y)
+00095 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(enemy_handle, enemy_x, enemy_y)
+00096 [GPT-5-CODEX-MAX-REASONING] 
+00097 [GPT-5-CODEX-MAX-REASONING]     -- Check collision
+00098 [GPT-5-CODEX-MAX-REASONING]     is_colliding = checkCollision(player_handle, enemy_handle)
+00099 [GPT-5-CODEX-MAX-REASONING] end
+00100 [GPT-5-CODEX-MAX-REASONING] 
+00101 [GPT-5-CODEX-MAX-REASONING] --- @brief Cleanup when leaving page
+00102 [GPT-5-CODEX-MAX-REASONING] function Page28.exit()
+00103 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00104 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00105 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00106 [GPT-5-CODEX-MAX-REASONING]     end
+00107 [GPT-5-CODEX-MAX-REASONING] 
+00108 [GPT-5-CODEX-MAX-REASONING]     if player_handle then
+00109 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearCollisionRect(player_handle)
+00110 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(player_handle)
+00111 [GPT-5-CODEX-MAX-REASONING]         player_handle = nil
+00112 [GPT-5-CODEX-MAX-REASONING]     end
+00113 [GPT-5-CODEX-MAX-REASONING]     if enemy_handle then
+00114 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearCollisionRect(enemy_handle)
+00115 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(enemy_handle)
+00116 [GPT-5-CODEX-MAX-REASONING]         enemy_handle = nil
+00117 [GPT-5-CODEX-MAX-REASONING]     end
+00118 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = false
+00119 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page28", "Collision rects cleared, sprites freed")
+00120 [GPT-5-CODEX-MAX-REASONING] end
+00121 [GPT-5-CODEX-MAX-REASONING] 
+00122 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 28: Collision Detection Demo
+00123 [GPT-5-CODEX-MAX-REASONING] function Page28.render(drawPageCounter)
+00124 [GPT-5-CODEX-MAX-REASONING]     -- Start double buffer on first render
+00125 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00126 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00127 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00128 [GPT-5-CODEX-MAX-REASONING]     end
+00129 [GPT-5-CODEX-MAX-REASONING] 
+00130 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00131 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00132 [GPT-5-CODEX-MAX-REASONING] 
+00133 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00134 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00135 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Collision", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00136 [GPT-5-CODEX-MAX-REASONING] 
+00137 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00138 [GPT-5-CODEX-MAX-REASONING] 
+00139 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites on first render
+00140 [GPT-5-CODEX-MAX-REASONING]     loadSprites()
+00141 [GPT-5-CODEX-MAX-REASONING] 
+00142 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00143 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR: Failed to load", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00144 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("sprites. Check assets.", 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00145 [GPT-5-CODEX-MAX-REASONING]     elseif not sprites_loaded then
+00146 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Loading sprites...", 10, 60, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00147 [GPT-5-CODEX-MAX-REASONING]     elseif player_handle and enemy_handle then
+00148 [GPT-5-CODEX-MAX-REASONING]         -- Draw sprites (player frame 0, enemy frame 0)
+00149 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawFrame(player_handle, 1, player_x, player_y, vmupro.sprite.kImageUnflipped)
+00150 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawFrame(enemy_handle, 1, enemy_x, enemy_y, vmupro.sprite.kImageUnflipped)
+00151 [GPT-5-CODEX-MAX-REASONING] 
+00152 [GPT-5-CODEX-MAX-REASONING]         -- Get collision bounds for visualization
+00153 [GPT-5-CODEX-MAX-REASONING]         local pbx, pby, pbw, pbh = vmupro.sprite.getCollideBounds(player_handle)
+00154 [GPT-5-CODEX-MAX-REASONING]         local ebx, eby, ebw, ebh = vmupro.sprite.getCollideBounds(enemy_handle)
+00155 [GPT-5-CODEX-MAX-REASONING] 
+00156 [GPT-5-CODEX-MAX-REASONING]         -- Draw collision rectangles
+00157 [GPT-5-CODEX-MAX-REASONING]         if pbx then
+00158 [GPT-5-CODEX-MAX-REASONING]             local rect_color = is_colliding and vmupro.graphics.RED or vmupro.graphics.GREEN
+00159 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawRect(pbx, pby, pbx + pbw - 1, pby + pbh - 1, rect_color)
+00160 [GPT-5-CODEX-MAX-REASONING]         end
+00161 [GPT-5-CODEX-MAX-REASONING]         if ebx then
+00162 [GPT-5-CODEX-MAX-REASONING]             local rect_color = is_colliding and vmupro.graphics.RED or vmupro.graphics.BLUE
+00163 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawRect(ebx, eby, ebx + ebw - 1, eby + ebh - 1, rect_color)
+00164 [GPT-5-CODEX-MAX-REASONING]         end
+00165 [GPT-5-CODEX-MAX-REASONING] 
+00166 [GPT-5-CODEX-MAX-REASONING]         -- Display collision status
+00167 [GPT-5-CODEX-MAX-REASONING]         if is_colliding then
+00168 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("COLLISION!", 10, 180, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00169 [GPT-5-CODEX-MAX-REASONING]         else
+00170 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("No collision", 10, 180, vmupro.graphics.GREEN, vmupro.graphics.BLACK)
+00171 [GPT-5-CODEX-MAX-REASONING]         end
+00172 [GPT-5-CODEX-MAX-REASONING] 
+00173 [GPT-5-CODEX-MAX-REASONING]         -- Display collision info
+00174 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Player rect: 20x28", 10, 195, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00175 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Enemy rect: 20x28", 10, 210, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00176 [GPT-5-CODEX-MAX-REASONING]     end
+00177 [GPT-5-CODEX-MAX-REASONING] 
+00178 [GPT-5-CODEX-MAX-REASONING]     -- Description at top
+00179 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Auto-moving sprite demo", 10, 40, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00180 [GPT-5-CODEX-MAX-REASONING] 
+00181 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00182 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00183 [GPT-5-CODEX-MAX-REASONING] 
+00184 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00185 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00186 [GPT-5-CODEX-MAX-REASONING] end

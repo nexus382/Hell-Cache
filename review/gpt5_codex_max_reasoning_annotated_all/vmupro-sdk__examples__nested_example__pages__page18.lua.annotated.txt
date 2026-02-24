@@ -1,0 +1,225 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page18.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 18: Color Add (Shield Glow)
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page18 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- Sprite handles
+00010 [GPT-5-CODEX-MAX-REASONING] local spritesheet_handle = nil
+00011 [GPT-5-CODEX-MAX-REASONING] local sprites_loaded = false
+00012 [GPT-5-CODEX-MAX-REASONING] local load_error = false
+00013 [GPT-5-CODEX-MAX-REASONING] 
+00014 [GPT-5-CODEX-MAX-REASONING] -- Animation state
+00015 [GPT-5-CODEX-MAX-REASONING] local current_frame = 1
+00016 [GPT-5-CODEX-MAX-REASONING] local last_frame_time = 0
+00017 [GPT-5-CODEX-MAX-REASONING] local FRAME_DURATION = 100000  -- 100ms per frame
+00018 [GPT-5-CODEX-MAX-REASONING] 
+00019 [GPT-5-CODEX-MAX-REASONING] -- Character position (center of screen)
+00020 [GPT-5-CODEX-MAX-REASONING] local char_x = 104
+00021 [GPT-5-CODEX-MAX-REASONING] local char_y = 100
+00022 [GPT-5-CODEX-MAX-REASONING] 
+00023 [GPT-5-CODEX-MAX-REASONING] -- Shield state
+00024 [GPT-5-CODEX-MAX-REASONING] local shield_active = false
+00025 [GPT-5-CODEX-MAX-REASONING] local shield_start_time = 0
+00026 [GPT-5-CODEX-MAX-REASONING] local SHIELD_DURATION = 3000000  -- 3 seconds of shield
+00027 [GPT-5-CODEX-MAX-REASONING] local shield_pulse_phase = 0
+00028 [GPT-5-CODEX-MAX-REASONING] 
+00029 [GPT-5-CODEX-MAX-REASONING] -- Projectile state (attacks the character)
+00030 [GPT-5-CODEX-MAX-REASONING] local projectile_x = 250
+00031 [GPT-5-CODEX-MAX-REASONING] local projectile_y = 116
+00032 [GPT-5-CODEX-MAX-REASONING] local projectile_radius = 5
+00033 [GPT-5-CODEX-MAX-REASONING] local projectile_speed = 2
+00034 [GPT-5-CODEX-MAX-REASONING] local projectile_active = true
+00035 [GPT-5-CODEX-MAX-REASONING] 
+00036 [GPT-5-CODEX-MAX-REASONING] -- Cooldown between shield activations
+00037 [GPT-5-CODEX-MAX-REASONING] local last_shield_end_time = 0
+00038 [GPT-5-CODEX-MAX-REASONING] local SHIELD_COOLDOWN = 1500000  -- 1.5 seconds cooldown
+00039 [GPT-5-CODEX-MAX-REASONING] 
+00040 [GPT-5-CODEX-MAX-REASONING] --- @brief Load spritesheet
+00041 [GPT-5-CODEX-MAX-REASONING] local function loadSprites()
+00042 [GPT-5-CODEX-MAX-REASONING]     if sprites_loaded or load_error then
+00043 [GPT-5-CODEX-MAX-REASONING]         return
+00044 [GPT-5-CODEX-MAX-REASONING]     end
+00045 [GPT-5-CODEX-MAX-REASONING] 
+00046 [GPT-5-CODEX-MAX-REASONING]     spritesheet_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00047 [GPT-5-CODEX-MAX-REASONING]     if not spritesheet_handle then
+00048 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page18", "Failed to load spritesheet")
+00049 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00050 [GPT-5-CODEX-MAX-REASONING]         return
+00051 [GPT-5-CODEX-MAX-REASONING]     end
+00052 [GPT-5-CODEX-MAX-REASONING] 
+00053 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = true
+00054 [GPT-5-CODEX-MAX-REASONING]     local current_time = vmupro.system.getTimeUs()
+00055 [GPT-5-CODEX-MAX-REASONING]     last_frame_time = current_time
+00056 [GPT-5-CODEX-MAX-REASONING]     last_shield_end_time = current_time - SHIELD_COOLDOWN  -- Allow immediate activation
+00057 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page18", "Sprites loaded for shield test")
+00058 [GPT-5-CODEX-MAX-REASONING] end
+00059 [GPT-5-CODEX-MAX-REASONING] 
+00060 [GPT-5-CODEX-MAX-REASONING] --- @brief Reset projectile to start position
+00061 [GPT-5-CODEX-MAX-REASONING] local function resetProjectile()
+00062 [GPT-5-CODEX-MAX-REASONING]     projectile_x = 250
+00063 [GPT-5-CODEX-MAX-REASONING]     projectile_active = true
+00064 [GPT-5-CODEX-MAX-REASONING] end
+00065 [GPT-5-CODEX-MAX-REASONING] 
+00066 [GPT-5-CODEX-MAX-REASONING] --- @brief Update logic
+00067 [GPT-5-CODEX-MAX-REASONING] function Page18.update()
+00068 [GPT-5-CODEX-MAX-REASONING]     -- No update needed - handled in render
+00069 [GPT-5-CODEX-MAX-REASONING] end
+00070 [GPT-5-CODEX-MAX-REASONING] 
+00071 [GPT-5-CODEX-MAX-REASONING] --- @brief Cleanup when leaving page
+00072 [GPT-5-CODEX-MAX-REASONING] function Page18.exit()
+00073 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00074 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00075 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00076 [GPT-5-CODEX-MAX-REASONING]     end
+00077 [GPT-5-CODEX-MAX-REASONING] 
+00078 [GPT-5-CODEX-MAX-REASONING]     if spritesheet_handle then
+00079 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(spritesheet_handle)
+00080 [GPT-5-CODEX-MAX-REASONING]         spritesheet_handle = nil
+00081 [GPT-5-CODEX-MAX-REASONING]     end
+00082 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = false
+00083 [GPT-5-CODEX-MAX-REASONING]     current_frame = 1
+00084 [GPT-5-CODEX-MAX-REASONING]     shield_active = false
+00085 [GPT-5-CODEX-MAX-REASONING]     resetProjectile()
+00086 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page18", "Sprites freed")
+00087 [GPT-5-CODEX-MAX-REASONING] end
+00088 [GPT-5-CODEX-MAX-REASONING] 
+00089 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 18: Shield Glow Demo
+00090 [GPT-5-CODEX-MAX-REASONING] function Page18.render(drawPageCounter)
+00091 [GPT-5-CODEX-MAX-REASONING]     -- Start double buffer on first render
+00092 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00093 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00094 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00095 [GPT-5-CODEX-MAX-REASONING]     end
+00096 [GPT-5-CODEX-MAX-REASONING] 
+00097 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00098 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00099 [GPT-5-CODEX-MAX-REASONING] 
+00100 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00101 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00102 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Shield Glow", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00103 [GPT-5-CODEX-MAX-REASONING] 
+00104 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00105 [GPT-5-CODEX-MAX-REASONING] 
+00106 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites on first render
+00107 [GPT-5-CODEX-MAX-REASONING]     loadSprites()
+00108 [GPT-5-CODEX-MAX-REASONING] 
+00109 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00110 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR: Failed to load", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00111 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("sprites. Check assets.", 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00112 [GPT-5-CODEX-MAX-REASONING]     elseif not sprites_loaded then
+00113 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Loading sprites...", 10, 60, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00114 [GPT-5-CODEX-MAX-REASONING]     elseif spritesheet_handle then
+00115 [GPT-5-CODEX-MAX-REASONING]         local current_time = vmupro.system.getTimeUs()
+00116 [GPT-5-CODEX-MAX-REASONING] 
+00117 [GPT-5-CODEX-MAX-REASONING]         -- Update animation frame
+00118 [GPT-5-CODEX-MAX-REASONING]         if (current_time - last_frame_time) >= FRAME_DURATION then
+00119 [GPT-5-CODEX-MAX-REASONING]             current_frame = current_frame + 1
+00120 [GPT-5-CODEX-MAX-REASONING]             if current_frame > spritesheet_handle.frameCount then
+00121 [GPT-5-CODEX-MAX-REASONING]                 current_frame = 1
+00122 [GPT-5-CODEX-MAX-REASONING]             end
+00123 [GPT-5-CODEX-MAX-REASONING]             last_frame_time = current_time
+00124 [GPT-5-CODEX-MAX-REASONING]         end
+00125 [GPT-5-CODEX-MAX-REASONING] 
+00126 [GPT-5-CODEX-MAX-REASONING]         -- Check for shield activation (A button)
+00127 [GPT-5-CODEX-MAX-REASONING]         if vmupro.input.pressed(vmupro.input.A) then
+00128 [GPT-5-CODEX-MAX-REASONING]             if not shield_active and (current_time - last_shield_end_time) >= SHIELD_COOLDOWN then
+00129 [GPT-5-CODEX-MAX-REASONING]                 shield_active = true
+00130 [GPT-5-CODEX-MAX-REASONING]                 shield_start_time = current_time
+00131 [GPT-5-CODEX-MAX-REASONING]                 shield_pulse_phase = 0
+00132 [GPT-5-CODEX-MAX-REASONING]                 vmupro.system.log(vmupro.system.LOG_INFO, "Page18", "Shield activated!")
+00133 [GPT-5-CODEX-MAX-REASONING]             end
+00134 [GPT-5-CODEX-MAX-REASONING]         end
+00135 [GPT-5-CODEX-MAX-REASONING] 
+00136 [GPT-5-CODEX-MAX-REASONING]         -- Update shield state
+00137 [GPT-5-CODEX-MAX-REASONING]         if shield_active then
+00138 [GPT-5-CODEX-MAX-REASONING]             local shield_elapsed = current_time - shield_start_time
+00139 [GPT-5-CODEX-MAX-REASONING]             if shield_elapsed >= SHIELD_DURATION then
+00140 [GPT-5-CODEX-MAX-REASONING]                 shield_active = false
+00141 [GPT-5-CODEX-MAX-REASONING]                 last_shield_end_time = current_time
+00142 [GPT-5-CODEX-MAX-REASONING]                 vmupro.system.log(vmupro.system.LOG_INFO, "Page18", "Shield expired")
+00143 [GPT-5-CODEX-MAX-REASONING]             else
+00144 [GPT-5-CODEX-MAX-REASONING]                 -- Update pulse phase for pulsating glow effect
+00145 [GPT-5-CODEX-MAX-REASONING]                 shield_pulse_phase = (shield_elapsed / 200000) % (2 * 3.14159)  -- Full cycle every 200ms
+00146 [GPT-5-CODEX-MAX-REASONING]             end
+00147 [GPT-5-CODEX-MAX-REASONING]         end
+00148 [GPT-5-CODEX-MAX-REASONING] 
+00149 [GPT-5-CODEX-MAX-REASONING]         -- Update projectile
+00150 [GPT-5-CODEX-MAX-REASONING]         if projectile_active then
+00151 [GPT-5-CODEX-MAX-REASONING]             projectile_x = projectile_x - projectile_speed
+00152 [GPT-5-CODEX-MAX-REASONING] 
+00153 [GPT-5-CODEX-MAX-REASONING]             -- Check collision with character
+00154 [GPT-5-CODEX-MAX-REASONING]             local char_center_x = char_x + (spritesheet_handle.frameWidth / 2)
+00155 [GPT-5-CODEX-MAX-REASONING]             local char_center_y = char_y + (spritesheet_handle.frameHeight / 2)
+00156 [GPT-5-CODEX-MAX-REASONING]             local dx = projectile_x - char_center_x
+00157 [GPT-5-CODEX-MAX-REASONING]             local dy = projectile_y - char_center_y
+00158 [GPT-5-CODEX-MAX-REASONING]             local distance = math.sqrt(dx * dx + dy * dy)
+00159 [GPT-5-CODEX-MAX-REASONING] 
+00160 [GPT-5-CODEX-MAX-REASONING]             if distance < (projectile_radius + 16) then
+00161 [GPT-5-CODEX-MAX-REASONING]                 if shield_active then
+00162 [GPT-5-CODEX-MAX-REASONING]                     -- Shield blocks the projectile
+00163 [GPT-5-CODEX-MAX-REASONING]                     vmupro.system.log(vmupro.system.LOG_INFO, "Page18", "Projectile blocked by shield!")
+00164 [GPT-5-CODEX-MAX-REASONING]                 else
+00165 [GPT-5-CODEX-MAX-REASONING]                     vmupro.system.log(vmupro.system.LOG_INFO, "Page18", "Hit! (no shield)")
+00166 [GPT-5-CODEX-MAX-REASONING]                 end
+00167 [GPT-5-CODEX-MAX-REASONING]                 resetProjectile()
+00168 [GPT-5-CODEX-MAX-REASONING]             elseif projectile_x < -10 then
+00169 [GPT-5-CODEX-MAX-REASONING]                 resetProjectile()
+00170 [GPT-5-CODEX-MAX-REASONING]             end
+00171 [GPT-5-CODEX-MAX-REASONING]         end
+00172 [GPT-5-CODEX-MAX-REASONING] 
+00173 [GPT-5-CODEX-MAX-REASONING]         -- Draw projectile
+00174 [GPT-5-CODEX-MAX-REASONING]         if projectile_active then
+00175 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawCircleFilled(math.floor(projectile_x), projectile_y, projectile_radius, vmupro.graphics.RED)
+00176 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawCircle(math.floor(projectile_x), projectile_y, projectile_radius, vmupro.graphics.ORANGE)
+00177 [GPT-5-CODEX-MAX-REASONING]         end
+00178 [GPT-5-CODEX-MAX-REASONING] 
+00179 [GPT-5-CODEX-MAX-REASONING]         -- Draw character with or without shield glow
+00180 [GPT-5-CODEX-MAX-REASONING]         if shield_active then
+00181 [GPT-5-CODEX-MAX-REASONING]             -- Calculate pulsating glow intensity
+00182 [GPT-5-CODEX-MAX-REASONING]             local pulse = math.sin(shield_pulse_phase)
+00183 [GPT-5-CODEX-MAX-REASONING]             local base_glow = 0x40  -- Base light blue glow
+00184 [GPT-5-CODEX-MAX-REASONING]             local pulse_amount = math.floor(0x20 * ((pulse + 1) / 2))  -- 0 to 0x20 variation
+00185 [GPT-5-CODEX-MAX-REASONING]             local glow_intensity = base_glow + pulse_amount
+00186 [GPT-5-CODEX-MAX-REASONING] 
+00187 [GPT-5-CODEX-MAX-REASONING]             -- Light blue glow: more blue, some green, less red
+00188 [GPT-5-CODEX-MAX-REASONING]             local add_color = (0x10 * 65536) + (glow_intensity * 256) + (glow_intensity + 0x20)
+00189 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.drawFrameColorAdd(spritesheet_handle, current_frame, char_x, char_y, add_color, vmupro.sprite.kImageUnflipped)
+00190 [GPT-5-CODEX-MAX-REASONING] 
+00191 [GPT-5-CODEX-MAX-REASONING]             -- Draw shield circle around character
+00192 [GPT-5-CODEX-MAX-REASONING]             local shield_radius = 24 + math.floor(pulse * 2)
+00193 [GPT-5-CODEX-MAX-REASONING]             local shield_center_x = char_x + (spritesheet_handle.frameWidth / 2)
+00194 [GPT-5-CODEX-MAX-REASONING]             local shield_center_y = char_y + (spritesheet_handle.frameHeight / 2)
+00195 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawCircle(math.floor(shield_center_x), math.floor(shield_center_y), shield_radius, vmupro.graphics.BLUE)
+00196 [GPT-5-CODEX-MAX-REASONING]         else
+00197 [GPT-5-CODEX-MAX-REASONING]             -- Normal rendering
+00198 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.drawFrame(spritesheet_handle, current_frame, char_x, char_y, vmupro.sprite.kImageUnflipped)
+00199 [GPT-5-CODEX-MAX-REASONING]         end
+00200 [GPT-5-CODEX-MAX-REASONING] 
+00201 [GPT-5-CODEX-MAX-REASONING]         -- Status info
+00202 [GPT-5-CODEX-MAX-REASONING]         if shield_active then
+00203 [GPT-5-CODEX-MAX-REASONING]             local remaining = SHIELD_DURATION - (current_time - shield_start_time)
+00204 [GPT-5-CODEX-MAX-REASONING]             local remaining_sec = remaining / 1000000
+00205 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("SHIELD ACTIVE", 80, 180, vmupro.graphics.BLUE, vmupro.graphics.BLACK)
+00206 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText(string.format("Time: %.1fs", remaining_sec), 10, 195, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00207 [GPT-5-CODEX-MAX-REASONING]         else
+00208 [GPT-5-CODEX-MAX-REASONING]             local cooldown_remaining = SHIELD_COOLDOWN - (current_time - last_shield_end_time)
+00209 [GPT-5-CODEX-MAX-REASONING]             if cooldown_remaining > 0 then
+00210 [GPT-5-CODEX-MAX-REASONING]                 local cooldown_sec = cooldown_remaining / 1000000
+00211 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawText(string.format("Cooldown: %.1fs", cooldown_sec), 10, 195, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00212 [GPT-5-CODEX-MAX-REASONING]             else
+00213 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawText("Press A for shield", 10, 195, vmupro.graphics.GREEN, vmupro.graphics.BLACK)
+00214 [GPT-5-CODEX-MAX-REASONING]             end
+00215 [GPT-5-CODEX-MAX-REASONING]         end
+00216 [GPT-5-CODEX-MAX-REASONING] 
+00217 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(string.format("Frame: %d/%d", current_frame, spritesheet_handle.frameCount), 10, 210, vmupro.graphics.BLUE, vmupro.graphics.BLACK)
+00218 [GPT-5-CODEX-MAX-REASONING]     end
+00219 [GPT-5-CODEX-MAX-REASONING] 
+00220 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00221 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00222 [GPT-5-CODEX-MAX-REASONING] 
+00223 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00224 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00225 [GPT-5-CODEX-MAX-REASONING] end

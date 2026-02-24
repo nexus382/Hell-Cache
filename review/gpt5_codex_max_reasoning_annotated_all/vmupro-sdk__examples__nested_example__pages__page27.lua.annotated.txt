@@ -1,0 +1,179 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page27.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 27: Animation Control API (playAnimation, updateAnimations, isAnimating)
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page27 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- Sprite handles for three animated sprites
+00010 [GPT-5-CODEX-MAX-REASONING] local sprite1_handle = nil
+00011 [GPT-5-CODEX-MAX-REASONING] local sprite2_handle = nil
+00012 [GPT-5-CODEX-MAX-REASONING] local sprite3_handle = nil
+00013 [GPT-5-CODEX-MAX-REASONING] local sprites_loaded = false
+00014 [GPT-5-CODEX-MAX-REASONING] local load_error = false
+00015 [GPT-5-CODEX-MAX-REASONING] 
+00016 [GPT-5-CODEX-MAX-REASONING] -- Sprite positions
+00017 [GPT-5-CODEX-MAX-REASONING] local sprite1_x = 40
+00018 [GPT-5-CODEX-MAX-REASONING] local sprite1_y = 80
+00019 [GPT-5-CODEX-MAX-REASONING] local sprite2_x = 104
+00020 [GPT-5-CODEX-MAX-REASONING] local sprite2_y = 80
+00021 [GPT-5-CODEX-MAX-REASONING] local sprite3_x = 168
+00022 [GPT-5-CODEX-MAX-REASONING] local sprite3_y = 80
+00023 [GPT-5-CODEX-MAX-REASONING] 
+00024 [GPT-5-CODEX-MAX-REASONING] --- @brief Load sprites and start animations
+00025 [GPT-5-CODEX-MAX-REASONING] local function loadSprites()
+00026 [GPT-5-CODEX-MAX-REASONING]     if sprites_loaded or load_error then
+00027 [GPT-5-CODEX-MAX-REASONING]         return
+00028 [GPT-5-CODEX-MAX-REASONING]     end
+00029 [GPT-5-CODEX-MAX-REASONING] 
+00030 [GPT-5-CODEX-MAX-REASONING]     -- Load three spritesheet sprites using newSheet
+00031 [GPT-5-CODEX-MAX-REASONING]     sprite1_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00032 [GPT-5-CODEX-MAX-REASONING]     sprite2_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00033 [GPT-5-CODEX-MAX-REASONING]     sprite3_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00034 [GPT-5-CODEX-MAX-REASONING] 
+00035 [GPT-5-CODEX-MAX-REASONING]     if not sprite1_handle or not sprite2_handle or not sprite3_handle then
+00036 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page27", "Failed to load spritesheets")
+00037 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00038 [GPT-5-CODEX-MAX-REASONING]         return
+00039 [GPT-5-CODEX-MAX-REASONING]     end
+00040 [GPT-5-CODEX-MAX-REASONING] 
+00041 [GPT-5-CODEX-MAX-REASONING]     -- Start animations with different configurations
+00042 [GPT-5-CODEX-MAX-REASONING]     -- Sprite 1: Full animation (frames 0-3), 10 FPS, looping
+00043 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.playAnimation(sprite1_handle, 0, 3, 10, true)
+00044 [GPT-5-CODEX-MAX-REASONING] 
+00045 [GPT-5-CODEX-MAX-REASONING]     -- Sprite 2: Full animation (frames 0-3), 5 FPS, one-shot (no loop)
+00046 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.playAnimation(sprite2_handle, 0, 3, 5, false)
+00047 [GPT-5-CODEX-MAX-REASONING] 
+00048 [GPT-5-CODEX-MAX-REASONING]     -- Sprite 3: Partial animation (frames 1-2), 15 FPS, looping
+00049 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.playAnimation(sprite3_handle, 1, 2, 15, true)
+00050 [GPT-5-CODEX-MAX-REASONING] 
+00051 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = true
+00052 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page27", "Sprites loaded and animations started")
+00053 [GPT-5-CODEX-MAX-REASONING] end
+00054 [GPT-5-CODEX-MAX-REASONING] 
+00055 [GPT-5-CODEX-MAX-REASONING] --- @brief Update logic - update all animations
+00056 [GPT-5-CODEX-MAX-REASONING] function Page27.update()
+00057 [GPT-5-CODEX-MAX-REASONING]     if not sprites_loaded then
+00058 [GPT-5-CODEX-MAX-REASONING]         return
+00059 [GPT-5-CODEX-MAX-REASONING]     end
+00060 [GPT-5-CODEX-MAX-REASONING] 
+00061 [GPT-5-CODEX-MAX-REASONING]     -- Update all sprite animations (must be called once per frame)
+00062 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.updateAnimations()
+00063 [GPT-5-CODEX-MAX-REASONING] end
+00064 [GPT-5-CODEX-MAX-REASONING] 
+00065 [GPT-5-CODEX-MAX-REASONING] --- @brief Cleanup when leaving page
+00066 [GPT-5-CODEX-MAX-REASONING] function Page27.exit()
+00067 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00068 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00069 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00070 [GPT-5-CODEX-MAX-REASONING]     end
+00071 [GPT-5-CODEX-MAX-REASONING] 
+00072 [GPT-5-CODEX-MAX-REASONING]     -- Stop animations and free sprites
+00073 [GPT-5-CODEX-MAX-REASONING]     if sprite1_handle then
+00074 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.stopAnimation(sprite1_handle)
+00075 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite1_handle)
+00076 [GPT-5-CODEX-MAX-REASONING]         sprite1_handle = nil
+00077 [GPT-5-CODEX-MAX-REASONING]     end
+00078 [GPT-5-CODEX-MAX-REASONING]     if sprite2_handle then
+00079 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.stopAnimation(sprite2_handle)
+00080 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite2_handle)
+00081 [GPT-5-CODEX-MAX-REASONING]         sprite2_handle = nil
+00082 [GPT-5-CODEX-MAX-REASONING]     end
+00083 [GPT-5-CODEX-MAX-REASONING]     if sprite3_handle then
+00084 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.stopAnimation(sprite3_handle)
+00085 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite3_handle)
+00086 [GPT-5-CODEX-MAX-REASONING]         sprite3_handle = nil
+00087 [GPT-5-CODEX-MAX-REASONING]     end
+00088 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = false
+00089 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page27", "Animations stopped, sprites freed")
+00090 [GPT-5-CODEX-MAX-REASONING] end
+00091 [GPT-5-CODEX-MAX-REASONING] 
+00092 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 27: Animation Control API Demo
+00093 [GPT-5-CODEX-MAX-REASONING] function Page27.render(drawPageCounter)
+00094 [GPT-5-CODEX-MAX-REASONING]     -- Start double buffer on first render
+00095 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00096 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00097 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00098 [GPT-5-CODEX-MAX-REASONING]     end
+00099 [GPT-5-CODEX-MAX-REASONING] 
+00100 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00101 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00102 [GPT-5-CODEX-MAX-REASONING] 
+00103 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00104 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00105 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Anim Control", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00106 [GPT-5-CODEX-MAX-REASONING] 
+00107 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00108 [GPT-5-CODEX-MAX-REASONING] 
+00109 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites on first render
+00110 [GPT-5-CODEX-MAX-REASONING]     loadSprites()
+00111 [GPT-5-CODEX-MAX-REASONING] 
+00112 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00113 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR: Failed to load", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00114 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("spritesheets. Check assets.", 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00115 [GPT-5-CODEX-MAX-REASONING]     elseif not sprites_loaded then
+00116 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Loading sprites...", 10, 60, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00117 [GPT-5-CODEX-MAX-REASONING]     elseif sprite1_handle and sprite2_handle and sprite3_handle then
+00118 [GPT-5-CODEX-MAX-REASONING]         -- Get current frames (0-based)
+00119 [GPT-5-CODEX-MAX-REASONING]         local s1_frame = vmupro.sprite.getCurrentFrame(sprite1_handle)
+00120 [GPT-5-CODEX-MAX-REASONING]         local s2_frame = vmupro.sprite.getCurrentFrame(sprite2_handle)
+00121 [GPT-5-CODEX-MAX-REASONING]         local s3_frame = vmupro.sprite.getCurrentFrame(sprite3_handle)
+00122 [GPT-5-CODEX-MAX-REASONING] 
+00123 [GPT-5-CODEX-MAX-REASONING]         -- Draw sprites manually using drawFrame (drawFrame uses 1-based indexing)
+00124 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawFrame(sprite1_handle, s1_frame + 1, sprite1_x, sprite1_y, vmupro.sprite.kImageUnflipped)
+00125 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawFrame(sprite2_handle, s2_frame + 1, sprite2_x, sprite2_y, vmupro.sprite.kImageUnflipped)
+00126 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawFrame(sprite3_handle, s3_frame + 1, sprite3_x, sprite3_y, vmupro.sprite.kImageUnflipped)
+00127 [GPT-5-CODEX-MAX-REASONING] 
+00128 [GPT-5-CODEX-MAX-REASONING]         -- Get animation states
+00129 [GPT-5-CODEX-MAX-REASONING]         local s1_animating = vmupro.sprite.isAnimating(sprite1_handle)
+00130 [GPT-5-CODEX-MAX-REASONING]         local s2_animating = vmupro.sprite.isAnimating(sprite2_handle)
+00131 [GPT-5-CODEX-MAX-REASONING]         local s3_animating = vmupro.sprite.isAnimating(sprite3_handle)
+00132 [GPT-5-CODEX-MAX-REASONING] 
+00133 [GPT-5-CODEX-MAX-REASONING]         -- Display sprite info in columns
+00134 [GPT-5-CODEX-MAX-REASONING]         local y_base = 140
+00135 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("S1:", 10, y_base, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00136 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("F" .. s1_frame, 30, y_base, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00137 [GPT-5-CODEX-MAX-REASONING]         if s1_animating then
+00138 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("PLAY", 50, y_base, vmupro.graphics.GREEN, vmupro.graphics.BLACK)
+00139 [GPT-5-CODEX-MAX-REASONING]         else
+00140 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("STOP", 50, y_base, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00141 [GPT-5-CODEX-MAX-REASONING]         end
+00142 [GPT-5-CODEX-MAX-REASONING] 
+00143 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("S2:", 95, y_base, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00144 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("F" .. s2_frame, 115, y_base, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00145 [GPT-5-CODEX-MAX-REASONING]         if s2_animating then
+00146 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("PLAY", 135, y_base, vmupro.graphics.GREEN, vmupro.graphics.BLACK)
+00147 [GPT-5-CODEX-MAX-REASONING]         else
+00148 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("STOP", 135, y_base, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00149 [GPT-5-CODEX-MAX-REASONING]         end
+00150 [GPT-5-CODEX-MAX-REASONING] 
+00151 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("S3:", 180, y_base, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00152 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("F" .. s3_frame, 200, y_base, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00153 [GPT-5-CODEX-MAX-REASONING]         if s3_animating then
+00154 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("PLAY", 220, y_base, vmupro.graphics.GREEN, vmupro.graphics.BLACK)
+00155 [GPT-5-CODEX-MAX-REASONING]         else
+00156 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("STOP", 220, y_base, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00157 [GPT-5-CODEX-MAX-REASONING]         end
+00158 [GPT-5-CODEX-MAX-REASONING] 
+00159 [GPT-5-CODEX-MAX-REASONING]         -- Animation configs info
+00160 [GPT-5-CODEX-MAX-REASONING]         local y_cfg = 155
+00161 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("0-3,10FPS,L", 10, y_cfg, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00162 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("0-3,5FPS,1X", 95, y_cfg, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00163 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("1-2,15FPS,L", 180, y_cfg, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00164 [GPT-5-CODEX-MAX-REASONING] 
+00165 [GPT-5-CODEX-MAX-REASONING]         -- Info text
+00166 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("3 sprites with auto", 10, 180, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00167 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("animations. S2 stops", 10, 195, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00168 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("after 1 loop (no loop)", 10, 210, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00169 [GPT-5-CODEX-MAX-REASONING]     end
+00170 [GPT-5-CODEX-MAX-REASONING] 
+00171 [GPT-5-CODEX-MAX-REASONING]     -- Description at top
+00172 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Auto animation system", 10, 40, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00173 [GPT-5-CODEX-MAX-REASONING] 
+00174 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00175 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00176 [GPT-5-CODEX-MAX-REASONING] 
+00177 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00178 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00179 [GPT-5-CODEX-MAX-REASONING] end

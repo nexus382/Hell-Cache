@@ -1,0 +1,41 @@
+00001 [GPT-5-Codex] -- Data layer: persistence hooks (stub-safe).
+00002 [GPT-5-Codex] -- Paths are defined now; format writers/readers can be expanded incrementally.
+00003 [GPT-5-Codex] 
+00004 [GPT-5-Codex] ExpansionPersistence = {
+00005 [GPT-5-Codex]     paths = {
+00006 [GPT-5-Codex]         high_scores = "save/high_scores.dat",
+00007 [GPT-5-Codex]         achievements = "save/achievements.dat",
+00008 [GPT-5-Codex]     }
+00009 [GPT-5-Codex] }
+00010 [GPT-5-Codex] 
+00011 [GPT-5-Codex] local function cloneTable(src)
+00012 [GPT-5-Codex]     local out = {}
+00013 [GPT-5-Codex]     if not src then return out end
+00014 [GPT-5-Codex]     for k, v in pairs(src) do
+00015 [GPT-5-Codex]         out[k] = v
+00016 [GPT-5-Codex]     end
+00017 [GPT-5-Codex]     return out
+00018 [GPT-5-Codex] end
+00019 [GPT-5-Codex] 
+00020 [GPT-5-Codex] function ExpansionPersistence.loadHighScores(defaultValue)
+00021 [GPT-5-Codex]     -- Hook point: wire vmupro.file-backed decode when format is finalized.
+00022 [GPT-5-Codex]     return cloneTable(defaultValue or {})
+00023 [GPT-5-Codex] end
+00024 [GPT-5-Codex] 
+00025 [GPT-5-Codex] function ExpansionPersistence.saveHighScores(scoreList)
+00026 [GPT-5-Codex]     -- Hook point: wire vmupro.file-backed encode when format is finalized.
+00027 [GPT-5-Codex]     return false, "not_implemented"
+00028 [GPT-5-Codex] end
+00029 [GPT-5-Codex] 
+00030 [GPT-5-Codex] function ExpansionPersistence.loadAchievementState(defaultValue)
+00031 [GPT-5-Codex]     local fallback = defaultValue or {unlocked = {}, progress = {}}
+00032 [GPT-5-Codex]     return {
+00033 [GPT-5-Codex]         unlocked = cloneTable(fallback.unlocked),
+00034 [GPT-5-Codex]         progress = cloneTable(fallback.progress),
+00035 [GPT-5-Codex]     }
+00036 [GPT-5-Codex] end
+00037 [GPT-5-Codex] 
+00038 [GPT-5-Codex] function ExpansionPersistence.saveAchievementState(achievementState)
+00039 [GPT-5-Codex]     -- Hook point: wire vmupro.file-backed encode when format is finalized.
+00040 [GPT-5-Codex]     return false, "not_implemented"
+00041 [GPT-5-Codex] end

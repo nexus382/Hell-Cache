@@ -4560,6 +4560,21 @@ end</code>
                 <h2>⚙️ Section 20: Efficient Implementation Order (Execution Sequence)</h2>
 
                 <div class="subsection">
+                    <h3>20.0 Live Implementation Status (Build 179)</h3>
+                    <div class="feature-card">
+                        <h4>✅ Implemented in Current Codebase</h4>
+                        <ul>
+                            <li>M1 start shipped: run bootstrap now detects new-run resets vs next-level continuation through <code>beginLoadLevel()</code> and <code>beginExpansionRun()</code>.</li>
+                            <li>Score event bus is live with deterministic hooks: <code>run_start</code>, <code>level_start</code>, <code>enemy_kill</code>, <code>health_pickup</code>, <code>player_damaged</code>, and <code>level_clear</code>.</li>
+                            <li>Run score state now tracks <code>current</code>, <code>kills</code>, <code>levels_cleared</code>, and per-level no-damage status for reward evaluation.</li>
+                            <li>Achievement trigger wiring exists for <code>kill_count</code>, <code>levels_cleared</code>, and <code>no_damage_level</code> with score-bonus payout support.</li>
+                            <li>Gameplay HUD now renders score + run counters for live validation while testing.</li>
+                        </ul>
+                        <p><strong>Still pending:</strong> death-initials/top-10 board flow, persistent save format for high scores/achievements, chest/trader economy runtime, and full Wave/Story mode rule sets.</p>
+                    </div>
+                </div>
+
+                <div class="subsection">
                     <h3>20.1 Order of Operations (Dependency-First)</h3>
                     <div class="feature-card">
                         <h4>🚀 Most Efficient Build Sequence</h4>

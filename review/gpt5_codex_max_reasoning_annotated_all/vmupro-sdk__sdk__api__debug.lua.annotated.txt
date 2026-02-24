@@ -1,0 +1,22 @@
+00001 [GPT-5-CODEX-MAX-REASONING] --- @file debug.lua
+00002 [GPT-5-CODEX-MAX-REASONING] --- @brief VMU Pro LUA SDK - Debug API
+00003 [GPT-5-CODEX-MAX-REASONING] --- @author 8BitMods
+00004 [GPT-5-CODEX-MAX-REASONING] --- @version 1.0.0
+00005 [GPT-5-CODEX-MAX-REASONING] --- @date 2026-01-09
+00006 [GPT-5-CODEX-MAX-REASONING] --- @copyright Copyright (c) 2026 8BitMods. All rights reserved.
+00007 [GPT-5-CODEX-MAX-REASONING] ---
+00008 [GPT-5-CODEX-MAX-REASONING] --- The debug API provides functions for debugging LUA applications running
+00009 [GPT-5-CODEX-MAX-REASONING] --- on VMU Pro devices. These functions require Developer Mode to be enabled.
+00010 [GPT-5-CODEX-MAX-REASONING] --- Functions are available under the vmupro.debug namespace.
+00011 [GPT-5-CODEX-MAX-REASONING] 
+00012 [GPT-5-CODEX-MAX-REASONING] -- Ensure vmupro namespace exists
+00013 [GPT-5-CODEX-MAX-REASONING] vmupro = vmupro or {}
+00014 [GPT-5-CODEX-MAX-REASONING] vmupro.debug = vmupro.debug or {}
+00015 [GPT-5-CODEX-MAX-REASONING] 
+00016 [GPT-5-CODEX-MAX-REASONING] --- @brief Log the current Lua stack trace to developer tools
+00017 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.debug.backtrace()
+00018 [GPT-5-CODEX-MAX-REASONING] --- @note Requires Developer Mode to be enabled for full stack trace output.
+00019 [GPT-5-CODEX-MAX-REASONING] ---       When Developer Mode is disabled, a limited message will be shown.
+00020 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00021 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00022 [GPT-5-CODEX-MAX-REASONING] function vmupro.debug.backtrace() end

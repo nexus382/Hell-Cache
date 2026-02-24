@@ -1,159 +1,194 @@
-<!-- Generated: 2026-02-04 | Updated: 2026-02-04 -->
+# Inner Sanctum - AGENTS.md
 
-# inner-santctum
+**Generated:** 2026-02-23
+
+---
 
 ## Purpose
-A 3D dungeon raycaster game for VMU Pro SDK featuring boomer wave shooter gameplay with castle dungeon environments and detailed sprite-based characters.
+
+Inner Sanctum is a doom-like 3D dungeon raycaster game for the VMU Pro handheld device. It is a wave shooter / dungeon crawler where the player protects a king from hordes of enemies who have broken into his inner sanctum.
+
+**Key Characteristics:**
+- **Platform:** VMU Pro (240x240 display, RGB565 color)
+- **Genre:** Boomer wave shooter / dungeon crawler
+- **Engine:** Custom raycasting renderer with textured walls
+- **Language:** Lua (VMU Pro Lua environment)
+
+---
 
 ## Key Files
 
-| File | Description |
-|------|-------------|
-| `app.lua` | Main game code - raycaster engine, AI, combat, UI |
-| `metadata.json` | VMU Pro package metadata and configuration |
-| `metadata_level1.json` | Level 1 specific metadata |
-| `metadata_level2.json` | Level 2 specific metadata |
-| `README.md` | Project overview and technical documentation |
-| `SPRITE_PIPELINE.md` | Sprite generation pipeline documentation |
-| `icon.bmp` | 76x76 application icon |
-| `.gitignore` | Git ignore patterns |
+| File | Purpose |
+|------|---------|
+| `app.lua` | Boot wrapper that imports `app_full.lua` with error handling |
+| `app_full.lua` | **Main game code** (~380KB) - contains all game logic, rendering, AI, and systems |
+| `metadata.json` | VMU Pro package metadata, resource manifest, and app configuration |
+| `metadata_level1.json` | Level 1 specific metadata for split packages |
+| `metadata_level2.json` | Level 2 specific metadata for split packages |
+| `icon.bmp` | 76x76 app icon for VMU Pro menu |
+| `README.md` | Project documentation and lessons learned |
+| `fix_sprites.py` | Python script for sprite normalization |
+| `generate_sprites.py` | Python script for sprite generation |
 
-## Python Scripts
+### Build Artifacts (.vmupack files)
+| File | Purpose |
+|------|---------|
+| `inner_sanctum.vmupack` | Full game package (~2.1MB) |
+| `inner_sanctum_l1.vmupack` | Level 1 standalone package |
+| `inner_sanctum_l2.vmupack` | Level 2 standalone package |
+| `innersantctum.vmupack` | Latest build |
 
-| File | Description |
-|------|-------------|
-| `generate_sprites.py` | Sprite generation utility |
-| `fix_sprites.py` | Sprite correction/fixing script |
-| `process_warrior_actions.py` | Process warrior action sprites |
-| `split_knight.py` | Split knight spritesheet |
-| `split_spritesheet.py` | General spritesheet splitting utility |
-| `split_warrior_actions.py` | Split warrior action spritesheets |
+### Planning/Design Documents
+| File | Purpose |
+|------|---------|
+| `DOOM_PERFORMANCE_OPTIMIZATION_PLAN.md` | Performance optimization strategy |
+| `DOOM_PERFORMANCE_SYSTEMS_PLAN.md` | Systems-level performance planning + build-tracked implementation status snapshot |
+| `DOOM_vs_INNERSANCTUM_ANALYSIS.md` | Comparative analysis with Doom |
+| `PERFORMANCE_AUDIT_REPORT.md` | Performance audit findings |
+| `MAGE_SPELL_DESIGN.md` | Mage spell system design |
+| `WEAPON_CLASS_MASTERY_PLAN.md` | Weapon mastery progression |
+| `STATS_TO_GAMEPLAY.md` | Stats to gameplay mechanics mapping |
+
+---
 
 ## Subdirectories
 
 | Directory | Purpose |
 |-----------|---------|
-| `VMUPRO_SDK_FILES/` | Complete VMU Pro SDK documentation and examples (see `VMUPRO_SDK_FILES/AGENTS.md`) |
-| `sprites/` | Game sprite assets - characters, walls, UI (see `sprites/AGENTS.md`) |
-| `sounds/` | Audio files - music and sound effects (see `sounds/AGENTS.md`) |
-| `tools/` | Development and build tools (see `tools/AGENTS.md`) |
-| `gemini_package/` | AI sprite generation references (see `gemini_package/AGENTS.md`) |
-| `.vscode/` | VS Code configuration |
+| `api/` | Custom API modules (system, display, text, input) for VMU Pro |
+| `data/` | Game data files (maps, configurations) |
+| `sounds/` | Audio files (WAV) for game sounds and music |
+| `sprites/` | All game sprites organized by level and type |
+| `tools/` | Development and build tools |
+| `vmupro-sdk/` | Official VMU Pro SDK (examples, documentation, SDK APIs) |
+| `IS BUILD FILES/` | Build artifacts and intermediate files |
+| `NEW-bmp-textures/` | New BMP format wall textures |
+| `new soudns/` | Additional sound files (typo in original) |
+| `gemini_package/` | Gemini-specific packaging files |
+| `review/` | Review and testing materials |
+| `vmupacker_debug/` | Debug builds from packer tool |
+
+---
 
 ## For AI Agents
 
-### Working In This Directory
+### Working With This Codebase
 
-**Critical VMU Pro SDK Constraints:**
-- Display: 240x240 pixels, RGB565 little-endian color format
-- **CRASH BUG**: `math.atan2()` causes crashes - use `safeAtan2()` implementation instead
-- **CRASH BUG**: `math.random()` can crash - use deterministic alternatives: `(frameCount * multiplier) % range`
-- **CRASH BUG**: Sample-based audio crashes - use synth audio only
-- All sprites normalized to ~517px height for consistent scaling
-- Ground positioning: `drawY = groundY - scaledHeight` (feet on ground, not eye-level)
+1. **Entry Point:** All game logic is in `app_full.lua`. The `app.lua` file is a thin wrapper.
 
-**Custom Safe Functions:**
-```lua
-local function safeAtan2(y, x)
-    if x == 0 then
-        if y > 0 then return 1.5708
-        elseif y < 0 then return -1.5708
-        else return 0 end
-    end
-    local angle = math.atan(y / x)
-    if x < 0 then angle = angle + 3.14159 end
-    return angle
-end
-```
+2. **VMU Pro Quirks (CRITICAL):**
+   - `math.atan2()` **crashes** - always use `safeAtan2()` implementation
+   - `math.random()` **can crash** - use deterministic alternatives like `(frameCount * multiplier) % range`
+   - Sample-based audio crashes - use `vmupro.sound.synth.*` API only
+   - Sprite slot limit is 64 - loading too many sprites crashes
 
-**Audio Setup (Synth-based):**
-```lua
-vmupro.audio.startListenMode()
-local synth = vmupro.sound.synth.new(vmupro.sound.kWaveNoise)
-vmupro.sound.synth.setAttack(synth, 0.01)
-vmupro.sound.synth.setDecay(synth, 0.1)
-vmupro.sound.synth.setSustain(synth, 0.2)
-vmupro.sound.synth.setRelease(synth, 0.1)
-vmupro.sound.synth.setVolume(synth, 0.5, 0.5)
--- Cleanup: vmupro.sound.synth.free(synth), vmupro.audio.exitListenMode()
-```
+3. **Color Format:** RGB565 little-endian. Define all COLOR_* constants or game crashes.
 
-**Sprite Handling:**
-- Check `animFrame ~= nil` (not `animFrame > 0` since 0 is valid frame)
-- All warrior sprites: ~517px height
-- All knight sprites: ~579px height
-- Use `vmupro.sprite.new()`, `vmupro.sprite.draw()`, `vmupro.sprite.drawScaled()`
+4. **Performance Considerations:**
+   - Column-slice wall textures are CPU-heavy; prefer full 128x128 textures
+   - Double buffering can be toggled via `DEBUG_DOUBLE_BUFFER`
+   - Performance monitoring variables prefixed with `PERF_MONITOR_*`
+   - Visibility-cap (VIS) culling controls were removed in Build 176; use draw distance, mip distances, and fog ranges for runtime tuning
+   - Sprite order cache now rebuilds in place (Build 177) to reduce per-refresh allocations in the sprite render ordering path
+   - Mip thresholds now support per-tier OFF (0) and independent tuning (Build 178); distance presets use 0.5 steps below 12 and 1.0 steps at 12+
+   - Expansion M1 scaffolding started in Build 179: `dispatchRunScoreEvent` now drives run score hooks (kills/pickups/level start-clear), and HUD score counters are live in gameplay for validation
 
-### Common Patterns
+5. **Code Style:**
+   - Lua imports use `import "module"` syntax
+   - VMU Pro API accessed via `vmupro.*` namespace
+   - Enable logs with `enableBootLogs` and `enablePerfLogs` flags
 
-**Color Constants (RGB565 Little-Endian):**
-```lua
-COLOR_BLACK = 0x0000
-COLOR_WHITE = 0xFFFF
-COLOR_RED = 0x00F8
-COLOR_GREEN = 0xE007
-COLOR_BLUE = 0x1F00
--- See app.lua for full list
-```
+### AGENTS Sync Discipline
 
-**Game Features Implemented:**
-- 3D raycaster with textured walls
-- Player movement and collision detection
-- Soldier enemies with patrol/chase/attack AI (3x sprint when chasing)
-- Combat system: 20 damage per swing, 1 unit attack range
-- Health system with Diablo 2-style potion UI
-- Health vial pickups (5 per level)
-- Death effects (blood particles, sounds)
-- Title/pause/options/game over screens
-- Win condition (kill all 5 soldiers)
+When making edits, keep `AGENTS.md` files current to reduce rediscovery cost in future sessions:
 
-### Known Issues
+1. Update the nearest `AGENTS.md` in each touched directory with any new systems, tunables, or workflow changes.
+2. Update root `AGENTS.md` when project-wide behavior, architecture, or debugging flows change.
+3. Keep entries short and factual (what changed, where, and why it matters).
+4. Do this in the same pass as code changes so docs and implementation do not drift.
 
-- One soldier may appear invisible (walking sprite loading issue)
-- Knights removed (sprites not ready)
+### Common Tasks
 
-### Testing Requirements
+**Adding a new sprite:**
+1. Add PNG to appropriate `sprites/` subdirectory
+2. Update `metadata.json` resources array
+3. Load with `vmupro.sprite.new()` in game code
+4. Respect 64 sprite slot limit
 
-Test on VMU Pro hardware:
-- Verify all math.atan2() calls replaced with safeAtan2()
-- Verify math.random() replaced with deterministic alternatives
-- Check sprite scaling and positioning
-- Test audio with synth-based sounds only
-- Verify combat AI and collision detection
+**Modifying game behavior:**
+1. All logic is in `app_full.lua`
+2. Search for state machine patterns (title, playing, paused, gameover)
+3. Game loop runs in `AppMain()` function
 
-### Building
-
-Use VMU Pro SDK packer:
+**Building:**
 ```bash
-python "tools/packer/packer.py" \
-    --projectdir "/path/to/inner-santctum" \
+python tools/packer/packer.py \
+    --projectdir /mnt/r/inner-santctum \
     --appname inner_sanctum \
     --meta metadata.json \
     --icon icon.bmp
 ```
 
-Output: `inner_sanctum.vmupack` → copy to SD card `D:\apps\`
+### Key Code Sections in app_full.lua
+
+| Section | Description |
+|---------|-------------|
+| Lines 1-100 | Debug flags and performance monitoring variables |
+| Performance monitoring | `PERF_MONITOR_*` variables for profiling |
+| Double buffering | `DEBUG_DOUBLE_BUFFER` and related functions |
+| Raycaster | Wall rendering with texture mapping |
+| Entity system | Enemies, player, AI states |
+| UI system | Menus, HUD, health bars |
+
+---
 
 ## Dependencies
 
-### External
-- VMU Pro SDK (Lua-based game development platform)
-- Python 3.x (for sprite processing scripts)
-- PIL/Pillow (Python image library)
+### Runtime
+- **VMU Pro** handheld device or emulator
+- VMU Pro firmware with Lua environment
 
-### Game Code
-- Uses VMU Pro API modules: system, display, input, sprites, audio
+### Build Tools
+- **Python 3.x** - for packer tool and sprite scripts
+- **VMU Pro SDK** - included in `vmupro-sdk/` directory
+- **packer.py** - creates .vmupack files from project
 
-## Asset Pipeline
+### Sprite/Asset Pipeline
+- PNG format for sprites
+- BMP format for app icon (76x76)
+- WAV format for sounds (but use synth API at runtime)
 
-**Sprites:**
-1. Generate base sprites via AI (see `SPRITE_PIPELINE.md`)
-2. Process with Python scripts (`split_*.py`, `generate_sprites.py`)
-3. Normalize to consistent heights (warrior: 517px, knight: 579px)
-4. Organize in `sprites/` by level and type
+---
 
-**Audio:**
-- Use synth-based audio generation (no sample playback)
-- Store reference files in `sounds/` for documentation
+## Architecture Overview
 
-<!-- MANUAL: Custom project notes can be added below -->
+```
++------------------+
+|     app.lua      |  <- Boot wrapper
++--------+---------+
+         |
+         v
++------------------+
+|   app_full.lua   |  <- Main game (380KB monolith)
++--------+---------+
+         |
+    +----+----+----+----+
+    |    |    |    |    |
+    v    v    v    v    v
++------+ +-----+ +------+
+| api/ | |data/| |vmupro|
++------+ +-----+ +------+
+    |                 |
+    +----> VMU Pro SDK APIs
+```
+
+**Game States:** TITLE -> PLAYING -> PAUSED -> GAME_OVER / WIN_SCREEN
+
+---
+
+## See Also
+
+- `README.md` - Detailed lessons learned and troubleshooting
+- `vmupro-sdk/docs/` - Official SDK documentation
+- `sprites/AGENTS.md` - Sprite organization details
+- `api/AGENTS.md` - Custom API module documentation

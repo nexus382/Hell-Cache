@@ -1,0 +1,41 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- Data layer: persistence hooks (stub-safe).
+00002 [GPT-5-CODEX-MAX-REASONING] -- Paths are defined now; format writers/readers can be expanded incrementally.
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] ExpansionPersistence = {
+00005 [GPT-5-CODEX-MAX-REASONING]     paths = {
+00006 [GPT-5-CODEX-MAX-REASONING]         high_scores = "save/high_scores.dat",
+00007 [GPT-5-CODEX-MAX-REASONING]         achievements = "save/achievements.dat",
+00008 [GPT-5-CODEX-MAX-REASONING]     }
+00009 [GPT-5-CODEX-MAX-REASONING] }
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING] local function cloneTable(src)
+00012 [GPT-5-CODEX-MAX-REASONING]     local out = {}
+00013 [GPT-5-CODEX-MAX-REASONING]     if not src then return out end
+00014 [GPT-5-CODEX-MAX-REASONING]     for k, v in pairs(src) do
+00015 [GPT-5-CODEX-MAX-REASONING]         out[k] = v
+00016 [GPT-5-CODEX-MAX-REASONING]     end
+00017 [GPT-5-CODEX-MAX-REASONING]     return out
+00018 [GPT-5-CODEX-MAX-REASONING] end
+00019 [GPT-5-CODEX-MAX-REASONING] 
+00020 [GPT-5-CODEX-MAX-REASONING] function ExpansionPersistence.loadHighScores(defaultValue)
+00021 [GPT-5-CODEX-MAX-REASONING]     -- Hook point: wire vmupro.file-backed decode when format is finalized.
+00022 [GPT-5-CODEX-MAX-REASONING]     return cloneTable(defaultValue or {})
+00023 [GPT-5-CODEX-MAX-REASONING] end
+00024 [GPT-5-CODEX-MAX-REASONING] 
+00025 [GPT-5-CODEX-MAX-REASONING] function ExpansionPersistence.saveHighScores(scoreList)
+00026 [GPT-5-CODEX-MAX-REASONING]     -- Hook point: wire vmupro.file-backed encode when format is finalized.
+00027 [GPT-5-CODEX-MAX-REASONING]     return false, "not_implemented"
+00028 [GPT-5-CODEX-MAX-REASONING] end
+00029 [GPT-5-CODEX-MAX-REASONING] 
+00030 [GPT-5-CODEX-MAX-REASONING] function ExpansionPersistence.loadAchievementState(defaultValue)
+00031 [GPT-5-CODEX-MAX-REASONING]     local fallback = defaultValue or {unlocked = {}, progress = {}}
+00032 [GPT-5-CODEX-MAX-REASONING]     return {
+00033 [GPT-5-CODEX-MAX-REASONING]         unlocked = cloneTable(fallback.unlocked),
+00034 [GPT-5-CODEX-MAX-REASONING]         progress = cloneTable(fallback.progress),
+00035 [GPT-5-CODEX-MAX-REASONING]     }
+00036 [GPT-5-CODEX-MAX-REASONING] end
+00037 [GPT-5-CODEX-MAX-REASONING] 
+00038 [GPT-5-CODEX-MAX-REASONING] function ExpansionPersistence.saveAchievementState(achievementState)
+00039 [GPT-5-CODEX-MAX-REASONING]     -- Hook point: wire vmupro.file-backed encode when format is finalized.
+00040 [GPT-5-CODEX-MAX-REASONING]     return false, "not_implemented"
+00041 [GPT-5-CODEX-MAX-REASONING] end

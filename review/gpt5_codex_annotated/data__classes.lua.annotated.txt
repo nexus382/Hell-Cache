@@ -1,0 +1,73 @@
+00001 [GPT-5-Codex] -- Data layer: playable classes and growth hooks.
+00002 [GPT-5-Codex] 
+00003 [GPT-5-Codex] GameClasses = {
+00004 [GPT-5-Codex]     warrior = {
+00005 [GPT-5-Codex]         id = "warrior",
+00006 [GPT-5-Codex]         name = "Warrior",
+00007 [GPT-5-Codex]         base_hp = 120,
+00008 [GPT-5-Codex]         base_damage = 20,
+00009 [GPT-5-Codex]         base_speed = 1.0,
+00010 [GPT-5-Codex]         primary = "melee",
+00011 [GPT-5-Codex]         base_defense = 4.00,
+00012 [GPT-5-Codex]         template_stats = {
+00013 [GPT-5-Codex]             agility = 4.00,
+00014 [GPT-5-Codex]             power = 4.00,
+00015 [GPT-5-Codex]             defense = 4.00,
+00016 [GPT-5-Codex]             dodge = 4.00,
+00017 [GPT-5-Codex]             regen = 4.00,
+00018 [GPT-5-Codex]             crit = 4.00,
+00019 [GPT-5-Codex]             atk_speed = 4.00,
+00020 [GPT-5-Codex]             shield_bonus = 4.00,
+00021 [GPT-5-Codex]         },
+00022 [GPT-5-Codex]         growth = {hp = 8, damage = 2, speed = 0.0},
+00023 [GPT-5-Codex]     },
+00024 [GPT-5-Codex]     archer = {
+00025 [GPT-5-Codex]         id = "archer",
+00026 [GPT-5-Codex]         name = "Archer",
+00027 [GPT-5-Codex]         base_hp = 90,
+00028 [GPT-5-Codex]         base_damage = 14,
+00029 [GPT-5-Codex]         base_speed = 1.15,
+00030 [GPT-5-Codex]         primary = "ranged",
+00031 [GPT-5-Codex]         base_defense = 2.50,
+00032 [GPT-5-Codex]         template_stats = {
+00033 [GPT-5-Codex]             agility = 5.50,
+00034 [GPT-5-Codex]             power = 3.75,
+00035 [GPT-5-Codex]             defense = 2.50,
+00036 [GPT-5-Codex]             dodge = 5.00,
+00037 [GPT-5-Codex]             regen = 2.50,
+00038 [GPT-5-Codex]             crit = 3.50,
+00039 [GPT-5-Codex]             atk_speed = 5.50,
+00040 [GPT-5-Codex]             shield_bonus = 2.00,
+00041 [GPT-5-Codex]         },
+00042 [GPT-5-Codex]         growth = {hp = 5, damage = 2, speed = 0.01},
+00043 [GPT-5-Codex]     },
+00044 [GPT-5-Codex]     mage = {
+00045 [GPT-5-Codex]         id = "mage",
+00046 [GPT-5-Codex]         name = "Mage",
+00047 [GPT-5-Codex]         base_hp = 80,
+00048 [GPT-5-Codex]         base_damage = 18,
+00049 [GPT-5-Codex]         base_speed = 1.05,
+00050 [GPT-5-Codex]         primary = "magic",
+00051 [GPT-5-Codex]         base_defense = 2.25,
+00052 [GPT-5-Codex]         template_stats = {
+00053 [GPT-5-Codex]             agility = 2.75,
+00054 [GPT-5-Codex]             power = 5.75,
+00055 [GPT-5-Codex]             defense = 2.25,
+00056 [GPT-5-Codex]             dodge = 2.50,
+00057 [GPT-5-Codex]             regen = 2.25,
+00058 [GPT-5-Codex]             crit = 5.25,
+00059 [GPT-5-Codex]             atk_speed = 2.75,
+00060 [GPT-5-Codex]             shield_bonus = 1.75,
+00061 [GPT-5-Codex]         },
+00062 [GPT-5-Codex]         growth = {hp = 4, damage = 3, speed = 0.0},
+00063 [GPT-5-Codex]     },
+00064 [GPT-5-Codex] }
+00065 [GPT-5-Codex] 
+00066 [GPT-5-Codex] GameClassOrder = {"warrior", "archer", "mage"}
+00067 [GPT-5-Codex] 
+00068 [GPT-5-Codex] function getGameClass(classId)
+00069 [GPT-5-Codex]     if not classId then
+00070 [GPT-5-Codex]         return GameClasses.warrior
+00071 [GPT-5-Codex]     end
+00072 [GPT-5-Codex]     return GameClasses[classId] or GameClasses.warrior
+00073 [GPT-5-Codex] end

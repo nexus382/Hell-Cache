@@ -1,0 +1,53 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page1.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 1: Basic Graphics - Lines & Rectangles
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page1 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 1: Basic Graphics - Lines & Rectangles
+00007 [GPT-5-CODEX-MAX-REASONING] function Page1.render(drawPageCounter)
+00008 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00009 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00012 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00013 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Lines & Rectangles", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_OPEN_SANS_15x18)
+00016 [GPT-5-CODEX-MAX-REASONING] 
+00017 [GPT-5-CODEX-MAX-REASONING]     -- Test: Horizontal lines
+00018 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Horizontal lines:", 10, 35, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00019 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawLine(10, 55, 110, 55, vmupro.graphics.MAGENTA)
+00020 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawLine(10, 60, 110, 60, vmupro.graphics.GREEN)
+00021 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawLine(10, 65, 110, 65, vmupro.graphics.BLUE)
+00022 [GPT-5-CODEX-MAX-REASONING] 
+00023 [GPT-5-CODEX-MAX-REASONING]     -- Test: Vertical lines
+00024 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Vertical lines:", 125, 35, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00025 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawLine(125, 55, 125, 85, vmupro.graphics.MAGENTA)
+00026 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawLine(135, 55, 135, 85, vmupro.graphics.GREEN)
+00027 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawLine(145, 55, 145, 85, vmupro.graphics.BLUE)
+00028 [GPT-5-CODEX-MAX-REASONING] 
+00029 [GPT-5-CODEX-MAX-REASONING]     -- Test: Diagonal linee
+00030 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Diagonal line:", 10, 90, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00031 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawLine(10, 110, 60, 140, vmupro.graphics.YELLOW)
+00032 [GPT-5-CODEX-MAX-REASONING] 
+00033 [GPT-5-CODEX-MAX-REASONING]     -- Test: Outline rectangles
+00034 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Outline rects:", 10, 145, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00035 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawRect(10, 165, 40, 190, vmupro.graphics.RED)      -- 30x25 rect
+00036 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawRect(45, 165, 70, 195, vmupro.graphics.GREEN)    -- 25x30 rect
+00037 [GPT-5-CODEX-MAX-REASONING] 
+00038 [GPT-5-CODEX-MAX-REASONING]     -- Test: Filled rectangles
+00039 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Filled rects:", 125, 145, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00040 [GPT-5-CODEX-MAX-REASONING]     -- drawFillRect uses (x1, y1, x2, y2, color) NOT (x, y, width, height, color)
+00041 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawFillRect(125, 165, 155, 190, vmupro.graphics.RED)      -- 30x25 rect
+00042 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawFillRect(160, 165, 185, 195, vmupro.graphics.GREEN)    -- 25x30 rect
+00043 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawFillRect(190, 165, 225, 185, vmupro.graphics.BLUE)     -- 35x20 rect
+00044 [GPT-5-CODEX-MAX-REASONING] 
+00045 [GPT-5-CODEX-MAX-REASONING]     -- Test: Edge case - rectangle at screen edge
+00046 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawRect(0, 0, 8, 8, vmupro.graphics.WHITE)
+00047 [GPT-5-CODEX-MAX-REASONING] 
+00048 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00049 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 215, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00050 [GPT-5-CODEX-MAX-REASONING] 
+00051 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00052 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00053 [GPT-5-CODEX-MAX-REASONING] end

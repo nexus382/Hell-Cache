@@ -1,0 +1,65 @@
+00001 [GPT-5-Codex] -- Data layer: chest-centric drop tables.
+00002 [GPT-5-Codex] -- Deterministic roll path (no math.random) for VMU Pro safety.
+00003 [GPT-5-Codex] 
+00004 [GPT-5-Codex] GameLootTables = {
+00005 [GPT-5-Codex]     chest_tier_1 = {
+00006 [GPT-5-Codex]         {item = "potion_small", weight = 60},
+00007 [GPT-5-Codex]         {item = "potion_large", weight = 20},
+00008 [GPT-5-Codex]         {item = "charm_guard", weight = 20},
+00009 [GPT-5-Codex]     },
+00010 [GPT-5-Codex]     chest_tier_2 = {
+00011 [GPT-5-Codex]         {item = "potion_large", weight = 35},
+00012 [GPT-5-Codex]         {item = "sword_iron", weight = 20},
+00013 [GPT-5-Codex]         {item = "bow_short", weight = 20},
+00014 [GPT-5-Codex]         {item = "focus_ember", weight = 20},
+00015 [GPT-5-Codex]         {item = "charm_guard", weight = 5},
+00016 [GPT-5-Codex]     },
+00017 [GPT-5-Codex] }
+00018 [GPT-5-Codex] 
+00019 [GPT-5-Codex] local function lootHash(seedA, seedB)
+00020 [GPT-5-Codex]     local a = seedA or 0
+00021 [GPT-5-Codex]     local b = seedB or 0
+00022 [GPT-5-Codex]     local v = (a * 1103 + b * 2909 + 7919) % 104729
+00023 [GPT-5-Codex]     v = ((v * 131) + 907) % 104729
+00024 [GPT-5-Codex]     return v
+00025 [GPT-5-Codex] end
+00026 [GPT-5-Codex] 
+00027 [GPT-5-Codex] local function getChestTierForLevel(levelId)
+00028 [GPT-5-Codex]     if (levelId or 1) >= 2 then
+00029 [GPT-5-Codex]         return "chest_tier_2"
+00030 [GPT-5-Codex]     end
+00031 [GPT-5-Codex]     return "chest_tier_1"
+00032 [GPT-5-Codex] end
+00033 [GPT-5-Codex] 
+00034 [GPT-5-Codex] function rollChestDrop(levelId, classId, seedValue)
+00035 [GPT-5-Codex]     local tierId = getChestTierForLevel(levelId)
+00036 [GPT-5-Codex]     local tier = GameLootTables[tierId]
+00037 [GPT-5-Codex]     if not tier or #tier == 0 then
+00038 [GPT-5-Codex]         return nil
+00039 [GPT-5-Codex]     end
+00040 [GPT-5-Codex] 
+00041 [GPT-5-Codex]     local total = 0
+00042 [GPT-5-Codex]     for i = 1, #tier do
+00043 [GPT-5-Codex]         total = total + (tier[i].weight or 0)
+00044 [GPT-5-Codex]     end
+00045 [GPT-5-Codex]     if total <= 0 then
+00046 [GPT-5-Codex]         return nil
+00047 [GPT-5-Codex]     end
+00048 [GPT-5-Codex] 
+00049 [GPT-5-Codex]     local classBias = 0
+00050 [GPT-5-Codex]     if classId == "warrior" then classBias = 11 end
+00051 [GPT-5-Codex]     if classId == "archer" then classBias = 17 end
+00052 [GPT-5-Codex]     if classId == "mage" then classBias = 23 end
+00053 [GPT-5-Codex]     local seed = lootHash(seedValue or 0, (levelId or 1) + classBias)
+00054 [GPT-5-Codex]     local pick = (seed % total) + 1
+00055 [GPT-5-Codex] 
+00056 [GPT-5-Codex]     local acc = 0
+00057 [GPT-5-Codex]     for i = 1, #tier do
+00058 [GPT-5-Codex]         acc = acc + (tier[i].weight or 0)
+00059 [GPT-5-Codex]         if pick <= acc then
+00060 [GPT-5-Codex]             return tier[i].item
+00061 [GPT-5-Codex]         end
+00062 [GPT-5-Codex]     end
+00063 [GPT-5-Codex] 
+00064 [GPT-5-Codex]     return tier[#tier].item
+00065 [GPT-5-Codex] end

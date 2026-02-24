@@ -1,0 +1,167 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page23.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 23: Sprite Visibility (setVisible, getVisible)
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page23 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- Sprite handles
+00010 [GPT-5-CODEX-MAX-REASONING] local sprite1_handle = nil
+00011 [GPT-5-CODEX-MAX-REASONING] local sprite2_handle = nil
+00012 [GPT-5-CODEX-MAX-REASONING] local sprite3_handle = nil
+00013 [GPT-5-CODEX-MAX-REASONING] local sprites_loaded = false
+00014 [GPT-5-CODEX-MAX-REASONING] local load_error = false
+00015 [GPT-5-CODEX-MAX-REASONING] 
+00016 [GPT-5-CODEX-MAX-REASONING] -- Blink timing for each sprite (different rates)
+00017 [GPT-5-CODEX-MAX-REASONING] local blink_interval_1 = 500000   -- 500ms (2 Hz)
+00018 [GPT-5-CODEX-MAX-REASONING] local blink_interval_2 = 1000000  -- 1 second (1 Hz)
+00019 [GPT-5-CODEX-MAX-REASONING] local blink_interval_3 = 250000   -- 250ms (4 Hz)
+00020 [GPT-5-CODEX-MAX-REASONING] 
+00021 [GPT-5-CODEX-MAX-REASONING] local last_toggle_time_1 = 0
+00022 [GPT-5-CODEX-MAX-REASONING] local last_toggle_time_2 = 0
+00023 [GPT-5-CODEX-MAX-REASONING] local last_toggle_time_3 = 0
+00024 [GPT-5-CODEX-MAX-REASONING] 
+00025 [GPT-5-CODEX-MAX-REASONING] --- @brief Load sprites
+00026 [GPT-5-CODEX-MAX-REASONING] local function loadSprites()
+00027 [GPT-5-CODEX-MAX-REASONING]     if sprites_loaded or load_error then
+00028 [GPT-5-CODEX-MAX-REASONING]         return
+00029 [GPT-5-CODEX-MAX-REASONING]     end
+00030 [GPT-5-CODEX-MAX-REASONING] 
+00031 [GPT-5-CODEX-MAX-REASONING]     sprite1_handle = vmupro.sprite.new("assets/mask_guy_idle")
+00032 [GPT-5-CODEX-MAX-REASONING]     sprite2_handle = vmupro.sprite.new("assets/mask_guy_idle")
+00033 [GPT-5-CODEX-MAX-REASONING]     sprite3_handle = vmupro.sprite.new("assets/mask_guy_idle")
+00034 [GPT-5-CODEX-MAX-REASONING] 
+00035 [GPT-5-CODEX-MAX-REASONING]     if not sprite1_handle or not sprite2_handle or not sprite3_handle then
+00036 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page23", "Failed to load sprites")
+00037 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00038 [GPT-5-CODEX-MAX-REASONING]         return
+00039 [GPT-5-CODEX-MAX-REASONING]     end
+00040 [GPT-5-CODEX-MAX-REASONING] 
+00041 [GPT-5-CODEX-MAX-REASONING]     -- Set initial positions for the three sprites
+00042 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(sprite1_handle, 30, 100)
+00043 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(sprite2_handle, 104, 100)
+00044 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setPosition(sprite3_handle, 178, 100)
+00045 [GPT-5-CODEX-MAX-REASONING] 
+00046 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = true
+00047 [GPT-5-CODEX-MAX-REASONING]     local current_time = vmupro.system.getTimeUs()
+00048 [GPT-5-CODEX-MAX-REASONING]     last_toggle_time_1 = current_time
+00049 [GPT-5-CODEX-MAX-REASONING]     last_toggle_time_2 = current_time
+00050 [GPT-5-CODEX-MAX-REASONING]     last_toggle_time_3 = current_time
+00051 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page23", "Sprites loaded for visibility test")
+00052 [GPT-5-CODEX-MAX-REASONING] end
+00053 [GPT-5-CODEX-MAX-REASONING] 
+00054 [GPT-5-CODEX-MAX-REASONING] --- @brief Update logic - toggle visibility periodically
+00055 [GPT-5-CODEX-MAX-REASONING] function Page23.update()
+00056 [GPT-5-CODEX-MAX-REASONING]     if not sprites_loaded then
+00057 [GPT-5-CODEX-MAX-REASONING]         return
+00058 [GPT-5-CODEX-MAX-REASONING]     end
+00059 [GPT-5-CODEX-MAX-REASONING] 
+00060 [GPT-5-CODEX-MAX-REASONING]     local current_time = vmupro.system.getTimeUs()
+00061 [GPT-5-CODEX-MAX-REASONING] 
+00062 [GPT-5-CODEX-MAX-REASONING]     -- Toggle sprite 1 visibility every 500ms
+00063 [GPT-5-CODEX-MAX-REASONING]     if (current_time - last_toggle_time_1) >= blink_interval_1 then
+00064 [GPT-5-CODEX-MAX-REASONING]         local visible = vmupro.sprite.getVisible(sprite1_handle)
+00065 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.setVisible(sprite1_handle, not visible)
+00066 [GPT-5-CODEX-MAX-REASONING]         last_toggle_time_1 = current_time
+00067 [GPT-5-CODEX-MAX-REASONING]     end
+00068 [GPT-5-CODEX-MAX-REASONING] 
+00069 [GPT-5-CODEX-MAX-REASONING]     -- Toggle sprite 2 visibility every 1 second
+00070 [GPT-5-CODEX-MAX-REASONING]     if (current_time - last_toggle_time_2) >= blink_interval_2 then
+00071 [GPT-5-CODEX-MAX-REASONING]         local visible = vmupro.sprite.getVisible(sprite2_handle)
+00072 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.setVisible(sprite2_handle, not visible)
+00073 [GPT-5-CODEX-MAX-REASONING]         last_toggle_time_2 = current_time
+00074 [GPT-5-CODEX-MAX-REASONING]     end
+00075 [GPT-5-CODEX-MAX-REASONING] 
+00076 [GPT-5-CODEX-MAX-REASONING]     -- Toggle sprite 3 visibility every 250ms
+00077 [GPT-5-CODEX-MAX-REASONING]     if (current_time - last_toggle_time_3) >= blink_interval_3 then
+00078 [GPT-5-CODEX-MAX-REASONING]         local visible = vmupro.sprite.getVisible(sprite3_handle)
+00079 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.setVisible(sprite3_handle, not visible)
+00080 [GPT-5-CODEX-MAX-REASONING]         last_toggle_time_3 = current_time
+00081 [GPT-5-CODEX-MAX-REASONING]     end
+00082 [GPT-5-CODEX-MAX-REASONING] end
+00083 [GPT-5-CODEX-MAX-REASONING] 
+00084 [GPT-5-CODEX-MAX-REASONING] --- @brief Cleanup when leaving page
+00085 [GPT-5-CODEX-MAX-REASONING] function Page23.exit()
+00086 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00087 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00088 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00089 [GPT-5-CODEX-MAX-REASONING]     end
+00090 [GPT-5-CODEX-MAX-REASONING] 
+00091 [GPT-5-CODEX-MAX-REASONING]     if sprite1_handle then
+00092 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite1_handle)
+00093 [GPT-5-CODEX-MAX-REASONING]         sprite1_handle = nil
+00094 [GPT-5-CODEX-MAX-REASONING]     end
+00095 [GPT-5-CODEX-MAX-REASONING]     if sprite2_handle then
+00096 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite2_handle)
+00097 [GPT-5-CODEX-MAX-REASONING]         sprite2_handle = nil
+00098 [GPT-5-CODEX-MAX-REASONING]     end
+00099 [GPT-5-CODEX-MAX-REASONING]     if sprite3_handle then
+00100 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite3_handle)
+00101 [GPT-5-CODEX-MAX-REASONING]         sprite3_handle = nil
+00102 [GPT-5-CODEX-MAX-REASONING]     end
+00103 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = false
+00104 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page23", "Sprites freed")
+00105 [GPT-5-CODEX-MAX-REASONING] end
+00106 [GPT-5-CODEX-MAX-REASONING] 
+00107 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 23: Sprite Visibility Demo
+00108 [GPT-5-CODEX-MAX-REASONING] function Page23.render(drawPageCounter)
+00109 [GPT-5-CODEX-MAX-REASONING]     -- Start double buffer on first render
+00110 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00111 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00112 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00113 [GPT-5-CODEX-MAX-REASONING]     end
+00114 [GPT-5-CODEX-MAX-REASONING] 
+00115 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00116 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00117 [GPT-5-CODEX-MAX-REASONING] 
+00118 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00119 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00120 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Visibility", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00121 [GPT-5-CODEX-MAX-REASONING] 
+00122 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00123 [GPT-5-CODEX-MAX-REASONING] 
+00124 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites on first render
+00125 [GPT-5-CODEX-MAX-REASONING]     loadSprites()
+00126 [GPT-5-CODEX-MAX-REASONING] 
+00127 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00128 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR: Failed to load", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00129 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("sprites. Check assets.", 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00130 [GPT-5-CODEX-MAX-REASONING]     elseif not sprites_loaded then
+00131 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Loading sprites...", 10, 60, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00132 [GPT-5-CODEX-MAX-REASONING]     elseif sprite1_handle and sprite2_handle and sprite3_handle then
+00133 [GPT-5-CODEX-MAX-REASONING]         -- Get positions for each sprite
+00134 [GPT-5-CODEX-MAX-REASONING]         local x1, y1 = vmupro.sprite.getPosition(sprite1_handle)
+00135 [GPT-5-CODEX-MAX-REASONING]         local x2, y2 = vmupro.sprite.getPosition(sprite2_handle)
+00136 [GPT-5-CODEX-MAX-REASONING]         local x3, y3 = vmupro.sprite.getPosition(sprite3_handle)
+00137 [GPT-5-CODEX-MAX-REASONING] 
+00138 [GPT-5-CODEX-MAX-REASONING]         -- Draw sprites at their positions (only if visible)
+00139 [GPT-5-CODEX-MAX-REASONING]         -- The sprite system handles visibility internally
+00140 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.draw(sprite1_handle, math.floor(x1), math.floor(y1), vmupro.sprite.kImageUnflipped)
+00141 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.draw(sprite2_handle, math.floor(x2), math.floor(y2), vmupro.sprite.kImageUnflipped)
+00142 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.draw(sprite3_handle, math.floor(x3), math.floor(y3), vmupro.sprite.kImageUnflipped)
+00143 [GPT-5-CODEX-MAX-REASONING] 
+00144 [GPT-5-CODEX-MAX-REASONING]         -- Display visibility states
+00145 [GPT-5-CODEX-MAX-REASONING]         local vis1 = vmupro.sprite.getVisible(sprite1_handle)
+00146 [GPT-5-CODEX-MAX-REASONING]         local vis2 = vmupro.sprite.getVisible(sprite2_handle)
+00147 [GPT-5-CODEX-MAX-REASONING]         local vis3 = vmupro.sprite.getVisible(sprite3_handle)
+00148 [GPT-5-CODEX-MAX-REASONING] 
+00149 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("2 Hz", math.floor(x1) + 4, 145, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00150 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("1 Hz", math.floor(x2) + 4, 145, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00151 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("4 Hz", math.floor(x3) + 4, 145, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00152 [GPT-5-CODEX-MAX-REASONING] 
+00153 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(vis1 and "ON" or "OFF", math.floor(x1) + 6, 160, vis1 and vmupro.graphics.GREEN or vmupro.graphics.RED, vmupro.graphics.BLACK)
+00154 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(vis2 and "ON" or "OFF", math.floor(x2) + 6, 160, vis2 and vmupro.graphics.GREEN or vmupro.graphics.RED, vmupro.graphics.BLACK)
+00155 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(vis3 and "ON" or "OFF", math.floor(x3) + 6, 160, vis3 and vmupro.graphics.GREEN or vmupro.graphics.RED, vmupro.graphics.BLACK)
+00156 [GPT-5-CODEX-MAX-REASONING] 
+00157 [GPT-5-CODEX-MAX-REASONING]         -- Info text
+00158 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Blinking at different rates", 10, 195, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00159 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Using setVisible/getVisible", 10, 210, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00160 [GPT-5-CODEX-MAX-REASONING]     end
+00161 [GPT-5-CODEX-MAX-REASONING] 
+00162 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00163 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00164 [GPT-5-CODEX-MAX-REASONING] 
+00165 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00166 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00167 [GPT-5-CODEX-MAX-REASONING] end

@@ -1,0 +1,544 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page38.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 38: Sound Sample Playback with Background Music
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page38 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- ============================================================================
+00010 [GPT-5-CODEX-MAX-REASONING] -- WAV SAMPLE PLAYBACK
+00011 [GPT-5-CODEX-MAX-REASONING] -- ============================================================================
+00012 [GPT-5-CODEX-MAX-REASONING] local coin_sound = nil
+00013 [GPT-5-CODEX-MAX-REASONING] local fail_sound = nil
+00014 [GPT-5-CODEX-MAX-REASONING] local complete_sound = nil
+00015 [GPT-5-CODEX-MAX-REASONING] 
+00016 [GPT-5-CODEX-MAX-REASONING] -- Loading status
+00017 [GPT-5-CODEX-MAX-REASONING] local sounds_loaded = false
+00018 [GPT-5-CODEX-MAX-REASONING] local load_error = nil
+00019 [GPT-5-CODEX-MAX-REASONING] 
+00020 [GPT-5-CODEX-MAX-REASONING] -- Visual feedback
+00021 [GPT-5-CODEX-MAX-REASONING] local last_played = ""
+00022 [GPT-5-CODEX-MAX-REASONING] local last_played_time = 0
+00023 [GPT-5-CODEX-MAX-REASONING] local feedback_duration = 500000 -- 500ms
+00024 [GPT-5-CODEX-MAX-REASONING] 
+00025 [GPT-5-CODEX-MAX-REASONING] -- Memory estimates
+00026 [GPT-5-CODEX-MAX-REASONING] local ESTIMATED_SOUND_SIZE = 100000 -- ~100KB per sound
+00027 [GPT-5-CODEX-MAX-REASONING] local TOTAL_SOUNDS = 3
+00028 [GPT-5-CODEX-MAX-REASONING] local MEMORY_OVERHEAD = 10000       -- 10KB overhead
+00029 [GPT-5-CODEX-MAX-REASONING] 
+00030 [GPT-5-CODEX-MAX-REASONING] -- ============================================================================
+00031 [GPT-5-CODEX-MAX-REASONING] -- BACKGROUND MUSIC (SYNTH)
+00032 [GPT-5-CODEX-MAX-REASONING] -- ============================================================================
+00033 [GPT-5-CODEX-MAX-REASONING] local melody_synth = nil
+00034 [GPT-5-CODEX-MAX-REASONING] local bass_synth = nil
+00035 [GPT-5-CODEX-MAX-REASONING] local chord_synth1 = nil
+00036 [GPT-5-CODEX-MAX-REASONING] local chord_synth2 = nil
+00037 [GPT-5-CODEX-MAX-REASONING] local synths_ready = false
+00038 [GPT-5-CODEX-MAX-REASONING] 
+00039 [GPT-5-CODEX-MAX-REASONING] -- Music state
+00040 [GPT-5-CODEX-MAX-REASONING] local bpm = 110
+00041 [GPT-5-CODEX-MAX-REASONING] local beat_duration = 0
+00042 [GPT-5-CODEX-MAX-REASONING] local current_section = 1
+00043 [GPT-5-CODEX-MAX-REASONING] 
+00044 [GPT-5-CODEX-MAX-REASONING] -- Note tracking
+00045 [GPT-5-CODEX-MAX-REASONING] local melody_note_end = 0
+00046 [GPT-5-CODEX-MAX-REASONING] local bass_note_end = 0
+00047 [GPT-5-CODEX-MAX-REASONING] local chord_note_end = 0
+00048 [GPT-5-CODEX-MAX-REASONING] 
+00049 [GPT-5-CODEX-MAX-REASONING] -- Pattern indices
+00050 [GPT-5-CODEX-MAX-REASONING] local melody_index = 1
+00051 [GPT-5-CODEX-MAX-REASONING] local bass_index = 1
+00052 [GPT-5-CODEX-MAX-REASONING] local chord_index = 1
+00053 [GPT-5-CODEX-MAX-REASONING] 
+00054 [GPT-5-CODEX-MAX-REASONING] -- Melody patterns (Theme Hospital / FF7 inspired)
+00055 [GPT-5-CODEX-MAX-REASONING] local melody_patterns = {
+00056 [GPT-5-CODEX-MAX-REASONING]     intro = {
+00057 [GPT-5-CODEX-MAX-REASONING]         { 72, 4, 0.8 }, { 71, 2, 0.7 }, { 72, 2, 0.7 },
+00058 [GPT-5-CODEX-MAX-REASONING]         { 74, 4, 0.8 }, { 72, 4, 0.7 },
+00059 [GPT-5-CODEX-MAX-REASONING]         { 71, 4, 0.8 }, { 69, 2, 0.7 }, { 67, 2, 0.6 },
+00060 [GPT-5-CODEX-MAX-REASONING]         { 69, 8, 0.8 },
+00061 [GPT-5-CODEX-MAX-REASONING]         { 67, 4, 0.8 }, { 69, 2, 0.7 }, { 71, 2, 0.7 },
+00062 [GPT-5-CODEX-MAX-REASONING]         { 72, 4, 0.8 }, { 74, 4, 0.7 },
+00063 [GPT-5-CODEX-MAX-REASONING]         { 76, 4, 0.9 }, { 74, 2, 0.7 }, { 72, 2, 0.7 },
+00064 [GPT-5-CODEX-MAX-REASONING]         { 74, 8, 0.8 },
+00065 [GPT-5-CODEX-MAX-REASONING]     },
+00066 [GPT-5-CODEX-MAX-REASONING]     verse_a = {
+00067 [GPT-5-CODEX-MAX-REASONING]         { 64, 4, 0.8 }, { 67, 4, 0.7 }, { 69, 4, 0.8 }, { 71, 4, 0.7 },
+00068 [GPT-5-CODEX-MAX-REASONING]         { 72, 8, 0.9 }, { 0, 4, 0 }, { 71, 4, 0.7 },
+00069 [GPT-5-CODEX-MAX-REASONING]         { 69, 4, 0.8 }, { 67, 4, 0.7 }, { 69, 4, 0.8 }, { 72, 4, 0.7 },
+00070 [GPT-5-CODEX-MAX-REASONING]         { 71, 8, 0.8 }, { 69, 4, 0.7 }, { 67, 4, 0.6 },
+00071 [GPT-5-CODEX-MAX-REASONING]         { 64, 4, 0.8 }, { 67, 4, 0.7 }, { 71, 4, 0.8 }, { 72, 4, 0.8 },
+00072 [GPT-5-CODEX-MAX-REASONING]         { 74, 8, 0.9 }, { 72, 4, 0.7 }, { 71, 4, 0.7 },
+00073 [GPT-5-CODEX-MAX-REASONING]         { 69, 4,  0.8 }, { 71, 4, 0.7 }, { 72, 4, 0.8 }, { 74, 4, 0.7 },
+00074 [GPT-5-CODEX-MAX-REASONING]         { 76, 12, 0.9 }, { 0, 4, 0 },
+00075 [GPT-5-CODEX-MAX-REASONING]     },
+00076 [GPT-5-CODEX-MAX-REASONING]     chorus = {
+00077 [GPT-5-CODEX-MAX-REASONING]         { 76, 4, 0.9 }, { 74, 4, 0.8 }, { 72, 4, 0.9 }, { 74, 4, 0.8 },
+00078 [GPT-5-CODEX-MAX-REASONING]         { 76, 8, 0.9 }, { 77, 4, 0.8 }, { 76, 4, 0.8 },
+00079 [GPT-5-CODEX-MAX-REASONING]         { 74, 4,  0.9 }, { 72, 4, 0.8 }, { 71, 4, 0.8 }, { 72, 4, 0.7 },
+00080 [GPT-5-CODEX-MAX-REASONING]         { 74, 12, 0.9 }, { 0, 4, 0 },
+00081 [GPT-5-CODEX-MAX-REASONING]         { 72, 4, 0.9 }, { 74, 4, 0.8 }, { 76, 4, 0.9 }, { 79, 4, 0.9 },
+00082 [GPT-5-CODEX-MAX-REASONING]         { 77, 8, 0.9 }, { 76, 4, 0.8 }, { 74, 4, 0.8 },
+00083 [GPT-5-CODEX-MAX-REASONING]         { 72, 4,  0.9 }, { 71, 4, 0.8 }, { 69, 4, 0.8 }, { 67, 4, 0.7 },
+00084 [GPT-5-CODEX-MAX-REASONING]         { 72, 16, 1.0 },
+00085 [GPT-5-CODEX-MAX-REASONING]     },
+00086 [GPT-5-CODEX-MAX-REASONING]     outro = {
+00087 [GPT-5-CODEX-MAX-REASONING]         { 76, 4, 0.8 }, { 74, 4, 0.7 }, { 72, 4, 0.8 }, { 71, 4, 0.7 },
+00088 [GPT-5-CODEX-MAX-REASONING]         { 69, 8, 0.7 }, { 67, 8, 0.6 },
+00089 [GPT-5-CODEX-MAX-REASONING]         { 64, 4,  0.7 }, { 67, 4, 0.6 }, { 69, 4, 0.7 }, { 67, 4, 0.6 },
+00090 [GPT-5-CODEX-MAX-REASONING]         { 64, 12, 0.6 }, { 0, 4, 0 },
+00091 [GPT-5-CODEX-MAX-REASONING]         { 72, 4, 0.8 }, { 71, 2, 0.7 }, { 72, 2, 0.7 }, { 74, 4, 0.8 }, { 72, 4, 0.7 },
+00092 [GPT-5-CODEX-MAX-REASONING]         { 71, 4, 0.7 }, { 69, 2, 0.6 }, { 67, 2, 0.6 }, { 69, 8, 0.7 },
+00093 [GPT-5-CODEX-MAX-REASONING]         { 67, 4,  0.6 }, { 64, 4, 0.5 }, { 60, 8, 0.6 },
+00094 [GPT-5-CODEX-MAX-REASONING]         { 0,  16, 0 },
+00095 [GPT-5-CODEX-MAX-REASONING]     },
+00096 [GPT-5-CODEX-MAX-REASONING] }
+00097 [GPT-5-CODEX-MAX-REASONING] 
+00098 [GPT-5-CODEX-MAX-REASONING] local bass_patterns = {
+00099 [GPT-5-CODEX-MAX-REASONING]     intro = {
+00100 [GPT-5-CODEX-MAX-REASONING]         { 48, 8, 0.7 }, { 52, 8, 0.6 },
+00101 [GPT-5-CODEX-MAX-REASONING]         { 55, 8, 0.7 }, { 52, 8, 0.6 },
+00102 [GPT-5-CODEX-MAX-REASONING]         { 53, 8, 0.7 }, { 48, 8, 0.6 },
+00103 [GPT-5-CODEX-MAX-REASONING]         { 55, 8, 0.7 }, { 43, 8, 0.6 },
+00104 [GPT-5-CODEX-MAX-REASONING]         { 48, 8, 0.7 }, { 52, 8, 0.6 },
+00105 [GPT-5-CODEX-MAX-REASONING]         { 55, 8, 0.7 }, { 52, 8, 0.6 },
+00106 [GPT-5-CODEX-MAX-REASONING]         { 57, 8, 0.7 }, { 55, 8, 0.6 },
+00107 [GPT-5-CODEX-MAX-REASONING]         { 55, 8, 0.7 }, { 52, 8, 0.6 },
+00108 [GPT-5-CODEX-MAX-REASONING]     },
+00109 [GPT-5-CODEX-MAX-REASONING]     verse_a = {
+00110 [GPT-5-CODEX-MAX-REASONING]         { 48, 4, 0.7 }, { 52, 4, 0.6 }, { 55, 4, 0.7 }, { 52, 4, 0.6 },
+00111 [GPT-5-CODEX-MAX-REASONING]         { 48, 8, 0.7 }, { 47, 4, 0.6 }, { 48, 4, 0.6 },
+00112 [GPT-5-CODEX-MAX-REASONING]         { 57, 4, 0.7 }, { 55, 4, 0.6 }, { 52, 4, 0.7 }, { 48, 4, 0.6 },
+00113 [GPT-5-CODEX-MAX-REASONING]         { 55, 8, 0.7 }, { 53, 4, 0.6 }, { 52, 4, 0.6 },
+00114 [GPT-5-CODEX-MAX-REASONING]         { 48, 4, 0.7 }, { 52, 4, 0.6 }, { 55, 4, 0.7 }, { 57, 4, 0.6 },
+00115 [GPT-5-CODEX-MAX-REASONING]         { 55, 8, 0.7 }, { 52, 4, 0.6 }, { 48, 4, 0.6 },
+00116 [GPT-5-CODEX-MAX-REASONING]         { 45, 4,  0.7 }, { 48, 4, 0.6 }, { 52, 4, 0.7 }, { 55, 4, 0.6 },
+00117 [GPT-5-CODEX-MAX-REASONING]         { 48, 12, 0.7 }, { 43, 4, 0.6 },
+00118 [GPT-5-CODEX-MAX-REASONING]     },
+00119 [GPT-5-CODEX-MAX-REASONING]     chorus = {
+00120 [GPT-5-CODEX-MAX-REASONING]         { 48, 4, 0.8 }, { 55, 4, 0.7 }, { 48, 4, 0.8 }, { 55, 4, 0.7 },
+00121 [GPT-5-CODEX-MAX-REASONING]         { 53, 4, 0.8 }, { 57, 4, 0.7 }, { 53, 4, 0.8 }, { 57, 4, 0.7 },
+00122 [GPT-5-CODEX-MAX-REASONING]         { 55, 4, 0.8 }, { 59, 4, 0.7 }, { 55, 4, 0.8 }, { 52, 4, 0.7 },
+00123 [GPT-5-CODEX-MAX-REASONING]         { 48, 8, 0.8 }, { 43, 8, 0.7 },
+00124 [GPT-5-CODEX-MAX-REASONING]         { 48, 4, 0.8 }, { 52, 4, 0.7 }, { 55, 4, 0.8 }, { 57, 4, 0.7 },
+00125 [GPT-5-CODEX-MAX-REASONING]         { 53, 4, 0.8 }, { 57, 4, 0.7 }, { 60, 4, 0.8 }, { 57, 4, 0.7 },
+00126 [GPT-5-CODEX-MAX-REASONING]         { 55, 4,  0.8 }, { 52, 4, 0.7 }, { 48, 4, 0.8 }, { 43, 4, 0.7 },
+00127 [GPT-5-CODEX-MAX-REASONING]         { 48, 16, 0.9 },
+00128 [GPT-5-CODEX-MAX-REASONING]     },
+00129 [GPT-5-CODEX-MAX-REASONING]     outro = {
+00130 [GPT-5-CODEX-MAX-REASONING]         { 48, 8, 0.6 }, { 52, 8, 0.5 },
+00131 [GPT-5-CODEX-MAX-REASONING]         { 45, 8, 0.6 }, { 43, 8, 0.5 },
+00132 [GPT-5-CODEX-MAX-REASONING]         { 40, 8,  0.6 }, { 43, 8, 0.5 },
+00133 [GPT-5-CODEX-MAX-REASONING]         { 36, 16, 0.5 },
+00134 [GPT-5-CODEX-MAX-REASONING]         { 48, 8,  0.6 }, { 52, 8, 0.5 },
+00135 [GPT-5-CODEX-MAX-REASONING]         { 55, 8, 0.6 }, { 52, 8, 0.5 },
+00136 [GPT-5-CODEX-MAX-REASONING]         { 48, 8, 0.5 }, { 43, 8, 0.4 },
+00137 [GPT-5-CODEX-MAX-REASONING]         { 36, 16, 0.4 },
+00138 [GPT-5-CODEX-MAX-REASONING]     },
+00139 [GPT-5-CODEX-MAX-REASONING] }
+00140 [GPT-5-CODEX-MAX-REASONING] 
+00141 [GPT-5-CODEX-MAX-REASONING] local chord_patterns = {
+00142 [GPT-5-CODEX-MAX-REASONING]     intro = {
+00143 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.3 }, { 64, 16, 0.3 },
+00144 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.3 }, { 67, 16, 0.3 },
+00145 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.3 }, { 65, 16, 0.3 },
+00146 [GPT-5-CODEX-MAX-REASONING]         { 59, 16, 0.3 }, { 67, 16, 0.3 },
+00147 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.3 }, { 64, 16, 0.3 },
+00148 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.3 }, { 67, 16, 0.3 },
+00149 [GPT-5-CODEX-MAX-REASONING]         { 62, 16, 0.3 }, { 69, 16, 0.3 },
+00150 [GPT-5-CODEX-MAX-REASONING]         { 59, 16, 0.3 }, { 67, 16, 0.3 },
+00151 [GPT-5-CODEX-MAX-REASONING]     },
+00152 [GPT-5-CODEX-MAX-REASONING]     verse_a = {
+00153 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.3 }, { 64, 16, 0.3 },
+00154 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.3 }, { 64, 16, 0.3 },
+00155 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.3 }, { 67, 16, 0.3 },
+00156 [GPT-5-CODEX-MAX-REASONING]         { 59, 16, 0.3 }, { 67, 16, 0.3 },
+00157 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.3 }, { 64, 16, 0.3 },
+00158 [GPT-5-CODEX-MAX-REASONING]         { 62, 16, 0.3 }, { 67, 16, 0.3 },
+00159 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.3 }, { 69, 16, 0.3 },
+00160 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.3 }, { 67, 16, 0.3 },
+00161 [GPT-5-CODEX-MAX-REASONING]     },
+00162 [GPT-5-CODEX-MAX-REASONING]     chorus = {
+00163 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.4 }, { 67, 16, 0.4 },
+00164 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.4 }, { 65, 16, 0.4 },
+00165 [GPT-5-CODEX-MAX-REASONING]         { 59, 16, 0.4 }, { 67, 16, 0.4 },
+00166 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.4 }, { 64, 16, 0.4 },
+00167 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.4 }, { 67, 16, 0.4 },
+00168 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.4 }, { 65, 16, 0.4 },
+00169 [GPT-5-CODEX-MAX-REASONING]         { 59, 16, 0.4 }, { 62, 16, 0.4 },
+00170 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.5 }, { 64, 16, 0.5 },
+00171 [GPT-5-CODEX-MAX-REASONING]     },
+00172 [GPT-5-CODEX-MAX-REASONING]     outro = {
+00173 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.3 }, { 64, 16, 0.3 },
+00174 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.3 }, { 69, 16, 0.3 },
+00175 [GPT-5-CODEX-MAX-REASONING]         { 59, 16, 0.3 }, { 64, 16, 0.3 },
+00176 [GPT-5-CODEX-MAX-REASONING]         { 60, 32, 0.3 }, { 0, 0, 0 },
+00177 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.3 }, { 64, 16, 0.3 },
+00178 [GPT-5-CODEX-MAX-REASONING]         { 59, 16, 0.3 }, { 67, 16, 0.3 },
+00179 [GPT-5-CODEX-MAX-REASONING]         { 60, 16, 0.2 }, { 64, 16, 0.2 },
+00180 [GPT-5-CODEX-MAX-REASONING]         { 60, 32, 0.2 }, { 0, 0, 0 },
+00181 [GPT-5-CODEX-MAX-REASONING]     },
+00182 [GPT-5-CODEX-MAX-REASONING] }
+00183 [GPT-5-CODEX-MAX-REASONING] 
+00184 [GPT-5-CODEX-MAX-REASONING] local section_order = { "intro", "verse_a", "chorus", "outro" }
+00185 [GPT-5-CODEX-MAX-REASONING] 
+00186 [GPT-5-CODEX-MAX-REASONING] -- ============================================================================
+00187 [GPT-5-CODEX-MAX-REASONING] -- WAV LOADING FUNCTIONS
+00188 [GPT-5-CODEX-MAX-REASONING] -- ============================================================================
+00189 [GPT-5-CODEX-MAX-REASONING] 
+00190 [GPT-5-CODEX-MAX-REASONING] local function loadSound(path, name)
+00191 [GPT-5-CODEX-MAX-REASONING]     local sound = vmupro.sound.sample.new(path)
+00192 [GPT-5-CODEX-MAX-REASONING]     if sound then
+00193 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_INFO, "Page38",
+00194 [GPT-5-CODEX-MAX-REASONING]             string.format("%s: %dHz, %dch, %d samples",
+00195 [GPT-5-CODEX-MAX-REASONING]                 name, sound.sampleRate, sound.channels, sound.sampleCount))
+00196 [GPT-5-CODEX-MAX-REASONING]     else
+00197 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page38",
+00198 [GPT-5-CODEX-MAX-REASONING]             string.format("Failed to load %s", name))
+00199 [GPT-5-CODEX-MAX-REASONING]     end
+00200 [GPT-5-CODEX-MAX-REASONING]     return sound
+00201 [GPT-5-CODEX-MAX-REASONING] end
+00202 [GPT-5-CODEX-MAX-REASONING] 
+00203 [GPT-5-CODEX-MAX-REASONING] -- ============================================================================
+00204 [GPT-5-CODEX-MAX-REASONING] -- SYNTH FUNCTIONS
+00205 [GPT-5-CODEX-MAX-REASONING] -- ============================================================================
+00206 [GPT-5-CODEX-MAX-REASONING] 
+00207 [GPT-5-CODEX-MAX-REASONING] local function initSynths()
+00208 [GPT-5-CODEX-MAX-REASONING]     if synths_ready then return true end
+00209 [GPT-5-CODEX-MAX-REASONING] 
+00210 [GPT-5-CODEX-MAX-REASONING]     melody_synth = vmupro.sound.synth.new(vmupro.sound.kWaveTriangle)
+00211 [GPT-5-CODEX-MAX-REASONING]     if not melody_synth then return false end
+00212 [GPT-5-CODEX-MAX-REASONING]     vmupro.sound.synth.setAttack(melody_synth, 0.02)
+00213 [GPT-5-CODEX-MAX-REASONING]     vmupro.sound.synth.setDecay(melody_synth, 0.1)
+00214 [GPT-5-CODEX-MAX-REASONING]     vmupro.sound.synth.setSustain(melody_synth, 0.6)
+00215 [GPT-5-CODEX-MAX-REASONING]     vmupro.sound.synth.setRelease(melody_synth, 0.2)
+00216 [GPT-5-CODEX-MAX-REASONING]     vmupro.sound.synth.setVolume(melody_synth, 0.5, 0.5)
+00217 [GPT-5-CODEX-MAX-REASONING] 
+00218 [GPT-5-CODEX-MAX-REASONING]     bass_synth = vmupro.sound.synth.new(vmupro.sound.kWaveSquare)
+00219 [GPT-5-CODEX-MAX-REASONING]     if not bass_synth then
+00220 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.synth.free(melody_synth)
+00221 [GPT-5-CODEX-MAX-REASONING]         melody_synth = nil
+00222 [GPT-5-CODEX-MAX-REASONING]         return false
+00223 [GPT-5-CODEX-MAX-REASONING]     end
+00224 [GPT-5-CODEX-MAX-REASONING]     vmupro.sound.synth.setAttack(bass_synth, 0.01)
+00225 [GPT-5-CODEX-MAX-REASONING]     vmupro.sound.synth.setDecay(bass_synth, 0.15)
+00226 [GPT-5-CODEX-MAX-REASONING]     vmupro.sound.synth.setSustain(bass_synth, 0.5)
+00227 [GPT-5-CODEX-MAX-REASONING]     vmupro.sound.synth.setRelease(bass_synth, 0.1)
+00228 [GPT-5-CODEX-MAX-REASONING]     vmupro.sound.synth.setVolume(bass_synth, 0.35, 0.35)
+00229 [GPT-5-CODEX-MAX-REASONING] 
+00230 [GPT-5-CODEX-MAX-REASONING]     chord_synth1 = vmupro.sound.synth.new(vmupro.sound.kWaveSine)
+00231 [GPT-5-CODEX-MAX-REASONING]     chord_synth2 = vmupro.sound.synth.new(vmupro.sound.kWaveSine)
+00232 [GPT-5-CODEX-MAX-REASONING]     if not chord_synth1 or not chord_synth2 then
+00233 [GPT-5-CODEX-MAX-REASONING]         if melody_synth then vmupro.sound.synth.free(melody_synth) end
+00234 [GPT-5-CODEX-MAX-REASONING]         if bass_synth then vmupro.sound.synth.free(bass_synth) end
+00235 [GPT-5-CODEX-MAX-REASONING]         if chord_synth1 then vmupro.sound.synth.free(chord_synth1) end
+00236 [GPT-5-CODEX-MAX-REASONING]         melody_synth, bass_synth, chord_synth1 = nil, nil, nil
+00237 [GPT-5-CODEX-MAX-REASONING]         return false
+00238 [GPT-5-CODEX-MAX-REASONING]     end
+00239 [GPT-5-CODEX-MAX-REASONING] 
+00240 [GPT-5-CODEX-MAX-REASONING]     for _, synth in ipairs({ chord_synth1, chord_synth2 }) do
+00241 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.synth.setAttack(synth, 0.1)
+00242 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.synth.setDecay(synth, 0.2)
+00243 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.synth.setSustain(synth, 0.4)
+00244 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.synth.setRelease(synth, 0.4)
+00245 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.synth.setVolume(synth, 0.25, 0.25)
+00246 [GPT-5-CODEX-MAX-REASONING]     end
+00247 [GPT-5-CODEX-MAX-REASONING] 
+00248 [GPT-5-CODEX-MAX-REASONING]     synths_ready = true
+00249 [GPT-5-CODEX-MAX-REASONING]     return true
+00250 [GPT-5-CODEX-MAX-REASONING] end
+00251 [GPT-5-CODEX-MAX-REASONING] 
+00252 [GPT-5-CODEX-MAX-REASONING] local function freeSynths()
+00253 [GPT-5-CODEX-MAX-REASONING]     if melody_synth then
+00254 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.synth.stop(melody_synth); vmupro.sound.synth.free(melody_synth); melody_synth = nil
+00255 [GPT-5-CODEX-MAX-REASONING]     end
+00256 [GPT-5-CODEX-MAX-REASONING]     if bass_synth then
+00257 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.synth.stop(bass_synth); vmupro.sound.synth.free(bass_synth); bass_synth = nil
+00258 [GPT-5-CODEX-MAX-REASONING]     end
+00259 [GPT-5-CODEX-MAX-REASONING]     if chord_synth1 then
+00260 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.synth.stop(chord_synth1); vmupro.sound.synth.free(chord_synth1); chord_synth1 = nil
+00261 [GPT-5-CODEX-MAX-REASONING]     end
+00262 [GPT-5-CODEX-MAX-REASONING]     if chord_synth2 then
+00263 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.synth.stop(chord_synth2); vmupro.sound.synth.free(chord_synth2); chord_synth2 = nil
+00264 [GPT-5-CODEX-MAX-REASONING]     end
+00265 [GPT-5-CODEX-MAX-REASONING]     synths_ready = false
+00266 [GPT-5-CODEX-MAX-REASONING] end
+00267 [GPT-5-CODEX-MAX-REASONING] 
+00268 [GPT-5-CODEX-MAX-REASONING] local function getCurrentSection()
+00269 [GPT-5-CODEX-MAX-REASONING]     return section_order[current_section] or "intro"
+00270 [GPT-5-CODEX-MAX-REASONING] end
+00271 [GPT-5-CODEX-MAX-REASONING] 
+00272 [GPT-5-CODEX-MAX-REASONING] local function advanceSection()
+00273 [GPT-5-CODEX-MAX-REASONING]     current_section = current_section + 1
+00274 [GPT-5-CODEX-MAX-REASONING]     if current_section > #section_order then
+00275 [GPT-5-CODEX-MAX-REASONING]         current_section = 1
+00276 [GPT-5-CODEX-MAX-REASONING]     end
+00277 [GPT-5-CODEX-MAX-REASONING]     melody_index, bass_index, chord_index = 1, 1, 1
+00278 [GPT-5-CODEX-MAX-REASONING] end
+00279 [GPT-5-CODEX-MAX-REASONING] 
+00280 [GPT-5-CODEX-MAX-REASONING] local function playMelodyNote(pattern, current_time)
+00281 [GPT-5-CODEX-MAX-REASONING]     if not pattern or melody_index > #pattern then return end
+00282 [GPT-5-CODEX-MAX-REASONING]     local note = pattern[melody_index]
+00283 [GPT-5-CODEX-MAX-REASONING]     if not note then return end
+00284 [GPT-5-CODEX-MAX-REASONING]     if note[1] > 0 and note[3] > 0 then
+00285 [GPT-5-CODEX-MAX-REASONING]         local len = (note[2] * beat_duration / 4) / 1000000
+00286 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.synth.playMIDINote(melody_synth, note[1], note[3], len * 0.9)
+00287 [GPT-5-CODEX-MAX-REASONING]     end
+00288 [GPT-5-CODEX-MAX-REASONING]     melody_note_end = current_time + (note[2] * beat_duration / 4)
+00289 [GPT-5-CODEX-MAX-REASONING]     melody_index = melody_index + 1
+00290 [GPT-5-CODEX-MAX-REASONING] end
+00291 [GPT-5-CODEX-MAX-REASONING] 
+00292 [GPT-5-CODEX-MAX-REASONING] local function playBassNote(pattern, current_time)
+00293 [GPT-5-CODEX-MAX-REASONING]     if not pattern or bass_index > #pattern then return end
+00294 [GPT-5-CODEX-MAX-REASONING]     local note = pattern[bass_index]
+00295 [GPT-5-CODEX-MAX-REASONING]     if not note then return end
+00296 [GPT-5-CODEX-MAX-REASONING]     if note[1] > 0 and note[3] > 0 then
+00297 [GPT-5-CODEX-MAX-REASONING]         local len = (note[2] * beat_duration / 4) / 1000000
+00298 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.synth.playMIDINote(bass_synth, note[1], note[3], len * 0.85)
+00299 [GPT-5-CODEX-MAX-REASONING]     end
+00300 [GPT-5-CODEX-MAX-REASONING]     bass_note_end = current_time + (note[2] * beat_duration / 4)
+00301 [GPT-5-CODEX-MAX-REASONING]     bass_index = bass_index + 1
+00302 [GPT-5-CODEX-MAX-REASONING] end
+00303 [GPT-5-CODEX-MAX-REASONING] 
+00304 [GPT-5-CODEX-MAX-REASONING] local function playChordNotes(pattern, current_time)
+00305 [GPT-5-CODEX-MAX-REASONING]     if not pattern or chord_index > #pattern then return end
+00306 [GPT-5-CODEX-MAX-REASONING]     local note1 = pattern[chord_index]
+00307 [GPT-5-CODEX-MAX-REASONING]     local note2 = pattern[chord_index + 1]
+00308 [GPT-5-CODEX-MAX-REASONING]     if note1 and note1[1] > 0 then
+00309 [GPT-5-CODEX-MAX-REASONING]         local len = (note1[2] * beat_duration / 4) / 1000000
+00310 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.synth.playMIDINote(chord_synth1, note1[1], note1[3], len * 0.95)
+00311 [GPT-5-CODEX-MAX-REASONING]     end
+00312 [GPT-5-CODEX-MAX-REASONING]     if note2 and note2[1] > 0 then
+00313 [GPT-5-CODEX-MAX-REASONING]         local len = (note2[2] * beat_duration / 4) / 1000000
+00314 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.synth.playMIDINote(chord_synth2, note2[1], note2[3], len * 0.95)
+00315 [GPT-5-CODEX-MAX-REASONING]     end
+00316 [GPT-5-CODEX-MAX-REASONING]     local dur = note1 and note1[2] or 16
+00317 [GPT-5-CODEX-MAX-REASONING]     chord_note_end = current_time + (dur * beat_duration / 4)
+00318 [GPT-5-CODEX-MAX-REASONING]     chord_index = chord_index + 2
+00319 [GPT-5-CODEX-MAX-REASONING] end
+00320 [GPT-5-CODEX-MAX-REASONING] 
+00321 [GPT-5-CODEX-MAX-REASONING] local function updateMusic()
+00322 [GPT-5-CODEX-MAX-REASONING]     if not synths_ready then return end
+00323 [GPT-5-CODEX-MAX-REASONING] 
+00324 [GPT-5-CODEX-MAX-REASONING]     local current_time = vmupro.system.getTimeUs()
+00325 [GPT-5-CODEX-MAX-REASONING]     local section_name = getCurrentSection()
+00326 [GPT-5-CODEX-MAX-REASONING]     local melody_pattern = melody_patterns[section_name]
+00327 [GPT-5-CODEX-MAX-REASONING]     local bass_pattern = bass_patterns[section_name]
+00328 [GPT-5-CODEX-MAX-REASONING]     local chord_pattern = chord_patterns[section_name]
+00329 [GPT-5-CODEX-MAX-REASONING] 
+00330 [GPT-5-CODEX-MAX-REASONING]     if current_time >= melody_note_end then
+00331 [GPT-5-CODEX-MAX-REASONING]         if melody_index > #melody_pattern then
+00332 [GPT-5-CODEX-MAX-REASONING]             advanceSection()
+00333 [GPT-5-CODEX-MAX-REASONING]             return
+00334 [GPT-5-CODEX-MAX-REASONING]         end
+00335 [GPT-5-CODEX-MAX-REASONING]         playMelodyNote(melody_pattern, current_time)
+00336 [GPT-5-CODEX-MAX-REASONING]     end
+00337 [GPT-5-CODEX-MAX-REASONING] 
+00338 [GPT-5-CODEX-MAX-REASONING]     if current_time >= bass_note_end and bass_index <= #bass_pattern then
+00339 [GPT-5-CODEX-MAX-REASONING]         playBassNote(bass_pattern, current_time)
+00340 [GPT-5-CODEX-MAX-REASONING]     end
+00341 [GPT-5-CODEX-MAX-REASONING] 
+00342 [GPT-5-CODEX-MAX-REASONING]     if current_time >= chord_note_end and chord_index <= #chord_pattern then
+00343 [GPT-5-CODEX-MAX-REASONING]         playChordNotes(chord_pattern, current_time)
+00344 [GPT-5-CODEX-MAX-REASONING]     end
+00345 [GPT-5-CODEX-MAX-REASONING] end
+00346 [GPT-5-CODEX-MAX-REASONING] 
+00347 [GPT-5-CODEX-MAX-REASONING] -- ============================================================================
+00348 [GPT-5-CODEX-MAX-REASONING] -- PAGE LIFECYCLE
+00349 [GPT-5-CODEX-MAX-REASONING] -- ============================================================================
+00350 [GPT-5-CODEX-MAX-REASONING] 
+00351 [GPT-5-CODEX-MAX-REASONING] function Page38.enter()
+00352 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page38", "Entering sound demo")
+00353 [GPT-5-CODEX-MAX-REASONING] 
+00354 [GPT-5-CODEX-MAX-REASONING]     vmupro.audio.startListenMode()
+00355 [GPT-5-CODEX-MAX-REASONING] 
+00356 [GPT-5-CODEX-MAX-REASONING]     -- Load WAV samples
+00357 [GPT-5-CODEX-MAX-REASONING]     local required_memory = (ESTIMATED_SOUND_SIZE * TOTAL_SOUNDS) + MEMORY_OVERHEAD
+00358 [GPT-5-CODEX-MAX-REASONING]     local largest_block = vmupro.system.getLargestFreeBlock()
+00359 [GPT-5-CODEX-MAX-REASONING] 
+00360 [GPT-5-CODEX-MAX-REASONING]     if largest_block < required_memory then
+00361 [GPT-5-CODEX-MAX-REASONING]         load_error = string.format("Need %dKB, have %dKB",
+00362 [GPT-5-CODEX-MAX-REASONING]             math.floor(required_memory / 1024),
+00363 [GPT-5-CODEX-MAX-REASONING]             math.floor(largest_block / 1024))
+00364 [GPT-5-CODEX-MAX-REASONING]         sounds_loaded = false
+00365 [GPT-5-CODEX-MAX-REASONING]     else
+00366 [GPT-5-CODEX-MAX-REASONING]         coin_sound = loadSound("assets/winning-a-coin", "Coin")
+00367 [GPT-5-CODEX-MAX-REASONING]         fail_sound = loadSound("assets/player-losing-or-failing", "Fail")
+00368 [GPT-5-CODEX-MAX-REASONING]         complete_sound = loadSound("assets/game-complete", "Complete")
+00369 [GPT-5-CODEX-MAX-REASONING] 
+00370 [GPT-5-CODEX-MAX-REASONING]         if coin_sound and fail_sound and complete_sound then
+00371 [GPT-5-CODEX-MAX-REASONING]             sounds_loaded = true
+00372 [GPT-5-CODEX-MAX-REASONING]             load_error = nil
+00373 [GPT-5-CODEX-MAX-REASONING]         else
+00374 [GPT-5-CODEX-MAX-REASONING]             sounds_loaded = false
+00375 [GPT-5-CODEX-MAX-REASONING]             load_error = "One or more sounds failed to load"
+00376 [GPT-5-CODEX-MAX-REASONING]         end
+00377 [GPT-5-CODEX-MAX-REASONING]     end
+00378 [GPT-5-CODEX-MAX-REASONING] 
+00379 [GPT-5-CODEX-MAX-REASONING]     -- Initialize synths for background music
+00380 [GPT-5-CODEX-MAX-REASONING]     if initSynths() then
+00381 [GPT-5-CODEX-MAX-REASONING]         beat_duration = (60 * 1000000) / bpm
+00382 [GPT-5-CODEX-MAX-REASONING]         local t = vmupro.system.getTimeUs()
+00383 [GPT-5-CODEX-MAX-REASONING]         melody_note_end, bass_note_end, chord_note_end = t, t, t
+00384 [GPT-5-CODEX-MAX-REASONING]         current_section = 1
+00385 [GPT-5-CODEX-MAX-REASONING]         melody_index, bass_index, chord_index = 1, 1, 1
+00386 [GPT-5-CODEX-MAX-REASONING]     end
+00387 [GPT-5-CODEX-MAX-REASONING] end
+00388 [GPT-5-CODEX-MAX-REASONING] 
+00389 [GPT-5-CODEX-MAX-REASONING] function Page38.update()
+00390 [GPT-5-CODEX-MAX-REASONING]     vmupro.sound.update()
+00391 [GPT-5-CODEX-MAX-REASONING] 
+00392 [GPT-5-CODEX-MAX-REASONING]     -- Update background music
+00393 [GPT-5-CODEX-MAX-REASONING]     updateMusic()
+00394 [GPT-5-CODEX-MAX-REASONING] 
+00395 [GPT-5-CODEX-MAX-REASONING]     -- Handle WAV sample controls
+00396 [GPT-5-CODEX-MAX-REASONING]     if not sounds_loaded then return end
+00397 [GPT-5-CODEX-MAX-REASONING] 
+00398 [GPT-5-CODEX-MAX-REASONING]     local current_time = vmupro.system.getTimeUs()
+00399 [GPT-5-CODEX-MAX-REASONING] 
+00400 [GPT-5-CODEX-MAX-REASONING]     if vmupro.input.pressed(vmupro.input.A) then
+00401 [GPT-5-CODEX-MAX-REASONING]         if coin_sound then
+00402 [GPT-5-CODEX-MAX-REASONING]             vmupro.sound.sample.play(coin_sound, 0, function()
+00403 [GPT-5-CODEX-MAX-REASONING]                 vmupro.system.log(vmupro.system.LOG_INFO, "Page38", "Coin done")
+00404 [GPT-5-CODEX-MAX-REASONING]             end)
+00405 [GPT-5-CODEX-MAX-REASONING]             last_played = "COIN"
+00406 [GPT-5-CODEX-MAX-REASONING]             last_played_time = current_time
+00407 [GPT-5-CODEX-MAX-REASONING]         end
+00408 [GPT-5-CODEX-MAX-REASONING]     end
+00409 [GPT-5-CODEX-MAX-REASONING] 
+00410 [GPT-5-CODEX-MAX-REASONING]     if vmupro.input.pressed(vmupro.input.MODE) then
+00411 [GPT-5-CODEX-MAX-REASONING]         if fail_sound then
+00412 [GPT-5-CODEX-MAX-REASONING]             vmupro.sound.sample.play(fail_sound, 0, function()
+00413 [GPT-5-CODEX-MAX-REASONING]                 vmupro.system.log(vmupro.system.LOG_INFO, "Page38", "Fail done")
+00414 [GPT-5-CODEX-MAX-REASONING]             end)
+00415 [GPT-5-CODEX-MAX-REASONING]             last_played = "FAIL"
+00416 [GPT-5-CODEX-MAX-REASONING]             last_played_time = current_time
+00417 [GPT-5-CODEX-MAX-REASONING]         end
+00418 [GPT-5-CODEX-MAX-REASONING]     end
+00419 [GPT-5-CODEX-MAX-REASONING] 
+00420 [GPT-5-CODEX-MAX-REASONING]     if vmupro.input.pressed(vmupro.input.UP) then
+00421 [GPT-5-CODEX-MAX-REASONING]         if complete_sound then
+00422 [GPT-5-CODEX-MAX-REASONING]             vmupro.sound.sample.play(complete_sound, 0, function()
+00423 [GPT-5-CODEX-MAX-REASONING]                 vmupro.system.log(vmupro.system.LOG_INFO, "Page38", "Complete done")
+00424 [GPT-5-CODEX-MAX-REASONING]             end)
+00425 [GPT-5-CODEX-MAX-REASONING]             last_played = "COMPLETE"
+00426 [GPT-5-CODEX-MAX-REASONING]             last_played_time = current_time
+00427 [GPT-5-CODEX-MAX-REASONING]         end
+00428 [GPT-5-CODEX-MAX-REASONING]     end
+00429 [GPT-5-CODEX-MAX-REASONING] 
+00430 [GPT-5-CODEX-MAX-REASONING]     if vmupro.input.pressed(vmupro.input.DOWN) then
+00431 [GPT-5-CODEX-MAX-REASONING]         if coin_sound then vmupro.sound.sample.stop(coin_sound) end
+00432 [GPT-5-CODEX-MAX-REASONING]         if fail_sound then vmupro.sound.sample.stop(fail_sound) end
+00433 [GPT-5-CODEX-MAX-REASONING]         if complete_sound then vmupro.sound.sample.stop(complete_sound) end
+00434 [GPT-5-CODEX-MAX-REASONING]         last_played = "STOPPED"
+00435 [GPT-5-CODEX-MAX-REASONING]         last_played_time = current_time
+00436 [GPT-5-CODEX-MAX-REASONING]     end
+00437 [GPT-5-CODEX-MAX-REASONING] 
+00438 [GPT-5-CODEX-MAX-REASONING]     if last_played ~= "" and (current_time - last_played_time) > feedback_duration then
+00439 [GPT-5-CODEX-MAX-REASONING]         last_played = ""
+00440 [GPT-5-CODEX-MAX-REASONING]     end
+00441 [GPT-5-CODEX-MAX-REASONING] end
+00442 [GPT-5-CODEX-MAX-REASONING] 
+00443 [GPT-5-CODEX-MAX-REASONING] function Page38.exit()
+00444 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00445 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00446 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00447 [GPT-5-CODEX-MAX-REASONING]     end
+00448 [GPT-5-CODEX-MAX-REASONING] 
+00449 [GPT-5-CODEX-MAX-REASONING]     -- Free WAV samples
+00450 [GPT-5-CODEX-MAX-REASONING]     if coin_sound then
+00451 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.sample.stop(coin_sound); vmupro.sound.sample.free(coin_sound); coin_sound = nil
+00452 [GPT-5-CODEX-MAX-REASONING]     end
+00453 [GPT-5-CODEX-MAX-REASONING]     if fail_sound then
+00454 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.sample.stop(fail_sound); vmupro.sound.sample.free(fail_sound); fail_sound = nil
+00455 [GPT-5-CODEX-MAX-REASONING]     end
+00456 [GPT-5-CODEX-MAX-REASONING]     if complete_sound then
+00457 [GPT-5-CODEX-MAX-REASONING]         vmupro.sound.sample.stop(complete_sound); vmupro.sound.sample.free(complete_sound); complete_sound = nil
+00458 [GPT-5-CODEX-MAX-REASONING]     end
+00459 [GPT-5-CODEX-MAX-REASONING] 
+00460 [GPT-5-CODEX-MAX-REASONING]     -- Free synths
+00461 [GPT-5-CODEX-MAX-REASONING]     freeSynths()
+00462 [GPT-5-CODEX-MAX-REASONING] 
+00463 [GPT-5-CODEX-MAX-REASONING]     vmupro.audio.exitListenMode()
+00464 [GPT-5-CODEX-MAX-REASONING] 
+00465 [GPT-5-CODEX-MAX-REASONING]     sounds_loaded = false
+00466 [GPT-5-CODEX-MAX-REASONING]     load_error = nil
+00467 [GPT-5-CODEX-MAX-REASONING]     last_played = ""
+00468 [GPT-5-CODEX-MAX-REASONING] end
+00469 [GPT-5-CODEX-MAX-REASONING] 
+00470 [GPT-5-CODEX-MAX-REASONING] function Page38.render(drawPageCounter)
+00471 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00472 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00473 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00474 [GPT-5-CODEX-MAX-REASONING]     end
+00475 [GPT-5-CODEX-MAX-REASONING] 
+00476 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00477 [GPT-5-CODEX-MAX-REASONING] 
+00478 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00479 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Sound", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00480 [GPT-5-CODEX-MAX-REASONING] 
+00481 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00482 [GPT-5-CODEX-MAX-REASONING] 
+00483 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00484 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("WAV + Synth Music", 10, 40, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00485 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR:", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00486 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(load_error, 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00487 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("< Prev", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00488 [GPT-5-CODEX-MAX-REASONING]         drawPageCounter()
+00489 [GPT-5-CODEX-MAX-REASONING]         return
+00490 [GPT-5-CODEX-MAX-REASONING]     end
+00491 [GPT-5-CODEX-MAX-REASONING] 
+00492 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("WAV + Synth Music", 10, 40, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00493 [GPT-5-CODEX-MAX-REASONING] 
+00494 [GPT-5-CODEX-MAX-REASONING]     local status_text = sounds_loaded and "Loaded" or "Loading..."
+00495 [GPT-5-CODEX-MAX-REASONING]     local status_color = sounds_loaded and vmupro.graphics.GREEN or vmupro.graphics.YELLOW
+00496 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Samples: " .. status_text, 10, 52, status_color, vmupro.graphics.BLACK)
+00497 [GPT-5-CODEX-MAX-REASONING] 
+00498 [GPT-5-CODEX-MAX-REASONING]     -- Music status
+00499 [GPT-5-CODEX-MAX-REASONING]     local music_status = synths_ready and getCurrentSection() or "Off"
+00500 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Music: " .. music_status, 130, 52, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00501 [GPT-5-CODEX-MAX-REASONING] 
+00502 [GPT-5-CODEX-MAX-REASONING]     -- WAV Controls
+00503 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("WAV Controls:", 10, 70, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00504 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("A - Coin", 15, 85, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00505 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("MODE - Fail", 15, 98, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00506 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("UP - Complete", 15, 111, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00507 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("DOWN - Stop", 15, 124, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00508 [GPT-5-CODEX-MAX-REASONING] 
+00509 [GPT-5-CODEX-MAX-REASONING]     -- Playing status
+00510 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Playing:", 10, 142, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00511 [GPT-5-CODEX-MAX-REASONING] 
+00512 [GPT-5-CODEX-MAX-REASONING]     local coin_playing = coin_sound and vmupro.sound.sample.isPlaying(coin_sound) or false
+00513 [GPT-5-CODEX-MAX-REASONING]     local fail_playing = fail_sound and vmupro.sound.sample.isPlaying(fail_sound) or false
+00514 [GPT-5-CODEX-MAX-REASONING]     local complete_playing = complete_sound and vmupro.sound.sample.isPlaying(complete_sound) or false
+00515 [GPT-5-CODEX-MAX-REASONING] 
+00516 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Coin", 15, 155, coin_playing and vmupro.graphics.GREEN or vmupro.graphics.GREY,
+00517 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.BLACK)
+00518 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Fail", 55, 155, fail_playing and vmupro.graphics.RED or vmupro.graphics.GREY,
+00519 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.BLACK)
+00520 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Complete", 90, 155, complete_playing and vmupro.graphics.BLUE or vmupro.graphics.GREY,
+00521 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.BLACK)
+00522 [GPT-5-CODEX-MAX-REASONING] 
+00523 [GPT-5-CODEX-MAX-REASONING]     -- Feedback
+00524 [GPT-5-CODEX-MAX-REASONING]     if last_played ~= "" then
+00525 [GPT-5-CODEX-MAX-REASONING]         local colors = { COIN = vmupro.graphics.YELLOWGREEN, FAIL = vmupro.graphics.RED, COMPLETE = vmupro.graphics.BLUE, STOPPED =
+00526 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.ORANGE }
+00527 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(">> " .. last_played .. " <<", 60, 175, colors[last_played] or vmupro.graphics.WHITE,
+00528 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.BLACK)
+00529 [GPT-5-CODEX-MAX-REASONING]     end
+00530 [GPT-5-CODEX-MAX-REASONING] 
+00531 [GPT-5-CODEX-MAX-REASONING]     -- Synth voices
+00532 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Synth:", 10, 195, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00533 [GPT-5-CODEX-MAX-REASONING]     local m_active = melody_synth and vmupro.sound.synth.isPlaying(melody_synth)
+00534 [GPT-5-CODEX-MAX-REASONING]     local b_active = bass_synth and vmupro.sound.synth.isPlaying(bass_synth)
+00535 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Mel", 55, 195, m_active and vmupro.graphics.GREEN or vmupro.graphics.GREY,
+00536 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.BLACK)
+00537 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Bas", 85, 195, b_active and vmupro.graphics.BLUE or vmupro.graphics.GREY,
+00538 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.BLACK)
+00539 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Chd", 115, 195, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00540 [GPT-5-CODEX-MAX-REASONING] 
+00541 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00542 [GPT-5-CODEX-MAX-REASONING] 
+00543 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00544 [GPT-5-CODEX-MAX-REASONING] end

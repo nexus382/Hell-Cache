@@ -1,0 +1,48 @@
+00001 [GPT-5-CODEX-MAX-REASONING] --- @file doublebuffer.lua
+00002 [GPT-5-CODEX-MAX-REASONING] --- @brief VMU Pro LUA SDK - Double Buffer Rendering Functions
+00003 [GPT-5-CODEX-MAX-REASONING] --- @author 8BitMods
+00004 [GPT-5-CODEX-MAX-REASONING] --- @version 1.0.0
+00005 [GPT-5-CODEX-MAX-REASONING] --- @date 2025-09-19
+00006 [GPT-5-CODEX-MAX-REASONING] --- @copyright Copyright (c) 2025 8BitMods. All rights reserved.
+00007 [GPT-5-CODEX-MAX-REASONING] ---
+00008 [GPT-5-CODEX-MAX-REASONING] --- Double buffer rendering system for smooth animation on VMU Pro.
+00009 [GPT-5-CODEX-MAX-REASONING] --- Functions are available under the vmupro.graphics namespace.
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING] -- Ensure vmupro namespace exists
+00012 [GPT-5-CODEX-MAX-REASONING] vmupro = vmupro or {}
+00013 [GPT-5-CODEX-MAX-REASONING] vmupro.graphics = vmupro.graphics or {}
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING] --- @brief Start the double buffer rendering system
+00016 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.startDoubleBufferRenderer()
+00017 [GPT-5-CODEX-MAX-REASONING] --- @note Call this at the beginning of your application for smooth rendering
+00018 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00019 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00020 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.startDoubleBufferRenderer() end
+00021 [GPT-5-CODEX-MAX-REASONING] 
+00022 [GPT-5-CODEX-MAX-REASONING] --- @brief Stop the double buffer rendering system
+00023 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.stopDoubleBufferRenderer()
+00024 [GPT-5-CODEX-MAX-REASONING] --- @note Call this when your application exits
+00025 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00026 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00027 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.stopDoubleBufferRenderer() end
+00028 [GPT-5-CODEX-MAX-REASONING] 
+00029 [GPT-5-CODEX-MAX-REASONING] --- @brief Push the current frame to the double buffer
+00030 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.pushDoubleBufferFrame()
+00031 [GPT-5-CODEX-MAX-REASONING] --- @note Call this after rendering a complete frame to display it
+00032 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00033 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00034 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.pushDoubleBufferFrame() end
+00035 [GPT-5-CODEX-MAX-REASONING] 
+00036 [GPT-5-CODEX-MAX-REASONING] --- @brief Pause the double buffer renderer
+00037 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.pauseDoubleBufferRenderer()
+00038 [GPT-5-CODEX-MAX-REASONING] --- @note Use this to temporarily pause rendering (e.g., during menu screens)
+00039 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00040 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00041 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.pauseDoubleBufferRenderer() end
+00042 [GPT-5-CODEX-MAX-REASONING] 
+00043 [GPT-5-CODEX-MAX-REASONING] --- @brief Resume the double buffer renderer
+00044 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.resumeDoubleBufferRenderer()
+00045 [GPT-5-CODEX-MAX-REASONING] --- @note Use this to resume rendering after pausing
+00046 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00047 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00048 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.resumeDoubleBufferRenderer() end

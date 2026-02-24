@@ -1,0 +1,15 @@
+{
+  "created_at": "2026-02-22T01:40:14.525Z",
+  "trigger": "auto",
+  "active_modes": {
+    "ultrawork": {
+      "original_prompt": "ok now itss looking right but i want to make the systemn work better, it seems that ts an nstant shot. ok using parellel workers, up to 20, and using uw ultra work mode, i want you to look at the way we handle the graphics right now, is this the best way to get the most performance and best quality? how was this done for games like DOOM? are we following methods that ensure performance to thast deghree, I would trhink this VMUPRO chip set was more powerful then the original systems runningg doom, and i want to know why we are far from that right nowe?"
+    }
+  },
+  "todo_summary": {
+    "pending": 0,
+    "in_progress": 0,
+    "completed": 0
+  },
+  "wisdom_exported": false
+}

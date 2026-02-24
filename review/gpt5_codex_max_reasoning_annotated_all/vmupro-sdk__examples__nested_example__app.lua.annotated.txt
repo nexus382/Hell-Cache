@@ -1,0 +1,524 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- app.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- VMU Pro LUA SDK Comprehensive Test Suite
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] import "api/system"
+00005 [GPT-5-CODEX-MAX-REASONING] import "api/display"
+00006 [GPT-5-CODEX-MAX-REASONING] import "api/input"
+00007 [GPT-5-CODEX-MAX-REASONING] import "api/sprites"
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- Import test pages
+00010 [GPT-5-CODEX-MAX-REASONING] import "pages/page1"
+00011 [GPT-5-CODEX-MAX-REASONING] import "pages/page2"
+00012 [GPT-5-CODEX-MAX-REASONING] import "pages/page3"
+00013 [GPT-5-CODEX-MAX-REASONING] import "pages/page4"
+00014 [GPT-5-CODEX-MAX-REASONING] import "pages/page5"
+00015 [GPT-5-CODEX-MAX-REASONING] import "pages/page6"
+00016 [GPT-5-CODEX-MAX-REASONING] import "pages/page7"
+00017 [GPT-5-CODEX-MAX-REASONING] import "pages/page8"
+00018 [GPT-5-CODEX-MAX-REASONING] import "pages/page9"
+00019 [GPT-5-CODEX-MAX-REASONING] import "pages/page10"
+00020 [GPT-5-CODEX-MAX-REASONING] import "pages/page11"
+00021 [GPT-5-CODEX-MAX-REASONING] import "pages/page12"
+00022 [GPT-5-CODEX-MAX-REASONING] import "pages/page13"
+00023 [GPT-5-CODEX-MAX-REASONING] import "pages/page14"
+00024 [GPT-5-CODEX-MAX-REASONING] import "pages/page15"
+00025 [GPT-5-CODEX-MAX-REASONING] import "pages/page16"
+00026 [GPT-5-CODEX-MAX-REASONING] import "pages/page17"
+00027 [GPT-5-CODEX-MAX-REASONING] import "pages/page18"
+00028 [GPT-5-CODEX-MAX-REASONING] import "pages/page19"
+00029 [GPT-5-CODEX-MAX-REASONING] import "pages/page20"
+00030 [GPT-5-CODEX-MAX-REASONING] import "pages/page21"
+00031 [GPT-5-CODEX-MAX-REASONING] import "pages/page22"
+00032 [GPT-5-CODEX-MAX-REASONING] import "pages/page23"
+00033 [GPT-5-CODEX-MAX-REASONING] import "pages/page24"
+00034 [GPT-5-CODEX-MAX-REASONING] import "pages/page25"
+00035 [GPT-5-CODEX-MAX-REASONING] import "pages/page26"
+00036 [GPT-5-CODEX-MAX-REASONING] import "pages/page27"
+00037 [GPT-5-CODEX-MAX-REASONING] import "pages/page28"
+00038 [GPT-5-CODEX-MAX-REASONING] import "pages/page29"
+00039 [GPT-5-CODEX-MAX-REASONING] import "pages/page30"
+00040 [GPT-5-CODEX-MAX-REASONING] import "pages/page31"
+00041 [GPT-5-CODEX-MAX-REASONING] import "pages/page32"
+00042 [GPT-5-CODEX-MAX-REASONING] import "pages/page33"
+00043 [GPT-5-CODEX-MAX-REASONING] import "pages/page34"
+00044 [GPT-5-CODEX-MAX-REASONING] import "pages/page35"
+00045 [GPT-5-CODEX-MAX-REASONING] import "pages/page36"
+00046 [GPT-5-CODEX-MAX-REASONING] import "pages/page37"
+00047 [GPT-5-CODEX-MAX-REASONING] import "pages/page38"
+00048 [GPT-5-CODEX-MAX-REASONING] import "pages/page39"
+00049 [GPT-5-CODEX-MAX-REASONING] 
+00050 [GPT-5-CODEX-MAX-REASONING] -- Application state
+00051 [GPT-5-CODEX-MAX-REASONING] local app_running = true
+00052 [GPT-5-CODEX-MAX-REASONING] local current_page = 1
+00053 [GPT-5-CODEX-MAX-REASONING] local previous_page = 1
+00054 [GPT-5-CODEX-MAX-REASONING] local total_pages = 39 -- Will increment as we add more test pages
+00055 [GPT-5-CODEX-MAX-REASONING] 
+00056 [GPT-5-CODEX-MAX-REASONING] -- Frame timing control
+00057 [GPT-5-CODEX-MAX-REASONING] local target_frame_time_us = 16666 -- Target 60 FPS (16.666ms in microseconds)
+00058 [GPT-5-CODEX-MAX-REASONING] local frame_start_time = 0
+00059 [GPT-5-CODEX-MAX-REASONING] 
+00060 [GPT-5-CODEX-MAX-REASONING] -- FPS tracking
+00061 [GPT-5-CODEX-MAX-REASONING] local last_fps_update_time = 0
+00062 [GPT-5-CODEX-MAX-REASONING] local current_fps = 0
+00063 [GPT-5-CODEX-MAX-REASONING] local frame_count = 0
+00064 [GPT-5-CODEX-MAX-REASONING] local fps_update_interval = 500000 -- Update FPS every 500ms (in microseconds)
+00065 [GPT-5-CODEX-MAX-REASONING] 
+00066 [GPT-5-CODEX-MAX-REASONING] --- @brief Initialize the application
+00067 [GPT-5-CODEX-MAX-REASONING] local function init_app()
+00068 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "SDKTest", "Starting VMU Pro SDK Test Suite")
+00069 [GPT-5-CODEX-MAX-REASONING] 
+00070 [GPT-5-CODEX-MAX-REASONING]     -- Set small font for better readability
+00071 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00072 [GPT-5-CODEX-MAX-REASONING] 
+00073 [GPT-5-CODEX-MAX-REASONING]     -- Initialize timing
+00074 [GPT-5-CODEX-MAX-REASONING]     local current_time = vmupro.system.getTimeUs()
+00075 [GPT-5-CODEX-MAX-REASONING]     frame_start_time = current_time
+00076 [GPT-5-CODEX-MAX-REASONING]     last_fps_update_time = current_time
+00077 [GPT-5-CODEX-MAX-REASONING] 
+00078 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "SDKTest", string.format("Total test pages: %d", total_pages))
+00079 [GPT-5-CODEX-MAX-REASONING] end
+00080 [GPT-5-CODEX-MAX-REASONING] 
+00081 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw page counter in top-right corner
+00082 [GPT-5-CODEX-MAX-REASONING] local function drawPageCounter()
+00083 [GPT-5-CODEX-MAX-REASONING]     local text = string.format("Page %d/%d", current_page, total_pages)
+00084 [GPT-5-CODEX-MAX-REASONING]     local text_width = vmupro.text.calcLength(text)
+00085 [GPT-5-CODEX-MAX-REASONING]     local x = 240 - text_width - 5
+00086 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(text, x, 5, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00087 [GPT-5-CODEX-MAX-REASONING] end
+00088 [GPT-5-CODEX-MAX-REASONING] 
+00089 [GPT-5-CODEX-MAX-REASONING] --- @brief Update and draw FPS counter in bottom-right corner
+00090 [GPT-5-CODEX-MAX-REASONING] local function updateAndDrawFPS()
+00091 [GPT-5-CODEX-MAX-REASONING]     local current_time = vmupro.system.getTimeUs()
+00092 [GPT-5-CODEX-MAX-REASONING]     frame_count = frame_count + 1
+00093 [GPT-5-CODEX-MAX-REASONING] 
+00094 [GPT-5-CODEX-MAX-REASONING]     -- Update FPS every 500ms
+00095 [GPT-5-CODEX-MAX-REASONING]     if current_time - last_fps_update_time >= fps_update_interval then
+00096 [GPT-5-CODEX-MAX-REASONING]         local elapsed_seconds = (current_time - last_fps_update_time) / 1000000.0
+00097 [GPT-5-CODEX-MAX-REASONING]         current_fps = math.floor(frame_count / elapsed_seconds)
+00098 [GPT-5-CODEX-MAX-REASONING]         frame_count = 0
+00099 [GPT-5-CODEX-MAX-REASONING]         last_fps_update_time = current_time
+00100 [GPT-5-CODEX-MAX-REASONING]     end
+00101 [GPT-5-CODEX-MAX-REASONING] 
+00102 [GPT-5-CODEX-MAX-REASONING]     -- Set font for FPS counter
+00103 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00104 [GPT-5-CODEX-MAX-REASONING] 
+00105 [GPT-5-CODEX-MAX-REASONING]     -- Draw FPS counter in bottom-right corner
+00106 [GPT-5-CODEX-MAX-REASONING]     local fps_text = string.format("FPS:%d", current_fps)
+00107 [GPT-5-CODEX-MAX-REASONING]     local text_width = vmupro.text.calcLength(fps_text)
+00108 [GPT-5-CODEX-MAX-REASONING]     local x = 240 - text_width - 5
+00109 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(fps_text, x, 225, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00110 [GPT-5-CODEX-MAX-REASONING] end
+00111 [GPT-5-CODEX-MAX-REASONING] 
+00112 [GPT-5-CODEX-MAX-REASONING] --- @brief Update application logic
+00113 [GPT-5-CODEX-MAX-REASONING] local function update()
+00114 [GPT-5-CODEX-MAX-REASONING]     -- Read input
+00115 [GPT-5-CODEX-MAX-REASONING]     vmupro.input.read()
+00116 [GPT-5-CODEX-MAX-REASONING] 
+00117 [GPT-5-CODEX-MAX-REASONING]     -- Call page-specific update functions
+00118 [GPT-5-CODEX-MAX-REASONING]     if current_page == 9 then
+00119 [GPT-5-CODEX-MAX-REASONING]         Page9.update()
+00120 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 11 then
+00121 [GPT-5-CODEX-MAX-REASONING]         Page11.update()
+00122 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 12 then
+00123 [GPT-5-CODEX-MAX-REASONING]         Page12.update()
+00124 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 14 then
+00125 [GPT-5-CODEX-MAX-REASONING]         Page14.update()
+00126 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 15 then
+00127 [GPT-5-CODEX-MAX-REASONING]         Page15.update()
+00128 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 16 then
+00129 [GPT-5-CODEX-MAX-REASONING]         Page16.update()
+00130 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 17 then
+00131 [GPT-5-CODEX-MAX-REASONING]         Page17.update()
+00132 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 18 then
+00133 [GPT-5-CODEX-MAX-REASONING]         Page18.update()
+00134 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 19 then
+00135 [GPT-5-CODEX-MAX-REASONING]         Page19.update()
+00136 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 20 then
+00137 [GPT-5-CODEX-MAX-REASONING]         Page20.update()
+00138 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 21 then
+00139 [GPT-5-CODEX-MAX-REASONING]         Page21.update()
+00140 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 22 then
+00141 [GPT-5-CODEX-MAX-REASONING]         Page22.update()
+00142 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 23 then
+00143 [GPT-5-CODEX-MAX-REASONING]         Page23.update()
+00144 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 24 then
+00145 [GPT-5-CODEX-MAX-REASONING]         Page24.update()
+00146 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 25 then
+00147 [GPT-5-CODEX-MAX-REASONING]         Page25.update()
+00148 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 26 then
+00149 [GPT-5-CODEX-MAX-REASONING]         Page26.update()
+00150 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 27 then
+00151 [GPT-5-CODEX-MAX-REASONING]         Page27.update()
+00152 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 28 then
+00153 [GPT-5-CODEX-MAX-REASONING]         Page28.update()
+00154 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 29 then
+00155 [GPT-5-CODEX-MAX-REASONING]         Page29.update()
+00156 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 30 then
+00157 [GPT-5-CODEX-MAX-REASONING]         Page30.update()
+00158 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 31 then
+00159 [GPT-5-CODEX-MAX-REASONING]         Page31.update()
+00160 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 32 then
+00161 [GPT-5-CODEX-MAX-REASONING]         Page32.update()
+00162 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 33 then
+00163 [GPT-5-CODEX-MAX-REASONING]         Page33.update()
+00164 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 34 then
+00165 [GPT-5-CODEX-MAX-REASONING]         Page34.update()
+00166 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 35 then
+00167 [GPT-5-CODEX-MAX-REASONING]         Page35.update()
+00168 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 36 then
+00169 [GPT-5-CODEX-MAX-REASONING]         Page36.update()
+00170 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 37 then
+00171 [GPT-5-CODEX-MAX-REASONING]         Page37.update()
+00172 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 38 then
+00173 [GPT-5-CODEX-MAX-REASONING]         Page38.update()
+00174 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 39 then
+00175 [GPT-5-CODEX-MAX-REASONING]         Page39.update()
+00176 [GPT-5-CODEX-MAX-REASONING]     end
+00177 [GPT-5-CODEX-MAX-REASONING] 
+00178 [GPT-5-CODEX-MAX-REASONING]     -- Special handling for page 6 (button test page) - require MODE button
+00179 [GPT-5-CODEX-MAX-REASONING]     local mode_held = vmupro.input.held(vmupro.input.MODE)
+00180 [GPT-5-CODEX-MAX-REASONING]     local require_mode = (current_page == 6)
+00181 [GPT-5-CODEX-MAX-REASONING] 
+00182 [GPT-5-CODEX-MAX-REASONING]     -- Navigate to previous page (LEFT)
+00183 [GPT-5-CODEX-MAX-REASONING]     if vmupro.input.pressed(vmupro.input.LEFT) then
+00184 [GPT-5-CODEX-MAX-REASONING]         if (not require_mode) or (require_mode and mode_held) then
+00185 [GPT-5-CODEX-MAX-REASONING]             if current_page > 1 then
+00186 [GPT-5-CODEX-MAX-REASONING]                 -- Call exit function for pages that need cleanup
+00187 [GPT-5-CODEX-MAX-REASONING]                 if current_page == 11 then
+00188 [GPT-5-CODEX-MAX-REASONING]                     Page11.exit()
+00189 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 13 then
+00190 [GPT-5-CODEX-MAX-REASONING]                     Page13.exit()
+00191 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 14 then
+00192 [GPT-5-CODEX-MAX-REASONING]                     Page14.exit()
+00193 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 15 then
+00194 [GPT-5-CODEX-MAX-REASONING]                     Page15.exit()
+00195 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 16 then
+00196 [GPT-5-CODEX-MAX-REASONING]                     Page16.exit()
+00197 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 17 then
+00198 [GPT-5-CODEX-MAX-REASONING]                     Page17.exit()
+00199 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 18 then
+00200 [GPT-5-CODEX-MAX-REASONING]                     Page18.exit()
+00201 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 19 then
+00202 [GPT-5-CODEX-MAX-REASONING]                     Page19.exit()
+00203 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 20 then
+00204 [GPT-5-CODEX-MAX-REASONING]                     Page20.exit()
+00205 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 21 then
+00206 [GPT-5-CODEX-MAX-REASONING]                     Page21.exit()
+00207 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 22 then
+00208 [GPT-5-CODEX-MAX-REASONING]                     Page22.exit()
+00209 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 23 then
+00210 [GPT-5-CODEX-MAX-REASONING]                     Page23.exit()
+00211 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 24 then
+00212 [GPT-5-CODEX-MAX-REASONING]                     Page24.exit()
+00213 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 25 then
+00214 [GPT-5-CODEX-MAX-REASONING]                     Page25.exit()
+00215 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 26 then
+00216 [GPT-5-CODEX-MAX-REASONING]                     Page26.exit()
+00217 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 27 then
+00218 [GPT-5-CODEX-MAX-REASONING]                     Page27.exit()
+00219 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 28 then
+00220 [GPT-5-CODEX-MAX-REASONING]                     Page28.exit()
+00221 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 29 then
+00222 [GPT-5-CODEX-MAX-REASONING]                     Page29.exit()
+00223 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 30 then
+00224 [GPT-5-CODEX-MAX-REASONING]                     Page30.exit()
+00225 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 31 then
+00226 [GPT-5-CODEX-MAX-REASONING]                     Page31.exit()
+00227 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 32 then
+00228 [GPT-5-CODEX-MAX-REASONING]                     Page32.exit()
+00229 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 33 then
+00230 [GPT-5-CODEX-MAX-REASONING]                     Page33.exit()
+00231 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 34 then
+00232 [GPT-5-CODEX-MAX-REASONING]                     Page34.exit()
+00233 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 35 then
+00234 [GPT-5-CODEX-MAX-REASONING]                     Page35.exit()
+00235 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 36 then
+00236 [GPT-5-CODEX-MAX-REASONING]                     Page36.exit()
+00237 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 37 then
+00238 [GPT-5-CODEX-MAX-REASONING]                     Page37.exit()
+00239 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 38 then
+00240 [GPT-5-CODEX-MAX-REASONING]                     Page38.exit()
+00241 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 39 then
+00242 [GPT-5-CODEX-MAX-REASONING]                     Page39.exit()
+00243 [GPT-5-CODEX-MAX-REASONING]                 end
+00244 [GPT-5-CODEX-MAX-REASONING]                 previous_page = current_page
+00245 [GPT-5-CODEX-MAX-REASONING]                 current_page = current_page - 1
+00246 [GPT-5-CODEX-MAX-REASONING]                 vmupro.system.log(vmupro.system.LOG_INFO, "SDKTest", string.format("Navigate to page %d", current_page))
+00247 [GPT-5-CODEX-MAX-REASONING]                 -- Call enter function for pages that need setup
+00248 [GPT-5-CODEX-MAX-REASONING]                 if current_page == 38 then
+00249 [GPT-5-CODEX-MAX-REASONING]                     Page38.enter()
+00250 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 39 then
+00251 [GPT-5-CODEX-MAX-REASONING]                     Page39.enter()
+00252 [GPT-5-CODEX-MAX-REASONING]                 end
+00253 [GPT-5-CODEX-MAX-REASONING]             end
+00254 [GPT-5-CODEX-MAX-REASONING]         end
+00255 [GPT-5-CODEX-MAX-REASONING]     end
+00256 [GPT-5-CODEX-MAX-REASONING] 
+00257 [GPT-5-CODEX-MAX-REASONING]     -- Navigate to next page (RIGHT)
+00258 [GPT-5-CODEX-MAX-REASONING]     if vmupro.input.pressed(vmupro.input.RIGHT) then
+00259 [GPT-5-CODEX-MAX-REASONING]         if (not require_mode) or (require_mode and mode_held) then
+00260 [GPT-5-CODEX-MAX-REASONING]             if current_page < total_pages then
+00261 [GPT-5-CODEX-MAX-REASONING]                 -- Call exit function for pages that need cleanup
+00262 [GPT-5-CODEX-MAX-REASONING]                 if current_page == 11 then
+00263 [GPT-5-CODEX-MAX-REASONING]                     Page11.exit()
+00264 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 13 then
+00265 [GPT-5-CODEX-MAX-REASONING]                     Page13.exit()
+00266 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 14 then
+00267 [GPT-5-CODEX-MAX-REASONING]                     Page14.exit()
+00268 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 15 then
+00269 [GPT-5-CODEX-MAX-REASONING]                     Page15.exit()
+00270 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 16 then
+00271 [GPT-5-CODEX-MAX-REASONING]                     Page16.exit()
+00272 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 17 then
+00273 [GPT-5-CODEX-MAX-REASONING]                     Page17.exit()
+00274 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 18 then
+00275 [GPT-5-CODEX-MAX-REASONING]                     Page18.exit()
+00276 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 19 then
+00277 [GPT-5-CODEX-MAX-REASONING]                     Page19.exit()
+00278 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 20 then
+00279 [GPT-5-CODEX-MAX-REASONING]                     Page20.exit()
+00280 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 21 then
+00281 [GPT-5-CODEX-MAX-REASONING]                     Page21.exit()
+00282 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 22 then
+00283 [GPT-5-CODEX-MAX-REASONING]                     Page22.exit()
+00284 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 23 then
+00285 [GPT-5-CODEX-MAX-REASONING]                     Page23.exit()
+00286 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 24 then
+00287 [GPT-5-CODEX-MAX-REASONING]                     Page24.exit()
+00288 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 25 then
+00289 [GPT-5-CODEX-MAX-REASONING]                     Page25.exit()
+00290 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 26 then
+00291 [GPT-5-CODEX-MAX-REASONING]                     Page26.exit()
+00292 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 27 then
+00293 [GPT-5-CODEX-MAX-REASONING]                     Page27.exit()
+00294 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 28 then
+00295 [GPT-5-CODEX-MAX-REASONING]                     Page28.exit()
+00296 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 29 then
+00297 [GPT-5-CODEX-MAX-REASONING]                     Page29.exit()
+00298 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 30 then
+00299 [GPT-5-CODEX-MAX-REASONING]                     Page30.exit()
+00300 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 31 then
+00301 [GPT-5-CODEX-MAX-REASONING]                     Page31.exit()
+00302 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 32 then
+00303 [GPT-5-CODEX-MAX-REASONING]                     Page32.exit()
+00304 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 33 then
+00305 [GPT-5-CODEX-MAX-REASONING]                     Page33.exit()
+00306 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 34 then
+00307 [GPT-5-CODEX-MAX-REASONING]                     Page34.exit()
+00308 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 35 then
+00309 [GPT-5-CODEX-MAX-REASONING]                     Page35.exit()
+00310 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 36 then
+00311 [GPT-5-CODEX-MAX-REASONING]                     Page36.exit()
+00312 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 37 then
+00313 [GPT-5-CODEX-MAX-REASONING]                     Page37.exit()
+00314 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 38 then
+00315 [GPT-5-CODEX-MAX-REASONING]                     Page38.exit()
+00316 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 39 then
+00317 [GPT-5-CODEX-MAX-REASONING]                     Page39.exit()
+00318 [GPT-5-CODEX-MAX-REASONING]                 end
+00319 [GPT-5-CODEX-MAX-REASONING]                 previous_page = current_page
+00320 [GPT-5-CODEX-MAX-REASONING]                 current_page = current_page + 1
+00321 [GPT-5-CODEX-MAX-REASONING]                 vmupro.system.log(vmupro.system.LOG_INFO, "SDKTest", string.format("Navigate to page %d", current_page))
+00322 [GPT-5-CODEX-MAX-REASONING]                 -- Call enter function for pages that need setup
+00323 [GPT-5-CODEX-MAX-REASONING]                 if current_page == 38 then
+00324 [GPT-5-CODEX-MAX-REASONING]                     Page38.enter()
+00325 [GPT-5-CODEX-MAX-REASONING]                 elseif current_page == 39 then
+00326 [GPT-5-CODEX-MAX-REASONING]                     Page39.enter()
+00327 [GPT-5-CODEX-MAX-REASONING]                 end
+00328 [GPT-5-CODEX-MAX-REASONING]             end
+00329 [GPT-5-CODEX-MAX-REASONING]         end
+00330 [GPT-5-CODEX-MAX-REASONING]     end
+00331 [GPT-5-CODEX-MAX-REASONING] 
+00332 [GPT-5-CODEX-MAX-REASONING]     -- Exit on B button
+00333 [GPT-5-CODEX-MAX-REASONING]     if vmupro.input.pressed(vmupro.input.B) then
+00334 [GPT-5-CODEX-MAX-REASONING]         if (not require_mode) or (require_mode and mode_held) then
+00335 [GPT-5-CODEX-MAX-REASONING]             -- Call exit function for pages that need cleanup when quitting
+00336 [GPT-5-CODEX-MAX-REASONING]             if current_page == 11 then
+00337 [GPT-5-CODEX-MAX-REASONING]                 Page11.exit()
+00338 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 13 then
+00339 [GPT-5-CODEX-MAX-REASONING]                 Page13.exit()
+00340 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 14 then
+00341 [GPT-5-CODEX-MAX-REASONING]                 Page14.exit()
+00342 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 15 then
+00343 [GPT-5-CODEX-MAX-REASONING]                 Page15.exit()
+00344 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 16 then
+00345 [GPT-5-CODEX-MAX-REASONING]                 Page16.exit()
+00346 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 17 then
+00347 [GPT-5-CODEX-MAX-REASONING]                 Page17.exit()
+00348 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 18 then
+00349 [GPT-5-CODEX-MAX-REASONING]                 Page18.exit()
+00350 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 19 then
+00351 [GPT-5-CODEX-MAX-REASONING]                 Page19.exit()
+00352 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 20 then
+00353 [GPT-5-CODEX-MAX-REASONING]                 Page20.exit()
+00354 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 21 then
+00355 [GPT-5-CODEX-MAX-REASONING]                 Page21.exit()
+00356 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 22 then
+00357 [GPT-5-CODEX-MAX-REASONING]                 Page22.exit()
+00358 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 23 then
+00359 [GPT-5-CODEX-MAX-REASONING]                 Page23.exit()
+00360 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 24 then
+00361 [GPT-5-CODEX-MAX-REASONING]                 Page24.exit()
+00362 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 25 then
+00363 [GPT-5-CODEX-MAX-REASONING]                 Page25.exit()
+00364 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 26 then
+00365 [GPT-5-CODEX-MAX-REASONING]                 Page26.exit()
+00366 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 27 then
+00367 [GPT-5-CODEX-MAX-REASONING]                 Page27.exit()
+00368 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 28 then
+00369 [GPT-5-CODEX-MAX-REASONING]                 Page28.exit()
+00370 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 29 then
+00371 [GPT-5-CODEX-MAX-REASONING]                 Page29.exit()
+00372 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 30 then
+00373 [GPT-5-CODEX-MAX-REASONING]                 Page30.exit()
+00374 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 31 then
+00375 [GPT-5-CODEX-MAX-REASONING]                 Page31.exit()
+00376 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 32 then
+00377 [GPT-5-CODEX-MAX-REASONING]                 Page32.exit()
+00378 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 33 then
+00379 [GPT-5-CODEX-MAX-REASONING]                 Page33.exit()
+00380 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 34 then
+00381 [GPT-5-CODEX-MAX-REASONING]                 Page34.exit()
+00382 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 35 then
+00383 [GPT-5-CODEX-MAX-REASONING]                 Page35.exit()
+00384 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 36 then
+00385 [GPT-5-CODEX-MAX-REASONING]                 Page36.exit()
+00386 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 37 then
+00387 [GPT-5-CODEX-MAX-REASONING]                 Page37.exit()
+00388 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 38 then
+00389 [GPT-5-CODEX-MAX-REASONING]                 Page38.exit()
+00390 [GPT-5-CODEX-MAX-REASONING]             elseif current_page == 39 then
+00391 [GPT-5-CODEX-MAX-REASONING]                 Page39.exit()
+00392 [GPT-5-CODEX-MAX-REASONING]             end
+00393 [GPT-5-CODEX-MAX-REASONING]             vmupro.system.log(vmupro.system.LOG_INFO, "SDKTest", "Exit requested")
+00394 [GPT-5-CODEX-MAX-REASONING]             app_running = false
+00395 [GPT-5-CODEX-MAX-REASONING]         end
+00396 [GPT-5-CODEX-MAX-REASONING]     end
+00397 [GPT-5-CODEX-MAX-REASONING] end
+00398 [GPT-5-CODEX-MAX-REASONING] 
+00399 [GPT-5-CODEX-MAX-REASONING] --- @brief Main render function - calls appropriate page renderer
+00400 [GPT-5-CODEX-MAX-REASONING] local function render()
+00401 [GPT-5-CODEX-MAX-REASONING]     if current_page == 1 then
+00402 [GPT-5-CODEX-MAX-REASONING]         Page1.render(drawPageCounter)
+00403 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 2 then
+00404 [GPT-5-CODEX-MAX-REASONING]         Page2.render(drawPageCounter)
+00405 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 3 then
+00406 [GPT-5-CODEX-MAX-REASONING]         Page3.render(drawPageCounter)
+00407 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 4 then
+00408 [GPT-5-CODEX-MAX-REASONING]         Page4.render(drawPageCounter)
+00409 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 5 then
+00410 [GPT-5-CODEX-MAX-REASONING]         Page5.render(drawPageCounter)
+00411 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 6 then
+00412 [GPT-5-CODEX-MAX-REASONING]         Page6.render(drawPageCounter)
+00413 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 7 then
+00414 [GPT-5-CODEX-MAX-REASONING]         Page7.render(drawPageCounter)
+00415 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 8 then
+00416 [GPT-5-CODEX-MAX-REASONING]         Page8.render(drawPageCounter)
+00417 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 9 then
+00418 [GPT-5-CODEX-MAX-REASONING]         Page9.render(drawPageCounter)
+00419 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 10 then
+00420 [GPT-5-CODEX-MAX-REASONING]         Page10.render(drawPageCounter)
+00421 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 11 then
+00422 [GPT-5-CODEX-MAX-REASONING]         Page11.render(drawPageCounter)
+00423 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 12 then
+00424 [GPT-5-CODEX-MAX-REASONING]         Page12.render(drawPageCounter)
+00425 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 13 then
+00426 [GPT-5-CODEX-MAX-REASONING]         Page13.render(drawPageCounter)
+00427 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 14 then
+00428 [GPT-5-CODEX-MAX-REASONING]         Page14.render(drawPageCounter)
+00429 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 15 then
+00430 [GPT-5-CODEX-MAX-REASONING]         Page15.render(drawPageCounter)
+00431 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 16 then
+00432 [GPT-5-CODEX-MAX-REASONING]         Page16.render(drawPageCounter)
+00433 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 17 then
+00434 [GPT-5-CODEX-MAX-REASONING]         Page17.render(drawPageCounter)
+00435 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 18 then
+00436 [GPT-5-CODEX-MAX-REASONING]         Page18.render(drawPageCounter)
+00437 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 19 then
+00438 [GPT-5-CODEX-MAX-REASONING]         Page19.render(drawPageCounter)
+00439 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 20 then
+00440 [GPT-5-CODEX-MAX-REASONING]         Page20.render(drawPageCounter)
+00441 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 21 then
+00442 [GPT-5-CODEX-MAX-REASONING]         Page21.render(drawPageCounter)
+00443 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 22 then
+00444 [GPT-5-CODEX-MAX-REASONING]         Page22.render(drawPageCounter)
+00445 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 23 then
+00446 [GPT-5-CODEX-MAX-REASONING]         Page23.render(drawPageCounter)
+00447 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 24 then
+00448 [GPT-5-CODEX-MAX-REASONING]         Page24.render(drawPageCounter)
+00449 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 25 then
+00450 [GPT-5-CODEX-MAX-REASONING]         Page25.render(drawPageCounter)
+00451 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 26 then
+00452 [GPT-5-CODEX-MAX-REASONING]         Page26.render(drawPageCounter)
+00453 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 27 then
+00454 [GPT-5-CODEX-MAX-REASONING]         Page27.render(drawPageCounter)
+00455 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 28 then
+00456 [GPT-5-CODEX-MAX-REASONING]         Page28.render(drawPageCounter)
+00457 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 29 then
+00458 [GPT-5-CODEX-MAX-REASONING]         Page29.render(drawPageCounter)
+00459 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 30 then
+00460 [GPT-5-CODEX-MAX-REASONING]         Page30.render(drawPageCounter)
+00461 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 31 then
+00462 [GPT-5-CODEX-MAX-REASONING]         Page31.render(drawPageCounter)
+00463 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 32 then
+00464 [GPT-5-CODEX-MAX-REASONING]         Page32.render(drawPageCounter)
+00465 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 33 then
+00466 [GPT-5-CODEX-MAX-REASONING]         Page33.render(drawPageCounter)
+00467 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 34 then
+00468 [GPT-5-CODEX-MAX-REASONING]         Page34.render(drawPageCounter)
+00469 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 35 then
+00470 [GPT-5-CODEX-MAX-REASONING]         Page35.render(drawPageCounter)
+00471 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 36 then
+00472 [GPT-5-CODEX-MAX-REASONING]         Page36.render(drawPageCounter)
+00473 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 37 then
+00474 [GPT-5-CODEX-MAX-REASONING]         Page37.render(drawPageCounter)
+00475 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 38 then
+00476 [GPT-5-CODEX-MAX-REASONING]         Page38.render(drawPageCounter)
+00477 [GPT-5-CODEX-MAX-REASONING]     elseif current_page == 39 then
+00478 [GPT-5-CODEX-MAX-REASONING]         Page39.render(drawPageCounter)
+00479 [GPT-5-CODEX-MAX-REASONING]     end
+00480 [GPT-5-CODEX-MAX-REASONING]     -- More pages will be added here
+00481 [GPT-5-CODEX-MAX-REASONING] 
+00482 [GPT-5-CODEX-MAX-REASONING]     -- Draw FPS counter on all pages
+00483 [GPT-5-CODEX-MAX-REASONING]     updateAndDrawFPS()
+00484 [GPT-5-CODEX-MAX-REASONING] 
+00485 [GPT-5-CODEX-MAX-REASONING]     -- Refresh display once after all drawing is complete
+00486 [GPT-5-CODEX-MAX-REASONING]     -- Note: Pages 13-39 use double buffer renderer which calls pushDoubleBufferFrame() instead
+00487 [GPT-5-CODEX-MAX-REASONING]     if current_page >= 13 and current_page <= 39 then
+00488 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.pushDoubleBufferFrame()
+00489 [GPT-5-CODEX-MAX-REASONING]     else
+00490 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.refresh()
+00491 [GPT-5-CODEX-MAX-REASONING]     end
+00492 [GPT-5-CODEX-MAX-REASONING] end
+00493 [GPT-5-CODEX-MAX-REASONING] 
+00494 [GPT-5-CODEX-MAX-REASONING] --- @brief Main application entry point
+00495 [GPT-5-CODEX-MAX-REASONING] function AppMain()
+00496 [GPT-5-CODEX-MAX-REASONING]     -- Initialize
+00497 [GPT-5-CODEX-MAX-REASONING]     init_app()
+00498 [GPT-5-CODEX-MAX-REASONING] 
+00499 [GPT-5-CODEX-MAX-REASONING]     -- Main loop
+00500 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "SDKTest", "Entering main loop")
+00501 [GPT-5-CODEX-MAX-REASONING] 
+00502 [GPT-5-CODEX-MAX-REASONING]     while app_running do
+00503 [GPT-5-CODEX-MAX-REASONING]         -- Record frame start time
+00504 [GPT-5-CODEX-MAX-REASONING]         frame_start_time = vmupro.system.getTimeUs()
+00505 [GPT-5-CODEX-MAX-REASONING] 
+00506 [GPT-5-CODEX-MAX-REASONING]         -- Update and render
+00507 [GPT-5-CODEX-MAX-REASONING]         update()
+00508 [GPT-5-CODEX-MAX-REASONING]         render()
+00509 [GPT-5-CODEX-MAX-REASONING] 
+00510 [GPT-5-CODEX-MAX-REASONING]         -- Calculate elapsed time and delay to maintain target FPS
+00511 [GPT-5-CODEX-MAX-REASONING]         local frame_end_time = vmupro.system.getTimeUs()
+00512 [GPT-5-CODEX-MAX-REASONING]         local elapsed_time_us = frame_end_time - frame_start_time
+00513 [GPT-5-CODEX-MAX-REASONING]         local delay_time_us = target_frame_time_us - elapsed_time_us
+00514 [GPT-5-CODEX-MAX-REASONING] 
+00515 [GPT-5-CODEX-MAX-REASONING]         if delay_time_us > 0 then
+00516 [GPT-5-CODEX-MAX-REASONING]             vmupro.system.delayUs(delay_time_us)
+00517 [GPT-5-CODEX-MAX-REASONING]         end
+00518 [GPT-5-CODEX-MAX-REASONING]     end
+00519 [GPT-5-CODEX-MAX-REASONING] 
+00520 [GPT-5-CODEX-MAX-REASONING]     -- Cleanup
+00521 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "SDKTest", "Test suite completed")
+00522 [GPT-5-CODEX-MAX-REASONING] 
+00523 [GPT-5-CODEX-MAX-REASONING]     return 0
+00524 [GPT-5-CODEX-MAX-REASONING] end

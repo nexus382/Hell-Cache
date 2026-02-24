@@ -1,0 +1,189 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page31.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 31: overlappingSprites() Demo
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page31 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- Sprite handles
+00010 [GPT-5-CODEX-MAX-REASONING] local sprite1_handle = nil  -- Stationary left
+00011 [GPT-5-CODEX-MAX-REASONING] local sprite2_handle = nil  -- Stationary right
+00012 [GPT-5-CODEX-MAX-REASONING] local sprite3_handle = nil  -- Moving sprite
+00013 [GPT-5-CODEX-MAX-REASONING] local sprites_loaded = false
+00014 [GPT-5-CODEX-MAX-REASONING] local load_error = false
+00015 [GPT-5-CODEX-MAX-REASONING] 
+00016 [GPT-5-CODEX-MAX-REASONING] -- Sprite positions
+00017 [GPT-5-CODEX-MAX-REASONING] local sprite1_x = 80
+00018 [GPT-5-CODEX-MAX-REASONING] local sprite1_y = 100
+00019 [GPT-5-CODEX-MAX-REASONING] 
+00020 [GPT-5-CODEX-MAX-REASONING] local sprite2_x = 160
+00021 [GPT-5-CODEX-MAX-REASONING] local sprite2_y = 100
+00022 [GPT-5-CODEX-MAX-REASONING] 
+00023 [GPT-5-CODEX-MAX-REASONING] local sprite3_x = 40
+00024 [GPT-5-CODEX-MAX-REASONING] local sprite3_y = 100
+00025 [GPT-5-CODEX-MAX-REASONING] 
+00026 [GPT-5-CODEX-MAX-REASONING] --- @brief Load sprites and set up collision groups
+00027 [GPT-5-CODEX-MAX-REASONING] local function loadSprites()
+00028 [GPT-5-CODEX-MAX-REASONING]     if sprites_loaded or load_error then
+00029 [GPT-5-CODEX-MAX-REASONING]         return
+00030 [GPT-5-CODEX-MAX-REASONING]     end
+00031 [GPT-5-CODEX-MAX-REASONING] 
+00032 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites (using single-frame from spritesheet)
+00033 [GPT-5-CODEX-MAX-REASONING]     sprite1_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00034 [GPT-5-CODEX-MAX-REASONING]     sprite2_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00035 [GPT-5-CODEX-MAX-REASONING]     sprite3_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00036 [GPT-5-CODEX-MAX-REASONING] 
+00037 [GPT-5-CODEX-MAX-REASONING]     if not sprite1_handle or not sprite2_handle or not sprite3_handle then
+00038 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page31", "Failed to load sprites")
+00039 [GPT-5-CODEX-MAX-REASONING]         -- Clean up any sprites that were successfully loaded
+00040 [GPT-5-CODEX-MAX-REASONING]         if sprite1_handle then
+00041 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.free(sprite1_handle)
+00042 [GPT-5-CODEX-MAX-REASONING]             sprite1_handle = nil
+00043 [GPT-5-CODEX-MAX-REASONING]         end
+00044 [GPT-5-CODEX-MAX-REASONING]         if sprite2_handle then
+00045 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.free(sprite2_handle)
+00046 [GPT-5-CODEX-MAX-REASONING]             sprite2_handle = nil
+00047 [GPT-5-CODEX-MAX-REASONING]         end
+00048 [GPT-5-CODEX-MAX-REASONING]         if sprite3_handle then
+00049 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.free(sprite3_handle)
+00050 [GPT-5-CODEX-MAX-REASONING]             sprite3_handle = nil
+00051 [GPT-5-CODEX-MAX-REASONING]         end
+00052 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00053 [GPT-5-CODEX-MAX-REASONING]         return
+00054 [GPT-5-CODEX-MAX-REASONING]     end
+00055 [GPT-5-CODEX-MAX-REASONING] 
+00056 [GPT-5-CODEX-MAX-REASONING]     -- Set current frame to first frame
+00057 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(sprite1_handle, 0)
+00058 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(sprite2_handle, 0)
+00059 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(sprite3_handle, 0)
+00060 [GPT-5-CODEX-MAX-REASONING] 
+00061 [GPT-5-CODEX-MAX-REASONING]     -- Set collision rects for all sprites
+00062 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollisionRect(sprite1_handle, 6, 2, 20, 28)
+00063 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollisionRect(sprite2_handle, 6, 2, 20, 28)
+00064 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollisionRect(sprite3_handle, 6, 2, 20, 28)
+00065 [GPT-5-CODEX-MAX-REASONING] 
+00066 [GPT-5-CODEX-MAX-REASONING]     -- Setup collision groups - all sprites can collide with each other
+00067 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setGroups(sprite1_handle, {1})
+00068 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollidesWithGroups(sprite1_handle, {2})
+00069 [GPT-5-CODEX-MAX-REASONING] 
+00070 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setGroups(sprite2_handle, {1})
+00071 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollidesWithGroups(sprite2_handle, {2})
+00072 [GPT-5-CODEX-MAX-REASONING] 
+00073 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setGroups(sprite3_handle, {2})
+00074 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCollidesWithGroups(sprite3_handle, {1})
+00075 [GPT-5-CODEX-MAX-REASONING] 
+00076 [GPT-5-CODEX-MAX-REASONING]     -- Set initial positions
+00077 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.moveTo(sprite1_handle, sprite1_x, sprite1_y)
+00078 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.moveTo(sprite2_handle, sprite2_x, sprite2_y)
+00079 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.moveTo(sprite3_handle, sprite3_x, sprite3_y)
+00080 [GPT-5-CODEX-MAX-REASONING] 
+00081 [GPT-5-CODEX-MAX-REASONING]     -- Add sprites to the scene (required for collision queries)
+00082 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(sprite1_handle)
+00083 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(sprite2_handle)
+00084 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(sprite3_handle)
+00085 [GPT-5-CODEX-MAX-REASONING] 
+00086 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = true
+00087 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page31", "Sprites loaded for overlappingSprites demo")
+00088 [GPT-5-CODEX-MAX-REASONING] end
+00089 [GPT-5-CODEX-MAX-REASONING] 
+00090 [GPT-5-CODEX-MAX-REASONING] --- @brief Update logic - move sprite3 back and forth
+00091 [GPT-5-CODEX-MAX-REASONING] function Page31.update()
+00092 [GPT-5-CODEX-MAX-REASONING]     if not sprites_loaded then
+00093 [GPT-5-CODEX-MAX-REASONING]         return
+00094 [GPT-5-CODEX-MAX-REASONING]     end
+00095 [GPT-5-CODEX-MAX-REASONING] 
+00096 [GPT-5-CODEX-MAX-REASONING]     -- Move sprite3 horizontally back and forth (40 to 200)
+00097 [GPT-5-CODEX-MAX-REASONING]     local time = vmupro.system.getTimeUs() / 1000000.0
+00098 [GPT-5-CODEX-MAX-REASONING]     sprite3_x = math.floor(40 + (math.sin(time * 0.8) * 0.5 + 0.5) * 160)
+00099 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.moveTo(sprite3_handle, sprite3_x, sprite3_y)
+00100 [GPT-5-CODEX-MAX-REASONING] end
+00101 [GPT-5-CODEX-MAX-REASONING] 
+00102 [GPT-5-CODEX-MAX-REASONING] --- @brief Cleanup when leaving page
+00103 [GPT-5-CODEX-MAX-REASONING] function Page31.exit()
+00104 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00105 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00106 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00107 [GPT-5-CODEX-MAX-REASONING]     end
+00108 [GPT-5-CODEX-MAX-REASONING] 
+00109 [GPT-5-CODEX-MAX-REASONING]     -- Remove sprites from scene before freeing
+00110 [GPT-5-CODEX-MAX-REASONING]     if sprite1_handle then
+00111 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.remove(sprite1_handle)
+00112 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearCollisionRect(sprite1_handle)
+00113 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite1_handle)
+00114 [GPT-5-CODEX-MAX-REASONING]         sprite1_handle = nil
+00115 [GPT-5-CODEX-MAX-REASONING]     end
+00116 [GPT-5-CODEX-MAX-REASONING]     if sprite2_handle then
+00117 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.remove(sprite2_handle)
+00118 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearCollisionRect(sprite2_handle)
+00119 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite2_handle)
+00120 [GPT-5-CODEX-MAX-REASONING]         sprite2_handle = nil
+00121 [GPT-5-CODEX-MAX-REASONING]     end
+00122 [GPT-5-CODEX-MAX-REASONING]     if sprite3_handle then
+00123 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.remove(sprite3_handle)
+00124 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearCollisionRect(sprite3_handle)
+00125 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite3_handle)
+00126 [GPT-5-CODEX-MAX-REASONING]         sprite3_handle = nil
+00127 [GPT-5-CODEX-MAX-REASONING]     end
+00128 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = false
+00129 [GPT-5-CODEX-MAX-REASONING]     load_error = false
+00130 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page31", "overlappingSprites demo cleaned up")
+00131 [GPT-5-CODEX-MAX-REASONING] end
+00132 [GPT-5-CODEX-MAX-REASONING] 
+00133 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 31: overlappingSprites Demo
+00134 [GPT-5-CODEX-MAX-REASONING] function Page31.render(drawPageCounter)
+00135 [GPT-5-CODEX-MAX-REASONING]     -- Start double buffer on first render
+00136 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00137 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00138 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00139 [GPT-5-CODEX-MAX-REASONING]     end
+00140 [GPT-5-CODEX-MAX-REASONING] 
+00141 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00142 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00143 [GPT-5-CODEX-MAX-REASONING] 
+00144 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00145 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00146 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Overlapping", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00147 [GPT-5-CODEX-MAX-REASONING] 
+00148 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00149 [GPT-5-CODEX-MAX-REASONING] 
+00150 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites on first render
+00151 [GPT-5-CODEX-MAX-REASONING]     loadSprites()
+00152 [GPT-5-CODEX-MAX-REASONING] 
+00153 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00154 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR: Failed to load", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00155 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("sprites. Check assets.", 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00156 [GPT-5-CODEX-MAX-REASONING]     elseif not sprites_loaded then
+00157 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Loading sprites...", 10, 60, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00158 [GPT-5-CODEX-MAX-REASONING]     elseif sprite1_handle and sprite2_handle and sprite3_handle then
+00159 [GPT-5-CODEX-MAX-REASONING]         -- Draw stationary sprites
+00160 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawFrame(sprite1_handle, 1, sprite1_x, sprite1_y, vmupro.sprite.kImageUnflipped)
+00161 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawFrame(sprite2_handle, 1, sprite2_x, sprite2_y, vmupro.sprite.kImageUnflipped)
+00162 [GPT-5-CODEX-MAX-REASONING] 
+00163 [GPT-5-CODEX-MAX-REASONING]         -- Draw moving sprite
+00164 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawFrame(sprite3_handle, 1, sprite3_x, sprite3_y, vmupro.sprite.kImageUnflipped)
+00165 [GPT-5-CODEX-MAX-REASONING] 
+00166 [GPT-5-CODEX-MAX-REASONING]         -- Query overlappingSprites for the moving sprite
+00167 [GPT-5-CODEX-MAX-REASONING]         local overlapping = vmupro.sprite.overlappingSprites(sprite3_handle)
+00168 [GPT-5-CODEX-MAX-REASONING] 
+00169 [GPT-5-CODEX-MAX-REASONING]         -- Highlight any sprites that are overlapping with yellow rectangles
+00170 [GPT-5-CODEX-MAX-REASONING]         for _, sprite_data in ipairs(overlapping) do
+00171 [GPT-5-CODEX-MAX-REASONING]             local bx, by, bw, bh = vmupro.sprite.getCollideBounds(sprite_data)
+00172 [GPT-5-CODEX-MAX-REASONING]             if bx and by and bw and bh then
+00173 [GPT-5-CODEX-MAX-REASONING]                 -- Draw thick yellow rectangle around overlapping sprite
+00174 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawRect(bx-1, by-1, bx + bw, by + bh, vmupro.graphics.YELLOW)
+00175 [GPT-5-CODEX-MAX-REASONING]                 vmupro.graphics.drawRect(bx, by, bx + bw - 1, by + bh - 1, vmupro.graphics.YELLOW)
+00176 [GPT-5-CODEX-MAX-REASONING]             end
+00177 [GPT-5-CODEX-MAX-REASONING]         end
+00178 [GPT-5-CODEX-MAX-REASONING] 
+00179 [GPT-5-CODEX-MAX-REASONING]         -- Info text
+00180 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Moving sprite overlapping:", 10, 40, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00181 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(string.format("%d sprite(s)", #overlapping), 10, 55, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00182 [GPT-5-CODEX-MAX-REASONING]     end
+00183 [GPT-5-CODEX-MAX-REASONING] 
+00184 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00185 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00186 [GPT-5-CODEX-MAX-REASONING] 
+00187 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00188 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00189 [GPT-5-CODEX-MAX-REASONING] end

@@ -1,0 +1,191 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page17.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 17: Color Tinting (Damage Flash)
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page17 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- Sprite handles
+00010 [GPT-5-CODEX-MAX-REASONING] local spritesheet_handle = nil
+00011 [GPT-5-CODEX-MAX-REASONING] local sprites_loaded = false
+00012 [GPT-5-CODEX-MAX-REASONING] local load_error = false
+00013 [GPT-5-CODEX-MAX-REASONING] 
+00014 [GPT-5-CODEX-MAX-REASONING] -- Animation state
+00015 [GPT-5-CODEX-MAX-REASONING] local current_frame = 1
+00016 [GPT-5-CODEX-MAX-REASONING] local last_frame_time = 0
+00017 [GPT-5-CODEX-MAX-REASONING] local FRAME_DURATION = 100000  -- 100ms per frame
+00018 [GPT-5-CODEX-MAX-REASONING] 
+00019 [GPT-5-CODEX-MAX-REASONING] -- Character position (right side of screen)
+00020 [GPT-5-CODEX-MAX-REASONING] local char_x = 180
+00021 [GPT-5-CODEX-MAX-REASONING] local char_y = 100
+00022 [GPT-5-CODEX-MAX-REASONING] 
+00023 [GPT-5-CODEX-MAX-REASONING] -- Bullet state
+00024 [GPT-5-CODEX-MAX-REASONING] local bullet_x = 0
+00025 [GPT-5-CODEX-MAX-REASONING] local bullet_y = 116  -- Center of character
+00026 [GPT-5-CODEX-MAX-REASONING] local bullet_radius = 6
+00027 [GPT-5-CODEX-MAX-REASONING] local bullet_speed = 3
+00028 [GPT-5-CODEX-MAX-REASONING] 
+00029 [GPT-5-CODEX-MAX-REASONING] -- Damage effect state
+00030 [GPT-5-CODEX-MAX-REASONING] local is_damaged = false
+00031 [GPT-5-CODEX-MAX-REASONING] local damage_flash_time = 0
+00032 [GPT-5-CODEX-MAX-REASONING] local DAMAGE_FLASH_DURATION = 300000  -- 300ms flash duration
+00033 [GPT-5-CODEX-MAX-REASONING] local flash_count = 0
+00034 [GPT-5-CODEX-MAX-REASONING] local MAX_FLASHES = 3
+00035 [GPT-5-CODEX-MAX-REASONING] 
+00036 [GPT-5-CODEX-MAX-REASONING] --- @brief Load spritesheet
+00037 [GPT-5-CODEX-MAX-REASONING] local function loadSprites()
+00038 [GPT-5-CODEX-MAX-REASONING]     if sprites_loaded or load_error then
+00039 [GPT-5-CODEX-MAX-REASONING]         return
+00040 [GPT-5-CODEX-MAX-REASONING]     end
+00041 [GPT-5-CODEX-MAX-REASONING] 
+00042 [GPT-5-CODEX-MAX-REASONING]     spritesheet_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00043 [GPT-5-CODEX-MAX-REASONING]     if not spritesheet_handle then
+00044 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page17", "Failed to load spritesheet")
+00045 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00046 [GPT-5-CODEX-MAX-REASONING]         return
+00047 [GPT-5-CODEX-MAX-REASONING]     end
+00048 [GPT-5-CODEX-MAX-REASONING] 
+00049 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = true
+00050 [GPT-5-CODEX-MAX-REASONING]     local current_time = vmupro.system.getTimeUs()
+00051 [GPT-5-CODEX-MAX-REASONING]     last_frame_time = current_time
+00052 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page17", "Sprites loaded for tinting test")
+00053 [GPT-5-CODEX-MAX-REASONING] end
+00054 [GPT-5-CODEX-MAX-REASONING] 
+00055 [GPT-5-CODEX-MAX-REASONING] --- @brief Reset bullet to start position
+00056 [GPT-5-CODEX-MAX-REASONING] local function resetBullet()
+00057 [GPT-5-CODEX-MAX-REASONING]     bullet_x = -10
+00058 [GPT-5-CODEX-MAX-REASONING]     is_damaged = false
+00059 [GPT-5-CODEX-MAX-REASONING]     flash_count = 0
+00060 [GPT-5-CODEX-MAX-REASONING] end
+00061 [GPT-5-CODEX-MAX-REASONING] 
+00062 [GPT-5-CODEX-MAX-REASONING] --- @brief Update logic
+00063 [GPT-5-CODEX-MAX-REASONING] function Page17.update()
+00064 [GPT-5-CODEX-MAX-REASONING]     -- No update needed - handled in render
+00065 [GPT-5-CODEX-MAX-REASONING] end
+00066 [GPT-5-CODEX-MAX-REASONING] 
+00067 [GPT-5-CODEX-MAX-REASONING] --- @brief Cleanup when leaving page
+00068 [GPT-5-CODEX-MAX-REASONING] function Page17.exit()
+00069 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00070 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00071 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00072 [GPT-5-CODEX-MAX-REASONING]     end
+00073 [GPT-5-CODEX-MAX-REASONING] 
+00074 [GPT-5-CODEX-MAX-REASONING]     if spritesheet_handle then
+00075 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(spritesheet_handle)
+00076 [GPT-5-CODEX-MAX-REASONING]         spritesheet_handle = nil
+00077 [GPT-5-CODEX-MAX-REASONING]     end
+00078 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = false
+00079 [GPT-5-CODEX-MAX-REASONING]     current_frame = 1
+00080 [GPT-5-CODEX-MAX-REASONING]     resetBullet()
+00081 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page17", "Sprites freed")
+00082 [GPT-5-CODEX-MAX-REASONING] end
+00083 [GPT-5-CODEX-MAX-REASONING] 
+00084 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 17: Color Tinting Demo
+00085 [GPT-5-CODEX-MAX-REASONING] function Page17.render(drawPageCounter)
+00086 [GPT-5-CODEX-MAX-REASONING]     -- Start double buffer on first render
+00087 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00088 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00089 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00090 [GPT-5-CODEX-MAX-REASONING]     end
+00091 [GPT-5-CODEX-MAX-REASONING] 
+00092 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00093 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00094 [GPT-5-CODEX-MAX-REASONING] 
+00095 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00096 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00097 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Damage Flash", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00098 [GPT-5-CODEX-MAX-REASONING] 
+00099 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00100 [GPT-5-CODEX-MAX-REASONING] 
+00101 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites on first render
+00102 [GPT-5-CODEX-MAX-REASONING]     loadSprites()
+00103 [GPT-5-CODEX-MAX-REASONING] 
+00104 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00105 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR: Failed to load", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00106 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("sprites. Check assets.", 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00107 [GPT-5-CODEX-MAX-REASONING]     elseif not sprites_loaded then
+00108 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Loading sprites...", 10, 60, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00109 [GPT-5-CODEX-MAX-REASONING]     elseif spritesheet_handle then
+00110 [GPT-5-CODEX-MAX-REASONING]         local current_time = vmupro.system.getTimeUs()
+00111 [GPT-5-CODEX-MAX-REASONING] 
+00112 [GPT-5-CODEX-MAX-REASONING]         -- Update animation frame
+00113 [GPT-5-CODEX-MAX-REASONING]         if (current_time - last_frame_time) >= FRAME_DURATION then
+00114 [GPT-5-CODEX-MAX-REASONING]             current_frame = current_frame + 1
+00115 [GPT-5-CODEX-MAX-REASONING]             if current_frame > spritesheet_handle.frameCount then
+00116 [GPT-5-CODEX-MAX-REASONING]                 current_frame = 1
+00117 [GPT-5-CODEX-MAX-REASONING]             end
+00118 [GPT-5-CODEX-MAX-REASONING]             last_frame_time = current_time
+00119 [GPT-5-CODEX-MAX-REASONING]         end
+00120 [GPT-5-CODEX-MAX-REASONING] 
+00121 [GPT-5-CODEX-MAX-REASONING]         -- Update bullet position
+00122 [GPT-5-CODEX-MAX-REASONING]         if not is_damaged then
+00123 [GPT-5-CODEX-MAX-REASONING]             bullet_x = bullet_x + bullet_speed
+00124 [GPT-5-CODEX-MAX-REASONING] 
+00125 [GPT-5-CODEX-MAX-REASONING]             -- Check collision with character
+00126 [GPT-5-CODEX-MAX-REASONING]             local char_center_x = char_x + (spritesheet_handle.frameWidth / 2)
+00127 [GPT-5-CODEX-MAX-REASONING]             local char_center_y = char_y + (spritesheet_handle.frameHeight / 2)
+00128 [GPT-5-CODEX-MAX-REASONING]             local dx = bullet_x - char_center_x
+00129 [GPT-5-CODEX-MAX-REASONING]             local dy = bullet_y - char_center_y
+00130 [GPT-5-CODEX-MAX-REASONING]             local distance = math.sqrt(dx * dx + dy * dy)
+00131 [GPT-5-CODEX-MAX-REASONING] 
+00132 [GPT-5-CODEX-MAX-REASONING]             if distance < (bullet_radius + 16) then  -- 16 = approximate character radius
+00133 [GPT-5-CODEX-MAX-REASONING]                 is_damaged = true
+00134 [GPT-5-CODEX-MAX-REASONING]                 damage_flash_time = current_time
+00135 [GPT-5-CODEX-MAX-REASONING]                 flash_count = 0
+00136 [GPT-5-CODEX-MAX-REASONING]                 vmupro.system.log(vmupro.system.LOG_INFO, "Page17", "Hit! Damage flash triggered")
+00137 [GPT-5-CODEX-MAX-REASONING]             end
+00138 [GPT-5-CODEX-MAX-REASONING]         else
+00139 [GPT-5-CODEX-MAX-REASONING]             -- Handle damage flash timing
+00140 [GPT-5-CODEX-MAX-REASONING]             local elapsed = current_time - damage_flash_time
+00141 [GPT-5-CODEX-MAX-REASONING]             if elapsed >= DAMAGE_FLASH_DURATION then
+00142 [GPT-5-CODEX-MAX-REASONING]                 flash_count = flash_count + 1
+00143 [GPT-5-CODEX-MAX-REASONING]                 if flash_count >= MAX_FLASHES then
+00144 [GPT-5-CODEX-MAX-REASONING]                     resetBullet()
+00145 [GPT-5-CODEX-MAX-REASONING]                 else
+00146 [GPT-5-CODEX-MAX-REASONING]                     damage_flash_time = current_time
+00147 [GPT-5-CODEX-MAX-REASONING]                 end
+00148 [GPT-5-CODEX-MAX-REASONING]             end
+00149 [GPT-5-CODEX-MAX-REASONING]         end
+00150 [GPT-5-CODEX-MAX-REASONING] 
+00151 [GPT-5-CODEX-MAX-REASONING]         -- Draw bullet (only if not damaged)
+00152 [GPT-5-CODEX-MAX-REASONING]         if not is_damaged then
+00153 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawCircleFilled(math.floor(bullet_x), bullet_y, bullet_radius, vmupro.graphics.YELLOW)
+00154 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawCircle(math.floor(bullet_x), bullet_y, bullet_radius, vmupro.graphics.ORANGE)
+00155 [GPT-5-CODEX-MAX-REASONING]         end
+00156 [GPT-5-CODEX-MAX-REASONING] 
+00157 [GPT-5-CODEX-MAX-REASONING]         -- Draw character with or without tint
+00158 [GPT-5-CODEX-MAX-REASONING]         if is_damaged then
+00159 [GPT-5-CODEX-MAX-REASONING]             -- Flash red when damaged
+00160 [GPT-5-CODEX-MAX-REASONING]             local elapsed = current_time - damage_flash_time
+00161 [GPT-5-CODEX-MAX-REASONING]             local flash_phase = math.floor(elapsed / 50000) % 2  -- Toggle every 50ms
+00162 [GPT-5-CODEX-MAX-REASONING] 
+00163 [GPT-5-CODEX-MAX-REASONING]             if flash_phase == 0 then
+00164 [GPT-5-CODEX-MAX-REASONING]                 -- Red tint for damage
+00165 [GPT-5-CODEX-MAX-REASONING]                 vmupro.sprite.drawFrameTinted(spritesheet_handle, current_frame, char_x, char_y, 0xFF4040, vmupro.sprite.kImageUnflipped)
+00166 [GPT-5-CODEX-MAX-REASONING]             else
+00167 [GPT-5-CODEX-MAX-REASONING]                 -- Normal (white tint = no change)
+00168 [GPT-5-CODEX-MAX-REASONING]                 vmupro.sprite.drawFrame(spritesheet_handle, current_frame, char_x, char_y, vmupro.sprite.kImageUnflipped)
+00169 [GPT-5-CODEX-MAX-REASONING]             end
+00170 [GPT-5-CODEX-MAX-REASONING]         else
+00171 [GPT-5-CODEX-MAX-REASONING]             -- Normal rendering
+00172 [GPT-5-CODEX-MAX-REASONING]             vmupro.sprite.drawFrame(spritesheet_handle, current_frame, char_x, char_y, vmupro.sprite.kImageUnflipped)
+00173 [GPT-5-CODEX-MAX-REASONING]         end
+00174 [GPT-5-CODEX-MAX-REASONING] 
+00175 [GPT-5-CODEX-MAX-REASONING]         -- Status info
+00176 [GPT-5-CODEX-MAX-REASONING]         if is_damaged then
+00177 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("DAMAGE!", 100, 180, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00178 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText(string.format("Flash %d/%d", flash_count + 1, MAX_FLASHES), 10, 195, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00179 [GPT-5-CODEX-MAX-REASONING]         else
+00180 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText("Bullet incoming...", 10, 195, vmupro.graphics.GREEN, vmupro.graphics.BLACK)
+00181 [GPT-5-CODEX-MAX-REASONING]         end
+00182 [GPT-5-CODEX-MAX-REASONING] 
+00183 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(string.format("Frame: %d/%d", current_frame, spritesheet_handle.frameCount), 10, 210, vmupro.graphics.BLUE, vmupro.graphics.BLACK)
+00184 [GPT-5-CODEX-MAX-REASONING]     end
+00185 [GPT-5-CODEX-MAX-REASONING] 
+00186 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00187 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00188 [GPT-5-CODEX-MAX-REASONING] 
+00189 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00190 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00191 [GPT-5-CODEX-MAX-REASONING] end

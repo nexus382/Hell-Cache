@@ -1,0 +1,210 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page36.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 36: Sprite Clip Rect (setClipRect, clearClipRect)
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page36 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- Sprite handles
+00010 [GPT-5-CODEX-MAX-REASONING] local healthbar_sprite = nil
+00011 [GPT-5-CODEX-MAX-REASONING] local progress_sprite = nil
+00012 [GPT-5-CODEX-MAX-REASONING] local card_sprite = nil
+00013 [GPT-5-CODEX-MAX-REASONING] local sprites_loaded = false
+00014 [GPT-5-CODEX-MAX-REASONING] local load_error = false
+00015 [GPT-5-CODEX-MAX-REASONING] 
+00016 [GPT-5-CODEX-MAX-REASONING] -- Animation state
+00017 [GPT-5-CODEX-MAX-REASONING] local health = 100
+00018 [GPT-5-CODEX-MAX-REASONING] local health_direction = -1
+00019 [GPT-5-CODEX-MAX-REASONING] local progress = 0
+00020 [GPT-5-CODEX-MAX-REASONING] local progress_direction = 1
+00021 [GPT-5-CODEX-MAX-REASONING] local reveal_width = 0
+00022 [GPT-5-CODEX-MAX-REASONING] local reveal_direction = 1
+00023 [GPT-5-CODEX-MAX-REASONING] 
+00024 [GPT-5-CODEX-MAX-REASONING] -- Timing
+00025 [GPT-5-CODEX-MAX-REASONING] local update_interval = 50000  -- 50ms
+00026 [GPT-5-CODEX-MAX-REASONING] local last_update_time = 0
+00027 [GPT-5-CODEX-MAX-REASONING] 
+00028 [GPT-5-CODEX-MAX-REASONING] --- @brief Load sprites
+00029 [GPT-5-CODEX-MAX-REASONING] local function loadSprites()
+00030 [GPT-5-CODEX-MAX-REASONING]     if sprites_loaded or load_error then
+00031 [GPT-5-CODEX-MAX-REASONING]         return
+00032 [GPT-5-CODEX-MAX-REASONING]     end
+00033 [GPT-5-CODEX-MAX-REASONING] 
+00034 [GPT-5-CODEX-MAX-REASONING]     -- Load three copies of the same sprite to demonstrate different clip effects
+00035 [GPT-5-CODEX-MAX-REASONING]     healthbar_sprite = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00036 [GPT-5-CODEX-MAX-REASONING]     progress_sprite = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00037 [GPT-5-CODEX-MAX-REASONING]     card_sprite = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00038 [GPT-5-CODEX-MAX-REASONING] 
+00039 [GPT-5-CODEX-MAX-REASONING]     if not healthbar_sprite or not progress_sprite or not card_sprite then
+00040 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page36", "Failed to load sprites")
+00041 [GPT-5-CODEX-MAX-REASONING]         if healthbar_sprite then vmupro.sprite.free(healthbar_sprite) end
+00042 [GPT-5-CODEX-MAX-REASONING]         if progress_sprite then vmupro.sprite.free(progress_sprite) end
+00043 [GPT-5-CODEX-MAX-REASONING]         if card_sprite then vmupro.sprite.free(card_sprite) end
+00044 [GPT-5-CODEX-MAX-REASONING]         healthbar_sprite = nil
+00045 [GPT-5-CODEX-MAX-REASONING]         progress_sprite = nil
+00046 [GPT-5-CODEX-MAX-REASONING]         card_sprite = nil
+00047 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00048 [GPT-5-CODEX-MAX-REASONING]         return
+00049 [GPT-5-CODEX-MAX-REASONING]     end
+00050 [GPT-5-CODEX-MAX-REASONING] 
+00051 [GPT-5-CODEX-MAX-REASONING]     -- Set frames
+00052 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(healthbar_sprite, 0)
+00053 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(progress_sprite, 1)
+00054 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(card_sprite, 2)
+00055 [GPT-5-CODEX-MAX-REASONING] 
+00056 [GPT-5-CODEX-MAX-REASONING]     -- Set positions
+00057 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.moveTo(healthbar_sprite, 40, 80)
+00058 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.moveTo(progress_sprite, 120, 80)
+00059 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.moveTo(card_sprite, 200, 80)
+00060 [GPT-5-CODEX-MAX-REASONING] 
+00061 [GPT-5-CODEX-MAX-REASONING]     -- Add to scene
+00062 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(healthbar_sprite)
+00063 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(progress_sprite)
+00064 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(card_sprite)
+00065 [GPT-5-CODEX-MAX-REASONING] 
+00066 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = true
+00067 [GPT-5-CODEX-MAX-REASONING]     last_update_time = vmupro.system.getTimeUs()
+00068 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page36", "Sprites loaded for clip rect demo")
+00069 [GPT-5-CODEX-MAX-REASONING] end
+00070 [GPT-5-CODEX-MAX-REASONING] 
+00071 [GPT-5-CODEX-MAX-REASONING] --- @brief Update logic - animate clip rects
+00072 [GPT-5-CODEX-MAX-REASONING] function Page36.update()
+00073 [GPT-5-CODEX-MAX-REASONING]     if not sprites_loaded then
+00074 [GPT-5-CODEX-MAX-REASONING]         return
+00075 [GPT-5-CODEX-MAX-REASONING]     end
+00076 [GPT-5-CODEX-MAX-REASONING] 
+00077 [GPT-5-CODEX-MAX-REASONING]     local current_time = vmupro.system.getTimeUs()
+00078 [GPT-5-CODEX-MAX-REASONING] 
+00079 [GPT-5-CODEX-MAX-REASONING]     if (current_time - last_update_time) >= update_interval then
+00080 [GPT-5-CODEX-MAX-REASONING]         -- Health bar effect (horizontal clip from left)
+00081 [GPT-5-CODEX-MAX-REASONING]         health = health + health_direction
+00082 [GPT-5-CODEX-MAX-REASONING]         if health <= 0 then
+00083 [GPT-5-CODEX-MAX-REASONING]             health = 0
+00084 [GPT-5-CODEX-MAX-REASONING]             health_direction = 1
+00085 [GPT-5-CODEX-MAX-REASONING]         elseif health >= 100 then
+00086 [GPT-5-CODEX-MAX-REASONING]             health = 100
+00087 [GPT-5-CODEX-MAX-REASONING]             health_direction = -1
+00088 [GPT-5-CODEX-MAX-REASONING]         end
+00089 [GPT-5-CODEX-MAX-REASONING]         local health_width = math.floor(32 * health / 100)
+00090 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.setClipRect(healthbar_sprite, 0, 0, health_width, 32)
+00091 [GPT-5-CODEX-MAX-REASONING] 
+00092 [GPT-5-CODEX-MAX-REASONING]         -- Progress bar effect (horizontal clip from right)
+00093 [GPT-5-CODEX-MAX-REASONING]         progress = progress + progress_direction
+00094 [GPT-5-CODEX-MAX-REASONING]         if progress <= 0 then
+00095 [GPT-5-CODEX-MAX-REASONING]             progress = 0
+00096 [GPT-5-CODEX-MAX-REASONING]             progress_direction = 1
+00097 [GPT-5-CODEX-MAX-REASONING]         elseif progress >= 100 then
+00098 [GPT-5-CODEX-MAX-REASONING]             progress = 100
+00099 [GPT-5-CODEX-MAX-REASONING]             progress_direction = -1
+00100 [GPT-5-CODEX-MAX-REASONING]         end
+00101 [GPT-5-CODEX-MAX-REASONING]         local progress_offset = math.floor(32 * (100 - progress) / 100)
+00102 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.setClipRect(progress_sprite, progress_offset, 0, 32 - progress_offset, 32)
+00103 [GPT-5-CODEX-MAX-REASONING] 
+00104 [GPT-5-CODEX-MAX-REASONING]         -- Reveal effect (wipe from left)
+00105 [GPT-5-CODEX-MAX-REASONING]         reveal_width = reveal_width + reveal_direction
+00106 [GPT-5-CODEX-MAX-REASONING]         if reveal_width <= 0 then
+00107 [GPT-5-CODEX-MAX-REASONING]             reveal_width = 0
+00108 [GPT-5-CODEX-MAX-REASONING]             reveal_direction = 1
+00109 [GPT-5-CODEX-MAX-REASONING]         elseif reveal_width >= 32 then
+00110 [GPT-5-CODEX-MAX-REASONING]             reveal_width = 32
+00111 [GPT-5-CODEX-MAX-REASONING]             reveal_direction = -1
+00112 [GPT-5-CODEX-MAX-REASONING]         end
+00113 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.setClipRect(card_sprite, 0, 0, reveal_width, 32)
+00114 [GPT-5-CODEX-MAX-REASONING] 
+00115 [GPT-5-CODEX-MAX-REASONING]         last_update_time = current_time
+00116 [GPT-5-CODEX-MAX-REASONING]     end
+00117 [GPT-5-CODEX-MAX-REASONING] end
+00118 [GPT-5-CODEX-MAX-REASONING] 
+00119 [GPT-5-CODEX-MAX-REASONING] --- @brief Cleanup when leaving page
+00120 [GPT-5-CODEX-MAX-REASONING] function Page36.exit()
+00121 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00122 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00123 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00124 [GPT-5-CODEX-MAX-REASONING]     end
+00125 [GPT-5-CODEX-MAX-REASONING] 
+00126 [GPT-5-CODEX-MAX-REASONING]     -- Remove all sprites from scene
+00127 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.removeAll()
+00128 [GPT-5-CODEX-MAX-REASONING] 
+00129 [GPT-5-CODEX-MAX-REASONING]     if healthbar_sprite then
+00130 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearClipRect(healthbar_sprite)
+00131 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(healthbar_sprite)
+00132 [GPT-5-CODEX-MAX-REASONING]         healthbar_sprite = nil
+00133 [GPT-5-CODEX-MAX-REASONING]     end
+00134 [GPT-5-CODEX-MAX-REASONING] 
+00135 [GPT-5-CODEX-MAX-REASONING]     if progress_sprite then
+00136 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearClipRect(progress_sprite)
+00137 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(progress_sprite)
+00138 [GPT-5-CODEX-MAX-REASONING]         progress_sprite = nil
+00139 [GPT-5-CODEX-MAX-REASONING]     end
+00140 [GPT-5-CODEX-MAX-REASONING] 
+00141 [GPT-5-CODEX-MAX-REASONING]     if card_sprite then
+00142 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearClipRect(card_sprite)
+00143 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(card_sprite)
+00144 [GPT-5-CODEX-MAX-REASONING]         card_sprite = nil
+00145 [GPT-5-CODEX-MAX-REASONING]     end
+00146 [GPT-5-CODEX-MAX-REASONING] 
+00147 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = false
+00148 [GPT-5-CODEX-MAX-REASONING]     load_error = false
+00149 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page36", "Clip rect demo cleaned up")
+00150 [GPT-5-CODEX-MAX-REASONING] end
+00151 [GPT-5-CODEX-MAX-REASONING] 
+00152 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 36: Clip Rect Demo
+00153 [GPT-5-CODEX-MAX-REASONING] function Page36.render(drawPageCounter)
+00154 [GPT-5-CODEX-MAX-REASONING]     -- Start double buffer on first render
+00155 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00156 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00157 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00158 [GPT-5-CODEX-MAX-REASONING]     end
+00159 [GPT-5-CODEX-MAX-REASONING] 
+00160 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00161 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00162 [GPT-5-CODEX-MAX-REASONING] 
+00163 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00164 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00165 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Clip Rect", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00166 [GPT-5-CODEX-MAX-REASONING] 
+00167 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00168 [GPT-5-CODEX-MAX-REASONING] 
+00169 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites on first render
+00170 [GPT-5-CODEX-MAX-REASONING]     loadSprites()
+00171 [GPT-5-CODEX-MAX-REASONING] 
+00172 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00173 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR: Failed to load", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00174 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("sprites. Check assets.", 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00175 [GPT-5-CODEX-MAX-REASONING]     elseif not sprites_loaded then
+00176 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Loading sprites...", 10, 60, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00177 [GPT-5-CODEX-MAX-REASONING]     else
+00178 [GPT-5-CODEX-MAX-REASONING]         -- Draw background boxes to show full sprite size
+00179 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawRect(40, 80, 40 + 32 - 1, 80 + 32 - 1, vmupro.graphics.GREY)
+00180 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawRect(120, 80, 120 + 32 - 1, 80 + 32 - 1, vmupro.graphics.GREY)
+00181 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawRect(200, 80, 200 + 32 - 1, 80 + 32 - 1, vmupro.graphics.GREY)
+00182 [GPT-5-CODEX-MAX-REASONING] 
+00183 [GPT-5-CODEX-MAX-REASONING]         -- Draw all sprites with clip rects
+00184 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawAll()
+00185 [GPT-5-CODEX-MAX-REASONING] 
+00186 [GPT-5-CODEX-MAX-REASONING]         -- Labels and percentages
+00187 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Health", 32, 120, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00188 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(health .. "%", 36, 132, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00189 [GPT-5-CODEX-MAX-REASONING] 
+00190 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Progress", 108, 120, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00191 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(progress .. "%", 120, 132, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00192 [GPT-5-CODEX-MAX-REASONING] 
+00193 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Reveal", 196, 120, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00194 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(math.floor(reveal_width * 100 / 32) .. "%", 200, 132, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00195 [GPT-5-CODEX-MAX-REASONING] 
+00196 [GPT-5-CODEX-MAX-REASONING]         -- Info
+00197 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Clip from left", 10, 155, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00198 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Clip from right", 10, 167, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00199 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Wipe effect", 10, 179, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00200 [GPT-5-CODEX-MAX-REASONING]     end
+00201 [GPT-5-CODEX-MAX-REASONING] 
+00202 [GPT-5-CODEX-MAX-REASONING]     -- Description
+00203 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Partial sprite rendering", 10, 40, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00204 [GPT-5-CODEX-MAX-REASONING] 
+00205 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00206 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00207 [GPT-5-CODEX-MAX-REASONING] 
+00208 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00209 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00210 [GPT-5-CODEX-MAX-REASONING] end

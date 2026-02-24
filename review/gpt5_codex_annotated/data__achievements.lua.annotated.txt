@@ -1,0 +1,43 @@
+00001 [GPT-5-Codex] -- Data layer: achievement registry and state helpers.
+00002 [GPT-5-Codex] 
+00003 [GPT-5-Codex] GameAchievements = {
+00004 [GPT-5-Codex]     first_blood = {
+00005 [GPT-5-Codex]         id = "first_blood",
+00006 [GPT-5-Codex]         name = "First Blood",
+00007 [GPT-5-Codex]         trigger = "kill_count",
+00008 [GPT-5-Codex]         threshold = 1,
+00009 [GPT-5-Codex]         reward = {score_bonus = 100},
+00010 [GPT-5-Codex]     },
+00011 [GPT-5-Codex]     survivor_10 = {
+00012 [GPT-5-Codex]         id = "survivor_10",
+00013 [GPT-5-Codex]         name = "Survivor 10",
+00014 [GPT-5-Codex]         trigger = "levels_cleared",
+00015 [GPT-5-Codex]         threshold = 10,
+00016 [GPT-5-Codex]         reward = {score_bonus = 300},
+00017 [GPT-5-Codex]     },
+00018 [GPT-5-Codex]     flawless_1 = {
+00019 [GPT-5-Codex]         id = "flawless_1",
+00020 [GPT-5-Codex]         name = "Flawless",
+00021 [GPT-5-Codex]         trigger = "no_damage_level",
+00022 [GPT-5-Codex]         threshold = 1,
+00023 [GPT-5-Codex]         reward = {score_bonus = 250},
+00024 [GPT-5-Codex]     },
+00025 [GPT-5-Codex] }
+00026 [GPT-5-Codex] 
+00027 [GPT-5-Codex] function newAchievementState()
+00028 [GPT-5-Codex]     return {
+00029 [GPT-5-Codex]         unlocked = {},
+00030 [GPT-5-Codex]         progress = {},
+00031 [GPT-5-Codex]     }
+00032 [GPT-5-Codex] end
+00033 [GPT-5-Codex] 
+00034 [GPT-5-Codex] function markAchievementUnlocked(state, achievementId)
+00035 [GPT-5-Codex]     if not state or not achievementId then
+00036 [GPT-5-Codex]         return false
+00037 [GPT-5-Codex]     end
+00038 [GPT-5-Codex]     if state.unlocked[achievementId] then
+00039 [GPT-5-Codex]         return false
+00040 [GPT-5-Codex]     end
+00041 [GPT-5-Codex]     state.unlocked[achievementId] = true
+00042 [GPT-5-Codex]     return true
+00043 [GPT-5-Codex] end

@@ -1,0 +1,207 @@
+00001 [GPT-5-CODEX-MAX-REASONING] --- @file display.lua
+00002 [GPT-5-CODEX-MAX-REASONING] --- @brief VMU Pro LUA SDK - Display and Graphics Functions
+00003 [GPT-5-CODEX-MAX-REASONING] --- @author 8BitMods
+00004 [GPT-5-CODEX-MAX-REASONING] --- @version 1.0.0
+00005 [GPT-5-CODEX-MAX-REASONING] --- @date 2025-09-29
+00006 [GPT-5-CODEX-MAX-REASONING] --- @copyright Copyright (c) 2025 8BitMods. All rights reserved.
+00007 [GPT-5-CODEX-MAX-REASONING] ---
+00008 [GPT-5-CODEX-MAX-REASONING] --- Display and graphics utilities for VMU Pro LUA applications.
+00009 [GPT-5-CODEX-MAX-REASONING] --- Functions are available under the vmupro.graphics namespace.
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING] -- Ensure vmupro namespace exists
+00012 [GPT-5-CODEX-MAX-REASONING] vmupro = vmupro or {}
+00013 [GPT-5-CODEX-MAX-REASONING] vmupro.graphics = vmupro.graphics or {}
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING] --- @brief Clear the display with a specific color
+00016 [GPT-5-CODEX-MAX-REASONING] --- @param color number RGB565 color value (optional, defaults to black 0x0000)
+00017 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.clear() -- Clear to black
+00018 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.clear(0xFFFF) -- Clear to white
+00019 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.clear(0xF800) -- Clear to red
+00020 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00021 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00022 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.clear(color) end
+00023 [GPT-5-CODEX-MAX-REASONING] 
+00024 [GPT-5-CODEX-MAX-REASONING] --- @brief Refresh the display to show all drawing operations
+00025 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.refresh() -- Update the screen
+00026 [GPT-5-CODEX-MAX-REASONING] --- @note Call this after drawing operations to make them visible
+00027 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00028 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00029 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.refresh() end
+00030 [GPT-5-CODEX-MAX-REASONING] 
+00031 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a rectangle outline
+00032 [GPT-5-CODEX-MAX-REASONING] --- @param x1 number X coordinate of first corner
+00033 [GPT-5-CODEX-MAX-REASONING] --- @param y1 number Y coordinate of first corner
+00034 [GPT-5-CODEX-MAX-REASONING] --- @param x2 number X coordinate of opposite corner
+00035 [GPT-5-CODEX-MAX-REASONING] --- @param y2 number Y coordinate of opposite corner
+00036 [GPT-5-CODEX-MAX-REASONING] --- @param color number RGB565 color value
+00037 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.drawRect(10, 10, 60, 40, 0xFFFF) -- White rectangle from (10,10) to (60,40)
+00038 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00039 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00040 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.drawRect(x1, y1, x2, y2, color) end
+00041 [GPT-5-CODEX-MAX-REASONING] 
+00042 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a filled rectangle
+00043 [GPT-5-CODEX-MAX-REASONING] --- @param x1 number X coordinate of first corner
+00044 [GPT-5-CODEX-MAX-REASONING] --- @param y1 number Y coordinate of first corner
+00045 [GPT-5-CODEX-MAX-REASONING] --- @param x2 number X coordinate of opposite corner
+00046 [GPT-5-CODEX-MAX-REASONING] --- @param y2 number Y coordinate of opposite corner
+00047 [GPT-5-CODEX-MAX-REASONING] --- @param color number RGB565 color value
+00048 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.drawFillRect(10, 10, 60, 40, 0xF800) -- Red filled rectangle from (10,10) to (60,40)
+00049 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00050 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00051 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.drawFillRect(x1, y1, x2, y2, color) end
+00052 [GPT-5-CODEX-MAX-REASONING] 
+00053 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw text on the display
+00054 [GPT-5-CODEX-MAX-REASONING] --- @param text string Text to display
+00055 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate for text
+00056 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate for text
+00057 [GPT-5-CODEX-MAX-REASONING] --- @param color number RGB565 text color
+00058 [GPT-5-CODEX-MAX-REASONING] --- @param bg_color number RGB565 background color (optional, defaults to black 0x0000)
+00059 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.drawText("Hello World", 10, 10, 0xFFFF) -- White text on black background
+00060 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.drawText("Hello", 10, 30, 0xFFFF, 0x001F) -- White text on blue background
+00061 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00062 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00063 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.drawText(text, x, y, color, bg_color) end
+00064 [GPT-5-CODEX-MAX-REASONING] 
+00065 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a line between two points
+00066 [GPT-5-CODEX-MAX-REASONING] --- @param x1 number X coordinate of first point
+00067 [GPT-5-CODEX-MAX-REASONING] --- @param y1 number Y coordinate of first point
+00068 [GPT-5-CODEX-MAX-REASONING] --- @param x2 number X coordinate of second point
+00069 [GPT-5-CODEX-MAX-REASONING] --- @param y2 number Y coordinate of second point
+00070 [GPT-5-CODEX-MAX-REASONING] --- @param color number RGB565 color value
+00071 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.drawLine(0, 0, 100, 100, COLOR_WHITE) -- Diagonal line
+00072 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00073 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00074 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.drawLine(x1, y1, x2, y2, color) end
+00075 [GPT-5-CODEX-MAX-REASONING] 
+00076 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a circle outline
+00077 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate of center
+00078 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate of center
+00079 [GPT-5-CODEX-MAX-REASONING] --- @param radius number Radius of circle
+00080 [GPT-5-CODEX-MAX-REASONING] --- @param color number RGB565 color value
+00081 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.drawCircle(50, 50, 25, COLOR_RED) -- Red circle outline
+00082 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00083 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00084 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.drawCircle(x, y, radius, color) end
+00085 [GPT-5-CODEX-MAX-REASONING] 
+00086 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a filled circle
+00087 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate of center
+00088 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate of center
+00089 [GPT-5-CODEX-MAX-REASONING] --- @param radius number Radius of circle
+00090 [GPT-5-CODEX-MAX-REASONING] --- @param color number RGB565 color value
+00091 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.drawCircleFilled(50, 50, 25, COLOR_BLUE) -- Blue filled circle
+00092 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00093 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00094 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.drawCircleFilled(x, y, radius, color) end
+00095 [GPT-5-CODEX-MAX-REASONING] 
+00096 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw an ellipse outline
+00097 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate of center
+00098 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate of center
+00099 [GPT-5-CODEX-MAX-REASONING] --- @param rx number X-axis radius
+00100 [GPT-5-CODEX-MAX-REASONING] --- @param ry number Y-axis radius
+00101 [GPT-5-CODEX-MAX-REASONING] --- @param color number RGB565 color value
+00102 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.drawEllipse(50, 50, 30, 20, COLOR_GREEN) -- Green ellipse outline
+00103 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00104 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00105 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.drawEllipse(x, y, rx, ry, color) end
+00106 [GPT-5-CODEX-MAX-REASONING] 
+00107 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a filled ellipse
+00108 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate of center
+00109 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate of center
+00110 [GPT-5-CODEX-MAX-REASONING] --- @param rx number X-axis radius
+00111 [GPT-5-CODEX-MAX-REASONING] --- @param ry number Y-axis radius
+00112 [GPT-5-CODEX-MAX-REASONING] --- @param color number RGB565 color value
+00113 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.drawEllipseFilled(50, 50, 30, 20, COLOR_YELLOW) -- Yellow filled ellipse
+00114 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00115 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00116 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.drawEllipseFilled(x, y, rx, ry, color) end
+00117 [GPT-5-CODEX-MAX-REASONING] 
+00118 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a polygon outline from an array of points
+00119 [GPT-5-CODEX-MAX-REASONING] --- @param points table Array of {x, y} coordinate pairs
+00120 [GPT-5-CODEX-MAX-REASONING] --- @param color number RGB565 color value
+00121 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.drawPolygon({{50, 20}, {20, 80}, {80, 80}}, COLOR_RED) -- Red triangle outline
+00122 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00123 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00124 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.drawPolygon(points, color) end
+00125 [GPT-5-CODEX-MAX-REASONING] 
+00126 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a filled polygon from an array of points
+00127 [GPT-5-CODEX-MAX-REASONING] --- @param points table Array of {x, y} coordinate pairs
+00128 [GPT-5-CODEX-MAX-REASONING] --- @param color number RGB565 color value
+00129 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.drawPolygonFilled({{50, 20}, {20, 80}, {80, 80}}, COLOR_RED) -- Red filled triangle
+00130 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00131 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00132 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.drawPolygonFilled(points, color) end
+00133 [GPT-5-CODEX-MAX-REASONING] 
+00134 [GPT-5-CODEX-MAX-REASONING] --- @brief Perform a flood fill operation starting from the specified point
+00135 [GPT-5-CODEX-MAX-REASONING] --- @param x number Starting X coordinate
+00136 [GPT-5-CODEX-MAX-REASONING] --- @param y number Starting Y coordinate
+00137 [GPT-5-CODEX-MAX-REASONING] --- @param fill_color number Color to fill with (RGB565)
+00138 [GPT-5-CODEX-MAX-REASONING] --- @param boundary_color number Boundary color to stop at (RGB565)
+00139 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.floodFill(50, 50, COLOR_GREEN, COLOR_BLACK) -- Fill with green until hitting black
+00140 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00141 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00142 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.floodFill(x, y, fill_color, boundary_color) end
+00143 [GPT-5-CODEX-MAX-REASONING] 
+00144 [GPT-5-CODEX-MAX-REASONING] --- @brief Perform a flood fill with color tolerance
+00145 [GPT-5-CODEX-MAX-REASONING] --- @param x number Starting X coordinate
+00146 [GPT-5-CODEX-MAX-REASONING] --- @param y number Starting Y coordinate
+00147 [GPT-5-CODEX-MAX-REASONING] --- @param fill_color number Color to fill with (RGB565)
+00148 [GPT-5-CODEX-MAX-REASONING] --- @param tolerance number Color tolerance for matching
+00149 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.floodFillTolerance(50, 50, COLOR_GREEN, 10) -- Fill with tolerance
+00150 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00151 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00152 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.floodFillTolerance(x, y, fill_color, tolerance) end
+00153 [GPT-5-CODEX-MAX-REASONING] 
+00154 [GPT-5-CODEX-MAX-REASONING] --- @brief Get a reference to the back framebuffer
+00155 [GPT-5-CODEX-MAX-REASONING] --- @return userdata Back framebuffer reference
+00156 [GPT-5-CODEX-MAX-REASONING] --- @usage local back_fb = vmupro.graphics.getBackFramebuffer()
+00157 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00158 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00159 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.getBackFramebuffer() end
+00160 [GPT-5-CODEX-MAX-REASONING] 
+00161 [GPT-5-CODEX-MAX-REASONING] --- @brief Get a reference to the front framebuffer
+00162 [GPT-5-CODEX-MAX-REASONING] --- @return userdata Front framebuffer reference
+00163 [GPT-5-CODEX-MAX-REASONING] --- @usage local front_fb = vmupro.graphics.getFrontFramebuffer()
+00164 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00165 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00166 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.getFrontFramebuffer() end
+00167 [GPT-5-CODEX-MAX-REASONING] 
+00168 [GPT-5-CODEX-MAX-REASONING] --- @brief Get a reference to the back buffer
+00169 [GPT-5-CODEX-MAX-REASONING] --- @return userdata Back buffer reference
+00170 [GPT-5-CODEX-MAX-REASONING] --- @usage local back_buffer = vmupro.graphics.getBackBuffer()
+00171 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00172 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00173 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.getBackBuffer() end
+00174 [GPT-5-CODEX-MAX-REASONING] 
+00175 [GPT-5-CODEX-MAX-REASONING] --- @brief Apply mosaic/pixelation effect to a region of the screen
+00176 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate of the top-left corner of the region
+00177 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate of the top-left corner of the region
+00178 [GPT-5-CODEX-MAX-REASONING] --- @param width number Width of the region in pixels
+00179 [GPT-5-CODEX-MAX-REASONING] --- @param height number Height of the region in pixels
+00180 [GPT-5-CODEX-MAX-REASONING] --- @param mosaic_size number Size of mosaic blocks in pixels (e.g., 2 = 2x2 blocks, 4 = 4x4 blocks)
+00181 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.applyMosaicToScreen(0, 0, 240, 240, 8) -- Pixelate entire screen
+00182 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.applyMosaicToScreen(50, 50, 100, 100, 4) -- Pixelate a region
+00183 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.graphics.applyMosaicToScreen(10, 10, 64, 64, 16) -- Heavy pixelation on small area
+00184 [GPT-5-CODEX-MAX-REASONING] --- @note Mosaic size of 1 = no effect
+00185 [GPT-5-CODEX-MAX-REASONING] --- @note Larger mosaic_size values create stronger pixelation effect
+00186 [GPT-5-CODEX-MAX-REASONING] --- @note Operates directly on the screen buffer
+00187 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for transitions, censoring effects, or retro visual effects
+00188 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00189 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00190 [GPT-5-CODEX-MAX-REASONING] function vmupro.graphics.applyMosaicToScreen(x, y, width, height, mosaic_size) end
+00191 [GPT-5-CODEX-MAX-REASONING] 
+00192 [GPT-5-CODEX-MAX-REASONING] -- Color constants (RGB565 format - since firmware doesn't export them)
+00193 [GPT-5-CODEX-MAX-REASONING] -- These values match the firmware's Colors enum in config.h
+00194 [GPT-5-CODEX-MAX-REASONING] vmupro.graphics.RED = 0xF800           --- Red color (RGB565)
+00195 [GPT-5-CODEX-MAX-REASONING] vmupro.graphics.ORANGE = 0xFBA0        --- Orange color (RGB565)
+00196 [GPT-5-CODEX-MAX-REASONING] vmupro.graphics.YELLOW = 0xFF80        --- Yellow color (RGB565)
+00197 [GPT-5-CODEX-MAX-REASONING] vmupro.graphics.YELLOWGREEN = 0x7F80   --- Yellow-green color (RGB565)
+00198 [GPT-5-CODEX-MAX-REASONING] vmupro.graphics.GREEN = 0x0500         --- Green color (RGB565)
+00199 [GPT-5-CODEX-MAX-REASONING] vmupro.graphics.BLUE = 0x045F          --- Blue color (RGB565)
+00200 [GPT-5-CODEX-MAX-REASONING] vmupro.graphics.NAVY = 0x000C          --- Navy blue color (RGB565)
+00201 [GPT-5-CODEX-MAX-REASONING] vmupro.graphics.VIOLET = 0x781F        --- Violet color (RGB565)
+00202 [GPT-5-CODEX-MAX-REASONING] vmupro.graphics.MAGENTA = 0x780D       --- Magenta color (RGB565)
+00203 [GPT-5-CODEX-MAX-REASONING] vmupro.graphics.GREY = 0xB5B6          --- Grey color (RGB565)
+00204 [GPT-5-CODEX-MAX-REASONING] vmupro.graphics.BLACK = 0x0000         --- Black color (RGB565)
+00205 [GPT-5-CODEX-MAX-REASONING] vmupro.graphics.WHITE = 0xFFFF         --- White color (RGB565)
+00206 [GPT-5-CODEX-MAX-REASONING] vmupro.graphics.VMUGREEN = 0x6CD2      --- VMU Pro green color (RGB565)
+00207 [GPT-5-CODEX-MAX-REASONING] vmupro.graphics.VMUINK = 0x288A        --- VMU Pro ink color (RGB565)

@@ -1,0 +1,92 @@
+00001 [GPT-5-CODEX-MAX-REASONING] --- @file input.lua
+00002 [GPT-5-CODEX-MAX-REASONING] --- @brief VMU Pro LUA SDK - Input and Button Functions
+00003 [GPT-5-CODEX-MAX-REASONING] --- @author 8BitMods
+00004 [GPT-5-CODEX-MAX-REASONING] --- @version 1.0.0
+00005 [GPT-5-CODEX-MAX-REASONING] --- @date 2025-09-29
+00006 [GPT-5-CODEX-MAX-REASONING] --- @copyright Copyright (c) 2025 8BitMods. All rights reserved.
+00007 [GPT-5-CODEX-MAX-REASONING] ---
+00008 [GPT-5-CODEX-MAX-REASONING] --- Input and button utilities for VMU Pro LUA applications.
+00009 [GPT-5-CODEX-MAX-REASONING] --- Functions are available under the vmupro.input namespace.
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING] -- Ensure vmupro namespace exists
+00012 [GPT-5-CODEX-MAX-REASONING] vmupro = vmupro or {}
+00013 [GPT-5-CODEX-MAX-REASONING] vmupro.input = vmupro.input or {}
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING] --- @brief Update button state (call once per frame)
+00016 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.input.read() -- Update button states
+00017 [GPT-5-CODEX-MAX-REASONING] --- @note Call this before checking button presses/holds to get current state
+00018 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00019 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00020 [GPT-5-CODEX-MAX-REASONING] function vmupro.input.read() end
+00021 [GPT-5-CODEX-MAX-REASONING] 
+00022 [GPT-5-CODEX-MAX-REASONING] --- @brief Check if a button was just pressed (one-shot)
+00023 [GPT-5-CODEX-MAX-REASONING] --- @param button number Button constant (vmupro.input.UP, vmupro.input.A, etc.)
+00024 [GPT-5-CODEX-MAX-REASONING] --- @return boolean true if button was just pressed, false otherwise
+00025 [GPT-5-CODEX-MAX-REASONING] --- @usage if vmupro.input.pressed(vmupro.input.A) then vmupro.system.log(vmupro.system.LOG_INFO, "Input", "A pressed!") end
+00026 [GPT-5-CODEX-MAX-REASONING] --- @usage if vmupro.input.pressed(vmupro.input.UP) then move_up() end
+00027 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00028 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00029 [GPT-5-CODEX-MAX-REASONING] function vmupro.input.pressed(button) end
+00030 [GPT-5-CODEX-MAX-REASONING] 
+00031 [GPT-5-CODEX-MAX-REASONING] --- @brief Check if a button is currently held down
+00032 [GPT-5-CODEX-MAX-REASONING] --- @param button number Button constant (vmupro.input.UP, vmupro.input.A, etc.)
+00033 [GPT-5-CODEX-MAX-REASONING] --- @return boolean true if button is currently held, false otherwise
+00034 [GPT-5-CODEX-MAX-REASONING] --- @usage if vmupro.input.held(vmupro.input.A) then continuous_action() end
+00035 [GPT-5-CODEX-MAX-REASONING] --- @usage if vmupro.input.held(vmupro.input.LEFT) then move_left() end
+00036 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00037 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00038 [GPT-5-CODEX-MAX-REASONING] function vmupro.input.held(button) end
+00039 [GPT-5-CODEX-MAX-REASONING] 
+00040 [GPT-5-CODEX-MAX-REASONING] --- @brief Check if a button was just released
+00041 [GPT-5-CODEX-MAX-REASONING] --- @param button number Button constant (vmupro.input.UP, vmupro.input.A, etc.)
+00042 [GPT-5-CODEX-MAX-REASONING] --- @return boolean true if button was just released, false otherwise
+00043 [GPT-5-CODEX-MAX-REASONING] --- @usage if vmupro.input.released(vmupro.input.A) then end_action() end
+00044 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00045 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00046 [GPT-5-CODEX-MAX-REASONING] function vmupro.input.released(button) end
+00047 [GPT-5-CODEX-MAX-REASONING] 
+00048 [GPT-5-CODEX-MAX-REASONING] --- @brief Check if any button is currently held
+00049 [GPT-5-CODEX-MAX-REASONING] --- @return boolean true if any button is held, false otherwise
+00050 [GPT-5-CODEX-MAX-REASONING] --- @usage if vmupro.input.anythingHeld() then show_controls() end
+00051 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00052 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00053 [GPT-5-CODEX-MAX-REASONING] function vmupro.input.anythingHeld() end
+00054 [GPT-5-CODEX-MAX-REASONING] 
+00055 [GPT-5-CODEX-MAX-REASONING] --- @brief Check if confirm button (A) was pressed
+00056 [GPT-5-CODEX-MAX-REASONING] --- @return boolean true if confirm button was pressed, false otherwise
+00057 [GPT-5-CODEX-MAX-REASONING] --- @usage if vmupro.input.confirmPressed() then confirm_action() end
+00058 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00059 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00060 [GPT-5-CODEX-MAX-REASONING] function vmupro.input.confirmPressed() end
+00061 [GPT-5-CODEX-MAX-REASONING] 
+00062 [GPT-5-CODEX-MAX-REASONING] --- @brief Check if confirm button (A) was released
+00063 [GPT-5-CODEX-MAX-REASONING] --- @return boolean true if confirm button was released, false otherwise
+00064 [GPT-5-CODEX-MAX-REASONING] --- @usage if vmupro.input.confirmReleased() then end_confirm() end
+00065 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00066 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00067 [GPT-5-CODEX-MAX-REASONING] function vmupro.input.confirmReleased() end
+00068 [GPT-5-CODEX-MAX-REASONING] 
+00069 [GPT-5-CODEX-MAX-REASONING] --- @brief Check if dismiss button (B) was pressed
+00070 [GPT-5-CODEX-MAX-REASONING] --- @return boolean true if dismiss button was pressed, false otherwise
+00071 [GPT-5-CODEX-MAX-REASONING] --- @usage if vmupro.input.dismissPressed() then cancel_action() end
+00072 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00073 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00074 [GPT-5-CODEX-MAX-REASONING] function vmupro.input.dismissPressed() end
+00075 [GPT-5-CODEX-MAX-REASONING] 
+00076 [GPT-5-CODEX-MAX-REASONING] --- @brief Check if dismiss button (B) was released
+00077 [GPT-5-CODEX-MAX-REASONING] --- @return boolean true if dismiss button was released, false otherwise
+00078 [GPT-5-CODEX-MAX-REASONING] --- @usage if vmupro.input.dismissReleased() then end_cancel() end
+00079 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00080 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00081 [GPT-5-CODEX-MAX-REASONING] function vmupro.input.dismissReleased() end
+00082 [GPT-5-CODEX-MAX-REASONING] 
+00083 [GPT-5-CODEX-MAX-REASONING] -- Button constants (provided by firmware)
+00084 [GPT-5-CODEX-MAX-REASONING] vmupro.input.UP = DPad_Up or 0          --- D-Pad Up
+00085 [GPT-5-CODEX-MAX-REASONING] vmupro.input.DOWN = DPad_Down or 1      --- D-Pad Down
+00086 [GPT-5-CODEX-MAX-REASONING] vmupro.input.LEFT = DPad_Left or 2      --- D-Pad Left
+00087 [GPT-5-CODEX-MAX-REASONING] vmupro.input.RIGHT = DPad_Right or 3    --- D-Pad Right
+00088 [GPT-5-CODEX-MAX-REASONING] vmupro.input.A = Btn_A or 4             --- A button
+00089 [GPT-5-CODEX-MAX-REASONING] vmupro.input.B = Btn_B or 5             --- B button
+00090 [GPT-5-CODEX-MAX-REASONING] vmupro.input.POWER = Btn_Power or 6     --- Power button
+00091 [GPT-5-CODEX-MAX-REASONING] vmupro.input.MODE = Btn_Mode or 7       --- Mode button
+00092 [GPT-5-CODEX-MAX-REASONING] vmupro.input.FUNCTION = Btn_Bottom or 8 --- Bottom button (F-Left)

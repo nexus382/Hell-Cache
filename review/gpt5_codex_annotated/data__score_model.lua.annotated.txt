@@ -1,0 +1,67 @@
+00001 [GPT-5-Codex] -- Data layer: run score and top-10 high score helpers.
+00002 [GPT-5-Codex] 
+00003 [GPT-5-Codex] GameScoreModel = {}
+00004 [GPT-5-Codex] 
+00005 [GPT-5-Codex] function GameScoreModel.newRun()
+00006 [GPT-5-Codex]     return {
+00007 [GPT-5-Codex]         current = 0,
+00008 [GPT-5-Codex]         kills = 0,
+00009 [GPT-5-Codex]         levels_cleared = 0,
+00010 [GPT-5-Codex]         started_level = 1,
+00011 [GPT-5-Codex]         ended_level = 1,
+00012 [GPT-5-Codex]     }
+00013 [GPT-5-Codex] end
+00014 [GPT-5-Codex] 
+00015 [GPT-5-Codex] function GameScoreModel.addPoints(runState, amount)
+00016 [GPT-5-Codex]     if not runState then
+00017 [GPT-5-Codex]         return 0
+00018 [GPT-5-Codex]     end
+00019 [GPT-5-Codex]     local delta = amount or 0
+00020 [GPT-5-Codex]     if delta < 0 then delta = 0 end
+00021 [GPT-5-Codex]     runState.current = (runState.current or 0) + delta
+00022 [GPT-5-Codex]     return runState.current
+00023 [GPT-5-Codex] end
+00024 [GPT-5-Codex] 
+00025 [GPT-5-Codex] function GameScoreModel.sanitizeInitials(initials)
+00026 [GPT-5-Codex]     local s = tostring(initials or "AAA"):upper()
+00027 [GPT-5-Codex]     local out = ""
+00028 [GPT-5-Codex]     for i = 1, #s do
+00029 [GPT-5-Codex]         local c = s:sub(i, i)
+00030 [GPT-5-Codex]         if c >= "A" and c <= "Z" then
+00031 [GPT-5-Codex]             out = out .. c
+00032 [GPT-5-Codex]         end
+00033 [GPT-5-Codex]         if #out == 3 then
+00034 [GPT-5-Codex]             break
+00035 [GPT-5-Codex]         end
+00036 [GPT-5-Codex]     end
+00037 [GPT-5-Codex]     while #out < 3 do
+00038 [GPT-5-Codex]         out = out .. "A"
+00039 [GPT-5-Codex]     end
+00040 [GPT-5-Codex]     return out
+00041 [GPT-5-Codex] end
+00042 [GPT-5-Codex] 
+00043 [GPT-5-Codex] function GameScoreModel.createEntry(initials, score, levelReached)
+00044 [GPT-5-Codex]     return {
+00045 [GPT-5-Codex]         initials = GameScoreModel.sanitizeInitials(initials),
+00046 [GPT-5-Codex]         score = math.max(0, math.floor(score or 0)),
+00047 [GPT-5-Codex]         level = math.max(1, math.floor(levelReached or 1)),
+00048 [GPT-5-Codex]     }
+00049 [GPT-5-Codex] end
+00050 [GPT-5-Codex] 
+00051 [GPT-5-Codex] function GameScoreModel.insertHighScore(list, entry, maxEntries)
+00052 [GPT-5-Codex]     local scores = list or {}
+00053 [GPT-5-Codex]     scores[#scores + 1] = entry
+00054 [GPT-5-Codex]     table.sort(scores, function(a, b)
+00055 [GPT-5-Codex]         local sa = (a and a.score) or 0
+00056 [GPT-5-Codex]         local sb = (b and b.score) or 0
+00057 [GPT-5-Codex]         if sa == sb then
+00058 [GPT-5-Codex]             return ((a and a.level) or 0) > ((b and b.level) or 0)
+00059 [GPT-5-Codex]         end
+00060 [GPT-5-Codex]         return sa > sb
+00061 [GPT-5-Codex]     end)
+00062 [GPT-5-Codex]     local limit = maxEntries or 10
+00063 [GPT-5-Codex]     while #scores > limit do
+00064 [GPT-5-Codex]         table.remove(scores)
+00065 [GPT-5-Codex]     end
+00066 [GPT-5-Codex]     return scores
+00067 [GPT-5-Codex] end

@@ -1,0 +1,130 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page26.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 26: Spritesheet Frame Management (setCurrentFrame, getCurrentFrame, getFrameCount)
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page26 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- Spritesheet handle
+00010 [GPT-5-CODEX-MAX-REASONING] local spritesheet_handle = nil
+00011 [GPT-5-CODEX-MAX-REASONING] local sheet_loaded = false
+00012 [GPT-5-CODEX-MAX-REASONING] local load_error = false
+00013 [GPT-5-CODEX-MAX-REASONING] 
+00014 [GPT-5-CODEX-MAX-REASONING] -- Animation state
+00015 [GPT-5-CODEX-MAX-REASONING] local anim_time = 0
+00016 [GPT-5-CODEX-MAX-REASONING] local anim_speed = 150000  -- 150ms per frame (microseconds)
+00017 [GPT-5-CODEX-MAX-REASONING] 
+00018 [GPT-5-CODEX-MAX-REASONING] --- @brief Load spritesheet
+00019 [GPT-5-CODEX-MAX-REASONING] local function loadSpritesheet()
+00020 [GPT-5-CODEX-MAX-REASONING]     if sheet_loaded or load_error then
+00021 [GPT-5-CODEX-MAX-REASONING]         return
+00022 [GPT-5-CODEX-MAX-REASONING]     end
+00023 [GPT-5-CODEX-MAX-REASONING] 
+00024 [GPT-5-CODEX-MAX-REASONING]     spritesheet_handle = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00025 [GPT-5-CODEX-MAX-REASONING] 
+00026 [GPT-5-CODEX-MAX-REASONING]     if not spritesheet_handle then
+00027 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page26", "Failed to load spritesheet")
+00028 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00029 [GPT-5-CODEX-MAX-REASONING]         return
+00030 [GPT-5-CODEX-MAX-REASONING]     end
+00031 [GPT-5-CODEX-MAX-REASONING] 
+00032 [GPT-5-CODEX-MAX-REASONING]     -- Initialize to first frame
+00033 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(spritesheet_handle, 0)
+00034 [GPT-5-CODEX-MAX-REASONING] 
+00035 [GPT-5-CODEX-MAX-REASONING]     sheet_loaded = true
+00036 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page26",
+00037 [GPT-5-CODEX-MAX-REASONING]         string.format("Spritesheet loaded: %dx%d, %d frames",
+00038 [GPT-5-CODEX-MAX-REASONING]             spritesheet_handle.frameWidth, spritesheet_handle.frameHeight,
+00039 [GPT-5-CODEX-MAX-REASONING]             spritesheet_handle.frameCount))
+00040 [GPT-5-CODEX-MAX-REASONING] end
+00041 [GPT-5-CODEX-MAX-REASONING] 
+00042 [GPT-5-CODEX-MAX-REASONING] --- @brief Update logic - handle frame animation
+00043 [GPT-5-CODEX-MAX-REASONING] function Page26.update()
+00044 [GPT-5-CODEX-MAX-REASONING]     if not sheet_loaded then
+00045 [GPT-5-CODEX-MAX-REASONING]         return
+00046 [GPT-5-CODEX-MAX-REASONING]     end
+00047 [GPT-5-CODEX-MAX-REASONING] 
+00048 [GPT-5-CODEX-MAX-REASONING]     local current_time = vmupro.system.getTimeUs()
+00049 [GPT-5-CODEX-MAX-REASONING] 
+00050 [GPT-5-CODEX-MAX-REASONING]     -- Auto-animate
+00051 [GPT-5-CODEX-MAX-REASONING]     if (current_time - anim_time) >= anim_speed then
+00052 [GPT-5-CODEX-MAX-REASONING]         local current_frame = vmupro.sprite.getCurrentFrame(spritesheet_handle)
+00053 [GPT-5-CODEX-MAX-REASONING]         local frame_count = vmupro.sprite.getFrameCount(spritesheet_handle)
+00054 [GPT-5-CODEX-MAX-REASONING] 
+00055 [GPT-5-CODEX-MAX-REASONING]         -- Advance to next frame (loop)
+00056 [GPT-5-CODEX-MAX-REASONING]         local next_frame = (current_frame + 1) % frame_count
+00057 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.setCurrentFrame(spritesheet_handle, next_frame)
+00058 [GPT-5-CODEX-MAX-REASONING] 
+00059 [GPT-5-CODEX-MAX-REASONING]         anim_time = current_time
+00060 [GPT-5-CODEX-MAX-REASONING]     end
+00061 [GPT-5-CODEX-MAX-REASONING] end
+00062 [GPT-5-CODEX-MAX-REASONING] 
+00063 [GPT-5-CODEX-MAX-REASONING] --- @brief Cleanup when leaving page
+00064 [GPT-5-CODEX-MAX-REASONING] function Page26.exit()
+00065 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00066 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00067 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00068 [GPT-5-CODEX-MAX-REASONING]     end
+00069 [GPT-5-CODEX-MAX-REASONING] 
+00070 [GPT-5-CODEX-MAX-REASONING]     if spritesheet_handle then
+00071 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(spritesheet_handle)
+00072 [GPT-5-CODEX-MAX-REASONING]         spritesheet_handle = nil
+00073 [GPT-5-CODEX-MAX-REASONING]     end
+00074 [GPT-5-CODEX-MAX-REASONING]     sheet_loaded = false
+00075 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page26", "Spritesheet freed")
+00076 [GPT-5-CODEX-MAX-REASONING] end
+00077 [GPT-5-CODEX-MAX-REASONING] 
+00078 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 26: Spritesheet Frame Management Demo
+00079 [GPT-5-CODEX-MAX-REASONING] function Page26.render(drawPageCounter)
+00080 [GPT-5-CODEX-MAX-REASONING]     -- Start double buffer on first render
+00081 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00082 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00083 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00084 [GPT-5-CODEX-MAX-REASONING]     end
+00085 [GPT-5-CODEX-MAX-REASONING] 
+00086 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00087 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00088 [GPT-5-CODEX-MAX-REASONING] 
+00089 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00090 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00091 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Frame Mgmt", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00092 [GPT-5-CODEX-MAX-REASONING] 
+00093 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00094 [GPT-5-CODEX-MAX-REASONING] 
+00095 [GPT-5-CODEX-MAX-REASONING]     -- Load spritesheet on first render
+00096 [GPT-5-CODEX-MAX-REASONING]     loadSpritesheet()
+00097 [GPT-5-CODEX-MAX-REASONING] 
+00098 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00099 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR: Failed to load", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00100 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("spritesheet. Check assets.", 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00101 [GPT-5-CODEX-MAX-REASONING]     elseif not sheet_loaded then
+00102 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Loading spritesheet...", 10, 60, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00103 [GPT-5-CODEX-MAX-REASONING]     elseif spritesheet_handle then
+00104 [GPT-5-CODEX-MAX-REASONING]         -- Get current frame and frame count
+00105 [GPT-5-CODEX-MAX-REASONING]         local current_frame = vmupro.sprite.getCurrentFrame(spritesheet_handle)
+00106 [GPT-5-CODEX-MAX-REASONING]         local frame_count = vmupro.sprite.getFrameCount(spritesheet_handle)
+00107 [GPT-5-CODEX-MAX-REASONING] 
+00108 [GPT-5-CODEX-MAX-REASONING]         -- Draw the current frame (centered)
+00109 [GPT-5-CODEX-MAX-REASONING]         local sheet_x = 120 - (spritesheet_handle.frameWidth / 2)
+00110 [GPT-5-CODEX-MAX-REASONING]         local sheet_y = 100
+00111 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawFrame(spritesheet_handle, current_frame + 1, sheet_x, sheet_y, vmupro.sprite.kImageUnflipped)
+00112 [GPT-5-CODEX-MAX-REASONING] 
+00113 [GPT-5-CODEX-MAX-REASONING]         -- Draw frame info
+00114 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Frame: " .. current_frame .. " / " .. (frame_count - 1), 10, 60, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00115 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Count: " .. frame_count, 10, 75, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00116 [GPT-5-CODEX-MAX-REASONING] 
+00117 [GPT-5-CODEX-MAX-REASONING]         -- Display animation speed
+00118 [GPT-5-CODEX-MAX-REASONING]         local fps = 1000000 / anim_speed
+00119 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(string.format("Speed: %.1f FPS", fps), 10, 90, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00120 [GPT-5-CODEX-MAX-REASONING]     end
+00121 [GPT-5-CODEX-MAX-REASONING] 
+00122 [GPT-5-CODEX-MAX-REASONING]     -- Description at top
+00123 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Auto-playing animation", 10, 40, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00124 [GPT-5-CODEX-MAX-REASONING] 
+00125 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00126 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00127 [GPT-5-CODEX-MAX-REASONING] 
+00128 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00129 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00130 [GPT-5-CODEX-MAX-REASONING] end

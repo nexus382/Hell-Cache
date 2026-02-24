@@ -1,0 +1,17 @@
+00001 [GPT-5-Codex] import "api/system"
+00002 [GPT-5-Codex] 
+00003 [GPT-5-Codex] if vmupro and vmupro.system and vmupro.system.log then
+00004 [GPT-5-Codex]     vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "wrapper app.lua loaded")
+00005 [GPT-5-Codex] end
+00006 [GPT-5-Codex] 
+00007 [GPT-5-Codex] local ok, err = pcall(function()
+00008 [GPT-5-Codex]     import "app_full"
+00009 [GPT-5-Codex] end)
+00010 [GPT-5-Codex] 
+00011 [GPT-5-Codex] if vmupro and vmupro.system and vmupro.system.log then
+00012 [GPT-5-Codex]     if ok then
+00013 [GPT-5-Codex]         vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "import app_full ok")
+00014 [GPT-5-Codex]     else
+00015 [GPT-5-Codex]         vmupro.system.log(vmupro.system.LOG_ERROR, "BOOT", "import app_full FAIL err=" .. tostring(err))
+00016 [GPT-5-Codex]     end
+00017 [GPT-5-Codex] end

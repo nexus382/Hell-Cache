@@ -1,0 +1,129 @@
+00001 [GPT-5-CODEX-MAX-REASONING] --- @file sequence.lua
+00002 [GPT-5-CODEX-MAX-REASONING] --- @brief VMU Pro LUA SDK - Sequence (MIDI Playback) Functions
+00003 [GPT-5-CODEX-MAX-REASONING] --- @author 8BitMods
+00004 [GPT-5-CODEX-MAX-REASONING] --- @version 1.0.0
+00005 [GPT-5-CODEX-MAX-REASONING] --- @date 2025-12-14
+00006 [GPT-5-CODEX-MAX-REASONING] --- @copyright Copyright (c) 2025 8BitMods. All rights reserved.
+00007 [GPT-5-CODEX-MAX-REASONING] ---
+00008 [GPT-5-CODEX-MAX-REASONING] --- Sequence functions for loading and playing MIDI files.
+00009 [GPT-5-CODEX-MAX-REASONING] --- Functions are available under the vmupro.sound.sequence namespace.
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING] -- Ensure vmupro namespace exists
+00012 [GPT-5-CODEX-MAX-REASONING] vmupro = vmupro or {}
+00013 [GPT-5-CODEX-MAX-REASONING] vmupro.sound = vmupro.sound or {}
+00014 [GPT-5-CODEX-MAX-REASONING] vmupro.sound.sequence = vmupro.sound.sequence or {}
+00015 [GPT-5-CODEX-MAX-REASONING] 
+00016 [GPT-5-CODEX-MAX-REASONING] --- @class SequenceObject
+00017 [GPT-5-CODEX-MAX-REASONING] --- @field id number Internal handle for the sequence
+00018 [GPT-5-CODEX-MAX-REASONING] 
+00019 [GPT-5-CODEX-MAX-REASONING] --- @class TrackObject
+00020 [GPT-5-CODEX-MAX-REASONING] --- @field id number Internal handle for the track
+00021 [GPT-5-CODEX-MAX-REASONING] 
+00022 [GPT-5-CODEX-MAX-REASONING] --- @brief Load a MIDI file as a sequence
+00023 [GPT-5-CODEX-MAX-REASONING] --- @param path string Path to MIDI file (relative to VMUPack root)
+00024 [GPT-5-CODEX-MAX-REASONING] --- @return SequenceObject|nil Sequence object, or nil on error
+00025 [GPT-5-CODEX-MAX-REASONING] --- @return string|nil Error message if failed
+00026 [GPT-5-CODEX-MAX-REASONING] --- @usage local seq = vmupro.sound.sequence.new("assets/song.mid")
+00027 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00028 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00029 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sequence.new(path) end
+00030 [GPT-5-CODEX-MAX-REASONING] 
+00031 [GPT-5-CODEX-MAX-REASONING] --- @brief Get the number of tracks in a sequence
+00032 [GPT-5-CODEX-MAX-REASONING] --- @param seq SequenceObject Sequence to query
+00033 [GPT-5-CODEX-MAX-REASONING] --- @return number Number of tracks in the MIDI file
+00034 [GPT-5-CODEX-MAX-REASONING] --- @usage local count = vmupro.sound.sequence.getTrackCount(seq)
+00035 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00036 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00037 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sequence.getTrackCount(seq) end
+00038 [GPT-5-CODEX-MAX-REASONING] 
+00039 [GPT-5-CODEX-MAX-REASONING] --- @brief Get a track at a specific index
+00040 [GPT-5-CODEX-MAX-REASONING] --- @param seq SequenceObject Sequence to query
+00041 [GPT-5-CODEX-MAX-REASONING] --- @param index number Track index (1-based)
+00042 [GPT-5-CODEX-MAX-REASONING] --- @return TrackObject|nil Track object, or nil if index out of range
+00043 [GPT-5-CODEX-MAX-REASONING] --- @usage local track = vmupro.sound.sequence.getTrackAtIndex(seq, 1)
+00044 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00045 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00046 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sequence.getTrackAtIndex(seq, index) end
+00047 [GPT-5-CODEX-MAX-REASONING] 
+00048 [GPT-5-CODEX-MAX-REASONING] --- @brief Assign an instrument to a MIDI track
+00049 [GPT-5-CODEX-MAX-REASONING] --- @param seq SequenceObject Sequence to configure
+00050 [GPT-5-CODEX-MAX-REASONING] --- @param trackIndex number Track index (1-based)
+00051 [GPT-5-CODEX-MAX-REASONING] --- @param inst InstrumentObject Instrument to use for this track
+00052 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.sequence.setTrackInstrument(seq, 1, pianoInst)
+00053 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00054 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00055 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sequence.setTrackInstrument(seq, trackIndex, inst) end
+00056 [GPT-5-CODEX-MAX-REASONING] 
+00057 [GPT-5-CODEX-MAX-REASONING] --- @alias ProgramCallback fun(track: number, program: number): InstrumentObject
+00058 [GPT-5-CODEX-MAX-REASONING] 
+00059 [GPT-5-CODEX-MAX-REASONING] --- @brief Set a callback function to handle MIDI program changes
+00060 [GPT-5-CODEX-MAX-REASONING] --- @param seq SequenceObject Sequence to configure
+00061 [GPT-5-CODEX-MAX-REASONING] --- @param callback ProgramCallback Function called when a program change occurs
+00062 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.sequence.setProgramCallback(seq, function(track, program)
+00063 [GPT-5-CODEX-MAX-REASONING] ---     if program == 71 then return clarinet_inst
+00064 [GPT-5-CODEX-MAX-REASONING] ---     elseif program == 45 then return strings_inst
+00065 [GPT-5-CODEX-MAX-REASONING] ---     else return default_inst
+00066 [GPT-5-CODEX-MAX-REASONING] ---     end
+00067 [GPT-5-CODEX-MAX-REASONING] --- end)
+00068 [GPT-5-CODEX-MAX-REASONING] --- @note The callback receives: track (0-based index), program (0-127 MIDI program number)
+00069 [GPT-5-CODEX-MAX-REASONING] --- @note The callback should return an instrument to use for that program
+00070 [GPT-5-CODEX-MAX-REASONING] --- @note This allows dynamic instrument switching based on MIDI program changes
+00071 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00072 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00073 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sequence.setProgramCallback(seq, callback) end
+00074 [GPT-5-CODEX-MAX-REASONING] 
+00075 [GPT-5-CODEX-MAX-REASONING] --- @brief Get the maximum polyphony (simultaneous notes) for a track
+00076 [GPT-5-CODEX-MAX-REASONING] --- @param seq SequenceObject Sequence to query
+00077 [GPT-5-CODEX-MAX-REASONING] --- @param trackIndex number Track index (1-based)
+00078 [GPT-5-CODEX-MAX-REASONING] --- @return number Maximum number of simultaneous notes
+00079 [GPT-5-CODEX-MAX-REASONING] --- @usage local maxVoices = vmupro.sound.sequence.getTrackPolyphony(seq, 1)
+00080 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00081 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00082 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sequence.getTrackPolyphony(seq, trackIndex) end
+00083 [GPT-5-CODEX-MAX-REASONING] 
+00084 [GPT-5-CODEX-MAX-REASONING] --- @brief Get the number of currently active notes for a track
+00085 [GPT-5-CODEX-MAX-REASONING] --- @param seq SequenceObject Sequence to query
+00086 [GPT-5-CODEX-MAX-REASONING] --- @param trackIndex number Track index (1-based)
+00087 [GPT-5-CODEX-MAX-REASONING] --- @return number Number of currently playing notes
+00088 [GPT-5-CODEX-MAX-REASONING] --- @usage local active = vmupro.sound.sequence.getTrackNotesActive(seq, 1)
+00089 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00090 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00091 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sequence.getTrackNotesActive(seq, trackIndex) end
+00092 [GPT-5-CODEX-MAX-REASONING] 
+00093 [GPT-5-CODEX-MAX-REASONING] --- @brief Start playing the sequence
+00094 [GPT-5-CODEX-MAX-REASONING] --- @param seq SequenceObject Sequence to play
+00095 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.sequence.play(seq)
+00096 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00097 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00098 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sequence.play(seq) end
+00099 [GPT-5-CODEX-MAX-REASONING] 
+00100 [GPT-5-CODEX-MAX-REASONING] --- @brief Stop playing the sequence
+00101 [GPT-5-CODEX-MAX-REASONING] --- @param seq SequenceObject Sequence to stop
+00102 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.sequence.stop(seq)
+00103 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00104 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00105 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sequence.stop(seq) end
+00106 [GPT-5-CODEX-MAX-REASONING] 
+00107 [GPT-5-CODEX-MAX-REASONING] --- @brief Set whether the sequence should loop
+00108 [GPT-5-CODEX-MAX-REASONING] --- @param seq SequenceObject Sequence to configure
+00109 [GPT-5-CODEX-MAX-REASONING] --- @param shouldLoop boolean true to loop, false to play once
+00110 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.sequence.setLooping(seq, true)
+00111 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00112 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00113 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sequence.setLooping(seq, shouldLoop) end
+00114 [GPT-5-CODEX-MAX-REASONING] 
+00115 [GPT-5-CODEX-MAX-REASONING] --- @brief Check if a sequence is currently playing
+00116 [GPT-5-CODEX-MAX-REASONING] --- @param seq SequenceObject Sequence to check
+00117 [GPT-5-CODEX-MAX-REASONING] --- @return boolean true if playing, false otherwise
+00118 [GPT-5-CODEX-MAX-REASONING] --- @usage if vmupro.sound.sequence.isPlaying(seq) then vmupro.system.log(vmupro.system.LOG_DEBUG, "Sequence", "Playing") end
+00119 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00120 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00121 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sequence.isPlaying(seq) end
+00122 [GPT-5-CODEX-MAX-REASONING] 
+00123 [GPT-5-CODEX-MAX-REASONING] --- @brief Free a sequence and release its resources
+00124 [GPT-5-CODEX-MAX-REASONING] --- @param seq SequenceObject Sequence to free
+00125 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sound.sequence.free(seq)
+00126 [GPT-5-CODEX-MAX-REASONING] --- @note Stop the sequence before freeing
+00127 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00128 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00129 [GPT-5-CODEX-MAX-REASONING] function vmupro.sound.sequence.free(seq) end

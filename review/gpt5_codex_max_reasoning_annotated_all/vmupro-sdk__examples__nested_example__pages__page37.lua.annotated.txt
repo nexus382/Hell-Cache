@@ -1,0 +1,241 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page37.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 37: Sprite Stencil (setStencilPattern, clearStencil)
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page37 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track double buffer state
+00007 [GPT-5-CODEX-MAX-REASONING] local db_running = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] -- Sprite handles
+00010 [GPT-5-CODEX-MAX-REASONING] local sprite1 = nil
+00011 [GPT-5-CODEX-MAX-REASONING] local sprite2 = nil
+00012 [GPT-5-CODEX-MAX-REASONING] local sprite3 = nil
+00013 [GPT-5-CODEX-MAX-REASONING] local sprite4 = nil
+00014 [GPT-5-CODEX-MAX-REASONING] local sprites_loaded = false
+00015 [GPT-5-CODEX-MAX-REASONING] local load_error = false
+00016 [GPT-5-CODEX-MAX-REASONING] 
+00017 [GPT-5-CODEX-MAX-REASONING] -- Stencil patterns
+00018 [GPT-5-CODEX-MAX-REASONING] local checkerboard = {
+00019 [GPT-5-CODEX-MAX-REASONING]     0xAA,  -- 10101010
+00020 [GPT-5-CODEX-MAX-REASONING]     0x55,  -- 01010101
+00021 [GPT-5-CODEX-MAX-REASONING]     0xAA,  -- 10101010
+00022 [GPT-5-CODEX-MAX-REASONING]     0x55,  -- 01010101
+00023 [GPT-5-CODEX-MAX-REASONING]     0xAA,  -- 10101010
+00024 [GPT-5-CODEX-MAX-REASONING]     0x55,  -- 01010101
+00025 [GPT-5-CODEX-MAX-REASONING]     0xAA,  -- 10101010
+00026 [GPT-5-CODEX-MAX-REASONING]     0x55   -- 01010101
+00027 [GPT-5-CODEX-MAX-REASONING] }
+00028 [GPT-5-CODEX-MAX-REASONING] 
+00029 [GPT-5-CODEX-MAX-REASONING] local horizontal_lines = {
+00030 [GPT-5-CODEX-MAX-REASONING]     0xFF,  -- 11111111 (full row)
+00031 [GPT-5-CODEX-MAX-REASONING]     0x00,  -- 00000000 (empty row)
+00032 [GPT-5-CODEX-MAX-REASONING]     0xFF,  -- 11111111
+00033 [GPT-5-CODEX-MAX-REASONING]     0x00,  -- 00000000
+00034 [GPT-5-CODEX-MAX-REASONING]     0xFF,  -- 11111111
+00035 [GPT-5-CODEX-MAX-REASONING]     0x00,  -- 00000000
+00036 [GPT-5-CODEX-MAX-REASONING]     0xFF,  -- 11111111
+00037 [GPT-5-CODEX-MAX-REASONING]     0x00   -- 00000000
+00038 [GPT-5-CODEX-MAX-REASONING] }
+00039 [GPT-5-CODEX-MAX-REASONING] 
+00040 [GPT-5-CODEX-MAX-REASONING] local vertical_lines = {
+00041 [GPT-5-CODEX-MAX-REASONING]     0xCC,  -- 11001100
+00042 [GPT-5-CODEX-MAX-REASONING]     0xCC,  -- 11001100
+00043 [GPT-5-CODEX-MAX-REASONING]     0xCC,  -- 11001100
+00044 [GPT-5-CODEX-MAX-REASONING]     0xCC,  -- 11001100
+00045 [GPT-5-CODEX-MAX-REASONING]     0xCC,  -- 11001100
+00046 [GPT-5-CODEX-MAX-REASONING]     0xCC,  -- 11001100
+00047 [GPT-5-CODEX-MAX-REASONING]     0xCC,  -- 11001100
+00048 [GPT-5-CODEX-MAX-REASONING]     0xCC   -- 11001100
+00049 [GPT-5-CODEX-MAX-REASONING] }
+00050 [GPT-5-CODEX-MAX-REASONING] 
+00051 [GPT-5-CODEX-MAX-REASONING] local dither_50 = {
+00052 [GPT-5-CODEX-MAX-REASONING]     0xAA,  -- 10101010
+00053 [GPT-5-CODEX-MAX-REASONING]     0x55,  -- 01010101
+00054 [GPT-5-CODEX-MAX-REASONING]     0xAA,  -- 10101010
+00055 [GPT-5-CODEX-MAX-REASONING]     0x55,  -- 01010101
+00056 [GPT-5-CODEX-MAX-REASONING]     0xAA,  -- 10101010
+00057 [GPT-5-CODEX-MAX-REASONING]     0x55,  -- 01010101
+00058 [GPT-5-CODEX-MAX-REASONING]     0xAA,  -- 10101010
+00059 [GPT-5-CODEX-MAX-REASONING]     0x55   -- 01010101
+00060 [GPT-5-CODEX-MAX-REASONING] }
+00061 [GPT-5-CODEX-MAX-REASONING] 
+00062 [GPT-5-CODEX-MAX-REASONING] -- Pattern cycling
+00063 [GPT-5-CODEX-MAX-REASONING] local pattern_list = {checkerboard, horizontal_lines, vertical_lines, dither_50}
+00064 [GPT-5-CODEX-MAX-REASONING] local pattern_names = {"Checkerboard", "H-Lines", "V-Lines", "50% Dither"}
+00065 [GPT-5-CODEX-MAX-REASONING] local current_pattern = 1
+00066 [GPT-5-CODEX-MAX-REASONING] local cycle_interval = 2000000  -- 2 seconds
+00067 [GPT-5-CODEX-MAX-REASONING] local last_cycle_time = 0
+00068 [GPT-5-CODEX-MAX-REASONING] 
+00069 [GPT-5-CODEX-MAX-REASONING] --- @brief Load sprites
+00070 [GPT-5-CODEX-MAX-REASONING] local function loadSprites()
+00071 [GPT-5-CODEX-MAX-REASONING]     if sprites_loaded or load_error then
+00072 [GPT-5-CODEX-MAX-REASONING]         return
+00073 [GPT-5-CODEX-MAX-REASONING]     end
+00074 [GPT-5-CODEX-MAX-REASONING] 
+00075 [GPT-5-CODEX-MAX-REASONING]     -- Load four sprites to demonstrate different stencil patterns
+00076 [GPT-5-CODEX-MAX-REASONING]     sprite1 = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00077 [GPT-5-CODEX-MAX-REASONING]     sprite2 = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00078 [GPT-5-CODEX-MAX-REASONING]     sprite3 = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00079 [GPT-5-CODEX-MAX-REASONING]     sprite4 = vmupro.sprite.newSheet("assets/mask_guy-table-32-32")
+00080 [GPT-5-CODEX-MAX-REASONING] 
+00081 [GPT-5-CODEX-MAX-REASONING]     if not sprite1 or not sprite2 or not sprite3 or not sprite4 then
+00082 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_ERROR, "Page37", "Failed to load sprites")
+00083 [GPT-5-CODEX-MAX-REASONING]         if sprite1 then vmupro.sprite.free(sprite1) end
+00084 [GPT-5-CODEX-MAX-REASONING]         if sprite2 then vmupro.sprite.free(sprite2) end
+00085 [GPT-5-CODEX-MAX-REASONING]         if sprite3 then vmupro.sprite.free(sprite3) end
+00086 [GPT-5-CODEX-MAX-REASONING]         if sprite4 then vmupro.sprite.free(sprite4) end
+00087 [GPT-5-CODEX-MAX-REASONING]         sprite1 = nil
+00088 [GPT-5-CODEX-MAX-REASONING]         sprite2 = nil
+00089 [GPT-5-CODEX-MAX-REASONING]         sprite3 = nil
+00090 [GPT-5-CODEX-MAX-REASONING]         sprite4 = nil
+00091 [GPT-5-CODEX-MAX-REASONING]         load_error = true
+00092 [GPT-5-CODEX-MAX-REASONING]         return
+00093 [GPT-5-CODEX-MAX-REASONING]     end
+00094 [GPT-5-CODEX-MAX-REASONING] 
+00095 [GPT-5-CODEX-MAX-REASONING]     -- Set frames
+00096 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(sprite1, 0)
+00097 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(sprite2, 1)
+00098 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(sprite3, 2)
+00099 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setCurrentFrame(sprite4, 0)
+00100 [GPT-5-CODEX-MAX-REASONING] 
+00101 [GPT-5-CODEX-MAX-REASONING]     -- Set positions in a grid
+00102 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.moveTo(sprite1, 30, 80)
+00103 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.moveTo(sprite2, 90, 80)
+00104 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.moveTo(sprite3, 150, 80)
+00105 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.moveTo(sprite4, 210, 80)
+00106 [GPT-5-CODEX-MAX-REASONING] 
+00107 [GPT-5-CODEX-MAX-REASONING]     -- Apply different stencil patterns to each sprite
+00108 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setStencilPattern(sprite1, checkerboard)
+00109 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setStencilPattern(sprite2, horizontal_lines)
+00110 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setStencilPattern(sprite3, vertical_lines)
+00111 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.setStencilPattern(sprite4, dither_50)
+00112 [GPT-5-CODEX-MAX-REASONING] 
+00113 [GPT-5-CODEX-MAX-REASONING]     -- Add to scene
+00114 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(sprite1)
+00115 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(sprite2)
+00116 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(sprite3)
+00117 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.add(sprite4)
+00118 [GPT-5-CODEX-MAX-REASONING] 
+00119 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = true
+00120 [GPT-5-CODEX-MAX-REASONING]     last_cycle_time = vmupro.system.getTimeUs()
+00121 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page37", "Sprites loaded for stencil demo")
+00122 [GPT-5-CODEX-MAX-REASONING] end
+00123 [GPT-5-CODEX-MAX-REASONING] 
+00124 [GPT-5-CODEX-MAX-REASONING] --- @brief Update logic - cycle through patterns on first sprite
+00125 [GPT-5-CODEX-MAX-REASONING] function Page37.update()
+00126 [GPT-5-CODEX-MAX-REASONING]     if not sprites_loaded then
+00127 [GPT-5-CODEX-MAX-REASONING]         return
+00128 [GPT-5-CODEX-MAX-REASONING]     end
+00129 [GPT-5-CODEX-MAX-REASONING] 
+00130 [GPT-5-CODEX-MAX-REASONING]     local current_time = vmupro.system.getTimeUs()
+00131 [GPT-5-CODEX-MAX-REASONING] 
+00132 [GPT-5-CODEX-MAX-REASONING]     -- Cycle sprite1's stencil pattern every 2 seconds
+00133 [GPT-5-CODEX-MAX-REASONING]     if (current_time - last_cycle_time) >= cycle_interval then
+00134 [GPT-5-CODEX-MAX-REASONING]         current_pattern = (current_pattern % 4) + 1
+00135 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.setStencilPattern(sprite1, pattern_list[current_pattern])
+00136 [GPT-5-CODEX-MAX-REASONING]         last_cycle_time = current_time
+00137 [GPT-5-CODEX-MAX-REASONING] 
+00138 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.log(vmupro.system.LOG_INFO, "Page37",
+00139 [GPT-5-CODEX-MAX-REASONING]             "Sprite1 pattern: " .. pattern_names[current_pattern])
+00140 [GPT-5-CODEX-MAX-REASONING]     end
+00141 [GPT-5-CODEX-MAX-REASONING] end
+00142 [GPT-5-CODEX-MAX-REASONING] 
+00143 [GPT-5-CODEX-MAX-REASONING] --- @brief Cleanup when leaving page
+00144 [GPT-5-CODEX-MAX-REASONING] function Page37.exit()
+00145 [GPT-5-CODEX-MAX-REASONING]     if db_running then
+00146 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.stopDoubleBufferRenderer()
+00147 [GPT-5-CODEX-MAX-REASONING]         db_running = false
+00148 [GPT-5-CODEX-MAX-REASONING]     end
+00149 [GPT-5-CODEX-MAX-REASONING] 
+00150 [GPT-5-CODEX-MAX-REASONING]     -- Remove all sprites from scene
+00151 [GPT-5-CODEX-MAX-REASONING]     vmupro.sprite.removeAll()
+00152 [GPT-5-CODEX-MAX-REASONING] 
+00153 [GPT-5-CODEX-MAX-REASONING]     -- Clear stencils and free sprites
+00154 [GPT-5-CODEX-MAX-REASONING]     if sprite1 then
+00155 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearStencil(sprite1)
+00156 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite1)
+00157 [GPT-5-CODEX-MAX-REASONING]         sprite1 = nil
+00158 [GPT-5-CODEX-MAX-REASONING]     end
+00159 [GPT-5-CODEX-MAX-REASONING] 
+00160 [GPT-5-CODEX-MAX-REASONING]     if sprite2 then
+00161 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearStencil(sprite2)
+00162 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite2)
+00163 [GPT-5-CODEX-MAX-REASONING]         sprite2 = nil
+00164 [GPT-5-CODEX-MAX-REASONING]     end
+00165 [GPT-5-CODEX-MAX-REASONING] 
+00166 [GPT-5-CODEX-MAX-REASONING]     if sprite3 then
+00167 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearStencil(sprite3)
+00168 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite3)
+00169 [GPT-5-CODEX-MAX-REASONING]         sprite3 = nil
+00170 [GPT-5-CODEX-MAX-REASONING]     end
+00171 [GPT-5-CODEX-MAX-REASONING] 
+00172 [GPT-5-CODEX-MAX-REASONING]     if sprite4 then
+00173 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.clearStencil(sprite4)
+00174 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.free(sprite4)
+00175 [GPT-5-CODEX-MAX-REASONING]         sprite4 = nil
+00176 [GPT-5-CODEX-MAX-REASONING]     end
+00177 [GPT-5-CODEX-MAX-REASONING] 
+00178 [GPT-5-CODEX-MAX-REASONING]     sprites_loaded = false
+00179 [GPT-5-CODEX-MAX-REASONING]     load_error = false
+00180 [GPT-5-CODEX-MAX-REASONING]     vmupro.system.log(vmupro.system.LOG_INFO, "Page37", "Stencil demo cleaned up")
+00181 [GPT-5-CODEX-MAX-REASONING] end
+00182 [GPT-5-CODEX-MAX-REASONING] 
+00183 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 37: Stencil Pattern Demo
+00184 [GPT-5-CODEX-MAX-REASONING] function Page37.render(drawPageCounter)
+00185 [GPT-5-CODEX-MAX-REASONING]     -- Start double buffer on first render
+00186 [GPT-5-CODEX-MAX-REASONING]     if not db_running then
+00187 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.startDoubleBufferRenderer()
+00188 [GPT-5-CODEX-MAX-REASONING]         db_running = true
+00189 [GPT-5-CODEX-MAX-REASONING]     end
+00190 [GPT-5-CODEX-MAX-REASONING] 
+00191 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00192 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00193 [GPT-5-CODEX-MAX-REASONING] 
+00194 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00195 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00196 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Stencil", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00197 [GPT-5-CODEX-MAX-REASONING] 
+00198 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_SMALL)
+00199 [GPT-5-CODEX-MAX-REASONING] 
+00200 [GPT-5-CODEX-MAX-REASONING]     -- Load sprites on first render
+00201 [GPT-5-CODEX-MAX-REASONING]     loadSprites()
+00202 [GPT-5-CODEX-MAX-REASONING] 
+00203 [GPT-5-CODEX-MAX-REASONING]     if load_error then
+00204 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("ERROR: Failed to load", 10, 60, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00205 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("sprites. Check assets.", 10, 75, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00206 [GPT-5-CODEX-MAX-REASONING]     elseif not sprites_loaded then
+00207 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Loading sprites...", 10, 60, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00208 [GPT-5-CODEX-MAX-REASONING]     else
+00209 [GPT-5-CODEX-MAX-REASONING]         -- Draw all sprites with stencil patterns
+00210 [GPT-5-CODEX-MAX-REASONING]         vmupro.sprite.drawAll()
+00211 [GPT-5-CODEX-MAX-REASONING] 
+00212 [GPT-5-CODEX-MAX-REASONING]         -- Draw labels under each sprite
+00213 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(pattern_names[current_pattern], 10, 125, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00214 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("H-Lines", 80, 125, vmupro.graphics.GREEN, vmupro.graphics.BLACK)
+00215 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("V-Lines", 140, 125, vmupro.graphics.BLUE, vmupro.graphics.BLACK)
+00216 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("50% Dither", 190, 125, vmupro.graphics.MAGENTA, vmupro.graphics.BLACK)
+00217 [GPT-5-CODEX-MAX-REASONING] 
+00218 [GPT-5-CODEX-MAX-REASONING]         -- Info text
+00219 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("8x8 tiled patterns", 10, 150, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00220 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("First sprite cycles", 10, 162, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00221 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Pattern = 8 bytes", 10, 174, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00222 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("1 bit = 1 pixel", 10, 186, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00223 [GPT-5-CODEX-MAX-REASONING] 
+00224 [GPT-5-CODEX-MAX-REASONING]         -- Show current pattern bits
+00225 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText("Current pattern:", 130, 150, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00226 [GPT-5-CODEX-MAX-REASONING]         local pattern = pattern_list[current_pattern]
+00227 [GPT-5-CODEX-MAX-REASONING]         for i = 1, 4 do
+00228 [GPT-5-CODEX-MAX-REASONING]             local byte_str = string.format("0x%02X", pattern[i])
+00229 [GPT-5-CODEX-MAX-REASONING]             vmupro.graphics.drawText(byte_str, 130, 150 + (i * 11), vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00230 [GPT-5-CODEX-MAX-REASONING]         end
+00231 [GPT-5-CODEX-MAX-REASONING]     end
+00232 [GPT-5-CODEX-MAX-REASONING] 
+00233 [GPT-5-CODEX-MAX-REASONING]     -- Description
+00234 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Pattern stenciling", 10, 40, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00235 [GPT-5-CODEX-MAX-REASONING] 
+00236 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00237 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 225, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00238 [GPT-5-CODEX-MAX-REASONING] 
+00239 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00240 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00241 [GPT-5-CODEX-MAX-REASONING] end

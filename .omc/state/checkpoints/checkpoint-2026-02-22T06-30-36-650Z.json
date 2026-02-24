@@ -1,0 +1,15 @@
+{
+  "created_at": "2026-02-22T06:30:36.648Z",
+  "trigger": "auto",
+  "active_modes": {
+    "ultrawork": {
+      "original_prompt": "i dont want you to implement, i want a plan file written out , use up to 20 parellel workers, and uw ultra work mode if need be to do this as fast as you can but being accutrate"
+    }
+  },
+  "todo_summary": {
+    "pending": 0,
+    "in_progress": 0,
+    "completed": 0
+  },
+  "wisdom_exported": false
+}

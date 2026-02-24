@@ -1,202 +1,128 @@
-<!-- Parent: ../../AGENTS.md -->
-<!-- Generated: 2026-02-04 | Updated: 2026-02-04 -->
+# Level 1 Sprites
 
-# level1
+<!-- Parent: ../AGENTS.md -->
 
-## Purpose
-Level 1 specific character sprites including warrior idle poses, walking animations, attack sequences, death animations, and weapon effects.
+> Sprite assets for Level 1 characters and items. Last updated: 2026-02-23.
 
-## Key Files
+## Overview
 
-### Warrior Idle Sprites
+This directory contains sprite assets for Level 1 game content, including the Warrior character class animations, weapon effects, and pickup items.
 
-| File | Description | Direction |
-|------|-------------|-----------|
-| `warrior_front.png` | Front-facing idle pose | Front |
-| `warrior_back.png` | Back-facing idle pose | Back |
-| `warrior_left.png` | Left-facing idle pose | Left |
-| `warrior_right.png` | Right-facing idle pose | Right |
+## File Inventory
 
-### Warrior Walking Animations
+### Warrior Class Sprites
 
-| File | Description | Direction | Frame |
-|------|-------------|-----------|-------|
-| `warrior_walk1.png` | Walk cycle - left foot forward | Left | 1 |
-| `warrior_walk2.png` | Walk cycle - mid-stride | Left | 2 |
-| `warrior_walk3.png` | Walk cycle - right foot forward | Left | 3 |
-| `warrior_walk4.png` | Walk cycle - alternate pose | Side | 4 |
-| `warrior_walk5.png` | Walk cycle - alternate pose | Side | 5 |
-| `warrior_walk1_r.png` | Walk cycle - mirrored | Right | 1 |
-| `warrior_walk2_r.png` | Walk cycle - mirrored | Right | 2 |
-| `warrior_walk3_r.png` | Walk cycle - mirrored | Right | 3 |
-| `warrior_walk4_r.png` | Walk cycle - mirrored | Right | 4 |
-| `warrior_walk5_r.png` | Walk cycle - mirrored | Right | 5 |
-| `warrior_walk1_front.png` | Walk cycle - front view | Front | 1 |
-| `warrior_walk2_front.png` | Walk cycle - front view | Front | 2 |
-| `warrior_walk1_back.png` | Walk cycle - back view | Back | 1 |
-| `warrior_walk2_back.png` | Walk cycle - back view | Back | 2 |
+#### Idle States (4 files)
+Static directional sprites for the Warrior when not moving.
 
-### Warrior Attack Animations
+| File | Direction | Description |
+|------|-----------|-------------|
+| `warrior_front.png` | Front | Forward-facing idle pose |
+| `warrior_back.png` | Back | Backward-facing idle pose |
+| `warrior_left.png` | Left | Left-facing idle pose |
+| `warrior_right.png` | Right | Right-facing idle pose |
 
-| File | Description | Direction | Frame |
-|------|-------------|-----------|-------|
-| `warrior_attack_front1.png` | Attack wind-up | Front | 1 |
-| `warrior_attack_front2.png` | Attack swing | Front | 2 |
-| `warrior_attack_back1.png` | Attack wind-up | Back | 1 |
-| `warrior_attack_back2.png` | Attack swing | Back | 2 |
-| `warrior_attack_left1.png` | Attack wind-up | Left | 1 |
-| `warrior_attack_left2.png` | Attack swing | Left | 2 |
-| `warrior_attack_right1.png` | Attack wind-up | Right | 1 |
-| `warrior_attack_right2.png` | Attack swing | Right | 2 |
+#### Walk Animation (12 files)
+Walking animation frames organized by direction. Each direction has 3 frames for smooth animation cycling.
 
-### Warrior Death Animations
+| File | Direction | Frame |
+|------|-----------|-------|
+| `warrior_walk1.png` | Left | Frame 1 |
+| `warrior_walk2.png` | Left | Frame 2 |
+| `warrior_walk3.png` | Left | Frame 3 |
+| `warrior_walk1_back.png` | Back | Frame 1 |
+| `warrior_walk2_back.png` | Back | Frame 2 |
+| `warrior_walk3_back.png` | Back | Frame 3 |
+| `warrior_walk1_front.png` | Front | Frame 1 |
+| `warrior_walk2_front.png` | Front | Frame 2 |
+| `warrior_walk3_front.png` | Front | Frame 3 |
+| `warrior_walk1_r.png` | Right | Frame 1 |
+| `warrior_walk2_r.png` | Right | Frame 2 |
+| `warrior_walk3_r.png` | Right | Frame 3 |
 
-| File | Description | Frame |
-|------|-------------|-------|
-| `warrior_death1.png` | Death - start recoil | 1 |
-| `warrior_death2.png` | Death - falling | 2 |
-| `warrior_death3.png` | Death - collapsed | 3 |
-| `warrior_death4.png` | Death - alternate | 4 |
-| `warrior_death5.png` | Death - alternate | 5 |
-| `warrior_death6.png` | Death - alternate | 6 |
-| `warrior_death7.png` | Death - final | 7 |
+#### Attack Animation (10 files)
+Combat attack frames organized by direction.
 
-### Warrior Idle Standing
+| File | Direction | Frame |
+|------|-----------|-------|
+| `warrior_attack_front1.png` | Front | Frame 1 |
+| `warrior_attack_front2.png` | Front | Frame 2 |
+| `warrior_attack_back1.png` | Back | Frame 1 |
+| `warrior_attack_back2.png` | Back | Frame 2 |
+| `warrior_attack_left1.png` | Left | Frame 1 |
+| `warrior_attack_left2.png` | Left | Frame 2 |
+| `warrior_attack_right1.png` | Right | Frame 1 |
+| `warrior_attack_right2.png` | Right | Frame 2 |
 
-| File | Description |
-|------|-------------|
-| `warrior_stand1.png` | Standing idle frame 1 |
-| `warrior_stand2.png` | Standing idle frame 2 |
+#### Death Animation (7 files)
+Sequential death animation frames.
+
+| File | Frame | Description |
+|------|-------|-------------|
+| `warrior_death1.png` | 1 | Initial hit reaction |
+| `warrior_death2.png` | 2 | Stagger backward |
+| `warrior_death3.png` | 3 | Losing balance |
+| `warrior_death4.png` | 4 | Falling |
+| `warrior_death5.png` | 5 | Mid-fall |
+| `warrior_death6.png` | 6 | Near ground |
+| `warrior_death7.png` | 7 | Final position |
 
 ### Weapon Effects
 
-| File | Description |
-|------|-------------|
-| `sword_attack1.png` | Sword swing effect - frame 1 |
-| `sword_attack2.png` | Sword swing effect - frame 2 |
-| `sword_attack3.png` | Sword swing effect - frame 3 |
-| `sword_attack4.png` | Sword swing effect - frame 4 |
-| `sword_attack5.png` | Sword swing effect - frame 5 |
-| `sword_attack6.png` | Sword swing effect - frame 6 |
-| `sword_attack7.png` | Sword swing effect - frame 7 |
-| `sword_attack8.png` | Sword swing effect - frame 8 |
-| `sword_attack9.png` | Sword swing effect - frame 9 |
+#### Sword Attack Effect (9 files)
+Visual effect sprites for sword swing animations.
 
-### UI Element
+| File | Frame | Notes |
+|------|-------|-------|
+| `sword_attack1.png` | 1 | Wind-up |
+| `sword_attack2.png` | 2 | Wind-up |
+| `sword_attack3.png` | 3 | Pre-swing |
+| `sword_attack4.png` | 4 | Swing start |
+| `sword_attack5.png` | 5 | Peak swing (largest file) |
+| `sword_attack6.png` | 6 | Swing follow-through |
+| `sword_attack7.png` | 7 | Impact effect |
+| `sword_attack8.png` | 8 | Fade out |
+| `sword_attack9.png` | 9 | Final frame |
 
-| File | Description |
-|------|-------------|
-| `potion.png` | Health potion/vial for UI |
+### Pickup Items
 
-## For AI Agents
+| File | Type | Description |
+|------|------|-------------|
+| `potion.png` | Consumable | Health/mana pickup item |
 
-### Working In This Directory
+## Summary
 
-**Sprite Specifications**:
-- All sprites: PNG format with transparency
-- Normalized height: ~517px (for consistent scaling)
-- Style: Medieval fantasy, red/crimson plate armor
-- Lighting: Consistent top-left light source
+| Category | File Count |
+|----------|------------|
+| Warrior Idle | 4 |
+| Warrior Walk | 12 |
+| Warrior Attack | 8 |
+| Warrior Death | 7 |
+| Sword Effect | 9 |
+| Pickups | 1 |
+| **Total** | **41** |
 
-**Usage in Game**:
-- Sprites loaded via `vmupro.sprite.new("sprites/level1/warrior_front")`
-- Note: SDK appends `.png` automatically
-- Use scaled drawing: `vmupro.sprite.drawScaled(sprite, x, y, scale_x, scale_y, flags)`
+## Naming Convention
 
-### Animation Frame Sequences
+Files follow a consistent naming pattern:
 
-**Walking** (side view, 5 frames):
-1. `warrior_walk1.png` - Left foot forward
-2. `warrior_walk2.png` - Mid-stride
-3. `warrior_walk3.png` - Right foot forward
-4. `warrior_walk4.png` - Transition
-5. `warrior_walk5.png` - Transition
-
-**Attack** (3-frame sequence):
-1. `*_attack_*1.png` - Wind-up (sword raised)
-2. `*_attack_*2.png` - Swing (sword extended)
-3. [Optional] `*_attack_*3.png` - Follow-through
-
-**Death** (7-frame sequence):
-1. `warrior_death1.png` - Recoil
-2. `warrior_death2.png` - Begin falling
-3. `warrior_death3.png` - Mid-fall
-4. `warrior_death4.png` - Continue
-5. `warrior_death5.png` - Near ground
-6. `warrior_death6.png` - Almost down
-7. `warrior_death7.png` - Fully collapsed
-
-### Common Patterns
-
-**Walking Animation Check**:
-```lua
--- From app.lua - check animation is active
-if animFrame ~= nil then
-    -- Use walking sprites
-    frame_index = (animFrame % 5) + 1  -- 5 walking frames
-else
-    -- Use idle sprite
-    vmupro.sprite.draw(warrior_front, x, y, 0)
-end
+```
+{character}_{action}_{direction}{frame}.png
 ```
 
-**Direction-Based Sprite Selection**:
-```lua
-local function getWarriorSprite(direction, frame)
-    local prefix = "sprites/level1/warrior_"
-    local suffix = ""
+- `character`: warrior
+- `action`: walk, attack, death
+- `direction`: front, back, left, right (or `_r` suffix for right)
+- `frame`: 1, 2, 3, etc.
 
-    if direction == "front" then
-        suffix = "front"
-    elseif direction == "back" then
-        suffix = "back"
-    elseif direction == "left" then
-        suffix = "left"
-    elseif direction == "right" then
-        suffix = "right"
-    end
+**Special cases:**
+- Idle sprites omit the frame number (e.g., `warrior_front.png`)
+- Right direction uses `_r` suffix for walk frames (e.g., `warrior_walk1_r.png`)
+- Weapon effects use `sword_attack{N}.png` format
 
-    if frame ~= nil then
-        return prefix .. "walk" .. frame .. "_" .. suffix
-    else
-        return prefix .. suffix
-    end
-end
-```
+## Usage Notes
 
-### Missing Sprites
-
-According to `../../SPRITE_PIPELINE.md`, the following sprites are still needed:
-
-**Front/Back Walking**:
-- `warrior_walk_front3.png` (Frame 3 - needed for complete cycle)
-- `warrior_walk_back3.png` (Frame 3 - needed for complete cycle)
-
-**Attack Animations**:
-- Front attack frame 3 (follow-through)
-- Back attack frame 3 (follow-through)
-- Left attack frame 3 (follow-through)
-- Right attack frame 3 (follow-through)
-
-**Current Status**: Front/back walking has only 2 frames each. Side walking has complete 5-frame cycle plus mirrored versions.
-
-### Testing Requirements
-
-- Verify all sprites load without errors
-- Check walking animation cycles smoothly
-- Test attack frame timing
-- Verify death animation plays completely
-- Confirm scaling works at various distances
-- Check for any visual artifacts or transparency issues
-
-## Dependencies
-
-### Internal
-- `../../app.lua` - Main game code using these sprites
-- `../../SPRITE_PIPELINE.md` - Sprite generation documentation
-- `../../tools/split_warrior_actions.py` - Sprite processing tool
-
-### External
-- VMU Pro SDK sprite system
-
-<!-- MANUAL: Level 1 sprite-specific notes can be added below -->
+1. **Animation Timing**: Walk animations should cycle through frames 1-2-3-2-1 for smooth motion
+2. **Death Sequence**: Play frames 1-7 in sequence; do not loop
+3. **Directional Sprites**: Ensure sprite facing matches character movement direction
+4. **File Sizes**: Largest sprites are `sword_attack5.png` (18KB) and `sword_attack7.png` (15KB), indicating peak visual complexity

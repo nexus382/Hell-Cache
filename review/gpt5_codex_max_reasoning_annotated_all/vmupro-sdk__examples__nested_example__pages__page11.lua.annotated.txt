@@ -1,0 +1,152 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page11.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 11: Audio - Stream Control
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page11 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] -- Track initialization state
+00007 [GPT-5-CODEX-MAX-REASONING] local listen_mode_started = false
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] --- @brief Initialize listen mode on first call
+00010 [GPT-5-CODEX-MAX-REASONING] local function ensureListenModeStarted()
+00011 [GPT-5-CODEX-MAX-REASONING]     if not listen_mode_started then
+00012 [GPT-5-CODEX-MAX-REASONING]         vmupro.audio.startListenMode()
+00013 [GPT-5-CODEX-MAX-REASONING]         listen_mode_started = true
+00014 [GPT-5-CODEX-MAX-REASONING]     end
+00015 [GPT-5-CODEX-MAX-REASONING] end
+00016 [GPT-5-CODEX-MAX-REASONING] 
+00017 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 11: Audio - Stream Control
+00018 [GPT-5-CODEX-MAX-REASONING] function Page11.render(drawPageCounter)
+00019 [GPT-5-CODEX-MAX-REASONING]     -- Ensure listen mode is started for audio streaming
+00020 [GPT-5-CODEX-MAX-REASONING]     ensureListenModeStarted()
+00021 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00022 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00023 [GPT-5-CODEX-MAX-REASONING] 
+00024 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00025 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00026 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Audio Stream", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00027 [GPT-5-CODEX-MAX-REASONING] 
+00028 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00029 [GPT-5-CODEX-MAX-REASONING] 
+00030 [GPT-5-CODEX-MAX-REASONING]     local y_pos = 40
+00031 [GPT-5-CODEX-MAX-REASONING] 
+00032 [GPT-5-CODEX-MAX-REASONING]     -- Test: Get global volume
+00033 [GPT-5-CODEX-MAX-REASONING]     local current_volume = vmupro.audio.getGlobalVolume()
+00034 [GPT-5-CODEX-MAX-REASONING]     local volume_percent = math.floor((current_volume / 10) * 100)
+00035 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Global Volume:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00036 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00037 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(string.format("%d / 10", current_volume), 10, y_pos, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00038 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00039 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(string.format("(%d%%)", volume_percent), 10, y_pos, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00040 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 20
+00041 [GPT-5-CODEX-MAX-REASONING] 
+00042 [GPT-5-CODEX-MAX-REASONING]     -- Visual volume indicator bar
+00043 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Volume Bar:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00044 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 16
+00045 [GPT-5-CODEX-MAX-REASONING] 
+00046 [GPT-5-CODEX-MAX-REASONING]     -- Draw bar outline
+00047 [GPT-5-CODEX-MAX-REASONING]     local bar_x = 10
+00048 [GPT-5-CODEX-MAX-REASONING]     local bar_y = y_pos
+00049 [GPT-5-CODEX-MAX-REASONING]     local bar_width = 220
+00050 [GPT-5-CODEX-MAX-REASONING]     local bar_height = 16
+00051 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawRect(bar_x, bar_y, bar_x + bar_width, bar_y + bar_height, vmupro.graphics.WHITE)
+00052 [GPT-5-CODEX-MAX-REASONING] 
+00053 [GPT-5-CODEX-MAX-REASONING]     -- Draw filled bar representing current volume
+00054 [GPT-5-CODEX-MAX-REASONING]     local fill_width = math.floor((current_volume / 10) * (bar_width - 2))
+00055 [GPT-5-CODEX-MAX-REASONING]     if fill_width > 0 then
+00056 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawFillRect(bar_x + 1, bar_y + 1, bar_x + 1 + fill_width, bar_y + bar_height - 1, vmupro.graphics.GREEN)
+00057 [GPT-5-CODEX-MAX-REASONING]     end
+00058 [GPT-5-CODEX-MAX-REASONING] 
+00059 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 24
+00060 [GPT-5-CODEX-MAX-REASONING] 
+00061 [GPT-5-CODEX-MAX-REASONING]     -- Test: Get ringbuffer fill state
+00062 [GPT-5-CODEX-MAX-REASONING]     local fill_state = vmupro.audio.getRingbufferFillState()
+00063 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Ringbuffer State:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00064 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00065 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(string.format("%d samples", fill_state), 10, y_pos, vmupro.graphics.BLUE, vmupro.graphics.BLACK)
+00066 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 20
+00067 [GPT-5-CODEX-MAX-REASONING] 
+00068 [GPT-5-CODEX-MAX-REASONING]     -- Status
+00069 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Listen Mode:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00070 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00071 [GPT-5-CODEX-MAX-REASONING]     local mode_text = listen_mode_started and "ACTIVE" or "STOPPED"
+00072 [GPT-5-CODEX-MAX-REASONING]     local mode_color = listen_mode_started and vmupro.graphics.GREEN or vmupro.graphics.RED
+00073 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(mode_text, 10, y_pos, mode_color, vmupro.graphics.BLACK)
+00074 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 16
+00075 [GPT-5-CODEX-MAX-REASONING] 
+00076 [GPT-5-CODEX-MAX-REASONING]     -- Instructions
+00077 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_TINY_6x8)
+00078 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Controls:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00079 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 10
+00080 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("UP   - Increase volume", 10, y_pos, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00081 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 9
+00082 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("DOWN - Decrease volume", 10, y_pos, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00083 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 9
+00084 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("A    - Play 440Hz beep", 10, y_pos, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00085 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 9
+00086 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("B    - Clear ring buffer", 10, y_pos, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00087 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 9
+00088 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Range: 0-10, Step: 1", 10, y_pos, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00089 [GPT-5-CODEX-MAX-REASONING] 
+00090 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00091 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00092 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 210, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00093 [GPT-5-CODEX-MAX-REASONING] 
+00094 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00095 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00096 [GPT-5-CODEX-MAX-REASONING] end
+00097 [GPT-5-CODEX-MAX-REASONING] 
+00098 [GPT-5-CODEX-MAX-REASONING] --- @brief Generate a simple sine wave tone
+00099 [GPT-5-CODEX-MAX-REASONING] --- @param frequency number Frequency in Hz (e.g., 440 for A4)
+00100 [GPT-5-CODEX-MAX-REASONING] --- @param duration number Duration in seconds
+00101 [GPT-5-CODEX-MAX-REASONING] local function generateTone(frequency, duration)
+00102 [GPT-5-CODEX-MAX-REASONING]     local sample_rate = 44100
+00103 [GPT-5-CODEX-MAX-REASONING]     local amplitude = 16000  -- About half of 16-bit range
+00104 [GPT-5-CODEX-MAX-REASONING]     local num_samples = math.floor(sample_rate * duration)
+00105 [GPT-5-CODEX-MAX-REASONING] 
+00106 [GPT-5-CODEX-MAX-REASONING]     local samples = {}
+00107 [GPT-5-CODEX-MAX-REASONING]     for i = 0, num_samples - 1 do
+00108 [GPT-5-CODEX-MAX-REASONING]         local t = i / sample_rate
+00109 [GPT-5-CODEX-MAX-REASONING]         local value = math.floor(amplitude * math.sin(2 * math.pi * frequency * t))
+00110 [GPT-5-CODEX-MAX-REASONING]         -- Stereo: interleaved left and right channels (same value for both)
+00111 [GPT-5-CODEX-MAX-REASONING]         table.insert(samples, value)  -- Left channel
+00112 [GPT-5-CODEX-MAX-REASONING]         table.insert(samples, value)  -- Right channel
+00113 [GPT-5-CODEX-MAX-REASONING]     end
+00114 [GPT-5-CODEX-MAX-REASONING] 
+00115 [GPT-5-CODEX-MAX-REASONING]     -- Add samples to ring buffer (stereo mode, apply global volume)
+00116 [GPT-5-CODEX-MAX-REASONING]     vmupro.audio.addStreamSamples(samples, vmupro.audio.STEREO, true)
+00117 [GPT-5-CODEX-MAX-REASONING] end
+00118 [GPT-5-CODEX-MAX-REASONING] 
+00119 [GPT-5-CODEX-MAX-REASONING] --- @brief Update function for Page 11 (handles volume adjustment)
+00120 [GPT-5-CODEX-MAX-REASONING] function Page11.update()
+00121 [GPT-5-CODEX-MAX-REASONING]     -- Increase volume on UP button
+00122 [GPT-5-CODEX-MAX-REASONING]     if vmupro.input.pressed(vmupro.input.UP) then
+00123 [GPT-5-CODEX-MAX-REASONING]         local current = vmupro.audio.getGlobalVolume()
+00124 [GPT-5-CODEX-MAX-REASONING]         local new_volume = math.min(10, current + 1)
+00125 [GPT-5-CODEX-MAX-REASONING]         vmupro.audio.setGlobalVolume(new_volume)
+00126 [GPT-5-CODEX-MAX-REASONING]     end
+00127 [GPT-5-CODEX-MAX-REASONING] 
+00128 [GPT-5-CODEX-MAX-REASONING]     -- Decrease volume on DOWN button
+00129 [GPT-5-CODEX-MAX-REASONING]     if vmupro.input.pressed(vmupro.input.DOWN) then
+00130 [GPT-5-CODEX-MAX-REASONING]         local current = vmupro.audio.getGlobalVolume()
+00131 [GPT-5-CODEX-MAX-REASONING]         local new_volume = math.max(0, current - 1)
+00132 [GPT-5-CODEX-MAX-REASONING]         vmupro.audio.setGlobalVolume(new_volume)
+00133 [GPT-5-CODEX-MAX-REASONING]     end
+00134 [GPT-5-CODEX-MAX-REASONING] 
+00135 [GPT-5-CODEX-MAX-REASONING]     -- Play 440Hz beep on A button
+00136 [GPT-5-CODEX-MAX-REASONING]     if vmupro.input.pressed(vmupro.input.A) then
+00137 [GPT-5-CODEX-MAX-REASONING]         generateTone(440, 0.2)  -- 440Hz A4 note for 0.2 seconds
+00138 [GPT-5-CODEX-MAX-REASONING]     end
+00139 [GPT-5-CODEX-MAX-REASONING] 
+00140 [GPT-5-CODEX-MAX-REASONING]     -- Clear ring buffer on B button
+00141 [GPT-5-CODEX-MAX-REASONING]     if vmupro.input.pressed(vmupro.input.B) then
+00142 [GPT-5-CODEX-MAX-REASONING]         vmupro.audio.clearRingBuffer()
+00143 [GPT-5-CODEX-MAX-REASONING]     end
+00144 [GPT-5-CODEX-MAX-REASONING] end
+00145 [GPT-5-CODEX-MAX-REASONING] 
+00146 [GPT-5-CODEX-MAX-REASONING] --- @brief Exit function for Page 11 (cleanup when leaving page)
+00147 [GPT-5-CODEX-MAX-REASONING] function Page11.exit()
+00148 [GPT-5-CODEX-MAX-REASONING]     if listen_mode_started then
+00149 [GPT-5-CODEX-MAX-REASONING]         vmupro.audio.exitListenMode()
+00150 [GPT-5-CODEX-MAX-REASONING]         listen_mode_started = false
+00151 [GPT-5-CODEX-MAX-REASONING]     end
+00152 [GPT-5-CODEX-MAX-REASONING] end

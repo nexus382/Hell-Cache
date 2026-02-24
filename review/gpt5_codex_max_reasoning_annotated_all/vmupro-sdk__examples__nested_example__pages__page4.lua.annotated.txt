@@ -1,0 +1,60 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page4.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 4: Text Rendering & Fonts
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page4 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 4: Text Rendering & Fonts
+00007 [GPT-5-CODEX-MAX-REASONING] function Page4.render(drawPageCounter)
+00008 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00009 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00012 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00013 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Text & Fonts", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING]     local y_pos = 35
+00016 [GPT-5-CODEX-MAX-REASONING]     local sample_text = "Hello VMU Pro"
+00017 [GPT-5-CODEX-MAX-REASONING] 
+00018 [GPT-5-CODEX-MAX-REASONING]     -- Test: FONT_TINY_6x8
+00019 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_TINY_6x8)
+00020 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("TINY 6x8: " .. sample_text, 10, y_pos, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00021 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 15
+00022 [GPT-5-CODEX-MAX-REASONING] 
+00023 [GPT-5-CODEX-MAX-REASONING]     -- Test: FONT_MONO_7x13
+00024 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00025 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("MONO 7x13: " .. sample_text, 10, y_pos, vmupro.graphics.GREEN, vmupro.graphics.BLACK)
+00026 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 18
+00027 [GPT-5-CODEX-MAX-REASONING] 
+00028 [GPT-5-CODEX-MAX-REASONING]     -- Test: FONT_QUANTICO_15x16
+00029 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_QUANTICO_15x16)
+00030 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("QUANTICO 15x16", 10, y_pos, vmupro.graphics.BLUE, vmupro.graphics.BLACK)
+00031 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 20
+00032 [GPT-5-CODEX-MAX-REASONING] 
+00033 [GPT-5-CODEX-MAX-REASONING]     -- Test: FONT_GABARITO_18x18
+00034 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00035 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("GABARITO 18x18", 10, y_pos, vmupro.graphics.MAGENTA, vmupro.graphics.BLACK)
+00036 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 22
+00037 [GPT-5-CODEX-MAX-REASONING] 
+00038 [GPT-5-CODEX-MAX-REASONING]     -- Test: FONT_OPEN_SANS_15x18
+00039 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_OPEN_SANS_15x18)
+00040 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("OPEN SANS 15x18", 10, y_pos, vmupro.graphics.RED, vmupro.graphics.BLACK)
+00041 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 22
+00042 [GPT-5-CODEX-MAX-REASONING] 
+00043 [GPT-5-CODEX-MAX-REASONING]     -- Test: FONT_QUANTICO_25x29 (larger)
+00044 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_QUANTICO_25x29)
+00045 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("QUANTICO 25", 10, y_pos, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00046 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 33
+00047 [GPT-5-CODEX-MAX-REASONING] 
+00048 [GPT-5-CODEX-MAX-REASONING]     -- Test: Text length calculation
+00049 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00050 [GPT-5-CODEX-MAX-REASONING]     local test_text = "Width test"
+00051 [GPT-5-CODEX-MAX-REASONING]     local text_width = vmupro.text.calcLength(test_text)
+00052 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(string.format("'%s' = %dpx", test_text, text_width), 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00053 [GPT-5-CODEX-MAX-REASONING] 
+00054 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00055 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00056 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 210, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00057 [GPT-5-CODEX-MAX-REASONING] 
+00058 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00059 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00060 [GPT-5-CODEX-MAX-REASONING] end

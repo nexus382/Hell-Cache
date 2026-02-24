@@ -1,0 +1,19 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- Data layer: score-gated trader inventory tiers.
+00002 [GPT-5-CODEX-MAX-REASONING] 
+00003 [GPT-5-CODEX-MAX-REASONING] GameTraderTiers = {
+00004 [GPT-5-CODEX-MAX-REASONING]     {id = 1, min_score = 0,    items = {"potion_small", "charm_guard"}},
+00005 [GPT-5-CODEX-MAX-REASONING]     {id = 2, min_score = 500,  items = {"potion_large", "sword_iron", "bow_short", "focus_ember"}},
+00006 [GPT-5-CODEX-MAX-REASONING]     {id = 3, min_score = 1500, items = {"potion_large", "sword_iron", "bow_short", "focus_ember", "charm_guard"}},
+00007 [GPT-5-CODEX-MAX-REASONING] }
+00008 [GPT-5-CODEX-MAX-REASONING] 
+00009 [GPT-5-CODEX-MAX-REASONING] function getTraderTierForScore(score)
+00010 [GPT-5-CODEX-MAX-REASONING]     local s = math.max(0, math.floor(score or 0))
+00011 [GPT-5-CODEX-MAX-REASONING]     local selected = GameTraderTiers[1]
+00012 [GPT-5-CODEX-MAX-REASONING]     for i = 1, #GameTraderTiers do
+00013 [GPT-5-CODEX-MAX-REASONING]         local tier = GameTraderTiers[i]
+00014 [GPT-5-CODEX-MAX-REASONING]         if s >= (tier.min_score or 0) then
+00015 [GPT-5-CODEX-MAX-REASONING]             selected = tier
+00016 [GPT-5-CODEX-MAX-REASONING]         end
+00017 [GPT-5-CODEX-MAX-REASONING]     end
+00018 [GPT-5-CODEX-MAX-REASONING]     return selected
+00019 [GPT-5-CODEX-MAX-REASONING] end

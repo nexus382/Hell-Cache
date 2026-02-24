@@ -1,0 +1,14 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- libraries/utils.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Example utility functions module
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Utils = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] function Utils.clamp(value, min, max)
+00007 [GPT-5-CODEX-MAX-REASONING]     if value < min then return min end
+00008 [GPT-5-CODEX-MAX-REASONING]     if value > max then return max end
+00009 [GPT-5-CODEX-MAX-REASONING]     return value
+00010 [GPT-5-CODEX-MAX-REASONING] end
+00011 [GPT-5-CODEX-MAX-REASONING] 
+00012 [GPT-5-CODEX-MAX-REASONING] function Utils.lerp(a, b, t)
+00013 [GPT-5-CODEX-MAX-REASONING]     return a + (b - a) * t
+00014 [GPT-5-CODEX-MAX-REASONING] end

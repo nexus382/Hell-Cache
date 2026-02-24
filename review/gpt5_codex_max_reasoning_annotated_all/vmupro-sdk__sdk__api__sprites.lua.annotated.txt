@@ -1,0 +1,1011 @@
+00001 [GPT-5-CODEX-MAX-REASONING] --- @file sprites.lua
+00002 [GPT-5-CODEX-MAX-REASONING] --- @brief VMU Pro LUA SDK - Sprite Functions
+00003 [GPT-5-CODEX-MAX-REASONING] --- @author 8BitMods
+00004 [GPT-5-CODEX-MAX-REASONING] --- @version 1.0.0
+00005 [GPT-5-CODEX-MAX-REASONING] --- @date 2025-11-10
+00006 [GPT-5-CODEX-MAX-REASONING] --- @copyright Copyright (c) 2025 8BitMods. All rights reserved.
+00007 [GPT-5-CODEX-MAX-REASONING] ---
+00008 [GPT-5-CODEX-MAX-REASONING] --- Sprite management utilities for VMU Pro LUA applications.
+00009 [GPT-5-CODEX-MAX-REASONING] --- Functions are available under the vmupro.sprite namespace.
+00010 [GPT-5-CODEX-MAX-REASONING] ---
+00011 [GPT-5-CODEX-MAX-REASONING] --- The sprite system uses handle-based management where sprites are loaded into C memory
+00012 [GPT-5-CODEX-MAX-REASONING] --- and accessed via integer handles from LUA.
+00013 [GPT-5-CODEX-MAX-REASONING] 
+00014 [GPT-5-CODEX-MAX-REASONING] -- Ensure vmupro namespaces exist
+00015 [GPT-5-CODEX-MAX-REASONING] vmupro = vmupro or {}
+00016 [GPT-5-CODEX-MAX-REASONING] vmupro.sprite = vmupro.sprite or {}
+00017 [GPT-5-CODEX-MAX-REASONING] 
+00018 [GPT-5-CODEX-MAX-REASONING] --- @class SpriteHandle
+00019 [GPT-5-CODEX-MAX-REASONING] --- @field id number Integer handle for internal reference
+00020 [GPT-5-CODEX-MAX-REASONING] --- @field width number Sprite width in pixels
+00021 [GPT-5-CODEX-MAX-REASONING] --- @field height number Sprite height in pixels
+00022 [GPT-5-CODEX-MAX-REASONING] --- @field transparentColor number RGB565 transparent color value (0xFFFF for white)
+00023 [GPT-5-CODEX-MAX-REASONING] 
+00024 [GPT-5-CODEX-MAX-REASONING] --- @class SpritesheetHandle : SpriteHandle
+00025 [GPT-5-CODEX-MAX-REASONING] --- @field id number Integer handle for internal reference
+00026 [GPT-5-CODEX-MAX-REASONING] --- @field width number Total spritesheet width in pixels
+00027 [GPT-5-CODEX-MAX-REASONING] --- @field height number Total spritesheet height in pixels
+00028 [GPT-5-CODEX-MAX-REASONING] --- @field frameWidth number Width of each individual frame in pixels
+00029 [GPT-5-CODEX-MAX-REASONING] --- @field frameHeight number Height of each individual frame in pixels
+00030 [GPT-5-CODEX-MAX-REASONING] --- @field frameCount number Total number of frames in the spritesheet
+00031 [GPT-5-CODEX-MAX-REASONING] --- @field transparentColor number RGB565 transparent color value (0xFFFF for white)
+00032 [GPT-5-CODEX-MAX-REASONING] 
+00033 [GPT-5-CODEX-MAX-REASONING] --- @brief Load a sprite from file and return a sprite object
+00034 [GPT-5-CODEX-MAX-REASONING] --- @param path string Path to sprite file (BMP or PNG format, without extension)
+00035 [GPT-5-CODEX-MAX-REASONING] --- @return SpriteHandle|nil Sprite object table with id, width, height, and transparentColor fields, or nil on failure
+00036 [GPT-5-CODEX-MAX-REASONING] --- @usage local sprite = vmupro.sprite.new("sprites/player")
+00037 [GPT-5-CODEX-MAX-REASONING] --- @usage if sprite then vmupro.system.log(vmupro.system.LOG_DEBUG, "Sprites", "Size: " .. sprite.width .. "x" .. sprite.height) end
+00038 [GPT-5-CODEX-MAX-REASONING] --- @note Path should NOT include the file extension - it is added automatically (.bmp or .png)
+00039 [GPT-5-CODEX-MAX-REASONING] --- @note Sprites are loaded from embedded vmupack files only (not from SD card)
+00040 [GPT-5-CODEX-MAX-REASONING] --- @note Works the same way as Lua file imports (import "pages/page1")
+00041 [GPT-5-CODEX-MAX-REASONING] --- @note Sprites are loaded into C memory and managed by the returned table object
+00042 [GPT-5-CODEX-MAX-REASONING] --- @note The sprite's width, height, and transparent color are automatically detected from the file
+00043 [GPT-5-CODEX-MAX-REASONING] --- @note PNG files support full per-pixel alpha blending (RGBA8888)
+00044 [GPT-5-CODEX-MAX-REASONING] --- @note BMP files use RGB565 with transparent color key
+00045 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00046 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00047 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.new(path) end
+00048 [GPT-5-CODEX-MAX-REASONING] 
+00049 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a sprite using its sprite object
+00050 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object returned from vmupro.sprite.new()
+00051 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate to draw sprite
+00052 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate to draw sprite
+00053 [GPT-5-CODEX-MAX-REASONING] --- @param flags number Optional draw flags using constants below
+00054 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.draw(sprite, 50, 50, vmupro.sprite.kImageUnflipped)
+00055 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.draw(sprite, 100, 100, vmupro.sprite.kImageFlippedX) -- Draw flipped horizontally
+00056 [GPT-5-CODEX-MAX-REASONING] --- @note If flags is omitted, defaults to kImageUnflipped (no flipping)
+00057 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00058 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00059 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.draw(sprite, x, y, flags) end
+00060 [GPT-5-CODEX-MAX-REASONING] 
+00061 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a sprite with scaling
+00062 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object returned from vmupro.sprite.new()
+00063 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate to draw sprite
+00064 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate to draw sprite
+00065 [GPT-5-CODEX-MAX-REASONING] --- @param scale_x number Horizontal scale factor (1.0 = original size, 2.0 = double, 0.5 = half)
+00066 [GPT-5-CODEX-MAX-REASONING] --- @param scale_y number Optional vertical scale factor (defaults to scale_x for uniform scaling)
+00067 [GPT-5-CODEX-MAX-REASONING] --- @param flags number Optional draw flags using flip constants (default: kImageUnflipped)
+00068 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawScaled(sprite, 50, 50, 2.0) -- Draw at 2x size
+00069 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawScaled(sprite, 100, 100, 0.5, 0.5) -- Draw at half size
+00070 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawScaled(sprite, 100, 100, 2.0, 1.0) -- Double width, normal height
+00071 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawScaled(sprite, 100, 100, 1.5, 1.5, vmupro.sprite.kImageFlippedX) -- Scaled and flipped
+00072 [GPT-5-CODEX-MAX-REASONING] --- @note If scale_y is omitted, defaults to scale_x for uniform scaling
+00073 [GPT-5-CODEX-MAX-REASONING] --- @note Scale factors can be any positive number (e.g., 0.25, 1.5, 3.0)
+00074 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00075 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00076 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.drawScaled(sprite, x, y, scale_x, scale_y, flags) end
+00077 [GPT-5-CODEX-MAX-REASONING] 
+00078 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a sprite with color tinting
+00079 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object returned from vmupro.sprite.new()
+00080 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate to draw sprite
+00081 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate to draw sprite
+00082 [GPT-5-CODEX-MAX-REASONING] --- @param tint_color number RGB color value in 0xRRGGBB format (e.g., 0xFF0000 for red)
+00083 [GPT-5-CODEX-MAX-REASONING] --- @param flags number Optional draw flags using flip constants (default: kImageUnflipped)
+00084 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawTinted(sprite, 50, 50, 0xFF0000) -- Red tint
+00085 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawTinted(sprite, 100, 100, 0x00FF00) -- Green tint
+00086 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawTinted(sprite, 100, 100, 0x8080FF, vmupro.sprite.kImageFlippedX) -- Blue tint, flipped
+00087 [GPT-5-CODEX-MAX-REASONING] --- @note Color tinting multiplies the sprite's colors with the tint color
+00088 [GPT-5-CODEX-MAX-REASONING] --- @note For PNG sprites, uses per-pixel alpha blending with tint applied
+00089 [GPT-5-CODEX-MAX-REASONING] --- @note For BMP sprites, converts tint to RGB565 and applies color multiply
+00090 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00091 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00092 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.drawTinted(sprite, x, y, tint_color, flags) end
+00093 [GPT-5-CODEX-MAX-REASONING] 
+00094 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a sprite with additive color offset
+00095 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object returned from vmupro.sprite.new()
+00096 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate to draw sprite
+00097 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate to draw sprite
+00098 [GPT-5-CODEX-MAX-REASONING] --- @param add_color number RGB color value in 0xRRGGBB format to add to sprite colors
+00099 [GPT-5-CODEX-MAX-REASONING] --- @param flags number Optional draw flags using flip constants (default: kImageUnflipped)
+00100 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawColorAdd(sprite, 50, 50, 0xFF0000) -- Add red (brighten/warm)
+00101 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawColorAdd(sprite, 100, 100, 0x404040) -- Brighten all channels
+00102 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawColorAdd(sprite, 100, 100, 0x0000FF, vmupro.sprite.kImageFlippedX) -- Add blue, flipped
+00103 [GPT-5-CODEX-MAX-REASONING] --- @note Color addition adds the specified color values to each pixel (clamped to max 255)
+00104 [GPT-5-CODEX-MAX-REASONING] --- @note Unlike tinting (multiply), this brightens the sprite
+00105 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for glow effects, brightening, or color shifts
+00106 [GPT-5-CODEX-MAX-REASONING] --- @note For PNG sprites, uses per-pixel alpha blending with color add applied
+00107 [GPT-5-CODEX-MAX-REASONING] --- @note For BMP sprites, converts color to RGB565 and applies additive blend
+00108 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00109 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00110 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.drawColorAdd(sprite, x, y, add_color, flags) end
+00111 [GPT-5-CODEX-MAX-REASONING] 
+00112 [GPT-5-CODEX-MAX-REASONING] -- Sprite flip constants
+00113 [GPT-5-CODEX-MAX-REASONING] vmupro.sprite.kImageUnflipped = 0   --- No flipping
+00114 [GPT-5-CODEX-MAX-REASONING] vmupro.sprite.kImageFlippedX = 1    --- Flip horizontally (mirror left-right)
+00115 [GPT-5-CODEX-MAX-REASONING] vmupro.sprite.kImageFlippedY = 2    --- Flip vertically (mirror top-bottom)
+00116 [GPT-5-CODEX-MAX-REASONING] vmupro.sprite.kImageFlippedXY = 3   --- Flip both horizontally and vertically
+00117 [GPT-5-CODEX-MAX-REASONING] 
+00118 [GPT-5-CODEX-MAX-REASONING] --- @brief Free a sprite and release its memory
+00119 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object to free
+00120 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.free(sprite)
+00121 [GPT-5-CODEX-MAX-REASONING] --- @note Always free sprites when done to avoid memory leaks
+00122 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00123 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00124 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.free(sprite) end
+00125 [GPT-5-CODEX-MAX-REASONING] 
+00126 [GPT-5-CODEX-MAX-REASONING] --- @brief Set sprite position to absolute coordinates
+00127 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object from vmupro.sprite.new()
+00128 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate
+00129 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate
+00130 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setPosition(my_sprite, 100, 50)
+00131 [GPT-5-CODEX-MAX-REASONING] --- @note Sprites store their position internally for later rendering
+00132 [GPT-5-CODEX-MAX-REASONING] --- @note Also available as vmupro.sprite.moveTo() (alias)
+00133 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00134 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00135 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.setPosition(sprite, x, y) end
+00136 [GPT-5-CODEX-MAX-REASONING] 
+00137 [GPT-5-CODEX-MAX-REASONING] --- @brief Alias for setPosition() - sets sprite position to absolute coordinates
+00138 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object from vmupro.sprite.new()
+00139 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate
+00140 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate
+00141 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.moveTo(my_sprite, 100, 50)
+00142 [GPT-5-CODEX-MAX-REASONING] --- @note This is an alias for setPosition() - both functions do exactly the same thing
+00143 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00144 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00145 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.moveTo(sprite, x, y) end
+00146 [GPT-5-CODEX-MAX-REASONING] 
+00147 [GPT-5-CODEX-MAX-REASONING] --- @brief Move sprite by relative offset from current position
+00148 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object from vmupro.sprite.new()
+00149 [GPT-5-CODEX-MAX-REASONING] --- @param dx number Delta X (positive = right, negative = left)
+00150 [GPT-5-CODEX-MAX-REASONING] --- @param dy number Delta Y (positive = down, negative = up)
+00151 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.moveBy(my_sprite, 5, 0) -- Move 5 pixels right
+00152 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.moveBy(my_sprite, 0, -10) -- Move 10 pixels up
+00153 [GPT-5-CODEX-MAX-REASONING] --- @note Position changes accumulate: calling moveBy multiple times adds to position
+00154 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00155 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00156 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.moveBy(sprite, dx, dy) end
+00157 [GPT-5-CODEX-MAX-REASONING] 
+00158 [GPT-5-CODEX-MAX-REASONING] --- @brief Get current sprite position
+00159 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object from vmupro.sprite.new()
+00160 [GPT-5-CODEX-MAX-REASONING] --- @return number, number Current X and Y coordinates
+00161 [GPT-5-CODEX-MAX-REASONING] --- @usage local x, y = vmupro.sprite.getPosition(my_sprite)
+00162 [GPT-5-CODEX-MAX-REASONING] --- @note Returns two values that can be captured separately
+00163 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00164 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00165 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.getPosition(sprite) end
+00166 [GPT-5-CODEX-MAX-REASONING] 
+00167 [GPT-5-CODEX-MAX-REASONING] --- @brief Set sprite visibility (show/hide)
+00168 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object from vmupro.sprite.new()
+00169 [GPT-5-CODEX-MAX-REASONING] --- @param visible boolean True to show sprite, false to hide it
+00170 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setVisible(my_sprite, false) -- Hide sprite
+00171 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setVisible(my_sprite, true) -- Show sprite
+00172 [GPT-5-CODEX-MAX-REASONING] --- @note Hidden sprites are not rendered but still exist in memory
+00173 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for toggling UI elements, blinking effects, or conditional rendering
+00174 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00175 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00176 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.setVisible(sprite, visible) end
+00177 [GPT-5-CODEX-MAX-REASONING] 
+00178 [GPT-5-CODEX-MAX-REASONING] --- @brief Get sprite visibility state
+00179 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object from vmupro.sprite.new()
+00180 [GPT-5-CODEX-MAX-REASONING] --- @return boolean True if sprite is visible, false if hidden
+00181 [GPT-5-CODEX-MAX-REASONING] --- @usage local is_visible = vmupro.sprite.getVisible(my_sprite)
+00182 [GPT-5-CODEX-MAX-REASONING] --- @usage if vmupro.sprite.getVisible(enemy) then vmupro.system.log(vmupro.system.LOG_DEBUG, "Sprites", "Enemy is visible") end
+00183 [GPT-5-CODEX-MAX-REASONING] --- @note Sprites are visible by default when created
+00184 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00185 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00186 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.getVisible(sprite) end
+00187 [GPT-5-CODEX-MAX-REASONING] 
+00188 [GPT-5-CODEX-MAX-REASONING] --- @brief Load a spritesheet from file and return a spritesheet object
+00189 [GPT-5-CODEX-MAX-REASONING] --- @param path string Path to spritesheet file (BMP or PNG format, without extension)
+00190 [GPT-5-CODEX-MAX-REASONING] --- @return SpritesheetHandle|nil Spritesheet object table with id, width, height, frameWidth, frameHeight, frameCount, and transparentColor fields, or nil on failure
+00191 [GPT-5-CODEX-MAX-REASONING] --- @usage local sheet = vmupro.sprite.newSheet("sprites/player-table-32-32")
+00192 [GPT-5-CODEX-MAX-REASONING] --- @usage if sheet then vmupro.system.log(vmupro.system.LOG_DEBUG, "Sprites", "Frames: " .. sheet.frameCount .. " (" .. sheet.frameWidth .. "x" .. sheet.frameHeight .. ")") end
+00193 [GPT-5-CODEX-MAX-REASONING] --- @note Path should NOT include the file extension - it is added automatically (.bmp or .png)
+00194 [GPT-5-CODEX-MAX-REASONING] --- @note Filename must follow the template: name-table-<width>-<height> (e.g., "player-table-32-32")
+00195 [GPT-5-CODEX-MAX-REASONING] --- @note Frame dimensions are extracted from the filename (e.g., "player-table-32-32" = 32x32 pixel frames)
+00196 [GPT-5-CODEX-MAX-REASONING] --- @note Spritesheets are loaded from embedded vmupack files only (not from SD card)
+00197 [GPT-5-CODEX-MAX-REASONING] --- @note Frame count is automatically calculated from total image size divided by frame dimensions
+00198 [GPT-5-CODEX-MAX-REASONING] --- @note Frame layout is calculated as a grid: frames are arranged left-to-right, top-to-bottom
+00199 [GPT-5-CODEX-MAX-REASONING] --- @note PNG files support full per-pixel alpha blending (RGBA8888)
+00200 [GPT-5-CODEX-MAX-REASONING] --- @note BMP files use RGB565 with transparent color key
+00201 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00202 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00203 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.newSheet(path) end
+00204 [GPT-5-CODEX-MAX-REASONING] 
+00205 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a specific frame from a spritesheet
+00206 [GPT-5-CODEX-MAX-REASONING] --- @param spritesheet SpritesheetHandle Spritesheet object returned from vmupro.sprite.newSheet()
+00207 [GPT-5-CODEX-MAX-REASONING] --- @param frame_index number Frame index to draw (1-based, Lua convention)
+00208 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate to draw frame
+00209 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate to draw frame
+00210 [GPT-5-CODEX-MAX-REASONING] --- @param flags number Optional draw flags using flip constants (default: kImageUnflipped)
+00211 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrame(sheet, 1, 50, 50) -- Draw first frame
+00212 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrame(sheet, current_frame, player_x, player_y, vmupro.sprite.kImageFlippedX)
+00213 [GPT-5-CODEX-MAX-REASONING] --- @note Frame index is 1-based (Lua convention), valid range is 1 to frameCount
+00214 [GPT-5-CODEX-MAX-REASONING] --- @note Draw flags use the same constants as vmupro.sprite.draw (kImageUnflipped, kImageFlippedX, etc.)
+00215 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00216 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00217 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.drawFrame(spritesheet, frame_index, x, y, flags) end
+00218 [GPT-5-CODEX-MAX-REASONING] 
+00219 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a specific frame from a spritesheet with scaling
+00220 [GPT-5-CODEX-MAX-REASONING] --- @param spritesheet SpritesheetHandle Spritesheet object returned from vmupro.sprite.newSheet()
+00221 [GPT-5-CODEX-MAX-REASONING] --- @param frame_index number Frame index to draw (1-based, Lua convention)
+00222 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate to draw frame
+00223 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate to draw frame
+00224 [GPT-5-CODEX-MAX-REASONING] --- @param scale_x number Horizontal scale factor (1.0 = original size, 2.0 = double, 0.5 = half)
+00225 [GPT-5-CODEX-MAX-REASONING] --- @param scale_y number Optional vertical scale factor (defaults to scale_x for uniform scaling)
+00226 [GPT-5-CODEX-MAX-REASONING] --- @param flags number Optional draw flags using flip constants (default: kImageUnflipped)
+00227 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameScaled(sheet, 1, 50, 50, 2.0) -- Draw first frame at 2x size
+00228 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameScaled(sheet, current_frame, player_x, player_y, 0.5) -- Half size
+00229 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameScaled(sheet, 3, 100, 100, 1.5, 1.5, vmupro.sprite.kImageFlippedX)
+00230 [GPT-5-CODEX-MAX-REASONING] --- @note Frame index is 1-based (Lua convention), valid range is 1 to frameCount
+00231 [GPT-5-CODEX-MAX-REASONING] --- @note If scale_y is omitted, defaults to scale_x for uniform scaling
+00232 [GPT-5-CODEX-MAX-REASONING] --- @note Scale factors can be any positive number (e.g., 0.25, 1.5, 3.0)
+00233 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00234 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00235 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.drawFrameScaled(spritesheet, frame_index, x, y, scale_x, scale_y, flags) end
+00236 [GPT-5-CODEX-MAX-REASONING] 
+00237 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a specific frame from a spritesheet with color tinting
+00238 [GPT-5-CODEX-MAX-REASONING] --- @param spritesheet SpritesheetHandle Spritesheet object returned from vmupro.sprite.newSheet()
+00239 [GPT-5-CODEX-MAX-REASONING] --- @param frame_index number Frame index to draw (1-based, Lua convention)
+00240 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate to draw frame
+00241 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate to draw frame
+00242 [GPT-5-CODEX-MAX-REASONING] --- @param tint_color number RGB color value in 0xRRGGBB format (e.g., 0xFF0000 for red)
+00243 [GPT-5-CODEX-MAX-REASONING] --- @param flags number Optional draw flags using flip constants (default: kImageUnflipped)
+00244 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameTinted(sheet, 1, 50, 50, 0xFF0000) -- Red tint
+00245 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameTinted(sheet, current_frame, player_x, player_y, 0xFF4040) -- Damage flash
+00246 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameTinted(sheet, 3, 100, 100, 0x00FF00, vmupro.sprite.kImageFlippedX) -- Green tint, flipped
+00247 [GPT-5-CODEX-MAX-REASONING] --- @note Frame index is 1-based (Lua convention), valid range is 1 to frameCount
+00248 [GPT-5-CODEX-MAX-REASONING] --- @note Color tinting multiplies the frame's colors with the tint color
+00249 [GPT-5-CODEX-MAX-REASONING] --- @note For PNG spritesheets, uses per-pixel alpha blending with tint applied
+00250 [GPT-5-CODEX-MAX-REASONING] --- @note For BMP spritesheets, converts tint to RGB565 and applies color multiply
+00251 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00252 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00253 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.drawFrameTinted(spritesheet, frame_index, x, y, tint_color, flags) end
+00254 [GPT-5-CODEX-MAX-REASONING] 
+00255 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a specific frame from a spritesheet with additive color offset
+00256 [GPT-5-CODEX-MAX-REASONING] --- @param spritesheet SpritesheetHandle Spritesheet object returned from vmupro.sprite.newSheet()
+00257 [GPT-5-CODEX-MAX-REASONING] --- @param frame_index number Frame index to draw (1-based, Lua convention)
+00258 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate to draw frame
+00259 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate to draw frame
+00260 [GPT-5-CODEX-MAX-REASONING] --- @param add_color number RGB color value in 0xRRGGBB format to add to frame colors
+00261 [GPT-5-CODEX-MAX-REASONING] --- @param flags number Optional draw flags using flip constants (default: kImageUnflipped)
+00262 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameColorAdd(sheet, 1, 50, 50, 0xFF0000) -- Add red (brighten/warm)
+00263 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameColorAdd(sheet, current_frame, player_x, player_y, 0x404040) -- Brighten
+00264 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameColorAdd(sheet, 3, 100, 100, 0x0000FF, vmupro.sprite.kImageFlippedX) -- Add blue, flipped
+00265 [GPT-5-CODEX-MAX-REASONING] --- @note Frame index is 1-based (Lua convention), valid range is 1 to frameCount
+00266 [GPT-5-CODEX-MAX-REASONING] --- @note Color addition adds the specified color values to each pixel (clamped to max 255)
+00267 [GPT-5-CODEX-MAX-REASONING] --- @note Unlike tinting (multiply), this brightens the frame
+00268 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for glow effects, brightening, or color shifts
+00269 [GPT-5-CODEX-MAX-REASONING] --- @note For PNG spritesheets, uses per-pixel alpha blending with color add applied
+00270 [GPT-5-CODEX-MAX-REASONING] --- @note For BMP spritesheets, falls back to normal frame rendering (no color add)
+00271 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00272 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00273 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.drawFrameColorAdd(spritesheet, frame_index, x, y, add_color, flags) end
+00274 [GPT-5-CODEX-MAX-REASONING] 
+00275 [GPT-5-CODEX-MAX-REASONING] --- @brief Set the current frame index for a sprite or spritesheet
+00276 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite or spritesheet object
+00277 [GPT-5-CODEX-MAX-REASONING] --- @param frame_index number Frame index to set (0-based)
+00278 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setCurrentFrame(my_sheet, 0) -- Set to first frame
+00279 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setCurrentFrame(player_sprite, current_anim_frame)
+00280 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setCurrentFrame(enemy, 5) -- Set to 6th frame (0-based)
+00281 [GPT-5-CODEX-MAX-REASONING] --- @note Frame index is 0-based, validated against frame count
+00282 [GPT-5-CODEX-MAX-REASONING] --- @note For regular sprites (not spritesheets), this has no effect
+00283 [GPT-5-CODEX-MAX-REASONING] --- @note Frame index is clamped to valid range: 0 to (frameCount - 1)
+00284 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00285 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00286 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.setCurrentFrame(sprite, frame_index) end
+00287 [GPT-5-CODEX-MAX-REASONING] 
+00288 [GPT-5-CODEX-MAX-REASONING] --- @brief Get the current frame index of a sprite or spritesheet
+00289 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite or spritesheet object
+00290 [GPT-5-CODEX-MAX-REASONING] --- @return number Current frame index (0-based)
+00291 [GPT-5-CODEX-MAX-REASONING] --- @usage local frame = vmupro.sprite.getCurrentFrame(my_sheet)
+00292 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.system.log(vmupro.system.LOG_DEBUG, "Sprites", "Current frame: " .. frame)
+00293 [GPT-5-CODEX-MAX-REASONING] --- @usage if vmupro.sprite.getCurrentFrame(player) == 0 then vmupro.system.log(vmupro.system.LOG_DEBUG, "Sprites", "First frame") end
+00294 [GPT-5-CODEX-MAX-REASONING] --- @note Returns 0-based frame index
+00295 [GPT-5-CODEX-MAX-REASONING] --- @note For regular sprites (not spritesheets), returns 0
+00296 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00297 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00298 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.getCurrentFrame(sprite) end
+00299 [GPT-5-CODEX-MAX-REASONING] 
+00300 [GPT-5-CODEX-MAX-REASONING] --- @brief Get the total number of frames in a sprite or spritesheet
+00301 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite or spritesheet object
+00302 [GPT-5-CODEX-MAX-REASONING] --- @return number Total number of frames
+00303 [GPT-5-CODEX-MAX-REASONING] --- @usage local count = vmupro.sprite.getFrameCount(my_sheet)
+00304 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.system.log(vmupro.system.LOG_DEBUG, "Sprites", "Total frames: " .. count)
+00305 [GPT-5-CODEX-MAX-REASONING] --- @usage for i = 0, vmupro.sprite.getFrameCount(sheet) - 1 do ... end
+00306 [GPT-5-CODEX-MAX-REASONING] --- @note Returns frame count from spritesheet metadata
+00307 [GPT-5-CODEX-MAX-REASONING] --- @note For regular sprites (not spritesheets), returns 1
+00308 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00309 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00310 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.getFrameCount(sprite) end
+00311 [GPT-5-CODEX-MAX-REASONING] 
+00312 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a sprite with mosaic/pixelation effect
+00313 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object returned from vmupro.sprite.new()
+00314 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate to draw sprite
+00315 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate to draw sprite
+00316 [GPT-5-CODEX-MAX-REASONING] --- @param mosaic_size number Size of mosaic blocks in pixels (e.g., 2 = 2x2 blocks, 4 = 4x4 blocks)
+00317 [GPT-5-CODEX-MAX-REASONING] --- @param flags number Optional draw flags using flip constants (default: kImageUnflipped)
+00318 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawMosaic(sprite, 50, 50, 4) -- 4x4 pixel blocks
+00319 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawMosaic(sprite, 100, 100, 8) -- Heavy pixelation
+00320 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawMosaic(sprite, 100, 100, 2, vmupro.sprite.kImageFlippedX) -- Light mosaic, flipped
+00321 [GPT-5-CODEX-MAX-REASONING] --- @note Mosaic size of 1 = no effect (normal rendering)
+00322 [GPT-5-CODEX-MAX-REASONING] --- @note Larger mosaic_size values create stronger pixelation effect
+00323 [GPT-5-CODEX-MAX-REASONING] --- @note For PNG sprites, supports flip flags
+00324 [GPT-5-CODEX-MAX-REASONING] --- @note For BMP sprites, flip flags are not supported
+00325 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for transitions, censoring, retro effects, or distance-based LOD
+00326 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00327 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00328 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.drawMosaic(sprite, x, y, mosaic_size, flags) end
+00329 [GPT-5-CODEX-MAX-REASONING] 
+00330 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a specific frame from a spritesheet with mosaic/pixelation effect
+00331 [GPT-5-CODEX-MAX-REASONING] --- @param spritesheet SpritesheetHandle Spritesheet object returned from vmupro.sprite.newSheet()
+00332 [GPT-5-CODEX-MAX-REASONING] --- @param frame_index number Frame index to draw (1-based, Lua convention)
+00333 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate to draw frame
+00334 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate to draw frame
+00335 [GPT-5-CODEX-MAX-REASONING] --- @param mosaic_size number Size of mosaic blocks in pixels (e.g., 2 = 2x2 blocks, 4 = 4x4 blocks)
+00336 [GPT-5-CODEX-MAX-REASONING] --- @param flags number Optional draw flags using flip constants (default: kImageUnflipped)
+00337 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameMosaic(sheet, 1, 50, 50, 4) -- 4x4 pixel blocks
+00338 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameMosaic(sheet, current_frame, player_x, player_y, 8) -- Heavy pixelation
+00339 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameMosaic(sheet, 3, 100, 100, 2, vmupro.sprite.kImageFlippedX) -- Light mosaic, flipped
+00340 [GPT-5-CODEX-MAX-REASONING] --- @note Frame index is 1-based (Lua convention), valid range is 1 to frameCount
+00341 [GPT-5-CODEX-MAX-REASONING] --- @note Mosaic size of 1 = no effect (normal rendering)
+00342 [GPT-5-CODEX-MAX-REASONING] --- @note Larger mosaic_size values create stronger pixelation effect
+00343 [GPT-5-CODEX-MAX-REASONING] --- @note For PNG spritesheets, supports flip flags
+00344 [GPT-5-CODEX-MAX-REASONING] --- @note For BMP spritesheets, flip flags are not supported
+00345 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for transitions, censoring, retro effects, or distance-based LOD
+00346 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00347 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00348 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.drawFrameMosaic(spritesheet, frame_index, x, y, mosaic_size, flags) end
+00349 [GPT-5-CODEX-MAX-REASONING] 
+00350 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a sprite with global alpha blending (transparency)
+00351 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object returned from vmupro.sprite.new()
+00352 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate to draw sprite
+00353 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate to draw sprite
+00354 [GPT-5-CODEX-MAX-REASONING] --- @param alpha number Global alpha value 0-255 (0 = fully transparent, 255 = fully opaque)
+00355 [GPT-5-CODEX-MAX-REASONING] --- @param flags number Optional draw flags using flip constants (default: kImageUnflipped)
+00356 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawBlended(sprite, 50, 50, 128) -- 50% opacity
+00357 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawBlended(sprite, 100, 100, 200) -- 78% opacity
+00358 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawBlended(sprite, 100, 100, 64, vmupro.sprite.kImageFlippedX) -- 25% opacity, flipped
+00359 [GPT-5-CODEX-MAX-REASONING] --- @note Alpha value is clamped to 0-255 range
+00360 [GPT-5-CODEX-MAX-REASONING] --- @note For PNG sprites, global alpha combines with per-pixel alpha
+00361 [GPT-5-CODEX-MAX-REASONING] --- @note For BMP sprites, applies global alpha blending
+00362 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for fade in/out, ghost effects, transparency, or UI transitions
+00363 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00364 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00365 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.drawBlended(sprite, x, y, alpha, flags) end
+00366 [GPT-5-CODEX-MAX-REASONING] 
+00367 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a specific frame from a spritesheet with global alpha blending
+00368 [GPT-5-CODEX-MAX-REASONING] --- @param spritesheet SpritesheetHandle Spritesheet object returned from vmupro.sprite.newSheet()
+00369 [GPT-5-CODEX-MAX-REASONING] --- @param frame_index number Frame index to draw (1-based, Lua convention)
+00370 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate to draw frame
+00371 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate to draw frame
+00372 [GPT-5-CODEX-MAX-REASONING] --- @param alpha number Global alpha value 0-255 (0 = fully transparent, 255 = fully opaque)
+00373 [GPT-5-CODEX-MAX-REASONING] --- @param flags number Optional draw flags using flip constants (default: kImageUnflipped)
+00374 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameBlended(sheet, 1, 50, 50, 128) -- 50% opacity
+00375 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameBlended(sheet, current_frame, player_x, player_y, 200) -- 78% opacity
+00376 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameBlended(sheet, 3, 100, 100, 64, vmupro.sprite.kImageFlippedX) -- 25% opacity, flipped
+00377 [GPT-5-CODEX-MAX-REASONING] --- @note Frame index is 1-based (Lua convention), valid range is 1 to frameCount
+00378 [GPT-5-CODEX-MAX-REASONING] --- @note Alpha value is clamped to 0-255 range
+00379 [GPT-5-CODEX-MAX-REASONING] --- @note For PNG spritesheets, global alpha combines with per-pixel alpha
+00380 [GPT-5-CODEX-MAX-REASONING] --- @note For BMP spritesheets, falls back to normal rendering (no alpha)
+00381 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for fade in/out, ghost effects, or UI transitions in animated sprites
+00382 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00383 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00384 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.drawFrameBlended(spritesheet, frame_index, x, y, alpha, flags) end
+00385 [GPT-5-CODEX-MAX-REASONING] 
+00386 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw sprite with blur effect
+00387 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object returned from vmupro.sprite.new()
+00388 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate to draw sprite
+00389 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate to draw sprite
+00390 [GPT-5-CODEX-MAX-REASONING] --- @param radius number Blur radius 0-10 (0 = no blur, 10 = maximum blur)
+00391 [GPT-5-CODEX-MAX-REASONING] --- @param flags number Optional draw flags using flip constants (default: kImageUnflipped)
+00392 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawBlurred(my_sprite, 50, 50, 3) -- Moderate blur
+00393 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawBlurred(bg_sprite, 0, 0, 8) -- Heavy blur for depth of field
+00394 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawBlurred(enemy_sprite, enemy_x, enemy_y, 5, vmupro.sprite.kImageFlippedX) -- Blur + flip
+00395 [GPT-5-CODEX-MAX-REASONING] --- @note Blur radius is clamped to 0-10 range to prevent excessive processing
+00396 [GPT-5-CODEX-MAX-REASONING] --- @note Works best with BMP (RGB565BE) sprites
+00397 [GPT-5-CODEX-MAX-REASONING] --- @note PNG sprites have limited blur support (may not respect alpha perfectly)
+00398 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for depth of field, motion blur, dazed effects, or background defocus
+00399 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00400 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00401 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.drawBlurred(sprite, x, y, radius, flags) end
+00402 [GPT-5-CODEX-MAX-REASONING] 
+00403 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw a specific frame from a spritesheet with blur effect
+00404 [GPT-5-CODEX-MAX-REASONING] --- @param spritesheet SpritesheetHandle Spritesheet object returned from vmupro.sprite.newSheet()
+00405 [GPT-5-CODEX-MAX-REASONING] --- @param frame_index number Frame index to draw (1-based, Lua convention)
+00406 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate to draw frame
+00407 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate to draw frame
+00408 [GPT-5-CODEX-MAX-REASONING] --- @param radius number Blur radius 0-10 (0 = no blur, 10 = maximum blur)
+00409 [GPT-5-CODEX-MAX-REASONING] --- @param flags number Optional draw flags using flip constants (default: kImageUnflipped)
+00410 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameBlurred(sheet, 1, 50, 50, 2) -- Light blur
+00411 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameBlurred(sheet, current_frame, player_x, player_y, 10) -- Maximum blur
+00412 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawFrameBlurred(sheet, 3, 100, 100, 6, vmupro.sprite.kImageFlippedY) -- Blur + flip
+00413 [GPT-5-CODEX-MAX-REASONING] --- @note Frame index is 1-based (Lua convention), valid range is 1 to frameCount
+00414 [GPT-5-CODEX-MAX-REASONING] --- @note Blur radius is clamped to 0-10 range to prevent excessive processing
+00415 [GPT-5-CODEX-MAX-REASONING] --- @note Works best with BMP spritesheets
+00416 [GPT-5-CODEX-MAX-REASONING] --- @note PNG spritesheets have limited blur support
+00417 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for speed effects, dazed states, or transitional animations
+00418 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00419 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00420 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.drawFrameBlurred(spritesheet, frame_index, x, y, radius, flags) end
+00421 [GPT-5-CODEX-MAX-REASONING] 
+00422 [GPT-5-CODEX-MAX-REASONING] --- @brief Set sprite Z-index for drawing order control
+00423 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object returned from vmupro.sprite.new()
+00424 [GPT-5-CODEX-MAX-REASONING] --- @param z number Z-index value (lower values draw first/behind, higher values draw last/in front)
+00425 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setZIndex(my_sprite, 1) -- Draw first (back layer)
+00426 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setZIndex(my_sprite, 10) -- Draw last (front layer)
+00427 [GPT-5-CODEX-MAX-REASONING] --- @note Sprites with lower Z-index values are drawn first (appear behind)
+00428 [GPT-5-CODEX-MAX-REASONING] --- @note Sprites with higher Z-index values are drawn last (appear in front)
+00429 [GPT-5-CODEX-MAX-REASONING] --- @note Default Z-index is 0 if never set
+00430 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for managing drawing order of overlapping sprites
+00431 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00432 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00433 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.setZIndex(sprite, z) end
+00434 [GPT-5-CODEX-MAX-REASONING] 
+00435 [GPT-5-CODEX-MAX-REASONING] --- @brief Get sprite's current Z-index
+00436 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object returned from vmupro.sprite.new()
+00437 [GPT-5-CODEX-MAX-REASONING] --- @return number Current Z-index value
+00438 [GPT-5-CODEX-MAX-REASONING] --- @usage local z = vmupro.sprite.getZIndex(my_sprite)
+00439 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.system.log(vmupro.system.LOG_DEBUG, "Sprites", "Sprite Z-index: " .. vmupro.sprite.getZIndex(my_sprite))
+00440 [GPT-5-CODEX-MAX-REASONING] --- @note Returns the Z-index value set by setZIndex()
+00441 [GPT-5-CODEX-MAX-REASONING] --- @note Default Z-index is 0 if never set
+00442 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00443 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00444 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.getZIndex(sprite) end
+00445 [GPT-5-CODEX-MAX-REASONING] 
+00446 [GPT-5-CODEX-MAX-REASONING] --- @brief Add sprite to the scene for automatic Z-sorted rendering
+00447 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object returned from vmupro.sprite.new()
+00448 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.add(my_sprite)
+00449 [GPT-5-CODEX-MAX-REASONING] --- @note Added sprites will be automatically drawn when vmupro.sprite.drawAll() is called
+00450 [GPT-5-CODEX-MAX-REASONING] --- @note Sprites are drawn in Z-index order (lower Z-index values drawn first)
+00451 [GPT-5-CODEX-MAX-REASONING] --- @note Sprites use their internally stored position (set with setPosition/moveBy)
+00452 [GPT-5-CODEX-MAX-REASONING] --- @note IMPORTANT: Always call vmupro.sprite.removeAll() in cleanup/exit functions to prevent sprite leaking
+00453 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00454 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00455 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.add(sprite) end
+00456 [GPT-5-CODEX-MAX-REASONING] 
+00457 [GPT-5-CODEX-MAX-REASONING] --- @brief Remove sprite from the scene
+00458 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object to remove from scene
+00459 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.remove(my_sprite)
+00460 [GPT-5-CODEX-MAX-REASONING] --- @note Removed sprites will no longer be drawn by vmupro.sprite.drawAll()
+00461 [GPT-5-CODEX-MAX-REASONING] --- @note Should be called before freeing sprites with vmupro.sprite.free()
+00462 [GPT-5-CODEX-MAX-REASONING] --- @note For cleanup: Use vmupro.sprite.removeAll() instead to remove all sprites at once (more reliable)
+00463 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00464 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00465 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.remove(sprite) end
+00466 [GPT-5-CODEX-MAX-REASONING] 
+00467 [GPT-5-CODEX-MAX-REASONING] --- @brief Remove all sprites from the scene in a single operation
+00468 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.removeAll()
+00469 [GPT-5-CODEX-MAX-REASONING] --- @note RECOMMENDED way to clean up sprites when exiting a page or state
+00470 [GPT-5-CODEX-MAX-REASONING] --- @note Sets in_scene = false for all sprites in the scene
+00471 [GPT-5-CODEX-MAX-REASONING] --- @note Does NOT free sprite memory - sprites still exist and can be drawn manually
+00472 [GPT-5-CODEX-MAX-REASONING] --- @note Fast and reliable - no iteration needed on Lua side
+00473 [GPT-5-CODEX-MAX-REASONING] --- @note IMPORTANT: Always call this in exit/cleanup functions when using the scene system
+00474 [GPT-5-CODEX-MAX-REASONING] --- @note Prevents sprite leaking between pages/states
+00475 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00476 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00477 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.removeAll() end
+00478 [GPT-5-CODEX-MAX-REASONING] 
+00479 [GPT-5-CODEX-MAX-REASONING] --- @brief Draw all sprites in the scene sorted by Z-index
+00480 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.drawAll()
+00481 [GPT-5-CODEX-MAX-REASONING] --- @note Draws all sprites that have been added to the scene with vmupro.sprite.add()
+00482 [GPT-5-CODEX-MAX-REASONING] --- @note Sprites are rendered in Z-index order (lower values first = behind, higher values last = in front)
+00483 [GPT-5-CODEX-MAX-REASONING] --- @note Uses each sprite's internally stored position, visibility, and other properties
+00484 [GPT-5-CODEX-MAX-REASONING] --- @note IMPORTANT: If you see sprites from other pages appearing, call vmupro.sprite.removeAll() in your exit function
+00485 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00486 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00487 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.drawAll() end
+00488 [GPT-5-CODEX-MAX-REASONING] 
+00489 [GPT-5-CODEX-MAX-REASONING] --- @brief Set sprite center point for rotation and scaling
+00490 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object from vmupro.sprite.new()
+00491 [GPT-5-CODEX-MAX-REASONING] --- @param x number Normalized X coordinate (0.0 = left edge, 0.5 = center, 1.0 = right edge)
+00492 [GPT-5-CODEX-MAX-REASONING] --- @param y number Normalized Y coordinate (0.0 = top edge, 0.5 = center, 1.0 = bottom edge)
+00493 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setCenter(my_sprite, 0.5, 0.5) -- Center (default)
+00494 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setCenter(my_sprite, 0.5, 1.0) -- Bottom center (for character rotation)
+00495 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setCenter(my_sprite, 0.0, 0.0) -- Top-left corner
+00496 [GPT-5-CODEX-MAX-REASONING] --- @note Default center is (0.5, 0.5) which is the middle of the sprite
+00497 [GPT-5-CODEX-MAX-REASONING] --- @note Center point affects rotation and scaling operations
+00498 [GPT-5-CODEX-MAX-REASONING] --- @note Coordinates are normalized: 0.0-1.0 range relative to sprite dimensions
+00499 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00500 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00501 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.setCenter(sprite, x, y) end
+00502 [GPT-5-CODEX-MAX-REASONING] 
+00503 [GPT-5-CODEX-MAX-REASONING] --- @brief Get sprite's current center point
+00504 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object from vmupro.sprite.new()
+00505 [GPT-5-CODEX-MAX-REASONING] --- @return number, number Center X and Y coordinates (normalized 0.0-1.0)
+00506 [GPT-5-CODEX-MAX-REASONING] --- @usage local cx, cy = vmupro.sprite.getCenter(my_sprite)
+00507 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.system.log(vmupro.system.LOG_DEBUG, "Sprites", "Center: " .. cx .. ", " .. cy)
+00508 [GPT-5-CODEX-MAX-REASONING] --- @note Returns normalized coordinates (0.0-1.0 range)
+00509 [GPT-5-CODEX-MAX-REASONING] --- @note Default is (0.5, 0.5) if never set
+00510 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00511 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00512 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.getCenter(sprite) end
+00513 [GPT-5-CODEX-MAX-REASONING] 
+00514 [GPT-5-CODEX-MAX-REASONING] --- @brief Get sprite's actual drawing bounds in screen space
+00515 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle Sprite object from vmupro.sprite.new()
+00516 [GPT-5-CODEX-MAX-REASONING] --- @return number, number, number, number Top-left X, top-left Y, width, height
+00517 [GPT-5-CODEX-MAX-REASONING] --- @usage local x, y, w, h = vmupro.sprite.getBounds(my_sprite)
+00518 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.system.log(vmupro.system.LOG_DEBUG, "Sprites", "Draws at: " .. x .. "," .. y .. " size: " .. w .. "x" .. h)
+00519 [GPT-5-CODEX-MAX-REASONING] --- @note Returns the actual screen-space rectangle where the sprite is drawn
+00520 [GPT-5-CODEX-MAX-REASONING] --- @note Accounts for sprite position and center point
+00521 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for collision detection and UI layout
+00522 [GPT-5-CODEX-MAX-REASONING] --- @note The x, y values are the top-left corner of the drawn sprite
+00523 [GPT-5-CODEX-MAX-REASONING] --- @note Width and height match the sprite's dimensions
+00524 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00525 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00526 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.getBounds(sprite) end
+00527 [GPT-5-CODEX-MAX-REASONING] 
+00528 [GPT-5-CODEX-MAX-REASONING] --- @brief Start playing an animation on a spritesheet with automatic frame advancement
+00529 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpritesheetHandle Spritesheet object from vmupro.sprite.newSheet()
+00530 [GPT-5-CODEX-MAX-REASONING] --- @param startFrame number First frame of animation (0-based)
+00531 [GPT-5-CODEX-MAX-REASONING] --- @param endFrame number Last frame of animation (0-based, inclusive)
+00532 [GPT-5-CODEX-MAX-REASONING] --- @param fps number Frames per second (animation speed)
+00533 [GPT-5-CODEX-MAX-REASONING] --- @param loop boolean True to loop animation, false for one-shot playback
+00534 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.playAnimation(player, 0, 3, 10, true) -- Play frames 0-3 at 10 FPS, looping
+00535 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.playAnimation(explosion, 0, 7, 15, false) -- One-shot animation
+00536 [GPT-5-CODEX-MAX-REASONING] --- @note Frame indices are 0-based (0 = first frame)
+00537 [GPT-5-CODEX-MAX-REASONING] --- @note Animation automatically loops if loop is true, otherwise stops at endFrame
+00538 [GPT-5-CODEX-MAX-REASONING] --- @note Calling playAnimation() again restarts the animation from startFrame
+00539 [GPT-5-CODEX-MAX-REASONING] --- @note Requires vmupro.sprite.updateAnimations() to be called once per frame
+00540 [GPT-5-CODEX-MAX-REASONING] --- @note Only works with spritesheet sprites (created with vmupro.sprite.newSheet())
+00541 [GPT-5-CODEX-MAX-REASONING] --- @note IMPORTANT: Animated sprites must be drawn manually using drawFrame() with getCurrentFrame() + 1
+00542 [GPT-5-CODEX-MAX-REASONING] --- @note Do NOT use scene system (add/drawAll) with animated sprites - manual drawing required
+00543 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00544 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00545 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.playAnimation(sprite, startFrame, endFrame, fps, loop) end
+00546 [GPT-5-CODEX-MAX-REASONING] 
+00547 [GPT-5-CODEX-MAX-REASONING] --- @brief Stop the currently playing animation
+00548 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpritesheetHandle Spritesheet object from vmupro.sprite.newSheet()
+00549 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.stopAnimation(player)
+00550 [GPT-5-CODEX-MAX-REASONING] --- @note Stops animation playback completely
+00551 [GPT-5-CODEX-MAX-REASONING] --- @note Current frame is preserved (not reset)
+00552 [GPT-5-CODEX-MAX-REASONING] --- @note Can be restarted with playAnimation()
+00553 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for cleanup when removing sprites from scene
+00554 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00555 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00556 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.stopAnimation(sprite) end
+00557 [GPT-5-CODEX-MAX-REASONING] 
+00558 [GPT-5-CODEX-MAX-REASONING] --- @brief Pause the currently playing animation without resetting state
+00559 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpritesheetHandle Spritesheet object from vmupro.sprite.newSheet()
+00560 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.pauseAnimation(player)
+00561 [GPT-5-CODEX-MAX-REASONING] --- @note Pauses animation at current frame
+00562 [GPT-5-CODEX-MAX-REASONING] --- @note Animation state is preserved (frame index, timing)
+00563 [GPT-5-CODEX-MAX-REASONING] --- @note Does not reset animation progress
+00564 [GPT-5-CODEX-MAX-REASONING] --- @note Use resumeAnimation() to continue from current position
+00565 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for pause menus, cutscenes, or conditional animation
+00566 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00567 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00568 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.pauseAnimation(sprite) end
+00569 [GPT-5-CODEX-MAX-REASONING] 
+00570 [GPT-5-CODEX-MAX-REASONING] --- @brief Resume a paused animation from its current state
+00571 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpritesheetHandle Spritesheet object from vmupro.sprite.newSheet()
+00572 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.resumeAnimation(player)
+00573 [GPT-5-CODEX-MAX-REASONING] --- @note Continues animation from paused state
+00574 [GPT-5-CODEX-MAX-REASONING] --- @note No effect if animation was not paused
+00575 [GPT-5-CODEX-MAX-REASONING] --- @note Preserves frame index and animation progress
+00576 [GPT-5-CODEX-MAX-REASONING] --- @note Use with pauseAnimation() for pause/resume functionality
+00577 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00578 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00579 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.resumeAnimation(sprite) end
+00580 [GPT-5-CODEX-MAX-REASONING] 
+00581 [GPT-5-CODEX-MAX-REASONING] --- @brief Check if sprite is currently playing an animation (and not paused)
+00582 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpritesheetHandle Spritesheet object from vmupro.sprite.newSheet()
+00583 [GPT-5-CODEX-MAX-REASONING] --- @return boolean True if animation is playing, false if stopped or paused
+00584 [GPT-5-CODEX-MAX-REASONING] --- @usage if vmupro.sprite.isAnimating(player) then vmupro.system.log(vmupro.system.LOG_DEBUG, "Sprites", "Animating") end
+00585 [GPT-5-CODEX-MAX-REASONING] --- @usage if not vmupro.sprite.isAnimating(enemy) then vmupro.sprite.playAnimation(enemy, 0, 3, 10, true) end
+00586 [GPT-5-CODEX-MAX-REASONING] --- @note Returns false if animation is paused
+00587 [GPT-5-CODEX-MAX-REASONING] --- @note Returns false if animation is stopped
+00588 [GPT-5-CODEX-MAX-REASONING] --- @note Returns false for one-shot animations that have completed
+00589 [GPT-5-CODEX-MAX-REASONING] --- @note Returns true for actively playing animations
+00590 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for detecting animation completion or state changes
+00591 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00592 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00593 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.isAnimating(sprite) end
+00594 [GPT-5-CODEX-MAX-REASONING] 
+00595 [GPT-5-CODEX-MAX-REASONING] --- @brief Update all active sprite animations (must be called once per frame)
+00596 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.updateAnimations()
+00597 [GPT-5-CODEX-MAX-REASONING] --- @note Must be called once per frame in your update loop
+00598 [GPT-5-CODEX-MAX-REASONING] --- @note Advances all active animations for all sprites
+00599 [GPT-5-CODEX-MAX-REASONING] --- @note Handles frame timing and looping automatically
+00600 [GPT-5-CODEX-MAX-REASONING] --- @note No effect on sprites that are not animating
+00601 [GPT-5-CODEX-MAX-REASONING] --- @note This is a global update function that affects all animating sprites
+00602 [GPT-5-CODEX-MAX-REASONING] --- @note IMPORTANT: After calling updateAnimations(), draw sprites manually using drawFrame() with getCurrentFrame() + 1
+00603 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00604 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00605 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.updateAnimations() end
+00606 [GPT-5-CODEX-MAX-REASONING] 
+00607 [GPT-5-CODEX-MAX-REASONING] --- @brief Set collision rectangle for a sprite (relative to sprite position)
+00608 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite or spritesheet object
+00609 [GPT-5-CODEX-MAX-REASONING] --- @param x number X offset from sprite position (can be negative)
+00610 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y offset from sprite position (can be negative)
+00611 [GPT-5-CODEX-MAX-REASONING] --- @param width number Width of collision rectangle
+00612 [GPT-5-CODEX-MAX-REASONING] --- @param height number Height of collision rectangle
+00613 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setCollisionRect(player, 6, 2, 20, 28) -- 20x28 collision rect, offset by (6, 2)
+00614 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setCollisionRect(enemy, 0, 0, 32, 32) -- Full sprite collision
+00615 [GPT-5-CODEX-MAX-REASONING] --- @note Collision rect is relative to sprite position (not world space)
+00616 [GPT-5-CODEX-MAX-REASONING] --- @note If sprite moves, collision rect moves with it automatically
+00617 [GPT-5-CODEX-MAX-REASONING] --- @note Can be smaller than sprite for tighter collision detection
+00618 [GPT-5-CODEX-MAX-REASONING] --- @note Can be larger than sprite for extended hit areas
+00619 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00620 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00621 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.setCollisionRect(sprite, x, y, width, height) end
+00622 [GPT-5-CODEX-MAX-REASONING] 
+00623 [GPT-5-CODEX-MAX-REASONING] --- @brief Get collision rectangle relative to sprite position
+00624 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite or spritesheet object
+00625 [GPT-5-CODEX-MAX-REASONING] --- @return number|nil, number|nil, number|nil, number|nil X offset, Y offset, width, height (or nil if no collision rect set)
+00626 [GPT-5-CODEX-MAX-REASONING] --- @usage local cx, cy, cw, ch = vmupro.sprite.getCollisionRect(player)
+00627 [GPT-5-CODEX-MAX-REASONING] --- @usage if cx then vmupro.system.log(vmupro.system.LOG_DEBUG, "Sprites", "Collision rect: " .. cx .. "," .. cy .. " " .. cw .. "x" .. ch) end
+00628 [GPT-5-CODEX-MAX-REASONING] --- @note Returns nil if no collision rect has been set
+00629 [GPT-5-CODEX-MAX-REASONING] --- @note Returns relative coordinates (offsets from sprite position)
+00630 [GPT-5-CODEX-MAX-REASONING] --- @note For world-space collision bounds, use getCollideBounds() instead
+00631 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00632 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00633 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.getCollisionRect(sprite) end
+00634 [GPT-5-CODEX-MAX-REASONING] 
+00635 [GPT-5-CODEX-MAX-REASONING] --- @brief Remove collision rectangle from sprite
+00636 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite or spritesheet object
+00637 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.clearCollisionRect(player)
+00638 [GPT-5-CODEX-MAX-REASONING] --- @note After clearing, getCollisionRect() will return nil
+00639 [GPT-5-CODEX-MAX-REASONING] --- @note Safe to call even if no collision rect is set
+00640 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00641 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00642 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.clearCollisionRect(sprite) end
+00643 [GPT-5-CODEX-MAX-REASONING] 
+00644 [GPT-5-CODEX-MAX-REASONING] --- @brief Set a clipping rectangle to only draw a portion of the sprite
+00645 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite or spritesheet object
+00646 [GPT-5-CODEX-MAX-REASONING] --- @param x number X offset from sprite's top-left (can be negative)
+00647 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y offset from sprite's top-left (can be negative)
+00648 [GPT-5-CODEX-MAX-REASONING] --- @param width number Width of visible region
+00649 [GPT-5-CODEX-MAX-REASONING] --- @param height number Height of visible region
+00650 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setClipRect(healthBar, 0, 0, 60, 20) -- Show left 60 pixels
+00651 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setClipRect(card, 0, 0, revealWidth, 64) -- Reveal effect
+00652 [GPT-5-CODEX-MAX-REASONING] --- @note Clip rect is relative to sprite's top-left corner (not world space)
+00653 [GPT-5-CODEX-MAX-REASONING] --- @note Only the portion inside the clip rect will be drawn
+00654 [GPT-5-CODEX-MAX-REASONING] --- @note Negative offsets allow clipping from any edge
+00655 [GPT-5-CODEX-MAX-REASONING] --- @note Works with drawAll(), draw(), and drawFrame()
+00656 [GPT-5-CODEX-MAX-REASONING] --- @note Does not affect collision detection (use collision rect for that)
+00657 [GPT-5-CODEX-MAX-REASONING] --- @note Use clearClipRect() to remove clipping
+00658 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00659 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00660 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.setClipRect(sprite, x, y, width, height) end
+00661 [GPT-5-CODEX-MAX-REASONING] 
+00662 [GPT-5-CODEX-MAX-REASONING] --- @brief Remove clipping rectangle from sprite to draw it fully
+00663 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite or spritesheet object
+00664 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.clearClipRect(healthBar)
+00665 [GPT-5-CODEX-MAX-REASONING] --- @note Safe to call even if no clip rect is set
+00666 [GPT-5-CODEX-MAX-REASONING] --- @note After clearing, the full sprite will be drawn
+00667 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00668 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00669 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.clearClipRect(sprite) end
+00670 [GPT-5-CODEX-MAX-REASONING] 
+00671 [GPT-5-CODEX-MAX-REASONING] --- @brief Use another sprite's alpha channel as a stencil mask
+00672 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite to apply stencil to
+00673 [GPT-5-CODEX-MAX-REASONING] --- @param maskSprite SpriteHandle|SpritesheetHandle Sprite with alpha channel to use as mask (PNG with transparency)
+00674 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setStencilImage(character, circular_mask)
+00675 [GPT-5-CODEX-MAX-REASONING] --- @note Mask sprite must be RGBA8888 format (PNG with alpha channel)
+00676 [GPT-5-CODEX-MAX-REASONING] --- @note Mask is tiled if smaller than the main sprite
+00677 [GPT-5-CODEX-MAX-REASONING] --- @note Alpha channel multiplication: mask's alpha multiplied with source sprite's alpha
+00678 [GPT-5-CODEX-MAX-REASONING] --- @note Works with both draw() and drawAll()
+00679 [GPT-5-CODEX-MAX-REASONING] --- @note Compatible with setClipRect() - both can be used together
+00680 [GPT-5-CODEX-MAX-REASONING] --- @note Has CPU performance cost - use sparingly
+00681 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00682 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00683 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.setStencilImage(sprite, maskSprite) end
+00684 [GPT-5-CODEX-MAX-REASONING] 
+00685 [GPT-5-CODEX-MAX-REASONING] --- @brief Use an 8-byte pattern as an 8x8 tiled stencil mask
+00686 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite to apply stencil pattern to
+00687 [GPT-5-CODEX-MAX-REASONING] --- @param pattern table Array of 8 integers (0-255), each row of 8x8 pattern
+00688 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setStencilPattern(sprite, {0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55})
+00689 [GPT-5-CODEX-MAX-REASONING] --- @note Pattern is exactly 8 bytes (8 rows of 8 bits)
+00690 [GPT-5-CODEX-MAX-REASONING] --- @note Each bit: 1 = visible pixel, 0 = transparent pixel
+00691 [GPT-5-CODEX-MAX-REASONING] --- @note Pattern tiles across the entire sprite
+00692 [GPT-5-CODEX-MAX-REASONING] --- @note Good for dithering, texture effects, or retro transparency
+00693 [GPT-5-CODEX-MAX-REASONING] --- @note Works with both draw() and drawAll()
+00694 [GPT-5-CODEX-MAX-REASONING] --- @note More efficient than image stenciling for simple patterns
+00695 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00696 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00697 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.setStencilPattern(sprite, pattern) end
+00698 [GPT-5-CODEX-MAX-REASONING] 
+00699 [GPT-5-CODEX-MAX-REASONING] --- @brief Remove stencil mask from sprite
+00700 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite to remove stencil from
+00701 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.clearStencil(sprite)
+00702 [GPT-5-CODEX-MAX-REASONING] --- @note Safe to call even if no stencil is set
+00703 [GPT-5-CODEX-MAX-REASONING] --- @note Removes both image and pattern stencils
+00704 [GPT-5-CODEX-MAX-REASONING] --- @note After clearing, sprite renders normally
+00705 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00706 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00707 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.clearStencil(sprite) end
+00708 [GPT-5-CODEX-MAX-REASONING] 
+00709 [GPT-5-CODEX-MAX-REASONING] --- @brief Get world-space collision bounds for collision detection
+00710 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite or spritesheet object
+00711 [GPT-5-CODEX-MAX-REASONING] --- @return number|nil, number|nil, number|nil, number|nil World X, world Y, width, height (or nil if no collision rect set)
+00712 [GPT-5-CODEX-MAX-REASONING] --- @usage local bx, by, bw, bh = vmupro.sprite.getCollideBounds(player)
+00713 [GPT-5-CODEX-MAX-REASONING] --- @usage if bx then vmupro.system.log(vmupro.system.LOG_DEBUG, "Sprites", "Collision at: " .. bx .. "," .. by) end
+00714 [GPT-5-CODEX-MAX-REASONING] --- @note Returns nil if no collision rect has been set
+00715 [GPT-5-CODEX-MAX-REASONING] --- @note Returns world-space coordinates (sprite position + collision rect offset)
+00716 [GPT-5-CODEX-MAX-REASONING] --- @note Use for AABB (Axis-Aligned Bounding Box) collision detection
+00717 [GPT-5-CODEX-MAX-REASONING] --- @note More efficient than calculating sprite position + offset manually
+00718 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00719 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00720 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.getCollideBounds(sprite) end
+00721 [GPT-5-CODEX-MAX-REASONING] 
+00722 [GPT-5-CODEX-MAX-REASONING] --- @brief Set which collision groups a sprite belongs to
+00723 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite or spritesheet object
+00724 [GPT-5-CODEX-MAX-REASONING] --- @param groups table Array of group numbers (1-32)
+00725 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setGroups(player, {1}) -- Player belongs to group 1
+00726 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setGroups(enemy, {2, 5}) -- Enemy belongs to groups 2 and 5
+00727 [GPT-5-CODEX-MAX-REASONING] --- @note Groups are numbered 1-32
+00728 [GPT-5-CODEX-MAX-REASONING] --- @note Pass an array/table of group numbers: {1, 2, 3}
+00729 [GPT-5-CODEX-MAX-REASONING] --- @note Overwrites previous group membership
+00730 [GPT-5-CODEX-MAX-REASONING] --- @note Internally stored as a 32-bit bitmask for efficiency
+00731 [GPT-5-CODEX-MAX-REASONING] --- @note Empty array {} removes sprite from all groups
+00732 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00733 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00734 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.setGroups(sprite, groups) end
+00735 [GPT-5-CODEX-MAX-REASONING] 
+00736 [GPT-5-CODEX-MAX-REASONING] --- @brief Get which collision groups a sprite belongs to
+00737 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite or spritesheet object
+00738 [GPT-5-CODEX-MAX-REASONING] --- @return table Array of group numbers that this sprite belongs to
+00739 [GPT-5-CODEX-MAX-REASONING] --- @usage local groups = vmupro.sprite.getGroups(player)
+00740 [GPT-5-CODEX-MAX-REASONING] --- @usage for _, group in ipairs(groups) do vmupro.system.log(vmupro.system.LOG_DEBUG, "Sprites", "Group: " .. group) end
+00741 [GPT-5-CODEX-MAX-REASONING] --- @note Returns an array of group numbers (1-32)
+00742 [GPT-5-CODEX-MAX-REASONING] --- @note Returns empty array {} if sprite belongs to no groups
+00743 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00744 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00745 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.getGroups(sprite) end
+00746 [GPT-5-CODEX-MAX-REASONING] 
+00747 [GPT-5-CODEX-MAX-REASONING] --- @brief Set which collision groups this sprite collides with
+00748 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite or spritesheet object
+00749 [GPT-5-CODEX-MAX-REASONING] --- @param groups table Array of group numbers (1-32) to collide with
+00750 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setCollidesWithGroups(player, {2, 4}) -- Player collides with groups 2 and 4
+00751 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setCollidesWithGroups(bullet, {2}) -- Bullet only collides with group 2
+00752 [GPT-5-CODEX-MAX-REASONING] --- @note Groups are numbered 1-32
+00753 [GPT-5-CODEX-MAX-REASONING] --- @note Pass an array/table of group numbers: {1, 2, 3}
+00754 [GPT-5-CODEX-MAX-REASONING] --- @note Overwrites previous collides-with settings
+00755 [GPT-5-CODEX-MAX-REASONING] --- @note Internally stored as a 32-bit bitmask for efficiency
+00756 [GPT-5-CODEX-MAX-REASONING] --- @note Empty array {} means sprite doesn't collide with any groups
+00757 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00758 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00759 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.setCollidesWithGroups(sprite, groups) end
+00760 [GPT-5-CODEX-MAX-REASONING] 
+00761 [GPT-5-CODEX-MAX-REASONING] --- @brief Get which collision groups this sprite collides with
+00762 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite or spritesheet object
+00763 [GPT-5-CODEX-MAX-REASONING] --- @return table Array of group numbers that this sprite collides with
+00764 [GPT-5-CODEX-MAX-REASONING] --- @usage local collides = vmupro.sprite.getCollidesWithGroups(player)
+00765 [GPT-5-CODEX-MAX-REASONING] --- @usage for _, group in ipairs(collides) do vmupro.system.log(vmupro.system.LOG_DEBUG, "Sprites", "Collides with: " .. group) end
+00766 [GPT-5-CODEX-MAX-REASONING] --- @note Returns an array of group numbers (1-32)
+00767 [GPT-5-CODEX-MAX-REASONING] --- @note Returns empty array {} if sprite doesn't collide with any groups
+00768 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00769 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00770 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.getCollidesWithGroups(sprite) end
+00771 [GPT-5-CODEX-MAX-REASONING] 
+00772 [GPT-5-CODEX-MAX-REASONING] --- @brief Set collision groups using a 32-bit bitmask
+00773 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite or spritesheet object
+00774 [GPT-5-CODEX-MAX-REASONING] --- @param mask number 32-bit bitmask where each bit represents a group (bits 0-31 = groups 1-32)
+00775 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setGroupMask(player, 0x00000001) -- Group 1
+00776 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setGroupMask(enemy, 0x00000002) -- Group 2
+00777 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setGroupMask(boss, 0x00000012) -- Groups 2 and 5
+00778 [GPT-5-CODEX-MAX-REASONING] --- @note Groups 1-32 map to bits 0-31
+00779 [GPT-5-CODEX-MAX-REASONING] --- @note More efficient than array-based API for programmatic group manipulation
+00780 [GPT-5-CODEX-MAX-REASONING] --- @note Mask value 0x00000000 removes sprite from all groups
+00781 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00782 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00783 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.setGroupMask(sprite, mask) end
+00784 [GPT-5-CODEX-MAX-REASONING] 
+00785 [GPT-5-CODEX-MAX-REASONING] --- @brief Get collision groups as a 32-bit bitmask
+00786 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite or spritesheet object
+00787 [GPT-5-CODEX-MAX-REASONING] --- @return number 32-bit bitmask representing group membership
+00788 [GPT-5-CODEX-MAX-REASONING] --- @usage local mask = vmupro.sprite.getGroupMask(player)
+00789 [GPT-5-CODEX-MAX-REASONING] --- @usage if (mask & 0x00000001) ~= 0 then vmupro.system.log(vmupro.system.LOG_DEBUG, "Sprites", "Belongs to group 1") end
+00790 [GPT-5-CODEX-MAX-REASONING] --- @note Returns 0x00000000 if sprite belongs to no groups
+00791 [GPT-5-CODEX-MAX-REASONING] --- @note Use bitwise operations (&, |, ~) to check or combine groups
+00792 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00793 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00794 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.getGroupMask(sprite) end
+00795 [GPT-5-CODEX-MAX-REASONING] 
+00796 [GPT-5-CODEX-MAX-REASONING] --- @brief Set which collision groups this sprite collides with using a bitmask
+00797 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite or spritesheet object
+00798 [GPT-5-CODEX-MAX-REASONING] --- @param mask number 32-bit bitmask where each bit represents a group to collide with
+00799 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setCollidesWithGroupsMask(player, 0x0000000A) -- Groups 2 and 4
+00800 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setCollidesWithGroupsMask(bullet, 0x00000002) -- Only group 2
+00801 [GPT-5-CODEX-MAX-REASONING] --- @note More efficient for programmatic collision filtering
+00802 [GPT-5-CODEX-MAX-REASONING] --- @note Mask value 0x00000000 means sprite doesn't collide with any groups
+00803 [GPT-5-CODEX-MAX-REASONING] --- @note Mask value 0xFFFFFFFF means sprite collides with all groups
+00804 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00805 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00806 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.setCollidesWithGroupsMask(sprite, mask) end
+00807 [GPT-5-CODEX-MAX-REASONING] 
+00808 [GPT-5-CODEX-MAX-REASONING] --- @brief Get which collision groups this sprite collides with as a bitmask
+00809 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite or spritesheet object
+00810 [GPT-5-CODEX-MAX-REASONING] --- @return number 32-bit bitmask representing which groups this sprite collides with
+00811 [GPT-5-CODEX-MAX-REASONING] --- @usage local mask = vmupro.sprite.getCollidesWithGroupsMask(player)
+00812 [GPT-5-CODEX-MAX-REASONING] --- @usage if (mask & 0x00000002) ~= 0 then vmupro.system.log(vmupro.system.LOG_DEBUG, "Sprites", "Collides with group 2") end
+00813 [GPT-5-CODEX-MAX-REASONING] --- @note Returns 0x00000000 if sprite doesn't collide with any groups
+00814 [GPT-5-CODEX-MAX-REASONING] --- @note Efficient collision filtering: (groupsA & collidesWithB) != 0
+00815 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00816 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00817 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.getCollidesWithGroupsMask(sprite) end
+00818 [GPT-5-CODEX-MAX-REASONING] 
+00819 [GPT-5-CODEX-MAX-REASONING] --- Returns an array of all sprites that are currently overlapping with the given sprite.
+00820 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite object from vmupro.sprite.new() or vmupro.sprite.newSheet()
+00821 [GPT-5-CODEX-MAX-REASONING] --- @return table Array of collision results, each containing {id = sprite_handle}
+00822 [GPT-5-CODEX-MAX-REASONING] --- @usage local collisions = vmupro.sprite.overlappingSprites(player)
+00823 [GPT-5-CODEX-MAX-REASONING] --- @usage for i, collision in ipairs(collisions) do
+00824 [GPT-5-CODEX-MAX-REASONING] --- @usage     local other = collision.id
+00825 [GPT-5-CODEX-MAX-REASONING] --- @usage     if other == enemy then takeDamage() end
+00826 [GPT-5-CODEX-MAX-REASONING] --- @usage end
+00827 [GPT-5-CODEX-MAX-REASONING] --- @note Respects collision groups/masks (only returns sprites that should collide)
+00828 [GPT-5-CODEX-MAX-REASONING] --- @note Only checks sprites that are in the scene and visible
+00829 [GPT-5-CODEX-MAX-REASONING] --- @note Uses collision rectangles if set, otherwise uses sprite bounds
+00830 [GPT-5-CODEX-MAX-REASONING] --- @note Returns empty table {} if no overlapping sprites found
+00831 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00832 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00833 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.overlappingSprites(sprite) end
+00834 [GPT-5-CODEX-MAX-REASONING] 
+00835 [GPT-5-CODEX-MAX-REASONING] --- Returns an array of all sprites at a specific point in world space.
+00836 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate in world space
+00837 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate in world space
+00838 [GPT-5-CODEX-MAX-REASONING] --- @return table Array of sprites at the point, each containing {id = sprite_handle}
+00839 [GPT-5-CODEX-MAX-REASONING] --- @usage local sprites = vmupro.sprite.querySpritesAtPoint(120, 80)
+00840 [GPT-5-CODEX-MAX-REASONING] --- @usage if #sprites > 0 then
+00841 [GPT-5-CODEX-MAX-REASONING] --- @usage     local top_sprite = sprites[1].id
+00842 [GPT-5-CODEX-MAX-REASONING] --- @usage     highlightSprite(top_sprite)
+00843 [GPT-5-CODEX-MAX-REASONING] --- @usage end
+00844 [GPT-5-CODEX-MAX-REASONING] --- @note Does NOT respect collision groups (returns all sprites at that point)
+00845 [GPT-5-CODEX-MAX-REASONING] --- @note Uses collision rectangles if set, otherwise uses sprite bounds
+00846 [GPT-5-CODEX-MAX-REASONING] --- @note Returns empty table {} if no sprites found at the point
+00847 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for raycasting, mouse picking, or point-based collision checks
+00848 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00849 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00850 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.querySpritesAtPoint(x, y) end
+00851 [GPT-5-CODEX-MAX-REASONING] 
+00852 [GPT-5-CODEX-MAX-REASONING] --- Returns an array of all sprites intersecting a rectangular region.
+00853 [GPT-5-CODEX-MAX-REASONING] --- @param x number X coordinate of top-left corner
+00854 [GPT-5-CODEX-MAX-REASONING] --- @param y number Y coordinate of top-left corner
+00855 [GPT-5-CODEX-MAX-REASONING] --- @param width number Width of query rectangle
+00856 [GPT-5-CODEX-MAX-REASONING] --- @param height number Height of query rectangle
+00857 [GPT-5-CODEX-MAX-REASONING] --- @return table Array of sprites intersecting the rectangle, each containing {id = sprite_handle}
+00858 [GPT-5-CODEX-MAX-REASONING] --- @usage local sprites = vmupro.sprite.querySpritesInRect(100, 100, 64, 64)
+00859 [GPT-5-CODEX-MAX-REASONING] --- @usage for i, sprite_data in ipairs(sprites) do
+00860 [GPT-5-CODEX-MAX-REASONING] --- @usage     applyExplosionDamage(sprite_data.id)
+00861 [GPT-5-CODEX-MAX-REASONING] --- @usage end
+00862 [GPT-5-CODEX-MAX-REASONING] --- @note Does NOT respect collision groups (returns all sprites in that region)
+00863 [GPT-5-CODEX-MAX-REASONING] --- @note Uses collision rectangles if set, otherwise uses sprite bounds
+00864 [GPT-5-CODEX-MAX-REASONING] --- @note Returns empty table {} if no sprites found in the rectangle
+00865 [GPT-5-CODEX-MAX-REASONING] --- @note A sprite is included if any part of it intersects the query rectangle
+00866 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00867 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00868 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.querySpritesInRect(x, y, width, height) end
+00869 [GPT-5-CODEX-MAX-REASONING] 
+00870 [GPT-5-CODEX-MAX-REASONING] --- Returns an array of all sprites intersecting a line segment.
+00871 [GPT-5-CODEX-MAX-REASONING] --- @param x1 number X coordinate of line start point
+00872 [GPT-5-CODEX-MAX-REASONING] --- @param y1 number Y coordinate of line start point
+00873 [GPT-5-CODEX-MAX-REASONING] --- @param x2 number X coordinate of line end point
+00874 [GPT-5-CODEX-MAX-REASONING] --- @param y2 number Y coordinate of line end point
+00875 [GPT-5-CODEX-MAX-REASONING] --- @return table Array of sprites intersecting the line, each containing {id = sprite_handle}
+00876 [GPT-5-CODEX-MAX-REASONING] --- @usage local sprites = vmupro.sprite.querySpritesAlongLine(50, 120, 200, 120)
+00877 [GPT-5-CODEX-MAX-REASONING] --- @usage for i, sprite_data in ipairs(sprites) do
+00878 [GPT-5-CODEX-MAX-REASONING] --- @usage     applyLaserDamage(sprite_data.id)
+00879 [GPT-5-CODEX-MAX-REASONING] --- @usage end
+00880 [GPT-5-CODEX-MAX-REASONING] --- @note Does NOT respect collision groups (returns all sprites intersecting the line)
+00881 [GPT-5-CODEX-MAX-REASONING] --- @note Uses collision rectangles if set, otherwise uses sprite bounds
+00882 [GPT-5-CODEX-MAX-REASONING] --- @note Returns empty table {} if no sprites intersect the line
+00883 [GPT-5-CODEX-MAX-REASONING] --- @note Uses parametric line-rectangle intersection algorithm
+00884 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for raycasting, line-of-sight checks, laser weapons, etc.
+00885 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00886 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00887 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.querySpritesAlongLine(x1, y1, x2, y2) end
+00888 [GPT-5-CODEX-MAX-REASONING] 
+00889 [GPT-5-CODEX-MAX-REASONING] --- Returns what would happen if sprite moved to goal position (does NOT actually move)
+00890 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite to test movement for
+00891 [GPT-5-CODEX-MAX-REASONING] --- @param goalX number Target X position
+00892 [GPT-5-CODEX-MAX-REASONING] --- @param goalY number Target Y position
+00893 [GPT-5-CODEX-MAX-REASONING] --- @return number actualX - Position sprite would end at (current X if collision, goalX if clear)
+00894 [GPT-5-CODEX-MAX-REASONING] --- @return number actualY - Position sprite would end at (current Y if collision, goalY if clear)
+00895 [GPT-5-CODEX-MAX-REASONING] --- @return table collisions - Array of collided sprites {id = handle}, empty if no collision
+00896 [GPT-5-CODEX-MAX-REASONING] --- @usage local actualX, actualY, hits = vmupro.sprite.checkCollisions(player, newX, newY)
+00897 [GPT-5-CODEX-MAX-REASONING] --- @usage if #hits == 0 then
+00898 [GPT-5-CODEX-MAX-REASONING] --- @usage     vmupro.sprite.moveTo(player, newX, newY) -- Safe to move
+00899 [GPT-5-CODEX-MAX-REASONING] --- @usage else
+00900 [GPT-5-CODEX-MAX-REASONING] --- @usage     vmupro.system.log("Would collide with " .. #hits .. " sprites")
+00901 [GPT-5-CODEX-MAX-REASONING] --- @usage end
+00902 [GPT-5-CODEX-MAX-REASONING] --- @note DOES respect collision groups/masks - only detects sprites configured to collide
+00903 [GPT-5-CODEX-MAX-REASONING] --- @note Only checks sprites that are in the scene (added with add()) and visible
+00904 [GPT-5-CODEX-MAX-REASONING] --- @note Does NOT modify sprite position - use moveWithCollisions() to move automatically
+00905 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00906 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00907 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.checkCollisions(sprite, goalX, goalY) end
+00908 [GPT-5-CODEX-MAX-REASONING] 
+00909 [GPT-5-CODEX-MAX-REASONING] --- Moves sprite to goal position if no collision detected, stays at current position if collision
+00910 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite to move
+00911 [GPT-5-CODEX-MAX-REASONING] --- @param goalX number Target X position
+00912 [GPT-5-CODEX-MAX-REASONING] --- @param goalY number Target Y position
+00913 [GPT-5-CODEX-MAX-REASONING] --- @return number actualX - Actual position sprite moved to (current X if collision, goalX if clear)
+00914 [GPT-5-CODEX-MAX-REASONING] --- @return number actualY - Actual position sprite moved to (current Y if collision, goalY if clear)
+00915 [GPT-5-CODEX-MAX-REASONING] --- @return table collisions - Array of collided sprites {id = handle}, empty if no collision
+00916 [GPT-5-CODEX-MAX-REASONING] --- @usage local actualX, actualY, hits = vmupro.sprite.moveWithCollisions(player, newX, newY)
+00917 [GPT-5-CODEX-MAX-REASONING] --- @usage if #hits > 0 then
+00918 [GPT-5-CODEX-MAX-REASONING] --- @usage     -- Collision occurred, sprite did not move
+00919 [GPT-5-CODEX-MAX-REASONING] --- @usage     for i = 1, #hits do
+00920 [GPT-5-CODEX-MAX-REASONING] --- @usage         if hits[i].id == enemy.id then
+00921 [GPT-5-CODEX-MAX-REASONING] --- @usage             vmupro.system.log("Hit enemy!")
+00922 [GPT-5-CODEX-MAX-REASONING] --- @usage         end
+00923 [GPT-5-CODEX-MAX-REASONING] --- @usage     end
+00924 [GPT-5-CODEX-MAX-REASONING] --- @usage end
+00925 [GPT-5-CODEX-MAX-REASONING] --- @note DOES respect collision groups/masks - only detects sprites configured to collide
+00926 [GPT-5-CODEX-MAX-REASONING] --- @note Only checks sprites that are in the scene (added with add()) and visible
+00927 [GPT-5-CODEX-MAX-REASONING] --- @note Automatically moves sprite if path is clear, stays at original position if collision
+00928 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00929 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00930 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.moveWithCollisions(sprite, goalX, goalY) end
+00931 [GPT-5-CODEX-MAX-REASONING] 
+00932 [GPT-5-CODEX-MAX-REASONING] --- Set an 8-bit tag identifier for the sprite
+00933 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite to tag
+00934 [GPT-5-CODEX-MAX-REASONING] --- @param tag number Tag value (0-255)
+00935 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setTag(player, 1)  -- 1 = player type
+00936 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setTag(enemy, 2)   -- 2 = enemy type
+00937 [GPT-5-CODEX-MAX-REASONING] --- @note Tag is an 8-bit value (0-255) for quick sprite type identification
+00938 [GPT-5-CODEX-MAX-REASONING] --- @note Useful for categorizing sprites without storing full userdata
+00939 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00940 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00941 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.setTag(sprite, tag) end
+00942 [GPT-5-CODEX-MAX-REASONING] 
+00943 [GPT-5-CODEX-MAX-REASONING] --- Get the tag identifier for the sprite
+00944 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite to query
+00945 [GPT-5-CODEX-MAX-REASONING] --- @return number tag - Tag value (0-255), 0 if not set
+00946 [GPT-5-CODEX-MAX-REASONING] --- @usage local type = vmupro.sprite.getTag(sprite)
+00947 [GPT-5-CODEX-MAX-REASONING] --- @usage if type == 1 then
+00948 [GPT-5-CODEX-MAX-REASONING] --- @usage     vmupro.system.log("This is a player sprite")
+00949 [GPT-5-CODEX-MAX-REASONING] --- @usage elseif type == 2 then
+00950 [GPT-5-CODEX-MAX-REASONING] --- @usage     vmupro.system.log("This is an enemy sprite")
+00951 [GPT-5-CODEX-MAX-REASONING] --- @usage end
+00952 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00953 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00954 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.getTag(sprite) end
+00955 [GPT-5-CODEX-MAX-REASONING] 
+00956 [GPT-5-CODEX-MAX-REASONING] --- Store arbitrary Lua data with the sprite
+00957 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite to attach data to
+00958 [GPT-5-CODEX-MAX-REASONING] --- @param data any Lua value to store (table, number, string, boolean, etc.)
+00959 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setUserdata(player, {health = 100, lives = 3})
+00960 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setUserdata(enemy, {ai_state = "patrol", target = nil})
+00961 [GPT-5-CODEX-MAX-REASONING] --- @note Stored data persists until sprite is freed or userdata is replaced
+00962 [GPT-5-CODEX-MAX-REASONING] --- @note Data is stored in Lua registry and automatically cleaned up when sprite is freed
+00963 [GPT-5-CODEX-MAX-REASONING] --- @note Can store any Lua type: tables, numbers, strings, booleans, etc.
+00964 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00965 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00966 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.setUserdata(sprite, data) end
+00967 [GPT-5-CODEX-MAX-REASONING] 
+00968 [GPT-5-CODEX-MAX-REASONING] --- Retrieve Lua data stored with the sprite
+00969 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite to retrieve data from
+00970 [GPT-5-CODEX-MAX-REASONING] --- @return any data - Previously stored Lua value, or nil if none set
+00971 [GPT-5-CODEX-MAX-REASONING] --- @usage local data = vmupro.sprite.getUserdata(player)
+00972 [GPT-5-CODEX-MAX-REASONING] --- @usage if data then
+00973 [GPT-5-CODEX-MAX-REASONING] --- @usage     data.health = data.health - 10
+00974 [GPT-5-CODEX-MAX-REASONING] --- @usage     vmupro.sprite.setUserdata(player, data)  -- Update
+00975 [GPT-5-CODEX-MAX-REASONING] --- @usage end
+00976 [GPT-5-CODEX-MAX-REASONING] --- @note Returns nil if no userdata has been set for this sprite
+00977 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00978 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00979 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.getUserdata(sprite) end
+00980 [GPT-5-CODEX-MAX-REASONING] 
+00981 [GPT-5-CODEX-MAX-REASONING] --- Set custom update callback function for the sprite
+00982 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite to attach callback to
+00983 [GPT-5-CODEX-MAX-REASONING] --- @param callback function Update function called every frame during updateAnimations()
+00984 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setUpdateFunction(enemy, function()
+00985 [GPT-5-CODEX-MAX-REASONING] --- @usage     -- Custom per-frame logic
+00986 [GPT-5-CODEX-MAX-REASONING] --- @usage     local x, y = vmupro.sprite.getPosition(enemy)
+00987 [GPT-5-CODEX-MAX-REASONING] --- @usage     vmupro.sprite.moveTo(enemy, x + 1, y)
+00988 [GPT-5-CODEX-MAX-REASONING] --- @usage end)
+00989 [GPT-5-CODEX-MAX-REASONING] --- @note Callback is invoked automatically during vmupro.sprite.updateAnimations()
+00990 [GPT-5-CODEX-MAX-REASONING] --- @note Callback is stored in Lua registry and cleaned up when sprite is freed
+00991 [GPT-5-CODEX-MAX-REASONING] --- @note Pass nil to remove the update callback
+00992 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+00993 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+00994 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.setUpdateFunction(sprite, callback) end
+00995 [GPT-5-CODEX-MAX-REASONING] 
+00996 [GPT-5-CODEX-MAX-REASONING] --- Set custom draw callback function for the sprite (replaces default rendering)
+00997 [GPT-5-CODEX-MAX-REASONING] --- @param sprite SpriteHandle|SpritesheetHandle Sprite to attach callback to
+00998 [GPT-5-CODEX-MAX-REASONING] --- @param callback function Draw function(x, y, width, height) called during drawAll()
+00999 [GPT-5-CODEX-MAX-REASONING] --- @usage vmupro.sprite.setDrawFunction(sprite, function(x, y, w, h)
+01000 [GPT-5-CODEX-MAX-REASONING] --- @usage     -- Custom rendering - replaces default sprite drawing
+01001 [GPT-5-CODEX-MAX-REASONING] --- @usage     vmupro.graphics.drawRect(x, y, x+w, y+h, vmupro.graphics.RED)
+01002 [GPT-5-CODEX-MAX-REASONING] --- @usage     vmupro.graphics.drawText("!", x+w/2, y+h/2, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+01003 [GPT-5-CODEX-MAX-REASONING] --- @usage end)
+01004 [GPT-5-CODEX-MAX-REASONING] --- @note Callback parameters: x, y (position), width, height (dimensions)
+01005 [GPT-5-CODEX-MAX-REASONING] --- @note When set, sprite skips default rendering - callback must draw the sprite
+01006 [GPT-5-CODEX-MAX-REASONING] --- @note Callback is invoked automatically during vmupro.sprite.drawAll()
+01007 [GPT-5-CODEX-MAX-REASONING] --- @note Callback is stored in Lua registry and cleaned up when sprite is freed
+01008 [GPT-5-CODEX-MAX-REASONING] --- @note Pass nil to remove draw callback and restore default rendering
+01009 [GPT-5-CODEX-MAX-REASONING] --- @note This is a stub definition for IDE support only.
+01010 [GPT-5-CODEX-MAX-REASONING] ---       Actual implementation is provided by VMU Pro firmware at runtime.
+01011 [GPT-5-CODEX-MAX-REASONING] function vmupro.sprite.setDrawFunction(sprite, callback) end

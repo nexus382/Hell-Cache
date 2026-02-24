@@ -1,0 +1,55 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page5.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 5: Color Constants
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page5 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 5: Color Constants
+00007 [GPT-5-CODEX-MAX-REASONING] function Page5.render(drawPageCounter)
+00008 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00009 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00012 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00013 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Color Constants", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_TINY_6x8)
+00016 [GPT-5-CODEX-MAX-REASONING] 
+00017 [GPT-5-CODEX-MAX-REASONING]     local y_pos = 35
+00018 [GPT-5-CODEX-MAX-REASONING]     local swatch_size = 12
+00019 [GPT-5-CODEX-MAX-REASONING]     local x_swatch = 10
+00020 [GPT-5-CODEX-MAX-REASONING]     local x_text = 30
+00021 [GPT-5-CODEX-MAX-REASONING] 
+00022 [GPT-5-CODEX-MAX-REASONING]     -- Helper function to draw color swatch with name and value
+00023 [GPT-5-CODEX-MAX-REASONING]     local function drawColorSwatch(name, color, hex_value)
+00024 [GPT-5-CODEX-MAX-REASONING]         -- Draw filled rectangle color swatch
+00025 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawFillRect(x_swatch, y_pos, x_swatch + swatch_size, y_pos + swatch_size, color)
+00026 [GPT-5-CODEX-MAX-REASONING]         -- Draw white border around swatch
+00027 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawRect(x_swatch, y_pos, x_swatch + swatch_size, y_pos + swatch_size, vmupro.graphics.WHITE)
+00028 [GPT-5-CODEX-MAX-REASONING]         -- Draw color name and hex value
+00029 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawText(string.format("%s: 0x%04X", name, hex_value), x_text, y_pos + 2, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00030 [GPT-5-CODEX-MAX-REASONING]         y_pos = y_pos + 14
+00031 [GPT-5-CODEX-MAX-REASONING]     end
+00032 [GPT-5-CODEX-MAX-REASONING] 
+00033 [GPT-5-CODEX-MAX-REASONING]     -- Display all color constants
+00034 [GPT-5-CODEX-MAX-REASONING]     drawColorSwatch("RED", vmupro.graphics.RED, 0xF800)
+00035 [GPT-5-CODEX-MAX-REASONING]     drawColorSwatch("ORANGE", vmupro.graphics.ORANGE, 0xFBA0)
+00036 [GPT-5-CODEX-MAX-REASONING]     drawColorSwatch("YELLOW", vmupro.graphics.YELLOW, 0xFF80)
+00037 [GPT-5-CODEX-MAX-REASONING]     drawColorSwatch("YELLOWGREEN", vmupro.graphics.YELLOWGREEN, 0x7F80)
+00038 [GPT-5-CODEX-MAX-REASONING]     drawColorSwatch("GREEN", vmupro.graphics.GREEN, 0x0500)
+00039 [GPT-5-CODEX-MAX-REASONING]     drawColorSwatch("BLUE", vmupro.graphics.BLUE, 0x045F)
+00040 [GPT-5-CODEX-MAX-REASONING]     drawColorSwatch("NAVY", vmupro.graphics.NAVY, 0x000C)
+00041 [GPT-5-CODEX-MAX-REASONING]     drawColorSwatch("VIOLET", vmupro.graphics.VIOLET, 0x781F)
+00042 [GPT-5-CODEX-MAX-REASONING]     drawColorSwatch("MAGENTA", vmupro.graphics.MAGENTA, 0x780D)
+00043 [GPT-5-CODEX-MAX-REASONING]     drawColorSwatch("GREY", vmupro.graphics.GREY, 0xB5B6)
+00044 [GPT-5-CODEX-MAX-REASONING]     drawColorSwatch("WHITE", vmupro.graphics.WHITE, 0xFFFF)
+00045 [GPT-5-CODEX-MAX-REASONING]     drawColorSwatch("BLACK", vmupro.graphics.BLACK, 0x0000)
+00046 [GPT-5-CODEX-MAX-REASONING]     drawColorSwatch("VMUGREEN", vmupro.graphics.VMUGREEN, 0x6CD2)
+00047 [GPT-5-CODEX-MAX-REASONING]     drawColorSwatch("VMUINK", vmupro.graphics.VMUINK, 0x288A)
+00048 [GPT-5-CODEX-MAX-REASONING] 
+00049 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00050 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00051 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 210, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00052 [GPT-5-CODEX-MAX-REASONING] 
+00053 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00054 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00055 [GPT-5-CODEX-MAX-REASONING] end

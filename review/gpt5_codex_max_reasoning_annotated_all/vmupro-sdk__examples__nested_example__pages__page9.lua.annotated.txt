@@ -1,0 +1,83 @@
+00001 [GPT-5-CODEX-MAX-REASONING] -- pages/page9.lua
+00002 [GPT-5-CODEX-MAX-REASONING] -- Test Page 9: System - Brightness Control
+00003 [GPT-5-CODEX-MAX-REASONING] 
+00004 [GPT-5-CODEX-MAX-REASONING] Page9 = {}
+00005 [GPT-5-CODEX-MAX-REASONING] 
+00006 [GPT-5-CODEX-MAX-REASONING] --- @brief Render Page 9: System - Brightness Control
+00007 [GPT-5-CODEX-MAX-REASONING] function Page9.render(drawPageCounter)
+00008 [GPT-5-CODEX-MAX-REASONING]     -- Clear screen
+00009 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.clear(vmupro.graphics.BLACK)
+00010 [GPT-5-CODEX-MAX-REASONING] 
+00011 [GPT-5-CODEX-MAX-REASONING]     -- Page title
+00012 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_GABARITO_18x18)
+00013 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Brightness", 10, 10, vmupro.graphics.WHITE, vmupro.graphics.BLACK)
+00014 [GPT-5-CODEX-MAX-REASONING] 
+00015 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00016 [GPT-5-CODEX-MAX-REASONING] 
+00017 [GPT-5-CODEX-MAX-REASONING]     local y_pos = 40
+00018 [GPT-5-CODEX-MAX-REASONING] 
+00019 [GPT-5-CODEX-MAX-REASONING]     -- Test: Get current brightness
+00020 [GPT-5-CODEX-MAX-REASONING]     local current_brightness = vmupro.system.getGlobalBrightness()
+00021 [GPT-5-CODEX-MAX-REASONING]     local brightness_percent = math.floor((current_brightness / 10) * 100)
+00022 [GPT-5-CODEX-MAX-REASONING] 
+00023 [GPT-5-CODEX-MAX-REASONING]     -- Display brightness value
+00024 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Current Level:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00025 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00026 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(string.format("%d / 10", current_brightness), 10, y_pos, vmupro.graphics.YELLOW, vmupro.graphics.BLACK)
+00027 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 14
+00028 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText(string.format("(%d%%)", brightness_percent), 10, y_pos, vmupro.graphics.YELLOWGREEN, vmupro.graphics.BLACK)
+00029 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 25
+00030 [GPT-5-CODEX-MAX-REASONING] 
+00031 [GPT-5-CODEX-MAX-REASONING]     -- Visual brightness indicator bar
+00032 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Brightness Bar:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00033 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 18
+00034 [GPT-5-CODEX-MAX-REASONING] 
+00035 [GPT-5-CODEX-MAX-REASONING]     -- Draw bar outline
+00036 [GPT-5-CODEX-MAX-REASONING]     local bar_x = 10
+00037 [GPT-5-CODEX-MAX-REASONING]     local bar_y = y_pos
+00038 [GPT-5-CODEX-MAX-REASONING]     local bar_width = 220
+00039 [GPT-5-CODEX-MAX-REASONING]     local bar_height = 20
+00040 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawRect(bar_x, bar_y, bar_x + bar_width, bar_y + bar_height, vmupro.graphics.WHITE)
+00041 [GPT-5-CODEX-MAX-REASONING] 
+00042 [GPT-5-CODEX-MAX-REASONING]     -- Draw filled bar representing current brightness
+00043 [GPT-5-CODEX-MAX-REASONING]     local fill_width = math.floor((current_brightness / 10) * (bar_width - 2))
+00044 [GPT-5-CODEX-MAX-REASONING]     if fill_width > 0 then
+00045 [GPT-5-CODEX-MAX-REASONING]         vmupro.graphics.drawFillRect(bar_x + 1, bar_y + 1, bar_x + 1 + fill_width, bar_y + bar_height - 1, vmupro.graphics.YELLOWGREEN)
+00046 [GPT-5-CODEX-MAX-REASONING]     end
+00047 [GPT-5-CODEX-MAX-REASONING] 
+00048 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 35
+00049 [GPT-5-CODEX-MAX-REASONING] 
+00050 [GPT-5-CODEX-MAX-REASONING]     -- Instructions
+00051 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_TINY_6x8)
+00052 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Controls:", 10, y_pos, vmupro.graphics.ORANGE, vmupro.graphics.BLACK)
+00053 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 12
+00054 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("UP   - Increase brightness", 10, y_pos, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00055 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 10
+00056 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("DOWN - Decrease brightness", 10, y_pos, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00057 [GPT-5-CODEX-MAX-REASONING]     y_pos = y_pos + 10
+00058 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("Range: 1-10, Step: 1", 10, y_pos, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00059 [GPT-5-CODEX-MAX-REASONING] 
+00060 [GPT-5-CODEX-MAX-REASONING]     -- Navigation hint
+00061 [GPT-5-CODEX-MAX-REASONING]     vmupro.text.setFont(vmupro.text.FONT_MONO_7x13)
+00062 [GPT-5-CODEX-MAX-REASONING]     vmupro.graphics.drawText("< Prev | Next >", 75, 210, vmupro.graphics.GREY, vmupro.graphics.BLACK)
+00063 [GPT-5-CODEX-MAX-REASONING] 
+00064 [GPT-5-CODEX-MAX-REASONING]     -- Page counter
+00065 [GPT-5-CODEX-MAX-REASONING]     drawPageCounter()
+00066 [GPT-5-CODEX-MAX-REASONING] end
+00067 [GPT-5-CODEX-MAX-REASONING] 
+00068 [GPT-5-CODEX-MAX-REASONING] --- @brief Update function for Page 9 (handles brightness adjustment)
+00069 [GPT-5-CODEX-MAX-REASONING] function Page9.update()
+00070 [GPT-5-CODEX-MAX-REASONING]     -- Increase brightness on UP button
+00071 [GPT-5-CODEX-MAX-REASONING]     if vmupro.input.pressed(vmupro.input.UP) then
+00072 [GPT-5-CODEX-MAX-REASONING]         local current = vmupro.system.getGlobalBrightness()
+00073 [GPT-5-CODEX-MAX-REASONING]         local new_brightness = math.min(10, current + 1)
+00074 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.setGlobalBrightness(new_brightness)
+00075 [GPT-5-CODEX-MAX-REASONING]     end
+00076 [GPT-5-CODEX-MAX-REASONING] 
+00077 [GPT-5-CODEX-MAX-REASONING]     -- Decrease brightness on DOWN button
+00078 [GPT-5-CODEX-MAX-REASONING]     if vmupro.input.pressed(vmupro.input.DOWN) then
+00079 [GPT-5-CODEX-MAX-REASONING]         local current = vmupro.system.getGlobalBrightness()
+00080 [GPT-5-CODEX-MAX-REASONING]         local new_brightness = math.max(1, current - 1)
+00081 [GPT-5-CODEX-MAX-REASONING]         vmupro.system.setGlobalBrightness(new_brightness)
+00082 [GPT-5-CODEX-MAX-REASONING]     end
+00083 [GPT-5-CODEX-MAX-REASONING] end
