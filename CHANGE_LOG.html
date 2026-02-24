@@ -98,6 +98,7 @@
       <a href="#b166-170">Builds 166-170</a>
       <a href="#b171-175">Builds 171-175</a>
       <a href="#b176-180">Builds 176-180</a>
+      <a href="#b181-185">Builds 181-185</a>
     </div>
 
     <div class="panel" id="rules">
@@ -570,6 +571,60 @@
           <li>Wired achievement trigger progress for <code>kill_count</code>, <code>levels_cleared</code>, and <code>no_damage_level</code> to the new event flow, including score-bonus payout when an achievement unlocks.</li>
           <li>Added gameplay HUD score strip showing run score, kill count, and clears for in-device validation while we continue expansion phases.</li>
           <li>Updated <code>GAME_EXPANSION_PLAN.html</code> Section 20 with a live implementation-status snapshot so external AI re-reviews can see completed vs pending expansion work.</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 180</h3>
+        <ul>
+          <li>Implemented game-over high-score flow in <code>app_full.lua</code>: qualifying runs now enter retro 3-letter initials input before restart/menu selection.</li>
+          <li>Added top-10 high-score insertion logic on submit, plus game-over screen leaderboard preview and run score/level summary.</li>
+          <li>Replaced direct game-over state assignments with <code>enterGameOverState()</code> so death consistently initializes the new score-entry flow.</li>
+          <li>Implemented file-backed expansion persistence in <code>data/persistence.lua</code> for high scores and achievement state, with safe fallback when VMU file APIs are unavailable.</li>
+          <li>Updated expansion status in <code>GAME_EXPANSION_PLAN.html</code> and updated agent docs for both root and data-layer behaviors.</li>
+        </ul>
+        <div class="summary10">
+          <strong>Summary of last 10 changes (Builds 171-180):</strong>
+          <ul>
+            <li>Renderer-side VIS-cap experimentation was introduced, tuned, benchmarked, and then removed after proving low value for this project's visual/perf balance.</li>
+            <li>Core rendering tunables were stabilized: draw-distance control, mip normalization, and OFF-per-tier mip behavior became more consistent and debuggable.</li>
+            <li>Sprite ordering and load-hitch paths were optimized to reduce avoidable allocations and frame spikes.</li>
+            <li>Expansion milestone M1 was started with live score-event plumbing and HUD visibility for run progression data.</li>
+            <li>Death flow now supports high-score qualification, initials entry, leaderboard updates, and file-backed persistence scaffolding.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="b181-185">
+      <h2>Builds 181-185</h2>
+      <div class="build">
+        <h3>Build 181</h3>
+        <ul>
+          <li>Started M3 gameplay runtime slice in <code>app_full.lua</code>: chests are now breakable via melee/projectile and roll deterministic loot through <code>rollChestDrop()</code>.</li>
+          <li>Added world item drop entities (<code>t=8</code>) with pickup flow and weighted inventory checks; pickups now fail with explicit feedback when carry weight exceeds <code>inventory_state.max_weight</code>.</li>
+          <li>Added lightweight gameplay HUD feedback for inventory carry weight and live loot/pickup messages to speed test validation.</li>
+          <li>Updated expansion status snapshot in <code>GAME_EXPANSION_PLAN.html</code> to reflect Build 181 runtime progress and remaining M3 work.</li>
+          <li>Added <code>MUST_GENERATE.md</code> as the media production source-of-truth (required visuals/audio, contexts, specs, and next-phase backlog).</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 182</h3>
+        <ul>
+          <li>Added Phase A inventory UI to pause menu in <code>app_full.lua</code> with fixed layout zones and fixed row height to eliminate text overlap on the 240x240 display.</li>
+          <li>Implemented new pause-menu flow for <code>INVENTORY</code> tabbed views: <code>INV</code>, <code>STASH</code>, <code>EQUIP</code>, and read-only <code>TRADER</code> preview.</li>
+          <li>Inventory UI text now uses transparent drawing via <code>drawMenuText</code> (which wraps <code>drawTextTransparent</code>), matching the new no-background text requirement.</li>
+          <li>Added inventory/stash row aggregation, truncation, paging helpers, and always-visible carry-weight summary for fast test tuning.</li>
+          <li>Updated expansion plan + AGENTS docs to mark Phase A UI complete and clarify next pending step (interactive equip/use/transfer + trader buy/sell actions).</li>
+        </ul>
+      </div>
+      <div class="build">
+        <h3>Build 183</h3>
+        <ul>
+          <li>Polished inventory menu formatting in <code>app_full.lua</code>: inventory panel now renders as a true full-screen overlay to remove edge bleed-through from gameplay HUD layers.</li>
+          <li>Centered all inventory tab labels inside their highlight boxes, fixing the selected-tab alignment mismatch.</li>
+          <li>Moved inventory carry-weight emphasis into the inventory header and suppressed gameplay weight/HUD overlays while inventory is open.</li>
+          <li>Kept inventory list/detail/footer zones intact while eliminating black-strip artifacts caused by non-inventory overlays drawing after the menu.</li>
+          <li>Validated packaging/boot path with a successful local sanity pack build (<code>sanity_build183</code>).</li>
         </ul>
       </div>
     </div>

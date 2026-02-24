@@ -120,29 +120,38 @@ Chest drop tables with deterministic rolling (VMU Pro safe - no `math.random`).
 **Deterministic Rolling:**
 Uses hash-based selection with class bias to ensure reproducible results without `math.random`.
 
+**Runtime Integration (Build 181):**
+- `app_full.lua` now calls `rollChestDrop(levelId, classId, seed)` when breakable chest props are opened.
+- Drop outcomes now feed world-item pickup + inventory weight flow (first M3 gameplay slice).
+
 ---
 
 ### [persistence.lua](./persistence.lua)
 
-Save/load hook points (stub-safe for development).
+File-backed save/load helpers for expansion systems.
 
 | Export | Type | Description |
 |--------|------|-------------|
 | `ExpansionPersistence.paths` | table | File paths for save data |
-| `loadHighScores(defaultValue)` | function | Load high scores (stub) |
-| `saveHighScores(scoreList)` | function | Save high scores (stub) |
-| `loadAchievementState(defaultValue)` | function | Load achievements (stub) |
-| `saveAchievementState(state)` | function | Save achievements (stub) |
+| `loadHighScores(defaultValue)` | function | Load and normalize top-10 high scores |
+| `saveHighScores(scoreList)` | function | Save top-10 high scores to disk |
+| `loadAchievementState(defaultValue)` | function | Load persisted achievement state |
+| `saveAchievementState(state)` | function | Save achievement state to disk |
 
 **Save Paths:**
 ```lua
 {
-    high_scores = "save/high_scores.dat",
-    achievements = "save/achievements.dat",
+    high_scores = "/sdcard/inner_sanctum/high_scores_v1.dat",
+    achievements = "/sdcard/inner_sanctum/achievements_v1.dat",
 }
 ```
 
-**Note:** Currently returns defaults/clone. Wire to VMU Pro file API when format is finalized.
+**Format Notes:**
+- High scores use header `IS_HS_V1` with line records: `INITIALS|SCORE|LEVEL`
+- Achievements use header `IS_ACH_V1` with records:
+- `U|achievement_id` for unlocked flags
+- `P|achievement_id|progress_value` for progress counters
+- Functions gracefully fall back to defaults when VMU file APIs are unavailable.
 
 ---
 

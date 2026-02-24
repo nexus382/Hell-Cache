@@ -4560,7 +4560,7 @@ end</code>
                 <h2>⚙️ Section 20: Efficient Implementation Order (Execution Sequence)</h2>
 
                 <div class="subsection">
-                    <h3>20.0 Live Implementation Status (Build 179)</h3>
+                    <h3>20.0 Live Implementation Status (Build 183)</h3>
                     <div class="feature-card">
                         <h4>✅ Implemented in Current Codebase</h4>
                         <ul>
@@ -4569,8 +4569,14 @@ end</code>
                             <li>Run score state now tracks <code>current</code>, <code>kills</code>, <code>levels_cleared</code>, and per-level no-damage status for reward evaluation.</li>
                             <li>Achievement trigger wiring exists for <code>kill_count</code>, <code>levels_cleared</code>, and <code>no_damage_level</code> with score-bonus payout support.</li>
                             <li>Gameplay HUD now renders score + run counters for live validation while testing.</li>
+                            <li>Death flow now includes retro initials entry for qualifying runs, top-10 insertion on submit, and in-game game-over leaderboard preview.</li>
+                            <li>Data persistence hooks are now file-backed for high scores and achievement state using VMU Pro file APIs, with graceful fallback when file APIs are unavailable.</li>
+                            <li>Chest conversion pass is now active in runtime: closed chests can be broken by melee/projectile hits, then roll deterministic class-biased drops through <code>rollChestDrop()</code>.</li>
+                            <li>World-item drops now spawn as pickup entities and feed weighted inventory constraints (<code>inventory_state.current_weight / max_weight</code>) with rejection messaging on overweight pickup attempts.</li>
+                            <li>Phase A inventory UI is now live from pause menu: fixed-row, fixed-zone inventory/stash/equipment/trader-preview tabs with transparent text rendering to eliminate overlap on 240x240.</li>
+                            <li>Inventory UX polish pass shipped: full-screen inventory overlay now suppresses gameplay HUD bleed-through, and tab highlight/text alignment is centered for cleaner menu readability.</li>
                         </ul>
-                        <p><strong>Still pending:</strong> death-initials/top-10 board flow, persistent save format for high scores/achievements, chest/trader economy runtime, and full Wave/Story mode rule sets.</p>
+                        <p><strong>Still pending:</strong> inventory actions (equip/use/transfer), trader buy/sell runtime loop, and full Wave/Story mode rule sets.</p>
                     </div>
                 </div>
 
@@ -4637,7 +4643,46 @@ end</code>
                 </div>
 
                 <div class="subsection">
-                    <h3>20.3 Deferred Items (Intentionally Later)</h3>
+                    <h3>20.3 Inventory UI Contract (No Overlap, Small-Screen Safe)</h3>
+                    <div class="feature-card">
+                        <h4>🧩 Implementation Rules for 240x240</h4>
+                        <ul>
+                            <li><strong>Text API Rule:</strong> all inventory/stash/trader screen text must render via <code>drawTextTransparent()</code>; avoid opaque text backgrounds.</li>
+                            <li><strong>Font Rule:</strong> default inventory list font is <code>FONT_TINY_6x8</code>; no mixed font heights in the same list viewport.</li>
+                            <li><strong>Row Rule:</strong> fixed row height only (12-14 px), fixed top anchor, fixed row count per page; no dynamic stacking that can drift into overlap.</li>
+                            <li><strong>String Rule:</strong> truncate long item names to fit row width (ellipsis), do not wrap inside list rows.</li>
+                            <li><strong>Panel Rule:</strong> background panels are drawn first, then highlight bars, then transparent text; no text after the next panel starts.</li>
+                            <li><strong>Weight Rule:</strong> <code>current_weight / max_weight</code> is always visible in header for INV/STASH/TRADER pages.</li>
+                            <li><strong>Selection Rule:</strong> selected row gets full-width highlight bar; text color flips for contrast, never changes row height.</li>
+                        </ul>
+
+                        <h5>Recommended Screen Layout (Fixed Zones)</h5>
+                        <ul>
+                            <li><strong>Top Bar (y: 8-28):</strong> tabs <code>INV | EQUIP | STASH | TRADER</code> + weight summary.</li>
+                            <li><strong>List Pane (x: 12-146, y: 34-206):</strong> 10-12 fixed rows with item name + count.</li>
+                            <li><strong>Detail Pane (x: 150-228, y: 34-206):</strong> item stats/value/class and action hints.</li>
+                            <li><strong>Footer Hint Bar (y: 212-232):</strong> fixed controls (A action, B back, L/R tab).</li>
+                        </ul>
+
+                        <h5>Weight + Economy Behavior</h5>
+                        <ul>
+                            <li><strong>Pickup Gate:</strong> pickups fail when adding item weight exceeds capacity; show short message and keep drop on floor.</li>
+                            <li><strong>Stacking:</strong> stackables fill existing stacks first, then open new stack rows.</li>
+                            <li><strong>Trader Buy:</strong> require affordability + capacity check before transfer.</li>
+                            <li><strong>Trader Sell:</strong> remove item stack, add score/currency, refresh trader and player panes in same frame.</li>
+                        </ul>
+
+                        <h5>Phased Build Order (Recommended)</h5>
+                        <ol>
+                            <li><strong>Phase A:</strong> read-only inventory panel with paging, truncation, and stable highlight rows.</li>
+                            <li><strong>Phase B:</strong> equipment + quick-slot actions with weight-safe transfer behavior.</li>
+                            <li><strong>Phase C:</strong> trader panel reusing the same row renderer and action footer to avoid duplicate UI code.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>20.4 Deferred Items (Intentionally Later)</h3>
                     <div class="feature-card">
                         <h4>🕒 Not Blocking v1 Expansion</h4>
                         <ul>

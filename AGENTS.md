@@ -48,6 +48,7 @@ Inner Sanctum is a doom-like 3D dungeon raycaster game for the VMU Pro handheld 
 | `MAGE_SPELL_DESIGN.md` | Mage spell system design |
 | `WEAPON_CLASS_MASTERY_PLAN.md` | Weapon mastery progression |
 | `STATS_TO_GAMEPLAY.md` | Stats to gameplay mechanics mapping |
+| `MUST_GENERATE.md` | Build-tracked media production checklist (required/current/next assets with context + specs) |
 
 ---
 
@@ -92,6 +93,11 @@ Inner Sanctum is a doom-like 3D dungeon raycaster game for the VMU Pro handheld 
    - Sprite order cache now rebuilds in place (Build 177) to reduce per-refresh allocations in the sprite render ordering path
    - Mip thresholds now support per-tier OFF (0) and independent tuning (Build 178); distance presets use 0.5 steps below 12 and 1.0 steps at 12+
    - Expansion M1 scaffolding started in Build 179: `dispatchRunScoreEvent` now drives run score hooks (kills/pickups/level start-clear), and HUD score counters are live in gameplay for validation
+   - Build 180 adds retro death-score flow: qualifying runs enter initials capture on game over, insert into top-10, and persist via `data/persistence.lua`
+   - Build 181 starts M3 runtime loop: breakable chests now roll deterministic loot drops (`rollChestDrop`), world item drops are collectible, and pickup is constrained by inventory weight (`inventory_state`)
+   - Inventory/trader UI contract is documented in `GAME_EXPANSION_PLAN.html` Section 20.3 (fixed zones, no text overlap, and `drawTextTransparent` usage)
+   - Build 182 adds Phase A inventory UI (pause-menu tabs for INV/STASH/EQUIP/TRADER preview) using fixed-row transparent text rendering to prevent overlap on 240x240
+   - Build 183 refines inventory UX: tab labels are centered, inventory now draws full-screen, and gameplay HUD overlays (including top-right weight text) are hidden while inventory is open
 
 5. **Code Style:**
    - Lua imports use `import "module"` syntax

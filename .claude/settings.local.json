@@ -6,7 +6,8 @@
       "Bash(python3:*)",
       "Bash(ls:*)",
       "mcp__plugin_oh-my-claudecode_omc-tools__lsp_document_symbols",
-      "mcp__plugin_oh-my-claudecode_omc-tools__ast_grep_search"
+      "mcp__plugin_oh-my-claudecode_omc-tools__ast_grep_search",
+      "mcp__web-search-prime__webSearchPrime"
     ]
   }
 }

@@ -550,7 +550,7 @@ function buildSingleRoomMap()
     return mapOut
 end
 
--- Sprites: t=1 torch, t=2 barrel, t=3 table, t=4 chest, t=5 warrior, t=6 knight, t=7 health vial
+-- Sprites: t=1 torch, t=2 barrel, t=3 table, t=4 chest, t=5 warrior, t=6 knight, t=7 health vial, t=8 world item drop
 local BASE_SPRITES = {
     {x=1.5, y=1.5, t=1}, {x=6.5, y=1.5, t=1}, {x=8.5, y=1.5, t=1}, {x=14.5, y=1.5, t=1},
     {x=1.5, y=5.5, t=1}, {x=14.5, y=5.5, t=1},
@@ -755,22 +755,32 @@ inOptionsMenu = false -- Currently in options submenu
 optionsSelection = 1  -- Current options selection
 inGameDebugMenu = false -- In-game options: debug submenu
 inSaveMenu = false    -- In-game save submenu
+inInventoryMenu = false -- In-game inventory/stash submenu
 inStatsMenu = false   -- In-game stat allocation submenu
 inMasteryMenu = false -- In-game weapon mastery submenu
 saveMenuSelection = 1
 saveMenuMessage = ""
 saveMenuMessageTimer = 0
+inventoryMenuSelection = 1
+inventoryMenuPage = 1
+inventoryMenuTab = 1
+inventoryMenuMessage = ""
+inventoryMenuMessageTimer = 0
 statsMenuSelection = 1
 statsMenuMessage = ""
 statsMenuMessageTimer = 0
 masteryMenuSelection = 1
 masteryMenuMessage = ""
 masteryMenuMessageTimer = 0
+lootFeedMessage = ""
+lootFeedMessageTimer = 0
+INVENTORY_MENU_ROWS_PER_PAGE = 12
+INVENTORY_MENU_TABS = {"INV", "STASH", "EQUIP", "TRADER"}
 
 -- Static menu labels to avoid per-frame table allocations.
 TITLE_MAIN_MENU_ITEMS = {"NEW GAME", "LOAD GAME", "OPTIONS", "EXIT"}
 GAME_OVER_MENU_ITEMS = {"RESTART", "MENU", "QUIT"}
-PAUSE_MENU_ITEMS = {"RESUME", "SAVE GAME", "STATS", "MASTERIES", "OPTIONS", "RESTART", "MENU", "QUIT"}
+PAUSE_MENU_ITEMS = {"RESUME", "SAVE GAME", "INVENTORY", "STATS", "MASTERIES", "OPTIONS", "RESTART", "MENU", "QUIT"}
 
 -- Options settings
 soundEnabled = true   -- Sound on/off
@@ -976,7 +986,7 @@ LOW_RES_MODE = "quality"
 SHOW_MINIMAP = false
 RENDERER_MODE = "exp_hybrid" -- locked single renderer
 DEBUG_DISABLE_ENEMIES = false
-BUILD_COUNT = 179 -- Bump by +1 whenever we ship a new build/test iteration.
+BUILD_COUNT = 183 -- Bump by +1 whenever we ship a new build/test iteration.
 textureDebugFrame = -1
 textureDebugSamples = 0
 
@@ -997,6 +1007,8 @@ RUN_SCORE_PULSE_MAX = 36
 RUN_SCORE_EVENT_POINTS = {
     enemy_kill = 100,
     health_pickup = 25,
+    chest_open = 40,
+    item_pickup = 20,
     level_clear = 300,
     no_damage_clear = 200,
 }
@@ -1121,6 +1133,9 @@ function applyAchievementProgress(triggerName, progressValue)
                         if bonus > 0 then
                             addRunScorePoints(bonus)
                         end
+                        if ExpansionPersistence and ExpansionPersistence.saveAchievementState then
+                            ExpansionPersistence.saveAchievementState(achievement_state)
+                        end
                     end
                 end
             end
@@ -1169,6 +1184,231 @@ function dispatchRunScoreEvent(eventId, payload)
         addRunScorePoints(points)
     end
     run_score_event_count = (run_score_event_count or 0) + 1
+end
+
+function ensureHighScoreState()
+    if type(high_score_state) ~= "table" then
+        high_score_state = {entries = {}}
+    end
+    if type(high_score_state.entries) ~= "table" then
+        high_score_state.entries = {}
+    end
+    return high_score_state
+end
+
+function getCurrentRunScoreValue()
+    local run = ensureRunScoreState(currentLevel)
+    return math.floor(tonumber(run.current) or 0)
+end
+
+function getCurrentRunLevelValue()
+    local run = ensureRunScoreState(currentLevel)
+    local levelValue = math.floor(tonumber(run.ended_level) or tonumber(currentLevel) or 1)
+    if levelValue < 1 then levelValue = 1 end
+    return levelValue
+end
+
+function doesScoreQualifyForHighScore(scoreValue, levelValue)
+    local state = ensureHighScoreState()
+    local entries = state.entries
+    local maxEntries = RUN_HIGHSCORE_MAX_ENTRIES or 10
+    local score = math.floor(tonumber(scoreValue) or 0)
+    local level = math.floor(tonumber(levelValue) or 1)
+    if level < 1 then level = 1 end
+    if #entries < maxEntries then
+        return true
+    end
+
+    local worstScore = 2147483647
+    local worstLevel = 2147483647
+    for i = 1, #entries do
+        local entry = entries[i]
+        local entryScore = math.floor(tonumber(entry and entry.score) or 0)
+        local entryLevel = math.floor(tonumber(entry and entry.level) or 1)
+        if entryLevel < 1 then entryLevel = 1 end
+        if entryScore < worstScore or (entryScore == worstScore and entryLevel < worstLevel) then
+            worstScore = entryScore
+            worstLevel = entryLevel
+        end
+    end
+
+    if score > worstScore then
+        return true
+    end
+    if score == worstScore and level > worstLevel then
+        return true
+    end
+    return false
+end
+
+function resetGameOverScoreEntryState()
+    gameOverInitialsActive = false
+    gameOverInitialsCursor = 1
+    gameOverInitialsChars = {"A", "A", "A"}
+    gameOverScoreQualified = false
+    gameOverScoreSubmitted = false
+    gameOverScoreStatus = ""
+end
+
+function getGameOverInitialsText()
+    local a = (gameOverInitialsChars and gameOverInitialsChars[1]) or "A"
+    local b = (gameOverInitialsChars and gameOverInitialsChars[2]) or "A"
+    local c = (gameOverInitialsChars and gameOverInitialsChars[3]) or "A"
+    local text = tostring(a) .. tostring(b) .. tostring(c)
+    if GameScoreModel and GameScoreModel.sanitizeInitials then
+        return GameScoreModel.sanitizeInitials(text)
+    end
+    return text
+end
+
+function setGameOverInitialsText(initials)
+    local text = tostring(initials or "AAA")
+    if GameScoreModel and GameScoreModel.sanitizeInitials then
+        text = GameScoreModel.sanitizeInitials(text)
+    end
+    gameOverInitialsChars = {
+        text:sub(1, 1),
+        text:sub(2, 2),
+        text:sub(3, 3),
+    }
+end
+
+function stepGameOverInitialsChar(step)
+    if not gameOverInitialsActive then
+        return
+    end
+    local cursor = math.floor(tonumber(gameOverInitialsCursor) or 1)
+    if cursor < 1 then cursor = 1 end
+    if cursor > 3 then cursor = 3 end
+    gameOverInitialsCursor = cursor
+    local current = ((gameOverInitialsChars and gameOverInitialsChars[cursor]) or "A")
+    local byte = string.byte(current, 1) or string.byte("A", 1)
+    if byte < 65 or byte > 90 then byte = 65 end
+    local delta = math.floor(tonumber(step) or 0)
+    local nextValue = (byte - 65 + delta) % 26
+    gameOverInitialsChars[cursor] = string.char(65 + nextValue)
+end
+
+function submitGameOverHighScoreEntry()
+    if gameOverScoreSubmitted then
+        gameOverInitialsActive = false
+        return true
+    end
+    if not gameOverScoreQualified then
+        gameOverInitialsActive = false
+        return false
+    end
+
+    local scoreValue = getCurrentRunScoreValue()
+    local levelValue = getCurrentRunLevelValue()
+    local initials = getGameOverInitialsText()
+    local entry = nil
+    if GameScoreModel and GameScoreModel.createEntry then
+        entry = GameScoreModel.createEntry(initials, scoreValue, levelValue)
+    else
+        entry = {initials = initials, score = scoreValue, level = levelValue}
+    end
+
+    local state = ensureHighScoreState()
+    if GameScoreModel and GameScoreModel.insertHighScore then
+        state.entries = GameScoreModel.insertHighScore(state.entries, entry, RUN_HIGHSCORE_MAX_ENTRIES or 10)
+    else
+        state.entries[#state.entries + 1] = entry
+    end
+
+    local saveOk = false
+    if ExpansionPersistence and ExpansionPersistence.saveHighScores then
+        local okWrite = ExpansionPersistence.saveHighScores(state.entries)
+        saveOk = okWrite and true or false
+    end
+
+    gameOverInitialsActive = false
+    gameOverScoreSubmitted = true
+    gameOverScoreStatus = saveOk and "HIGH SCORE SAVED" or "HIGH SCORE ADDED"
+    return true
+end
+
+function prepareGameOverState()
+    local classId = getCurrentClassId()
+    local classSeed = "AAA"
+    if classId == "warrior" then
+        classSeed = "WAR"
+    elseif classId == "archer" then
+        classSeed = "ARC"
+    elseif classId == "mage" then
+        classSeed = "MAG"
+    end
+
+    ensureRunScoreState(currentLevel)
+    ensureHighScoreState()
+    resetGameOverScoreEntryState()
+    setGameOverInitialsText(classSeed)
+
+    local scoreValue = getCurrentRunScoreValue()
+    local levelValue = getCurrentRunLevelValue()
+    gameOverScoreQualified = doesScoreQualifyForHighScore(scoreValue, levelValue)
+    gameOverInitialsActive = gameOverScoreQualified
+    if gameOverScoreQualified then
+        gameOverScoreStatus = "NEW HIGH SCORE"
+    else
+        gameOverScoreStatus = "NO HIGH SCORE"
+    end
+end
+
+function enterGameOverState()
+    gameState = STATE_GAME_OVER
+    gameOverSelection = 1
+    prepareGameOverState()
+end
+
+function handleGameOverInput()
+    if gameOverInitialsActive then
+        if vmupro.input.pressed(vmupro.input.LEFT) then
+            gameOverInitialsCursor = gameOverInitialsCursor - 1
+            if gameOverInitialsCursor < 1 then gameOverInitialsCursor = 3 end
+        end
+        if vmupro.input.pressed(vmupro.input.RIGHT) then
+            gameOverInitialsCursor = gameOverInitialsCursor + 1
+            if gameOverInitialsCursor > 3 then gameOverInitialsCursor = 1 end
+        end
+        if vmupro.input.pressed(vmupro.input.UP) then
+            stepGameOverInitialsChar(1)
+        end
+        if vmupro.input.pressed(vmupro.input.DOWN) then
+            stepGameOverInitialsChar(-1)
+        end
+        if vmupro.input.pressed(vmupro.input.A) or vmupro.input.pressed(vmupro.input.MODE) then
+            if gameOverInitialsCursor < 3 then
+                gameOverInitialsCursor = gameOverInitialsCursor + 1
+            else
+                submitGameOverHighScoreEntry()
+            end
+        end
+        if vmupro.input.pressed(vmupro.input.B) or vmupro.input.pressed(vmupro.input.POWER) then
+            submitGameOverHighScoreEntry()
+        end
+        return
+    end
+
+    if vmupro.input.pressed(vmupro.input.UP) then
+        gameOverSelection = gameOverSelection - 1
+        if gameOverSelection < 1 then gameOverSelection = 3 end
+    end
+    if vmupro.input.pressed(vmupro.input.DOWN) then
+        gameOverSelection = gameOverSelection + 1
+        if gameOverSelection > 3 then gameOverSelection = 1 end
+    end
+    if vmupro.input.pressed(vmupro.input.A) or vmupro.input.pressed(vmupro.input.MODE) then
+        if gameOverSelection == 1 then
+            beginLoadLevel(currentLevel)  -- Restart
+        elseif gameOverSelection == 2 then
+            -- Return to title menu
+            enterTitle()
+            gameOverSelection = 1
+        else
+            quitApp("pause quit")  -- Quit
+        end
+    end
 end
 
 function bootstrapExpansionDataLayer()
@@ -1756,6 +1996,13 @@ function isExpRenderer()
     return true
 end
 gameOverSelection = 1  -- 1 = Restart, 2 = Menu, 3 = Quit
+RUN_HIGHSCORE_MAX_ENTRIES = 10
+gameOverInitialsActive = false
+gameOverInitialsCursor = 1
+gameOverInitialsChars = {"A", "A", "A"}
+gameOverScoreQualified = false
+gameOverScoreSubmitted = false
+gameOverScoreStatus = ""
 winSelection = 1  -- 1 = Menu
 winCooldown = 0   -- Delay before accepting win screen input
 levelBannerTimer = 0
@@ -1797,6 +2044,13 @@ ITEM_RENDER_DIST = 5
 ENEMY_RENDER_DIST_SQ = ENEMY_RENDER_DIST * ENEMY_RENDER_DIST
 PROP_RENDER_DIST_SQ = PROP_RENDER_DIST * PROP_RENDER_DIST
 ITEM_RENDER_DIST_SQ = ITEM_RENDER_DIST * ITEM_RENDER_DIST
+CHEST_HIT_RANGE = 1.05
+CHEST_HIT_RANGE_SQ = CHEST_HIT_RANGE * CHEST_HIT_RANGE
+PROJECTILE_CHEST_HIT_RADIUS = 0.34
+PROJECTILE_CHEST_HIT_RADIUS_SQ = PROJECTILE_CHEST_HIT_RADIUS * PROJECTILE_CHEST_HIT_RADIUS
+ITEM_PICKUP_RANGE = 0.78
+ITEM_PICKUP_RANGE_SQ = ITEM_PICKUP_RANGE * ITEM_PICKUP_RANGE
+LOOT_FEED_DURATION_TICKS = SIM_TARGET_HZ * 2
 
 function isEnemyType(t)
     return t == 5 or t == 6
@@ -2191,6 +2445,398 @@ function getSignedEquippedWeaponStat(statKey)
     if value < -10 then value = -10 end
     if value > 10 then value = 10 end
     return value
+end
+
+function ensureInventoryState()
+    if type(inventory_state) ~= "table" then
+        inventory_state = {
+            max_weight = 30,
+            current_weight = 0,
+            items = {},
+            quick_slots = {nil, nil, nil},
+        }
+    end
+    if type(inventory_state.items) ~= "table" then
+        inventory_state.items = {}
+    end
+    if type(inventory_state.quick_slots) ~= "table" then
+        inventory_state.quick_slots = {nil, nil, nil}
+    end
+    local maxWeight = tonumber(inventory_state.max_weight) or 30
+    if maxWeight < 1 then maxWeight = 1 end
+    inventory_state.max_weight = maxWeight
+    local curWeight = tonumber(inventory_state.current_weight) or 0
+    if curWeight < 0 then curWeight = 0 end
+    inventory_state.current_weight = curWeight
+    return inventory_state
+end
+
+function recalcInventoryWeight()
+    local inv = ensureInventoryState()
+    local total = 0.0
+    for i = 1, #inv.items do
+        local entry = inv.items[i]
+        local item = getGameItem and getGameItem(entry and entry.id or nil)
+        local weight = tonumber(item and item.weight) or 0
+        if weight < 0 then weight = 0 end
+        local count = math.floor(tonumber(entry and entry.count) or 0)
+        if count < 0 then count = 0 end
+        total = total + (weight * count)
+    end
+    inv.current_weight = total
+    return total
+end
+
+function ensureStashState()
+    if type(stash_state) ~= "table" then
+        stash_state = {
+            max_weight = 120,
+            current_weight = 0,
+            items = {},
+        }
+    end
+    if type(stash_state.items) ~= "table" then
+        stash_state.items = {}
+    end
+    local maxWeight = tonumber(stash_state.max_weight) or 120
+    if maxWeight < 1 then maxWeight = 1 end
+    stash_state.max_weight = maxWeight
+    local curWeight = tonumber(stash_state.current_weight) or 0
+    if curWeight < 0 then curWeight = 0 end
+    stash_state.current_weight = curWeight
+    return stash_state
+end
+
+function recalcStashWeight()
+    local stash = ensureStashState()
+    local total = 0.0
+    for i = 1, #stash.items do
+        local entry = stash.items[i]
+        local item = getGameItem and getGameItem(entry and entry.id or nil)
+        local weight = tonumber(item and item.weight) or 0
+        if weight < 0 then weight = 0 end
+        local count = math.floor(tonumber(entry and entry.count) or 0)
+        if count < 0 then count = 0 end
+        total = total + (weight * count)
+    end
+    stash.current_weight = total
+    return total
+end
+
+function truncateUiLabel(text, maxChars)
+    local src = tostring(text or "")
+    local n = math.floor(tonumber(maxChars) or 0)
+    if n <= 0 then
+        return ""
+    end
+    if #src <= n then
+        return src
+    end
+    if n <= 3 then
+        return string.sub(src, 1, n)
+    end
+    return string.sub(src, 1, n - 3) .. "..."
+end
+
+function buildInventoryUiRows(tabIndex)
+    local tab = math.floor(tonumber(tabIndex) or 1)
+    if tab < 1 then tab = 1 end
+    if tab > #INVENTORY_MENU_TABS then tab = #INVENTORY_MENU_TABS end
+
+    local rows = {}
+    local heading = "INVENTORY"
+    local carryCur = 0
+    local carryMax = 0
+    local sourceItems = nil
+
+    if tab == 1 then
+        local inv = ensureInventoryState()
+        recalcInventoryWeight()
+        heading = "INVENTORY"
+        carryCur = tonumber(inv.current_weight) or 0
+        carryMax = tonumber(inv.max_weight) or 30
+        sourceItems = inv.items
+    elseif tab == 2 then
+        local stash = ensureStashState()
+        recalcStashWeight()
+        heading = "STASH"
+        carryCur = tonumber(stash.current_weight) or 0
+        carryMax = tonumber(stash.max_weight) or 120
+        sourceItems = stash.items
+    elseif tab == 3 then
+        heading = "EQUIPMENT"
+        local build = ensurePlayerBuildState()
+        local eq = (build and build.equipment) or {}
+        local slots = {
+            {"WEAPON", eq.weapon},
+            {"ARMOR", eq.armor},
+            {"SPECIAL 1", eq.special_1},
+            {"SPECIAL 2", eq.special_2},
+        }
+        for i = 1, #slots do
+            local slotLabel = slots[i][1]
+            local itemId = slots[i][2]
+            local item = getGameItem and getGameItem(itemId) or nil
+            local itemName = item and item.name or "EMPTY"
+            rows[#rows + 1] = {
+                label = slotLabel,
+                detail = itemName,
+                kind = item and item.kind or "slot",
+                item = item,
+                count = item and 1 or 0,
+            }
+        end
+        local inv = ensureInventoryState()
+        recalcInventoryWeight()
+        carryCur = tonumber(inv.current_weight) or 0
+        carryMax = tonumber(inv.max_weight) or 30
+    else
+        heading = "TRADER"
+        local scoreValue = getCurrentRunScoreValue and getCurrentRunScoreValue() or 0
+        local tier = getTraderTierForScore and getTraderTierForScore(scoreValue) or nil
+        local items = tier and tier.items or {}
+        for i = 1, #items do
+            local itemId = items[i]
+            local item = getGameItem and getGameItem(itemId) or nil
+            rows[#rows + 1] = {
+                id = itemId,
+                label = item and item.name or tostring(itemId or "ITEM"),
+                detail = string.upper(tostring(item and item.kind or "ITEM")) .. "  V:" .. tostring(math.floor(tonumber(item and item.value) or 0)),
+                kind = item and item.kind or "item",
+                item = item,
+                count = 1,
+            }
+        end
+        local inv = ensureInventoryState()
+        recalcInventoryWeight()
+        carryCur = tonumber(inv.current_weight) or 0
+        carryMax = tonumber(inv.max_weight) or 30
+    end
+
+    if sourceItems then
+        local indexById = {}
+        for i = 1, #sourceItems do
+            local entry = sourceItems[i]
+            local itemId = entry and entry.id
+            local itemCount = math.floor(tonumber(entry and entry.count) or 0)
+            if itemId and itemId ~= "" and itemCount > 0 then
+                local slot = indexById[itemId]
+                if not slot then
+                    local item = getGameItem and getGameItem(itemId) or nil
+                    slot = #rows + 1
+                    indexById[itemId] = slot
+                    rows[slot] = {
+                        id = itemId,
+                        label = item and item.name or tostring(itemId),
+                        detail = string.upper(tostring(item and item.kind or "ITEM")) .. "  V:" .. tostring(math.floor(tonumber(item and item.value) or 0)),
+                        kind = item and item.kind or "item",
+                        item = item,
+                        count = 0,
+                    }
+                end
+                rows[slot].count = (rows[slot].count or 0) + itemCount
+            end
+        end
+    end
+
+    table.sort(rows, function(a, b)
+        local ka = tostring(a and a.kind or "")
+        local kb = tostring(b and b.kind or "")
+        if ka == kb then
+            return tostring(a and a.label or "") < tostring(b and b.label or "")
+        end
+        return ka < kb
+    end)
+
+    return rows, heading, carryCur, carryMax
+end
+
+function getInventoryUiPageBounds(totalRows, selectedIndex)
+    local rowsPerPage = INVENTORY_MENU_ROWS_PER_PAGE or 12
+    if rowsPerPage < 1 then rowsPerPage = 1 end
+    local total = math.floor(tonumber(totalRows) or 0)
+    if total < 0 then total = 0 end
+    local sel = math.floor(tonumber(selectedIndex) or 1)
+    if sel < 1 then sel = 1 end
+    if total <= 0 then
+        sel = 1
+    elseif sel > total then
+        sel = total
+    end
+    local page = math.floor((sel - 1) / rowsPerPage) + 1
+    local startIdx = ((page - 1) * rowsPerPage) + 1
+    local endIdx = startIdx + rowsPerPage - 1
+    if total > 0 and endIdx > total then endIdx = total end
+    return page, startIdx, endIdx, sel
+end
+
+function setLootFeedMessage(messageText)
+    lootFeedMessage = tostring(messageText or "")
+    if lootFeedMessage == "" then
+        lootFeedMessageTimer = 0
+    else
+        lootFeedMessageTimer = LOOT_FEED_DURATION_TICKS or (SIM_TARGET_HZ * 2)
+    end
+end
+
+function formatLootItemName(itemId)
+    local item = getGameItem and getGameItem(itemId) or nil
+    local label = tostring((item and item.name) or itemId or "ITEM")
+    return string.upper(label)
+end
+
+function tryAddItemToInventory(itemId, count)
+    local item = getGameItem and getGameItem(itemId) or nil
+    if not item then
+        return false, "INVALID ITEM"
+    end
+    local addCount = math.floor(tonumber(count) or 1)
+    if addCount < 1 then
+        addCount = 1
+    end
+
+    local inv = ensureInventoryState()
+    local unitWeight = tonumber(item.weight) or 0
+    if unitWeight < 0 then unitWeight = 0 end
+    local currentWeight = tonumber(inv.current_weight) or recalcInventoryWeight()
+    local maxWeight = tonumber(inv.max_weight) or 30
+    local addWeight = unitWeight * addCount
+    if (currentWeight + addWeight) > (maxWeight + 0.0001) then
+        return false, "TOO HEAVY"
+    end
+
+    local maxStack = math.floor(tonumber(item.stack_max) or 1)
+    if maxStack < 1 then
+        maxStack = 1
+    end
+
+    local remaining = addCount
+    if maxStack > 1 then
+        for i = 1, #inv.items do
+            local entry = inv.items[i]
+            if entry and entry.id == itemId then
+                local current = math.floor(tonumber(entry.count) or 0)
+                if current < maxStack then
+                    local capacity = maxStack - current
+                    local fill = remaining
+                    if fill > capacity then fill = capacity end
+                    entry.count = current + fill
+                    remaining = remaining - fill
+                    if remaining <= 0 then
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    while remaining > 0 do
+        local stackCount = remaining
+        if stackCount > maxStack then stackCount = maxStack end
+        inv.items[#inv.items + 1] = {
+            id = itemId,
+            count = stackCount,
+        }
+        remaining = remaining - stackCount
+    end
+
+    inv.current_weight = currentWeight + addWeight
+    return true, nil
+end
+
+function spawnWorldItemDrop(worldX, worldY, itemId)
+    if not sprites or not itemId then
+        return false
+    end
+    local sx = tonumber(worldX) or 0
+    local sy = tonumber(worldY) or 0
+    sprites[#sprites + 1] = {
+        x = sx,
+        y = sy,
+        t = 8,
+        item_id = itemId,
+        collected = false,
+        spawn_tick = simTickCount or 0,
+    }
+    return true
+end
+
+function openChestWithLoot(chestSprite, salt)
+    if not chestSprite or chestSprite.t ~= 4 or chestSprite.opened then
+        return false
+    end
+
+    chestSprite.opened = true
+    chestSprite.open_tick = simTickCount or 0
+    dispatchRunScoreEvent("chest_open", {level_id = currentLevel})
+
+    local classId = getCurrentClassId()
+    local baseSeed = (run_seed or 0) + math.floor((tonumber(chestSprite.x) or 0) * 100) + (math.floor((tonumber(chestSprite.y) or 0) * 100) * 37)
+    local itemId = nil
+    if rollChestDrop then
+        itemId = rollChestDrop(currentLevel, classId, baseSeed + math.floor(tonumber(salt) or 0))
+    end
+
+    if itemId and spawnWorldItemDrop(chestSprite.x, chestSprite.y, itemId) then
+        setLootFeedMessage("CHEST LOOT: " .. formatLootItemName(itemId))
+    else
+        setLootFeedMessage("CHEST EMPTY")
+    end
+    return true
+end
+
+function tryBreakChestInRange(rangeSq)
+    if not sprites or #sprites == 0 then
+        return false
+    end
+    local maxDistSq = tonumber(rangeSq) or CHEST_HIT_RANGE_SQ
+    if maxDistSq <= 0 then
+        maxDistSq = CHEST_HIT_RANGE_SQ
+    end
+    local dir = pdir % 64
+    local facingX = cosTable[dir] or 0
+    local facingY = sinTable[dir] or 0
+    local bestIndex = -1
+    local bestDistSq = maxDistSq + 1
+    for i = 1, #sprites do
+        local s = sprites[i]
+        if s and s.t == 4 and not s.opened then
+            local dx = (s.x or 0) - px
+            local dy = (s.y or 0) - py
+            local distSq = (dx * dx) + (dy * dy)
+            if distSq <= maxDistSq then
+                local inFront = (dx * facingX + dy * facingY) >= -0.05
+                if inFront and distSq < bestDistSq then
+                    bestDistSq = distSq
+                    bestIndex = i
+                end
+            end
+        end
+    end
+    if bestIndex > 0 then
+        return openChestWithLoot(sprites[bestIndex], (bestIndex * 193) + (simTickCount or 0))
+    end
+    return false
+end
+
+function tryHitChestWithProjectile(projectile, hitX, hitY)
+    if not sprites or #sprites == 0 then
+        return false
+    end
+    local hitRadiusSq = PROJECTILE_CHEST_HIT_RADIUS_SQ or 0.1156
+    for i = 1, #sprites do
+        local s = sprites[i]
+        if s and s.t == 4 and not s.opened then
+            local dx = (hitX or 0) - (s.x or 0)
+            local dy = (hitY or 0) - (s.y or 0)
+            if ((dx * dx) + (dy * dy)) <= hitRadiusSq then
+                local salt = ((projectile and projectile.id) or 0) * 151 + i * 211 + (simTickCount or 0)
+                openChestWithLoot(s, salt)
+                return true
+            end
+        end
+    end
+    return false
 end
 
 function getBowChargeTierCount()
@@ -3168,6 +3814,8 @@ function loadGameFromSlot(slotIndex)
     masteryMenuSelection = 1
     masteryMenuMessage = ""
     masteryMenuMessageTimer = 0
+    lootFeedMessage = ""
+    lootFeedMessageTimer = 0
 
     if totalSoldiers > 0 and soldiersKilled >= totalSoldiers then
         gameState = STATE_WIN
@@ -4427,22 +5075,31 @@ end
 
 function enterTitle()
     markRunResetRequested()
+    resetGameOverScoreEntryState()
     showMenu = false
     inOptionsMenu = false
     inGameDebugMenu = false
     inSaveMenu = false
+    inInventoryMenu = false
     inStatsMenu = false
     inMasteryMenu = false
     resetBowChargeState()
     saveMenuSelection = 1
     saveMenuMessage = ""
     saveMenuMessageTimer = 0
+    inventoryMenuSelection = 1
+    inventoryMenuPage = 1
+    inventoryMenuTab = 1
+    inventoryMenuMessage = ""
+    inventoryMenuMessageTimer = 0
     statsMenuSelection = 1
     statsMenuMessage = ""
     statsMenuMessageTimer = 0
     masteryMenuSelection = 1
     masteryMenuMessage = ""
     masteryMenuMessageTimer = 0
+    lootFeedMessage = ""
+    lootFeedMessageTimer = 0
     gameState = STATE_TITLE
     titleSelection = 1
     titleInClassSelect = false
@@ -4467,6 +5124,7 @@ function initializeLevelState(levelId)
     loadLevel(levelId)
     refreshClassGameplayStats(true)
     beginExpansionRun(levelId)
+    resetGameOverScoreEntryState()
     soldiersKilled = 0
     isAttacking = 0
     resetBowChargeState()
@@ -4476,11 +5134,17 @@ function initializeLevelState(levelId)
     inOptionsMenu = false
     inGameDebugMenu = false
     inSaveMenu = false
+    inInventoryMenu = false
     inStatsMenu = false
     inMasteryMenu = false
     saveMenuSelection = 1
     saveMenuMessage = ""
     saveMenuMessageTimer = 0
+    inventoryMenuSelection = 1
+    inventoryMenuPage = 1
+    inventoryMenuTab = 1
+    inventoryMenuMessage = ""
+    inventoryMenuMessageTimer = 0
     statsMenuSelection = 1
     statsMenuMessage = ""
     statsMenuMessageTimer = 0
@@ -4786,8 +5450,7 @@ function updateSoldiers()
                             recordDamageTaken(damage)
                             if playerHealth <= 0 then
                                 playerHealth = 0
-                                gameState = STATE_GAME_OVER
-                                gameOverSelection = 1
+                                enterGameOverState()
                             end
                         end
                         if isBlocking and blockAnim > 0 then
@@ -4946,6 +5609,36 @@ function checkHealthPickups()
                 s.collected = true
                 playerHealth = MAX_HEALTH
                 dispatchRunScoreEvent("health_pickup", {level_id = currentLevel})
+            end
+        end
+    end
+end
+
+function checkWorldItemPickups()
+    if not sprites or #sprites == 0 then
+        return
+    end
+    local pickupRangeSq = ITEM_PICKUP_RANGE_SQ or 0.6084
+    for i = 1, #sprites do
+        local s = sprites[i]
+        if s and s.t == 8 and not s.collected then
+            local dx = (s.x or 0) - px
+            local dy = (s.y or 0) - py
+            local distSq = (dx * dx) + (dy * dy)
+            if distSq <= pickupRangeSq then
+                local itemId = s.item_id
+                local okAdd, errAdd = tryAddItemToInventory(itemId, 1)
+                if okAdd then
+                    s.collected = true
+                    dispatchRunScoreEvent("item_pickup", {level_id = currentLevel})
+                    setLootFeedMessage("PICKED UP: " .. formatLootItemName(itemId))
+                else
+                    if errAdd == "TOO HEAVY" then
+                        setLootFeedMessage("TOO HEAVY: " .. formatLootItemName(itemId))
+                    else
+                        setLootFeedMessage("CANNOT PICK UP")
+                    end
+                end
             end
         end
     end
@@ -5817,25 +6510,71 @@ logBoot(vmupro.system.LOG_ERROR, "drawTitleScreen bound to impl")
 
 -- Draw game over screen
 function drawGameOver()
-    -- Darken background
-    drawUiPanel(40, 70, 200, 195, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
+    local run = ensureRunScoreState(currentLevel)
+    local scoreValue = math.floor(tonumber(run.current) or 0)
+    local levelValue = getCurrentRunLevelValue()
 
-    -- Title
-    drawUiPanel(50, 80, 190, 102, COLOR_MAROON, COLOR_WHITE)
+    drawUiPanel(26, 58, 214, 222, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
+    drawUiPanel(36, 68, 204, 90, COLOR_MAROON, COLOR_WHITE)
     setFontCached(vmupro.text.FONT_SMALL)
-    drawMenuText("GAME OVER", 76, 85, COLOR_WHITE)
+    drawMenuText("GAME OVER", 74, 73, COLOR_WHITE)
 
-    -- Menu items
+    setFontCached(vmupro.text.FONT_TINY_6x8)
+    drawMenuText("SCORE " .. tostring(scoreValue), 42, 96, COLOR_WHITE)
+    drawMenuText("LEVEL " .. tostring(levelValue), 142, 96, COLOR_WHITE)
+
+    if gameOverInitialsActive then
+        drawUiPanel(38, 108, 202, 186, COLOR_DARK_GRAY, COLOR_WHITE)
+        setFontCached(vmupro.text.FONT_SMALL)
+        drawMenuText("NEW HIGH SCORE", 50, 114, COLOR_WHITE)
+
+        for i = 1, 3 do
+            local x = 90 + ((i - 1) * 24)
+            local fg = COLOR_GRAY
+            if i == gameOverInitialsCursor then
+                drawUiPanel(x - 5, 136, x + 13, 156, COLOR_MAROON, COLOR_WHITE)
+                fg = COLOR_WHITE
+            end
+            setFontCached(vmupro.text.FONT_SMALL)
+            drawMenuText((gameOverInitialsChars and gameOverInitialsChars[i]) or "A", x, 140, fg)
+        end
+
+        setFontCached(vmupro.text.FONT_TINY_6x8)
+        drawMenuText("UP/DN LETTER  LT/RT SLOT", 44, 164, COLOR_WHITE)
+        drawMenuText("A NEXT/SUBMIT  B SUBMIT", 46, 176, COLOR_WHITE)
+        return
+    end
+
     for i = 1, #GAME_OVER_MENU_ITEMS do
         local item = GAME_OVER_MENU_ITEMS[i]
-        local y = 110 + (i - 1) * 18
+        local y = 112 + (i - 1) * 18
         local textColor = COLOR_GRAY
         if i == gameOverSelection then
-            drawUiPanel(50, y, 190, y + 18, COLOR_MAROON, COLOR_WHITE)
+            drawUiPanel(44, y, 196, y + 18, COLOR_MAROON, COLOR_WHITE)
             textColor = COLOR_WHITE
         end
         setFontCached(vmupro.text.FONT_SMALL)
-        drawMenuText(item, 86, y + 2, textColor)
+        drawMenuText(item, 80, y + 2, textColor)
+    end
+
+    local state = ensureHighScoreState()
+    local entries = state.entries or {}
+    setFontCached(vmupro.text.FONT_TINY_6x8)
+    drawMenuText("TOP SCORES", 42, 170, COLOR_WHITE)
+    for i = 1, 3 do
+        local e = entries[i]
+        local line = tostring(i) .. ". --- 0 L1"
+        if e then
+            local initials = tostring(e.initials or "AAA")
+            local entryScore = math.floor(tonumber(e.score) or 0)
+            local entryLevel = math.floor(tonumber(e.level) or 1)
+            if entryLevel < 1 then entryLevel = 1 end
+            line = tostring(i) .. ". " .. initials .. " " .. tostring(entryScore) .. " L" .. tostring(entryLevel)
+        end
+        drawMenuText(line, 42, 180 + ((i - 1) * 10), COLOR_WHITE)
+    end
+    if gameOverScoreStatus and gameOverScoreStatus ~= "" then
+        drawMenuText(gameOverScoreStatus, 42, 214, COLOR_WHITE)
     end
 end
 
@@ -6197,6 +6936,10 @@ function updatePlayerProjectiles()
                 end
                 p.x = nextX
                 p.y = nextY
+                if tryHitChestWithProjectile(p, nextX, nextY) then
+                    removeProjectile = true
+                    break
+                end
                 if not DEBUG_DISABLE_ENEMIES and tryHitEnemyWithProjectile(p, nextX, nextY) then
                     removeProjectile = true
                     break
@@ -7635,27 +8378,36 @@ function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData)
 
     elseif stype == 4 then
         -- Detailed Chest (sits on ground)
+        local opened = spriteData and spriteData.opened
         local cw = math.floor(size * 0.5)
         local ch = math.floor(size * 0.35)
         local cx1, cx2 = screenX - cw, screenX + cw
         local cy2 = y2  -- Bottom at ground
         local cy1 = cy2 - ch  -- Top of body
         local lidTop = cy1 - math.floor(ch * 0.4)
-        -- Main body
-        vmupro.graphics.drawFillRect(cx1, cy1, cx2, cy2, COLOR_BROWN)
-        -- Lid (slightly raised)
-        vmupro.graphics.drawFillRect(cx1 - 2, lidTop, cx2 + 2, cy1, COLOR_LIGHT_BROWN)
-        vmupro.graphics.drawFillRect(cx1, lidTop + 2, cx2, cy1 - 2, COLOR_BROWN)
-        -- Metal corners
-        vmupro.graphics.drawFillRect(cx1, cy1, cx1 + 4, cy2, COLOR_GRAY)
-        vmupro.graphics.drawFillRect(cx2 - 4, cy1, cx2, cy2, COLOR_GRAY)
-        vmupro.graphics.drawFillRect(cx1, lidTop, cx1 + 4, cy1, COLOR_GRAY)
-        vmupro.graphics.drawFillRect(cx2 - 4, lidTop, cx2, cy1, COLOR_GRAY)
-        -- Lock
-        vmupro.graphics.drawFillRect(screenX - 4, cy1 - 6, screenX + 4, cy1 + 6, COLOR_YELLOW)
-        vmupro.graphics.drawFillRect(screenX - 2, cy1 - 3, screenX + 2, cy1 + 3, COLOR_DARK_BROWN)
-        -- Keyhole
-        vmupro.graphics.drawFillRect(screenX - 1, cy1, screenX + 1, cy1 + 2, COLOR_BLACK)
+        if opened then
+            -- Open chest: lower contrast and no lock.
+            vmupro.graphics.drawFillRect(cx1, cy1, cx2, cy2, COLOR_DARK_BROWN)
+            vmupro.graphics.drawFillRect(cx1 - 2, lidTop - 2, cx2 + 2, cy1 - 6, COLOR_BROWN)
+            vmupro.graphics.drawFillRect(cx1, lidTop, cx2, cy1 - 8, COLOR_DARK_BROWN)
+            vmupro.graphics.drawFillRect(cx1, cy1, cx1 + 4, cy2, COLOR_GRAY)
+            vmupro.graphics.drawFillRect(cx2 - 4, cy1, cx2, cy2, COLOR_GRAY)
+        else
+            -- Main body
+            vmupro.graphics.drawFillRect(cx1, cy1, cx2, cy2, COLOR_BROWN)
+            -- Lid (closed)
+            vmupro.graphics.drawFillRect(cx1 - 2, lidTop, cx2 + 2, cy1, COLOR_LIGHT_BROWN)
+            vmupro.graphics.drawFillRect(cx1, lidTop + 2, cx2, cy1 - 2, COLOR_BROWN)
+            -- Metal corners
+            vmupro.graphics.drawFillRect(cx1, cy1, cx1 + 4, cy2, COLOR_GRAY)
+            vmupro.graphics.drawFillRect(cx2 - 4, cy1, cx2, cy2, COLOR_GRAY)
+            vmupro.graphics.drawFillRect(cx1, lidTop, cx1 + 4, cy1, COLOR_GRAY)
+            vmupro.graphics.drawFillRect(cx2 - 4, lidTop, cx2, cy1, COLOR_GRAY)
+            -- Lock
+            vmupro.graphics.drawFillRect(screenX - 4, cy1 - 6, screenX + 4, cy1 + 6, COLOR_YELLOW)
+            vmupro.graphics.drawFillRect(screenX - 2, cy1 - 3, screenX + 2, cy1 + 3, COLOR_DARK_BROWN)
+            vmupro.graphics.drawFillRect(screenX - 1, cy1, screenX + 1, cy1 + 2, COLOR_BLACK)
+        end
 
     elseif stype == 5 then
         if spriteData and spriteData.dying and #warriorDeath > 0 then
@@ -7979,6 +8731,33 @@ function drawSprite(screenX, dist, stype, viewAngle, animFrame, spriteData)
 
             vmupro.sprite.drawScaled(potionSprite, drawX, drawY, scale, scale, vmupro.sprite.kImageUnflipped)
         end
+    elseif stype == 8 then
+        -- World item drop marker (used for chest loot conversion).
+        if spriteData and spriteData.collected then
+            return
+        end
+
+        local iw = math.floor(size * 0.18)
+        if iw < 2 then iw = 2 end
+        local ih = math.floor(size * 0.20)
+        if ih < 3 then ih = 3 end
+        local ix1 = screenX - iw
+        local ix2 = screenX + iw
+        local iy2 = y2 - 1
+        local iy1 = iy2 - ih
+        local item = getGameItem and getGameItem(spriteData and spriteData.item_id or nil) or nil
+        local itemKind = tostring(item and item.kind or "")
+        local color = COLOR_YELLOW
+        if itemKind == "weapon" then
+            color = COLOR_LIGHT_BLUE
+        elseif itemKind == "equipment" then
+            color = COLOR_ORANGE
+        elseif itemKind == "consumable" then
+            color = COLOR_GREEN
+        end
+        vmupro.graphics.drawFillRect(ix1, iy1, ix2, iy2, color)
+        vmupro.graphics.drawFillRect(ix1 + 1, iy1 + 1, ix2 - 1, iy2 - 1, COLOR_WHITE)
+        vmupro.graphics.drawFillRect(ix1 + 2, iy1 + 2, ix2 - 2, iy2 - 2, color)
     end
 end
 
@@ -8155,12 +8934,15 @@ function renderGameFrame()
                 local skip = (DEBUG_DISABLE_ENEMIES and isEnemyType(s.t))
                     or (DEBUG_DISABLE_PROPS and isPropType(s.t))
                 if not skip then
+                    if (s.t == 7 or s.t == 8) and s.collected then
+                        goto continue_sprite_build
+                    end
                     local sdx, sdy = s.x - px, s.y - py
                     local distSq = sdx * sdx + sdy * sdy
                     local maxSq = SPRITE_MAX_DIST_SQ
                     if isEnemyType(s.t) then
                         maxSq = ENEMY_RENDER_DIST_SQ
-                    elseif s.t == 7 then
+                    elseif s.t == 7 or s.t == 8 then
                         maxSq = ITEM_RENDER_DIST_SQ
                     elseif isPropType(s.t) then
                         maxSq = PROP_RENDER_DIST_SQ
@@ -8200,6 +8982,9 @@ function renderGameFrame()
             if DEBUG_DISABLE_PROPS and isPropType(s.t) then
                 goto continue_sprite
             end
+            if (s.t == 7 or s.t == 8) and s.collected then
+                goto continue_sprite
+            end
             -- Skip dead soldiers
             if s.t == 5 and s.alive == false and not s.dying then
                 goto continue_sprite
@@ -8209,7 +8994,7 @@ function renderGameFrame()
             local maxSq = SPRITE_MAX_DIST_SQ
             if isEnemyType(s.t) then
                 maxSq = ENEMY_RENDER_DIST_SQ
-            elseif s.t == 7 then
+            elseif s.t == 7 or s.t == 8 then
                 maxSq = ITEM_RENDER_DIST_SQ
             elseif isPropType(s.t) then
                 maxSq = PROP_RENDER_DIST_SQ
@@ -8376,6 +9161,8 @@ function renderGameFrame()
     end
     end
 
+    local inventoryFullscreenActive = (showMenu and inInventoryMenu)
+
     -- Draw menu
     if showMenu then
         if inOptionsMenu then
@@ -8465,6 +9252,125 @@ function renderGameFrame()
                 drawMenuText(saveMenuMessage, 48, 224, COLOR_WHITE)
             else
                 drawMenuText("A/MODE SAVE  B BACK", 48, 224, COLOR_WHITE)
+            end
+        elseif inInventoryMenu then
+            local rows, heading, carryCur, carryMax = buildInventoryUiRows(inventoryMenuTab)
+            local totalRows = #rows
+            local page, startIdx, endIdx, selected = getInventoryUiPageBounds(totalRows, inventoryMenuSelection)
+            inventoryMenuSelection = selected
+            inventoryMenuPage = page
+
+            -- Full-screen inventory layout; keep all game HUD overlays hidden underneath.
+            vmupro.graphics.drawFillRect(0, 0, 239, 239, COLOR_DARK_GRAY)
+            drawRectOutline(0, 0, 239, 239, COLOR_LIGHT_GRAY)
+            vmupro.graphics.drawFillRect(8, 16, 232, 232, COLOR_DARK_GRAY)
+            drawUiPanel(8, 16, 232, 232, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY)
+            vmupro.graphics.drawFillRect(10, 20, 230, 34, COLOR_DARK_GRAY)
+
+            setFontCached(vmupro.text.FONT_TINY_6x8)
+            for i = 1, #INVENTORY_MENU_TABS do
+                local tx1 = 12 + ((i - 1) * 54)
+                local tx2 = tx1 + 50
+                local tabSelected = (i == inventoryMenuTab)
+                local tabFg = COLOR_LIGHT_GRAY
+                local tabLabel = INVENTORY_MENU_TABS[i]
+                if tabSelected then
+                    vmupro.graphics.drawFillRect(tx1, 20, tx2, 34, COLOR_MAROON)
+                    tabFg = COLOR_WHITE
+                end
+                local tabWidth = (tx2 - tx1) + 1
+                local tabTextWidth = string.len(tabLabel) * 6
+                local tabTextX = tx1 + math.floor((tabWidth - tabTextWidth) * 0.5)
+                if tabTextX < (tx1 + 2) then
+                    tabTextX = tx1 + 2
+                end
+                drawMenuText(tabLabel, tabTextX, 23, tabFg)
+            end
+
+            local wtText = "WT " .. string.format("%.1f/%.0f", carryCur or 0, carryMax or 0)
+            local wtTextX = 228 - (string.len(wtText) * 6)
+            if wtTextX < 108 then wtTextX = 108 end
+            drawMenuText(heading, 12, 36, COLOR_WHITE)
+            drawMenuText(wtText, wtTextX, 36, COLOR_WHITE)
+
+            -- List pane + detail pane.
+            vmupro.graphics.drawFillRect(12, 42, 146, 206, COLOR_DARK_GRAY)
+            vmupro.graphics.drawFillRect(150, 42, 228, 206, COLOR_DARK_GRAY)
+            drawUiPanel(12, 42, 146, 206, COLOR_DARK_GRAY, COLOR_GRAY)
+            drawUiPanel(150, 42, 228, 206, COLOR_DARK_GRAY, COLOR_GRAY)
+
+            drawMenuText("ITEMS", 16, 44, COLOR_WHITE)
+            drawMenuText("DETAIL", 154, 44, COLOR_WHITE)
+
+            if totalRows <= 0 then
+                drawMenuText("NO ITEMS", 16, 58, COLOR_GRAY)
+                if inventoryMenuTab == 4 then
+                    drawMenuText("TRADER UI", 154, 58, COLOR_LIGHT_GRAY)
+                    drawMenuText("PHASE B", 154, 70, COLOR_LIGHT_GRAY)
+                    drawMenuText("BUY/SELL", 154, 82, COLOR_LIGHT_GRAY)
+                    drawMenuText("NOT ACTIVE", 154, 94, COLOR_LIGHT_GRAY)
+                end
+            else
+                local drawRow = 0
+                for idx = startIdx, endIdx do
+                    drawRow = drawRow + 1
+                    local row = rows[idx]
+                    local y = 58 + ((drawRow - 1) * 12)
+                    local selectedRow = (idx == inventoryMenuSelection)
+                    local fg = COLOR_LIGHT_GRAY
+                    if selectedRow then
+                        vmupro.graphics.drawFillRect(14, y - 1, 144, y + 9, COLOR_MAROON)
+                        fg = COLOR_WHITE
+                    end
+
+                    local label = tostring((row and row.label) or "ITEM")
+                    local count = math.floor(tonumber(row and row.count) or 0)
+                    if count > 1 then
+                        label = label .. " x" .. tostring(count)
+                    end
+                    label = truncateUiLabel(label, 20)
+                    drawMenuText(label, 16, y, fg)
+                end
+
+                local row = rows[inventoryMenuSelection]
+                if row then
+                    local item = row.item
+                    drawMenuText(truncateUiLabel(tostring(row.label or "ITEM"), 12), 154, 58, COLOR_WHITE)
+                    drawMenuText(truncateUiLabel(tostring(row.detail or ""), 12), 154, 70, COLOR_LIGHT_GRAY)
+
+                    if item then
+                        local itemWeight = tonumber(item.weight) or 0
+                        if itemWeight < 0 then itemWeight = 0 end
+                        local itemValue = math.floor(tonumber(item.value) or 0)
+                        local affinity = string.upper(tostring(item.class_affinity or "any"))
+                        drawMenuText("WT " .. string.format("%.1f", itemWeight), 154, 84, COLOR_LIGHT_GRAY)
+                        drawMenuText("VAL " .. tostring(itemValue), 154, 96, COLOR_LIGHT_GRAY)
+                        drawMenuText("AFF " .. truncateUiLabel(affinity, 8), 154, 108, COLOR_LIGHT_GRAY)
+                        if item.weapon_class then
+                            local wc = normalizeWeaponClass(item.weapon_class)
+                            local wcLabel = WEAPON_CLASS_LABELS[wc] or tostring(wc)
+                            drawMenuText("CLS " .. wcLabel, 154, 120, COLOR_LIGHT_GRAY)
+                        end
+                    else
+                        drawMenuText("READ-ONLY", 154, 84, COLOR_LIGHT_GRAY)
+                        drawMenuText("PHASE A", 154, 96, COLOR_LIGHT_GRAY)
+                    end
+                end
+            end
+
+            drawMenuText(
+                "ROW " .. tostring(inventoryMenuSelection) .. "/" .. tostring(math.max(totalRows, 1)),
+                154,
+                194,
+                COLOR_WHITE
+            )
+            drawMenuText("PAGE " .. tostring(inventoryMenuPage), 154, 206, COLOR_LIGHT_GRAY)
+
+            vmupro.graphics.drawFillRect(10, 212, 230, 232, COLOR_DARK_GRAY)
+            if inventoryMenuMessage and inventoryMenuMessage ~= "" and inventoryMenuMessageTimer > 0 then
+                drawMenuText(truncateUiLabel(inventoryMenuMessage, 34), 14, 218, COLOR_WHITE)
+            else
+                drawMenuText("L/R TAB  U/D ROW  B BACK", 14, 218, COLOR_WHITE)
             end
         elseif inStatsMenu then
             local state = ensurePlayerBuildState()
@@ -8606,55 +9512,64 @@ function renderGameFrame()
         end
     end
 
-    -- Draw health UI (potion with liquid)
-    drawHealthUI()
-    if not showMenu then
-        drawEnemiesRemainingUI()
-        drawRunScoreUI()
-    end
-
-    -- Draw current level indicator
-                setFontCached(vmupro.text.FONT_SMALL)
-                drawUiText(getLevelLabel(currentLevel), 6, 228, COLOR_WHITE, COLOR_BLACK)
-                drawUiText("LV " .. tostring(getPlayerLevel()), 186, 228, COLOR_WHITE, COLOR_BLACK)
-                if showFpsOverlay and lastFps and lastFps > 0 then
-                    local fpsText = string.format("FPS %.1f", lastFps)
-                    drawUiText(fpsText, 6, 214, COLOR_WHITE, COLOR_BLACK)
-                end
-                if DEBUG_PERF_MONITOR then
-                    drawPerfMonitorOverlay()
-                end
-                if DEBUG_SHOW_BLOCK and lastBlockEvent and (frameCount - lastBlockEvent.frame) < 60 then
-                    local pct = math.floor((lastBlockEvent.pct or 0) * 100 + 0.5)
-                    local msg = "BLOCK " .. tostring(pct) .. "% (-" .. tostring(lastBlockEvent.amount or 0) .. ")"
-                    drawUiText(msg, 6, 202, COLOR_WHITE, COLOR_BLACK)
-                end
-                if gameState == STATE_PLAYING then
-                    setFontCached(vmupro.text.FONT_TINY_6x8)
-                    if (simTickCount or 0) < (damageDebugTakenUntilTick or 0) then
-                        drawUiText("DMG TAKEN: " .. tostring(damageDebugTakenValue or 0), 6, 4, COLOR_WHITE, COLOR_BLACK)
-                    end
-                    if (simTickCount or 0) < (damageDebugDealtUntilTick or 0) then
-                        drawUiText("DMG DEALT: " .. tostring(damageDebugDealtValue or 0), 6, 14, COLOR_WHITE, COLOR_BLACK)
-                    end
-                    if statsMenuMessage and statsMenuMessage ~= "" and statsMenuMessageTimer and statsMenuMessageTimer > 0 then
-                        drawUiText(statsMenuMessage, 58, 24, COLOR_WHITE, COLOR_BLACK)
-                    end
-                    if masteryMenuMessage and masteryMenuMessage ~= "" and masteryMenuMessageTimer and masteryMenuMessageTimer > 0 then
-                        drawUiText(masteryMenuMessage, 58, 34, COLOR_WHITE, COLOR_BLACK)
-                    end
-                end
-
-    if levelBannerTimer > 0 then
-                    local bannerText = "LEVEL " .. getLevelLabel(currentLevel)
-        local textColor = COLOR_WHITE
-        if levelBannerTimer < 50 then
-            textColor = COLOR_DARK_GRAY
-        elseif levelBannerTimer < 100 then
-            textColor = COLOR_LIGHT_GRAY
+    if not inventoryFullscreenActive then
+        -- Draw health UI (potion with liquid)
+        drawHealthUI()
+        if not showMenu then
+            drawEnemiesRemainingUI()
+            drawRunScoreUI()
         end
+
+        -- Draw current level indicator
         setFontCached(vmupro.text.FONT_SMALL)
-        drawUiText(bannerText, 170, 5, textColor, COLOR_BLACK)
+        drawUiText(getLevelLabel(currentLevel), 6, 228, COLOR_WHITE, COLOR_BLACK)
+        drawUiText("LV " .. tostring(getPlayerLevel()), 186, 228, COLOR_WHITE, COLOR_BLACK)
+        if showFpsOverlay and lastFps and lastFps > 0 then
+            local fpsText = string.format("FPS %.1f", lastFps)
+            drawUiText(fpsText, 6, 214, COLOR_WHITE, COLOR_BLACK)
+        end
+        if DEBUG_PERF_MONITOR then
+            drawPerfMonitorOverlay()
+        end
+        if DEBUG_SHOW_BLOCK and lastBlockEvent and (frameCount - lastBlockEvent.frame) < 60 then
+            local pct = math.floor((lastBlockEvent.pct or 0) * 100 + 0.5)
+            local msg = "BLOCK " .. tostring(pct) .. "% (-" .. tostring(lastBlockEvent.amount or 0) .. ")"
+            drawUiText(msg, 6, 202, COLOR_WHITE, COLOR_BLACK)
+        end
+        if gameState == STATE_PLAYING then
+            setFontCached(vmupro.text.FONT_TINY_6x8)
+            local invState = ensureInventoryState()
+            local invWeight = tonumber(invState and invState.current_weight) or 0
+            local invMax = tonumber(invState and invState.max_weight) or 0
+            drawUiText(string.format("WT %.1f/%.0f", invWeight, invMax), 164, 14, COLOR_WHITE, COLOR_BLACK)
+            if (simTickCount or 0) < (damageDebugTakenUntilTick or 0) then
+                drawUiText("DMG TAKEN: " .. tostring(damageDebugTakenValue or 0), 6, 4, COLOR_WHITE, COLOR_BLACK)
+            end
+            if (simTickCount or 0) < (damageDebugDealtUntilTick or 0) then
+                drawUiText("DMG DEALT: " .. tostring(damageDebugDealtValue or 0), 6, 14, COLOR_WHITE, COLOR_BLACK)
+            end
+            if statsMenuMessage and statsMenuMessage ~= "" and statsMenuMessageTimer and statsMenuMessageTimer > 0 then
+                drawUiText(statsMenuMessage, 58, 24, COLOR_WHITE, COLOR_BLACK)
+            end
+            if masteryMenuMessage and masteryMenuMessage ~= "" and masteryMenuMessageTimer and masteryMenuMessageTimer > 0 then
+                drawUiText(masteryMenuMessage, 58, 34, COLOR_WHITE, COLOR_BLACK)
+            end
+            if lootFeedMessage and lootFeedMessage ~= "" and lootFeedMessageTimer and lootFeedMessageTimer > 0 then
+                drawUiText(lootFeedMessage, 58, 44, COLOR_WHITE, COLOR_BLACK)
+            end
+        end
+
+        if levelBannerTimer > 0 then
+            local bannerText = "LEVEL " .. getLevelLabel(currentLevel)
+            local textColor = COLOR_WHITE
+            if levelBannerTimer < 50 then
+                textColor = COLOR_DARK_GRAY
+            elseif levelBannerTimer < 100 then
+                textColor = COLOR_LIGHT_GRAY
+            end
+            setFontCached(vmupro.text.FONT_SMALL)
+            drawUiText(bannerText, 170, 5, textColor, COLOR_BLACK)
+        end
     end
 
     -- Draw game over screen if player died
@@ -8702,11 +9617,17 @@ function runSimulationStep()
     if saveMenuMessageTimer and saveMenuMessageTimer > 0 then
         saveMenuMessageTimer = saveMenuMessageTimer - 1
     end
+    if inventoryMenuMessageTimer and inventoryMenuMessageTimer > 0 then
+        inventoryMenuMessageTimer = inventoryMenuMessageTimer - 1
+    end
     if statsMenuMessageTimer and statsMenuMessageTimer > 0 then
         statsMenuMessageTimer = statsMenuMessageTimer - 1
     end
     if masteryMenuMessageTimer and masteryMenuMessageTimer > 0 then
         masteryMenuMessageTimer = masteryMenuMessageTimer - 1
+    end
+    if lootFeedMessageTimer and lootFeedMessageTimer > 0 then
+        lootFeedMessageTimer = lootFeedMessageTimer - 1
     end
 
     if gameState == STATE_PLAYING and not showMenu then
@@ -8723,6 +9644,7 @@ function runSimulationStep()
             updateBloodEffects()
         end
         checkHealthPickups()
+        checkWorldItemPickups()
         if playerHealth and MAX_HEALTH and playerHealth > 0 and playerHealth < MAX_HEALTH then
             local regenPerSec = PLAYER_REGEN_PER_SEC or 0.0
             if regenPerSec > 0 then
@@ -9149,25 +10071,7 @@ function AppMain()
                 end
             -- Game over handling
             elseif gameState == STATE_GAME_OVER then
-                if vmupro.input.pressed(vmupro.input.UP) then
-                    gameOverSelection = gameOverSelection - 1
-                    if gameOverSelection < 1 then gameOverSelection = 3 end
-                end
-                if vmupro.input.pressed(vmupro.input.DOWN) then
-                    gameOverSelection = gameOverSelection + 1
-                    if gameOverSelection > 3 then gameOverSelection = 1 end
-                end
-                if vmupro.input.pressed(vmupro.input.A) or vmupro.input.pressed(vmupro.input.MODE) then
-                    if gameOverSelection == 1 then
-                        beginLoadLevel(currentLevel)  -- Restart
-                    elseif gameOverSelection == 2 then
-                        -- Return to title menu
-                        enterTitle()
-                        gameOverSelection = 1
-                    else
-                        quitApp("pause quit")  -- Quit
-                    end
-                end
+                handleGameOverInput()
             -- Win screen handling
             elseif gameState == STATE_WIN then
                 if winCooldown <= 0 and vmupro.input.pressed(vmupro.input.A) then
@@ -9284,6 +10188,54 @@ function AppMain()
                         saveMenuMessage = ""
                         saveMenuMessageTimer = 0
                     end
+                elseif inInventoryMenu then
+                    local rows = buildInventoryUiRows(inventoryMenuTab)
+                    local totalRows = #rows
+                    local maxSel = totalRows
+                    if maxSel < 1 then maxSel = 1 end
+
+                    if vmupro.input.pressed(vmupro.input.LEFT) then
+                        inventoryMenuTab = inventoryMenuTab - 1
+                        if inventoryMenuTab < 1 then inventoryMenuTab = #INVENTORY_MENU_TABS end
+                        inventoryMenuSelection = 1
+                        inventoryMenuPage = 1
+                    end
+                    if vmupro.input.pressed(vmupro.input.RIGHT) then
+                        inventoryMenuTab = inventoryMenuTab + 1
+                        if inventoryMenuTab > #INVENTORY_MENU_TABS then inventoryMenuTab = 1 end
+                        inventoryMenuSelection = 1
+                        inventoryMenuPage = 1
+                    end
+
+                    if vmupro.input.pressed(vmupro.input.UP) then
+                        inventoryMenuSelection = inventoryMenuSelection - 1
+                        if inventoryMenuSelection < 1 then inventoryMenuSelection = maxSel end
+                    end
+                    if vmupro.input.pressed(vmupro.input.DOWN) then
+                        inventoryMenuSelection = inventoryMenuSelection + 1
+                        if inventoryMenuSelection > maxSel then inventoryMenuSelection = 1 end
+                    end
+
+                    if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
+                        if inventoryMenuTab == 4 then
+                            inventoryMenuMessage = "TRADER BUY/SELL IN NEXT PHASE"
+                        else
+                            inventoryMenuMessage = "READ-ONLY PHASE A"
+                        end
+                        inventoryMenuMessageTimer = math.floor((SIM_TARGET_HZ or 24) * 2)
+                    end
+
+                    local page, _, _, sel = getInventoryUiPageBounds(totalRows, inventoryMenuSelection)
+                    inventoryMenuSelection = sel
+                    inventoryMenuPage = page
+
+                    if vmupro.input.pressed(vmupro.input.POWER) or vmupro.input.pressed(vmupro.input.B) then
+                        inInventoryMenu = false
+                        inventoryMenuSelection = 1
+                        inventoryMenuPage = 1
+                        inventoryMenuMessage = ""
+                        inventoryMenuMessageTimer = 0
+                    end
                 elseif inStatsMenu then
                     if vmupro.input.pressed(vmupro.input.UP) then
                         statsMenuSelection = statsMenuSelection - 1
@@ -9350,11 +10302,11 @@ function AppMain()
                     -- Main pause menu
                     if vmupro.input.pressed(vmupro.input.UP) then
                         menuSelection = menuSelection - 1
-                        if menuSelection < 1 then menuSelection = 8 end
+                        if menuSelection < 1 then menuSelection = 9 end
                     end
                     if vmupro.input.pressed(vmupro.input.DOWN) then
                         menuSelection = menuSelection + 1
-                        if menuSelection > 8 then menuSelection = 1 end
+                        if menuSelection > 9 then menuSelection = 1 end
                     end
                     if vmupro.input.pressed(vmupro.input.MODE) or vmupro.input.pressed(vmupro.input.A) then
                         if menuSelection == 1 then
@@ -9365,31 +10317,38 @@ function AppMain()
                             saveMenuMessage = ""
                             saveMenuMessageTimer = 0
                         elseif menuSelection == 3 then
+                            inInventoryMenu = true
+                            inventoryMenuSelection = 1
+                            inventoryMenuPage = 1
+                            inventoryMenuTab = 1
+                            inventoryMenuMessage = ""
+                            inventoryMenuMessageTimer = 0
+                        elseif menuSelection == 4 then
                             inStatsMenu = true
                             statsMenuSelection = 1
                             statsMenuMessage = ""
                             statsMenuMessageTimer = 0
-                        elseif menuSelection == 4 then
+                        elseif menuSelection == 5 then
                             inMasteryMenu = true
                             masteryMenuSelection = 1
                             masteryMenuMessage = ""
                             masteryMenuMessageTimer = 0
-                        elseif menuSelection == 5 then
+                        elseif menuSelection == 6 then
                             inOptionsMenu = true  -- Enter options
                             optionsSelection = 1
                             inGameDebugMenu = false
-                        elseif menuSelection == 6 then
+                        elseif menuSelection == 7 then
                             -- Reset position and health
                             px, py, pdir = 2.5, 2.5, 0
                             lastSafeWallX = px
                             lastSafeWallY = py
                             playerHealth = MAX_HEALTH
                             showMenu = false
-                        elseif menuSelection == 7 then
+                        elseif menuSelection == 8 then
                             -- Return to title menu
                             showMenu = false
                             enterTitle()
-                        elseif menuSelection == 8 then
+                        elseif menuSelection == 9 then
                             quitApp("game over quit")  -- Quit
                         end
                     end
@@ -9526,6 +10485,14 @@ function AppMain()
                                             end
                                         end
                                     end
+                                    if not hitSomething and tryBreakChestInRange(attackRangeSq) then
+                                        hitSomething = true
+                                        if soundEnabled and swordHitSample then
+                                            vmupro.sound.sample.stop(swordHitSample)
+                                            vmupro.sound.sample.play(swordHitSample)
+                                            if enableBootLogs then safeLog("INFO", "Play sample: sword_swing_connect") end
+                                        end
+                                    end
                                     if soundEnabled and (not hitSomething) and swordMissSample then
                                         vmupro.sound.sample.stop(swordMissSample)
                                         vmupro.sound.sample.play(swordMissSample)
@@ -9593,11 +10560,17 @@ function AppMain()
                             inOptionsMenu = false
                             inGameDebugMenu = false
                             inSaveMenu = false
+                            inInventoryMenu = false
                             inStatsMenu = false
                             inMasteryMenu = false
                             saveMenuSelection = 1
                             saveMenuMessage = ""
                             saveMenuMessageTimer = 0
+                            inventoryMenuSelection = 1
+                            inventoryMenuPage = 1
+                            inventoryMenuTab = 1
+                            inventoryMenuMessage = ""
+                            inventoryMenuMessageTimer = 0
                             statsMenuSelection = 1
                             statsMenuMessage = ""
                             statsMenuMessageTimer = 0
